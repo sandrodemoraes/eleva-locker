@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Empresas | ELEVA LOCKER</title>
+
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"/>
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Arial,Helvetica,sans-serif;
+}
+
+body{
+background:#f4f7fb;
+}
+
+.topo{
+
+width:100%;
+height:65px;
+background:#005ecb;
+display:flex;
+align-items:center;
+padding:0 30px;
+color:white;
+font-size:28px;
+font-weight:bold;
+box-shadow:0 2px 8px rgba(0,0,0,.2);
+
+}
+
+.menu{
+
+position:fixed;
+left:0;
+top:65px;
+width:230px;
+bottom:0;
+background:#17324d;
+
+}
+
+.menu a{
+
+display:block;
+padding:15px 20px;
+color:white;
+text-decoration:none;
+transition:.2s;
+
+}
+
+.menu a:hover{
+
+background:#005ecb;
+
+}
+
+.menu .ativo{
+
+background:#005ecb;
+
+}
+
+.logout{
+
+margin-top:30px;
+border-top:1px solid rgba(255,255,255,.2);
+
+}
+
+.pagina{
+
+margin-left:230px;
+margin-top:65px;
+padding:30px;
+
+}
+
+.cabecalho{
+
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:25px;
+
+}
+
+.cabecalho h1{
+
+font-size:34px;
+color:#005ecb;
+
+}
+
+.cabecalho p{
+
+color:#666;
+margin-top:5px;
+
+}
+
+.btn{
+
+background:#005ecb;
+color:white;
+border:none;
+padding:12px 22px;
+border-radius:8px;
+cursor:pointer;
+font-weight:bold;
+transition:.2s;
+
+}
+
+.btn:hover{
+
+background:#004aa2;
+
+}
+
+.card{
+
+background:white;
+padding:25px;
+border-radius:12px;
+box-shadow:0 5px 20px rgba(0,0,0,.08);
+
+}
+
+.barra{
+
+margin-bottom:20px;
+
+}
+
+.pesquisa{
+
+position:relative;
+
+}
+
+.pesquisa input{
+
+width:100%;
+padding:13px 45px 13px 15px;
+border:1px solid #ddd;
+border-radius:8px;
+font-size:15px;
+
+}
+
+.pesquisa i{
+
+position:absolute;
+right:15px;
+top:14px;
+color:#777;
+
+}
+
+table{
+
+width:100%;
+border-collapse:collapse;
+
+}
+
+thead{
+
+background:#005ecb;
+color:white;
+
+}
+
+th{
+
+padding:15px;
+text-align:left;
+
+}
+
+td{
+
+padding:15px;
+border-bottom:1px solid #eee;
+
+}
+
+tbody tr:hover{
+
+background:#f8fbff;
+
+}
+
+.status{
+
+padding:5px 12px;
+border-radius:30px;
+color:white;
+font-size:12px;
+font-weight:bold;
+
+}
+
+.ativoStatus{
+
+background:#27ae60;
+
+}
+
+.inativoStatus{
+
+background:#e74c3c;
+
+}
+
+.acoes{
+
+white-space:nowrap;
+
+}
+
+.acoes a{
+
+margin-right:10px;
+text-decoration:none;
+font-size:16px;
+
+}
+
+.editar{
+
+color:#005ecb;
+
+}
+
+.excluir{
+
+color:#d63031;
+
+}
+
+.rodape{
+
+margin-top:20px;
+color:#666;
+
+}
+
+.modal{
+
+display:none;
+position:fixed;
+left:0;
+top:0;
+width:100%;
+height:100%;
+background:rgba(0,0,0,.45);
+justify-content:center;
+align-items:center;
+z-index:999;
+
+}
+
+.modal-conteudo{
+
+background:white;
+width:900px;
+max-height:90vh;
+overflow:auto;
+border-radius:12px;
+padding:30px;
+
+}
+
+.modal h2{
+
+color:#005ecb;
+margin-bottom:20px;
+
+}
+
+.linha{
+
+display:flex;
+gap:15px;
+margin-bottom:15px;
+
+}
+
+.campo{
+
+flex:1;
+display:flex;
+flex-direction:column;
+
+}
+
+.campo label{
+
+margin-bottom:6px;
+font-weight:bold;
+
+}
+
+.campo input,
+.campo select{
+
+padding:11px;
+border:1px solid #ccc;
+border-radius:8px;
+
+}
+
+.botoes{
+
+display:flex;
+justify-content:flex-end;
+gap:10px;
+margin-top:20px;
+
+}
+
+.cancelar{
+
+background:#999;
+
+}
+
+.salvar{
+
+background:#27ae60;
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="topo">
+
+ELEVA LOCKER
+
+</div>
+
+<div class="menu">
+
+<a href="/dashboard">
+<i class="fa-solid fa-chart-line"></i>
+Dashboard
+</a>
+
+<a href="/usuarios">
+<i class="fa-solid fa-users"></i>
+Usuários
+</a>
+
+<a href="/empresas" class="ativo">
+<i class="fa-solid fa-building"></i>
+Empresas
+</a>
+
+<a href="/armarios">
+<i class="fa-solid fa-box"></i>
+Armários
+</a>
+
+<a href="/esp32">
+<i class="fa-solid fa-microchip"></i>
+ESP32
+</a>
+
+<a href="/compartimentos">
+<i class="fa-solid fa-table-cells"></i>
+Compartimentos
+</a>
+
+<a href="/encomendas">
+<i class="fa-solid fa-box-open"></i>
+Encomendas
+</a>
+
+<a href="/logs">
+<i class="fa-solid fa-file-lines"></i>
+Logs
+</a>
+
+<a href="/configuracoes">
+<i class="fa-solid fa-gear"></i>
+Configurações
+</a>
+
+<a href="/logout" class="logout">
+<i class="fa-solid fa-right-from-bracket"></i>
+Sair
+</a>
+
+</div>
+
+<div class="pagina">
+
+<div class="cabecalho">
+
+<div>
+
+<h1>Empresas</h1>
+
+<p>Cadastro de empresas do ELEVA LOCKER</p>
+
+</div>
+
+<button class="btn" onclick="abrirModal()">
+
+<i class="fa-solid fa-plus"></i>
+
+Nova Empresa
+
+</button>
+
+</div>
+
+<div class="card">
+
+<div class="barra">
+
+<div class="pesquisa">
+
+<input
+id="pesquisa"
+type="text"
+placeholder="Pesquisar empresa...">
+
+<i class="fa-solid fa-magnifying-glass"></i>
+
+</div>
+
+</div><table id="tabelaEmpresas">
+
+    <thead>
+
+        <tr>
+
+            <th>ID</th>
+            <th>Razão Social</th>
+            <th>Nome Fantasia</th>
+            <th>CNPJ</th>
+            <th>Cidade</th>
+            <th>Telefone</th>
+            <th>Status</th>
+            <th>Ações</th>
+
+        </tr>
+
+    </thead>
+
+    <tbody>
+
+    {% for empresa in empresas %}
+
+        <tr>
+
+            <td>{{ empresa.id }}</td>
+
+            <td>{{ empresa.razao_social }}</td>
+
+            <td>{{ empresa.nome_fantasia }}</td>
+
+            <td class="cnpj">{{ empresa.cnpj }}</td>
+
+            <td>{{ empresa.cidade }}</td>
+
+            <td>{{ empresa.telefone }}</td>
+
+            <td>
+
+                {% if empresa.status == 1 %}
+
+                    <span class="status ativoStatus">
+                        Ativo
+                    </span>
+
+                {% else %}
+
+                    <span class="status inativoStatus">
+                        Inativo
+                    </span>
+
+                {% endif %}
+
+            </td>
+
+            <td class="acoes">
+
+                <a
+href="#"
+class="editar"
+data-id="{{ empresa.id }}"
+data-razao="{{ empresa.razao_social }}"
+data-fantasia="{{ empresa.nome_fantasia }}"
+data-cnpj="{{ empresa.cnpj }}"
+data-ie="{{ empresa.inscricao_estadual }}"
+data-responsavel="{{ empresa.responsavel }}"
+data-telefone="{{ empresa.telefone }}"
+data-whatsapp="{{ empresa.whatsapp }}"
+data-email="{{ empresa.email }}"
+data-cep="{{ empresa.cep }}"
+data-endereco="{{ empresa.endereco }}"
+data-numero="{{ empresa.numero }}"
+data-bairro="{{ empresa.bairro }}"
+data-cidade="{{ empresa.cidade }}"
+data-estado="{{ empresa.estado }}"
+data-status="{{ empresa.status }}">
+
+    <i class="fa-solid fa-pen"></i>
+
+</a>
+
+                <a href="#" class="excluir">
+
+                    <i class="fa-solid fa-trash"></i>
+
+                </a>
+
+            </td>
+
+        </tr>
+
+    {% endfor %}
+
+    </tbody>
+
+</table>
+
+<div class="rodape">
+
+    Total de empresas cadastradas:
+
+    <strong>{{ empresas|length }}</strong>
+
+</div>
+
+</div>
+
+</div>
+
+<!-- =================== MODAL ==================== -->
+
+<div class="modal" id="modalEmpresa">
+
+<div class="modal-conteudo">
+
+<h2>Nova Empresa</h2>
+
+<form
+id="formEmpresa"
+method="POST"
+action="/empresas/nova">
+
+<input
+type="hidden"
+id="empresa_id"
+name="empresa_id">
+
+<div class="linha">
+
+<div class="campo">
+
+<label>Razão Social *</label>
+
+<input
+type="text"
+name="razao_social"
+required>
+
+</div>
+
+<div class="campo">
+
+<label>Nome Fantasia</label>
+
+<input
+type="text"
+name="nome_fantasia">
+
+</div>
+
+</div>
+
+<div class="linha">
+
+<div class="campo">
+
+<label>CNPJ</label>
+
+<input
+    type="text"
+    id="cnpj"
+    name="cnpj"
+    maxlength="18"
+    placeholder="00.000.000/0000-00">
+
+</div>
+
+<div class="campo">
+
+<label>Inscrição Estadual</label>
+
+<input
+type="text"
+name="inscricao_estadual">
+
+</div>
+
+</div>
+
+<div class="linha">
+
+<div class="campo">
+
+<label>Responsável</label>
+
+<input
+type="text"
+name="responsavel">
+
+</div>
+
+<div class="campo">
+
+<label>Telefone</label>
+
+<input
+type="text"
+name="telefone">
+
+</div>
+
+</div>
+
+<div class="linha">
+
+<div class="campo">
+
+<label>WhatsApp</label>
+
+<input
+type="text"
+name="whatsapp">
+
+</div>
+
+<div class="campo">
+
+<label>E-mail</label>
+
+<input
+type="email"
+name="email">
+
+</div>
+
+</div>
+
+<div class="linha">
+
+<div class="campo">
+
+<label>CEP</label>
+
+<input
+type="text"
+name="cep">
+
+</div>
+
+<div class="campo">
+
+<label>Número</label>
+
+<input
+type="text"
+name="numero">
+
+</div>
+
+</div>
+
+<div class="linha">
+
+<div class="campo">
+
+<label>Endereço</label>
+
+<input
+type="text"
+name="endereco">
+
+</div>
+
+</div>
+
+<div class="linha">
+
+<div class="campo">
+
+<label>Bairro</label>
+
+<input
+type="text"
+name="bairro">
+
+</div>
+
+<div class="campo">
+
+<label>Cidade</label>
+
+<input
+type="text"
+name="cidade">
+
+</div>
+
+<div class="campo">
+
+<label>Estado</label>
+
+<input
+type="text"
+name="estado">
+
+</div>
+
+</div>
+
+<div class="linha">
+
+<div class="campo">
+
+<label>Status</label>
+
+<select name="status">
+
+<option value="1">Ativo</option>
+
+<option value="0">Inativo</option>
+
+</select>
+
+</div>
+
+</div>
+
+<div class="botoes">
+
+<button
+type="button"
+class="btn cancelar"
+onclick="fecharModal()">
+
+Cancelar
+
+</button>
+
+<button
+type="submit"
+class="btn salvar">
+
+Salvar Empresa
+
+</button>
+
+</div>
+
+</form>
+
+</div>
+
+</div><script>
+
+function abrirModal(){
+
+    document.getElementById("modalEmpresa").style.display = "flex";
+
+    document.getElementById("formEmpresa").reset();
+
+    document.getElementById("empresa_id").value = "";
+
+    document.getElementById("formEmpresa").action = "/empresas/nova";
+
+
+}
+
+// =======================
+// PESQUISA
+// =======================
+
+document.getElementById("pesquisa").addEventListener("keyup",function(){
+
+    let filtro=this.value.toLowerCase();
+
+    let linhas=document.querySelectorAll("#tabelaEmpresas tbody tr");
+
+    linhas.forEach(function(linha){
+
+        let texto=linha.innerText.toLowerCase();
+
+        if(texto.indexOf(filtro)>-1){
+
+            linha.style.display="";
+
+        }else{
+
+            linha.style.display="none";
+
+        }
+
+    });
+
+});
+
+// =======================
+// EDITAR
+// =======================
+
+
+
+document.querySelectorAll(".editar").forEach(function(botao){
+
+    botao.addEventListener("click", function(e){
+
+       
+
+        e.preventDefault();
+
+        abrirModal();
+
+        let id = this.dataset.id;
+
+        document.getElementById("empresa_id").value = id;
+
+        document.getElementById("formEmpresa").action =
+            "/empresas/editar/" + id;
+
+        document.querySelector("[name=razao_social]").value = this.dataset.razao;
+        document.querySelector("[name=nome_fantasia]").value = this.dataset.fantasia;
+        let cnpj = this.dataset.cnpj.replace(/\D/g,'');
+
+if (cnpj.length === 14) {
+    cnpj = cnpj.replace(/^(\d{2})(\d)/, '$1.$2');
+    cnpj = cnpj.replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3');
+    cnpj = cnpj.replace(/\.(\d{3})(\d)/, '.$1/$2');
+    cnpj = cnpj.replace(/(\d{4})(\d)/, '$1-$2');
+}
+
+document.querySelector("[name=cnpj]").value = cnpj;
+        document.querySelector("[name=inscricao_estadual]").value = this.dataset.ie;
+        document.querySelector("[name=responsavel]").value = this.dataset.responsavel;
+        document.querySelector("[name=telefone]").value = this.dataset.telefone;
+        document.querySelector("[name=whatsapp]").value = this.dataset.whatsapp;
+        document.querySelector("[name=email]").value = this.dataset.email;
+        document.querySelector("[name=cep]").value = this.dataset.cep;
+        document.querySelector("[name=endereco]").value = this.dataset.endereco;
+        document.querySelector("[name=numero]").value = this.dataset.numero;
+        document.querySelector("[name=bairro]").value = this.dataset.bairro;
+        document.querySelector("[name=cidade]").value = this.dataset.cidade;
+        document.querySelector("[name=estado]").value = this.dataset.estado;
+        document.querySelector("[name=status]").value = this.dataset.status;
+
+    });
+
+});
+// ==============================
+// MÁSCARA CNPJ
+// ==============================
+
+function mascaraCNPJ(campo){
+
+    let valor = campo.value.replace(/\D/g,'');
+
+    valor = valor.replace(/^(\d{2})(\d)/,'$1.$2');
+    valor = valor.replace(/^(\d{2})\.(\d{3})(\d)/,'$1.$2.$3');
+    valor = valor.replace(/\.(\d{3})(\d)/,'.$1/$2');
+    valor = valor.replace(/(\d{4})(\d)/,'$1-$2');
+
+    campo.value = valor.substring(0,18);
+
+}
+
+document.querySelectorAll("[name=cnpj]").forEach(function(campo){
+
+    campo.addEventListener("input", function(){
+
+        mascaraCNPJ(this);
+
+    });
+
+});
+// ==============================
+// FORMATA CNPJ DA TABELA
+// ==============================
+
+document.querySelectorAll(".cnpj").forEach(function(campo){
+
+    let valor = campo.innerText.replace(/\D/g,'');
+
+    if(valor.length == 14){
+
+        valor = valor.replace(/^(\d{2})(\d)/,'$1.$2');
+        valor = valor.replace(/^(\d{2})\.(\d{3})(\d)/,'$1.$2.$3');
+        valor = valor.replace(/\.(\d{3})(\d)/,'.$1/$2');
+        valor = valor.replace(/(\d{4})(\d)/,'$1-$2');
+
+        campo.innerText = valor;
+
+    }
+
+});
+</script>
+
+</body>
+</html>

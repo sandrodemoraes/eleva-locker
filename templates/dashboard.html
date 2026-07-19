@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>ELEVA LOCKER - Dashboard</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+    <style>
+
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+            font-family:Arial, Helvetica, sans-serif;
+        }
+
+        body{
+            background:#edf2f7;
+        }
+
+        /* TOPO */
+
+        .topo{
+
+            background:#005ecb;
+
+            color:white;
+
+            padding:18px 30px;
+
+            display:flex;
+
+            justify-content:space-between;
+
+            align-items:center;
+
+            box-shadow:0 2px 8px rgba(0,0,0,.2);
+
+        }
+
+        .logo{
+
+            font-size:28px;
+
+            font-weight:bold;
+
+        }
+
+        .usuario{
+
+            font-size:18px;
+
+        }
+
+        /* MENU */
+
+        .menu{
+
+            background:#003f88;
+
+            display:flex;
+
+            flex-wrap:wrap;
+
+            gap:8px;
+
+            padding:12px 20px;
+
+        }
+
+        .menu a{
+
+            color:white;
+
+            text-decoration:none;
+
+            padding:10px 18px;
+
+            border-radius:6px;
+
+            transition:.3s;
+
+        }
+
+        .menu a:hover{
+
+            background:#005ecb;
+
+        }
+
+        .logout{
+
+            margin-left:auto;
+
+            background:#d62828;
+
+        }
+
+        .logout:hover{
+
+            background:#b00020 !important;
+
+        }
+
+        /* CONTEÚDO */
+
+        .conteudo{
+
+            padding:30px;
+
+        }
+
+        h1{
+
+            color:#005ecb;
+
+            margin-bottom:10px;
+
+        }
+
+        .subtitulo{
+
+            color:#666;
+
+            margin-bottom:30px;
+
+        }
+
+        /* CARDS */
+
+        .cards{
+
+            display:grid;
+
+            grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+
+            gap:20px;
+
+        }
+
+        .card{
+
+            background:white;
+
+            border-radius:10px;
+
+            padding:25px;
+
+            text-align:center;
+
+            box-shadow:0 5px 20px rgba(0,0,0,.1);
+
+        }
+
+        .numero{
+
+            font-size:42px;
+
+            color:#005ecb;
+
+            font-weight:bold;
+
+        }
+
+        .titulo-card{
+
+            margin-top:10px;
+
+            color:#666;
+
+            font-size:18px;
+
+        }
+
+        /* MENSAGEM */
+
+        .painel{
+
+            margin-top:35px;
+
+            background:white;
+
+            border-radius:10px;
+
+            padding:25px;
+
+            box-shadow:0 5px 20px rgba(0,0,0,.1);
+
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<div class="topo">
+
+    <div class="logo">
+
+        ELEVA LOCKER
+
+    </div>
+
+    <div class="usuario">
+
+        👤 {{ usuario }}
+
+    </div>
+
+</div>
+
+<div class="menu">
+
+    <a href="/dashboard">🏠 Dashboard</a>
+
+    <a href="/usuarios">👤 Usuários</a>
+
+    <a href="#">📦 Armários</a>
+
+    <a href="#">📬 Compartimentos</a>
+
+    <a href="#">📦 Encomendas</a>
+
+    <a href="#">📜 Logs</a>
+
+    <a href="#">⚙ Configurações</a>
+
+    <a href="/logout" class="logout">🚪 Sair</a>
+
+</div>
+
+<div class="conteudo">
+
+    <h1>Bem-vindo, {{ usuario }}</h1>
+
+    <div class="subtitulo">
+
+        Painel Administrativo do ELEVA LOCKER
+
+    </div>
+
+    <div class="cards">
+
+        <div class="card">
+
+            <div class="numero">1</div>
+
+            <div class="titulo-card">
+
+                Usuários
+
+            </div>
+
+        </div>
+
+        <div class="card">
+
+            <div class="numero">0</div>
+
+            <div class="titulo-card">
+
+                Armários
+
+            </div>
+
+        </div>
+
+        <div class="card">
+
+            <div class="numero">0</div>
+
+            <div class="titulo-card">
+
+                Compartimentos
+
+            </div>
+
+        </div>
+
+        <div class="card">
+
+            <div class="numero">0</div>
+
+            <div class="titulo-card">
+
+                Encomendas
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="painel">
+
+        <h2>🎉 Sistema funcionando!</h2>
+
+        <br>
+
+        <p>
+
+            Bem-vindo ao painel administrativo do <strong>ELEVA LOCKER</strong>.
+
+        </p>
+
+        <br>
+
+        <p>
+
+            O próximo passo será desenvolver os módulos:
+
+        </p>
+
+        <br>
+
+        <ul>
+
+            <li>✅ Cadastro de Usuários</li>
+
+            <li>📦 Cadastro de Armários</li>
+
+            <li>📬 Cadastro de Compartimentos</li>
+
+            <li>📦 Cadastro de Encomendas</li>
+
+            <li>🤖 Integração com ESP32</li>
+
+            <li>📊 Relatórios</li>
+
+            <li>📱 Aplicativo</li>
+
+        </ul>
+
+    </div>
+
+</div>
+
+</body>
+
+</html>
