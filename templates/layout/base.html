@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>
+        {% block title %}
+            ELEVA LOCKER
+        {% endblock %}
+    </title>
+
+    <!-- CSS Global -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/layout.css') }}">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+
+    {% block styles %}
+    {% endblock %}
+</head>
+
+<body>
+
+    <div class="app">
+
+        <!-- Navbar -->
+        <header class="topbar">
+            {% include 'layout/navbar.html' %}
+        </header>
+
+        <!-- Sidebar -->
+        <aside class="sidebar-container">
+            {% include 'layout/sidebar.html' %}
+        </aside>
+
+        <!-- Conteúdo -->
+        <main class="content">
+
+            {% block content %}
+            {% endblock %}
+
+        </main>
+
+    </div>
+
+    <!-- JQuery -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+    <!-- Scripts específicos -->
+    {% block scripts %}
+    {% endblock %}
+
+</body>
+
+</html>

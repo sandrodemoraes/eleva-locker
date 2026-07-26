@@ -1,0 +1,61 @@
+<header class="topo">
+
+    <div class="logo">
+
+        <div class="logo-icon">
+            <i class="fa-solid fa-box"></i>
+        </div>
+
+        <div class="logo-text">
+
+            <h2>ELEVA LOCKER</h2>
+
+            <span>Sistema Administrativo</span>
+
+        </div>
+
+    </div>
+
+    <div class="topo-direita">
+
+        <button class="btn-icon">
+
+            <i class="fa-solid fa-bell"></i>
+
+        </button>
+
+        <button class="btn-icon">
+
+            <i class="fa-solid fa-gear"></i>
+
+        </button>
+
+        <div class="usuario">
+
+            <div class="avatar">
+
+                <i class="fa-solid fa-user"></i>
+
+            </div>
+
+            <div>
+
+                <strong>
+
+                    {% if session.nome %}
+                        {{ session.nome }}
+                    {% else %}
+                        Administrador
+                    {% endif %}
+
+                </strong>
+
+                <small>Administrador</small>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</header>

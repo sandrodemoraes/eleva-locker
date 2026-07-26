@@ -1,7 +1,12 @@
-from flask import Blueprint, render_template, request, redirect, session, flash
-from werkzeug.security import generate_password_hash
+from flask import (
+    Blueprint,
+    render_template,
+    request,
+    redirect,
+    session,
+    flash
+)
 
-from database import conectar
 from services.usuario_service import UsuarioService
 
 usuarios_bp = Blueprint("usuarios", __name__)
@@ -29,67 +34,106 @@ def novo_usuario():
     if "usuario" not in session:
         return redirect("/")
 
-    nome = request.form["nome"].strip()
-    email = request.form["email"].strip().lower()
-    telefone = request.form["telefone"].strip()
-    perfil = request.form["perfil"]
-    status = int(request.form["status"])
+    try:
 
-    senha = request.form["senha"]
-    confirmar = request.form["confirmar"]
-
-    if not nome or not email or not senha:
-        flash("Preencha todos os campos obrigatórios.")
-        return redirect("/usuarios")
-
-    if senha != confirmar:
-        flash("As senhas não conferem.")
-        return redirect("/usuarios")
-
-    conn = conectar()
-    cursor = conn.cursor()
-
-    cursor.execute(
-        "SELECT id FROM usuarios WHERE email=?",
-        (email,)
-    )
-
-    existe = cursor.fetchone()
-
-    if existe:
-        conn.close()
-        flash("Este e-mail já está cadastrado.")
-        return redirect("/usuarios")
-
-    senha_hash = generate_password_hash(senha)
-
-    cursor.execute("""
-        INSERT INTO usuarios
-        (
-            nome,
-            email,
-            telefone,
-            senha,
-            perfil,
-            status
+        UsuarioService.criar(
+            nome=request.form["nome"],
+            email=request.form["email"],
+            telefone=request.form["telefone"],
+            senha=request.form["senha"],
+            confirmar=request.form["confirmar"],
+            perfil=request.form["perfil"],
+            status=int(request.form["status"])
         )
-        VALUES
-        (
-            ?,?,?,?,?,?
+
+        flash("Usuário cadastrado com sucesso!", "success")
+
+    except ValueError as erro:
+
+        flash(str(erro), "warning")
+
+    except Exception:
+
+        flash("Erro interno ao cadastrar usuário.", "danger")
+
+    return redirect("/usuarios")
+
+
+@usuarios_bp.route("/usuarios/editar/<int:usuario_id>", methods=["POST"])
+def editar_usuario(usuario_id):
+
+    if "usuario" not in session:
+        return redirect("/")
+
+    try:
+
+        UsuarioService.atualizar(
+            usuario_id=usuario_id,
+            nome=request.form["nome"],
+            email=request.form["email"],
+            telefone=request.form["telefone"],
+            perfil=request.form["perfil"],
+            status=int(request.form["status"])
         )
-    """,
-    (
-        nome,
-        email,
-        telefone,
-        senha_hash,
-        perfil,
-        status
-    ))
 
-    conn.commit()
-    conn.close()
+        flash("Usuário atualizado com sucesso!", "success")
 
-    flash("Usuário cadastrado com sucesso!")
+    except ValueError as erro:
+
+        flash(str(erro), "warning")
+
+    except Exception:
+
+        flash("Erro interno ao atualizar o usuário.", "danger")
+
+    return redirect("/usuarios")
+
+
+@usuarios_bp.route("/usuarios/excluir/<int:usuario_id>", methods=["POST"])
+def excluir_usuario(usuario_id):
+
+    if "usuario" not in session:
+        return redirect("/")
+
+    try:
+
+        UsuarioService.excluir(usuario_id)
+
+        flash("Usuário excluído com sucesso!", "success")
+
+    except ValueError as erro:
+
+        flash(str(erro), "warning")
+
+    except Exception:
+
+        flash("Erro interno ao excluir o usuário.", "danger")
+
+    return redirect("/usuarios")
+
+
+@usuarios_bp.route("/usuarios/senha/<int:usuario_id>", methods=["POST"])
+def alterar_senha(usuario_id):
+
+    if "usuario" not in session:
+        return redirect("/")
+
+    try:
+
+        UsuarioService.alterar_senha(
+            usuario_id=usuario_id,
+            senha=request.form["senha"],
+            confirmar=request.form["confirmar"]
+        )
+
+        flash("Senha alterada com sucesso!", "success")
+
+    except ValueError as erro:
+
+        flash(str(erro), "warning")
+
+    except Exception:
+
+        flash("Erro interno ao alterar a senha.", "danger")
 
     return redirect("/usuarios")

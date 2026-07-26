@@ -1,18 +1,10 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
+{% extends "layout/base.html" %}
 
-<head>
+{% block title %}
+Empresas | ELEVA LOCKER
+{% endblock %}
 
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>Empresas | ELEVA LOCKER</title>
-
-<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-
-<link rel="stylesheet"
-href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"/>
-
+{% block styles %}
 <style>
 
 *{
@@ -348,73 +340,14 @@ background:#27ae60;
 
 </style>
 
-</head>
 
-<body>
+{% endblock %}
 
-<div class="topo">
-
-ELEVA LOCKER
-
-</div>
-
-<div class="menu">
-
-<a href="/dashboard">
-<i class="fa-solid fa-chart-line"></i>
-Dashboard
-</a>
-
-<a href="/usuarios">
-<i class="fa-solid fa-users"></i>
-Usuários
-</a>
-
-<a href="/empresas" class="ativo">
-<i class="fa-solid fa-building"></i>
-Empresas
-</a>
-
-<a href="/armarios">
-<i class="fa-solid fa-box"></i>
-Armários
-</a>
-
-<a href="/esp32">
-<i class="fa-solid fa-microchip"></i>
-ESP32
-</a>
-
-<a href="/compartimentos">
-<i class="fa-solid fa-table-cells"></i>
-Compartimentos
-</a>
-
-<a href="/encomendas">
-<i class="fa-solid fa-box-open"></i>
-Encomendas
-</a>
-
-<a href="/logs">
-<i class="fa-solid fa-file-lines"></i>
-Logs
-</a>
-
-<a href="/configuracoes">
-<i class="fa-solid fa-gear"></i>
-Configurações
-</a>
-
-<a href="/logout" class="logout">
-<i class="fa-solid fa-right-from-bracket"></i>
-Sair
-</a>
-
-</div>
+{% block content %}
 
 <div class="pagina">
 
-<div class="cabecalho">
+    <div class="cabecalho">
 
 <div>
 
@@ -423,10 +356,31 @@ Sair
 <p>Cadastro de empresas do ELEVA LOCKER</p>
 
 </div>
+</div>
+
+{% if erro == "cnpj" %}
+
+<div style="
+    background:#ffe5e5;
+    color:#b30000;
+    border:1px solid #ffb3b3;
+    padding:15px;
+    margin-bottom:20px;
+    border-radius:8px;
+    font-weight:bold;
+">
+    <i class="fa-solid fa-triangle-exclamation"></i>
+    Já existe uma empresa cadastrada com este CNPJ.
+</div>
+
+{% endif %}
+
+
 
 <button class="btn" onclick="abrirModal()">
 
 <i class="fa-solid fa-plus"></i>
+
 
 Nova Empresa
 
@@ -504,45 +458,50 @@ placeholder="Pesquisar empresa...">
 
             </td>
 
-            <td class="acoes">
+           <td class="acoes">
 
-                <a
-href="#"
-class="editar"
-data-id="{{ empresa.id }}"
-data-razao="{{ empresa.razao_social }}"
-data-fantasia="{{ empresa.nome_fantasia }}"
-data-cnpj="{{ empresa.cnpj }}"
-data-ie="{{ empresa.inscricao_estadual }}"
-data-responsavel="{{ empresa.responsavel }}"
-data-telefone="{{ empresa.telefone }}"
-data-whatsapp="{{ empresa.whatsapp }}"
-data-email="{{ empresa.email }}"
-data-cep="{{ empresa.cep }}"
-data-endereco="{{ empresa.endereco }}"
-data-numero="{{ empresa.numero }}"
-data-bairro="{{ empresa.bairro }}"
-data-cidade="{{ empresa.cidade }}"
-data-estado="{{ empresa.estado }}"
-data-status="{{ empresa.status }}">
+    <a
+        href="#"
+        class="editar"
+        data-id="{{ empresa.id }}"
+        data-razao="{{ empresa.razao_social }}"
+        data-fantasia="{{ empresa.nome_fantasia }}"
+        data-cnpj="{{ empresa.cnpj }}"
+        data-ie="{{ empresa.inscricao_estadual }}"
+        data-responsavel="{{ empresa.responsavel }}"
+        data-telefone="{{ empresa.telefone }}"
+        data-whatsapp="{{ empresa.whatsapp }}"
+        data-email="{{ empresa.email }}"
+        data-cep="{{ empresa.cep }}"
+        data-endereco="{{ empresa.endereco }}"
+        data-numero="{{ empresa.numero }}"
+        data-bairro="{{ empresa.bairro }}"
+        data-cidade="{{ empresa.cidade }}"
+        data-estado="{{ empresa.estado }}"
+        data-status="{{ empresa.status }}">
 
-    <i class="fa-solid fa-pen"></i>
+        <i class="fa-solid fa-pen"></i>
 
-</a>
+    </a>
 
-                <a href="#" class="excluir">
+    <a
+        href="#"
+        class="excluir"
+        data-id="{{ empresa.id }}"
+        data-razao="{{ empresa.razao_social }}">
 
-                    <i class="fa-solid fa-trash"></i>
+        <i class="fa-solid fa-trash"></i>
 
-                </a>
+    </a>
 
-            </td>
+</td>
 
-        </tr>
+</tr>
 
-    {% endfor %}
+{% endfor %}
 
-    </tbody>
+</tbody>
+
 
 </table>
 
@@ -791,147 +750,60 @@ Salvar Empresa
 
 </div>
 
-</div><script>
+</div>
+<!-- ==========================
+     MODAL EXCLUIR EMPRESA
+========================== -->
 
-function abrirModal(){
+<div class="modal" id="modalExcluir">
+    
+    
 
-    document.getElementById("modalEmpresa").style.display = "flex";
+    <div class="modal-conteudo" style="max-width:420px;">
 
-    document.getElementById("formEmpresa").reset();
+        <h2>Excluir Empresa</h2>
 
-    document.getElementById("empresa_id").value = "";
+        <p style="margin:20px 0;">
+            Deseja realmente excluir a empresa:
+        </p>
 
-    document.getElementById("formEmpresa").action = "/empresas/nova";
+        <strong id="empresaExcluir"></strong>
 
+        <form id="formExcluir" method="POST">
 
-}
+            <div class="botoes">
 
-// =======================
-// PESQUISA
-// =======================
+                <button
+                    type="button"
+                    class="btn cancelar"
+                    onclick="fecharModalExcluir()">
 
-document.getElementById("pesquisa").addEventListener("keyup",function(){
+                    Cancelar
 
-    let filtro=this.value.toLowerCase();
-
-    let linhas=document.querySelectorAll("#tabelaEmpresas tbody tr");
-
-    linhas.forEach(function(linha){
-
-        let texto=linha.innerText.toLowerCase();
-
-        if(texto.indexOf(filtro)>-1){
-
-            linha.style.display="";
-
-        }else{
-
-            linha.style.display="none";
-
-        }
-
-    });
-
-});
-
-// =======================
-// EDITAR
-// =======================
+                </button>
 
 
+                <button
+    type="submit"
+    class="btn btn-excluir">
+                    Excluir
 
-document.querySelectorAll(".editar").forEach(function(botao){
+                </button>
 
-    botao.addEventListener("click", function(e){
+            </div>
 
-       
+        </form>
 
-        e.preventDefault();
+    </div>
 
-        abrirModal();
+</div>
 
-        let id = this.dataset.id;
 
-        document.getElementById("empresa_id").value = id;
 
-        document.getElementById("formEmpresa").action =
-            "/empresas/editar/" + id;
+</div>
 
-        document.querySelector("[name=razao_social]").value = this.dataset.razao;
-        document.querySelector("[name=nome_fantasia]").value = this.dataset.fantasia;
-        let cnpj = this.dataset.cnpj.replace(/\D/g,'');
+{% endblock %}
 
-if (cnpj.length === 14) {
-    cnpj = cnpj.replace(/^(\d{2})(\d)/, '$1.$2');
-    cnpj = cnpj.replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3');
-    cnpj = cnpj.replace(/\.(\d{3})(\d)/, '.$1/$2');
-    cnpj = cnpj.replace(/(\d{4})(\d)/, '$1-$2');
-}
-
-document.querySelector("[name=cnpj]").value = cnpj;
-        document.querySelector("[name=inscricao_estadual]").value = this.dataset.ie;
-        document.querySelector("[name=responsavel]").value = this.dataset.responsavel;
-        document.querySelector("[name=telefone]").value = this.dataset.telefone;
-        document.querySelector("[name=whatsapp]").value = this.dataset.whatsapp;
-        document.querySelector("[name=email]").value = this.dataset.email;
-        document.querySelector("[name=cep]").value = this.dataset.cep;
-        document.querySelector("[name=endereco]").value = this.dataset.endereco;
-        document.querySelector("[name=numero]").value = this.dataset.numero;
-        document.querySelector("[name=bairro]").value = this.dataset.bairro;
-        document.querySelector("[name=cidade]").value = this.dataset.cidade;
-        document.querySelector("[name=estado]").value = this.dataset.estado;
-        document.querySelector("[name=status]").value = this.dataset.status;
-
-    });
-
-});
-// ==============================
-// MÁSCARA CNPJ
-// ==============================
-
-function mascaraCNPJ(campo){
-
-    let valor = campo.value.replace(/\D/g,'');
-
-    valor = valor.replace(/^(\d{2})(\d)/,'$1.$2');
-    valor = valor.replace(/^(\d{2})\.(\d{3})(\d)/,'$1.$2.$3');
-    valor = valor.replace(/\.(\d{3})(\d)/,'.$1/$2');
-    valor = valor.replace(/(\d{4})(\d)/,'$1-$2');
-
-    campo.value = valor.substring(0,18);
-
-}
-
-document.querySelectorAll("[name=cnpj]").forEach(function(campo){
-
-    campo.addEventListener("input", function(){
-
-        mascaraCNPJ(this);
-
-    });
-
-});
-// ==============================
-// FORMATA CNPJ DA TABELA
-// ==============================
-
-document.querySelectorAll(".cnpj").forEach(function(campo){
-
-    let valor = campo.innerText.replace(/\D/g,'');
-
-    if(valor.length == 14){
-
-        valor = valor.replace(/^(\d{2})(\d)/,'$1.$2');
-        valor = valor.replace(/^(\d{2})\.(\d{3})(\d)/,'$1.$2.$3');
-        valor = valor.replace(/\.(\d{3})(\d)/,'.$1/$2');
-        valor = valor.replace(/(\d{4})(\d)/,'$1-$2');
-
-        campo.innerText = valor;
-
-    }
-
-});
-</script>
-
-</body>
-</html>
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/empresas.js') }}"></script>
+{% endblock %}

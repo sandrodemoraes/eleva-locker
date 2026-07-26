@@ -11,61 +11,96 @@ class BackupService:
 
     HASH_FILE = "backups/ultimo.hash"
 
+    PASTAS = [
+        "database",
+        "uploads",
+        "config",
+        "logs"
+    ]
+
+    ARQUIVOS = [
+        "PROJETO.md"
+    ]
+
     @staticmethod
     def criar_backup():
 
-        raiz = Path(__file__).resolve().parents[2]
+        try:
 
-        hash_atual = HashService.gerar_hash(raiz)
+            raiz = Path(__file__).resolve().parents[2]
 
-        os.makedirs("backups", exist_ok=True)
+            os.makedirs("backups", exist_ok=True)
 
-        if os.path.exists(BackupService.HASH_FILE):
+            hash_atual = HashService.gerar_hash(raiz)
 
-            with open(BackupService.HASH_FILE, "r") as f:
+            if os.path.exists(BackupService.HASH_FILE):
 
-                ultimo_hash = f.read()
+                with open(BackupService.HASH_FILE, "r", encoding="utf-8") as f:
+                    ultimo_hash = f.read().strip()
 
-            if ultimo_hash == hash_atual:
+                if ultimo_hash == hash_atual:
+                    print("✔ Nenhuma alteração. Backup ignorado.")
+                    return
 
-                print("✔ Nenhuma alteração. Backup ignorado.")
+            BackupService.rotacionar()
 
-                return
+            destino = Path("backups") / "backup_01"
 
-        BackupService.rotacionar()
+            if destino.exists():
+                shutil.rmtree(destino)
 
-        destino = Path("backups") / "backup_01"
+            # Copia somente as pastas necessárias
+            for pasta in BackupService.PASTAS:
 
-        shutil.copytree(
-            raiz,
-            destino,
-            ignore=shutil.ignore_patterns(
-                "__pycache__",
-                ".git",
-                "backups",
-                "*.pyc"
-            )
-        )
+                origem = raiz / pasta
 
-        with open(BackupService.HASH_FILE, "w") as f:
+                if origem.exists():
 
-            f.write(hash_atual)
+                    shutil.copytree(
+                        origem,
+                        destino / pasta,
+                        dirs_exist_ok=True
+                    )
 
-        print("✔ Backup criado.")
+            # Copia os arquivos importantes
+            for arquivo in BackupService.ARQUIVOS:
+
+                origem = raiz / arquivo
+
+                if origem.exists():
+
+                    (destino).mkdir(parents=True, exist_ok=True)
+
+                    shutil.copy2(
+                        origem,
+                        destino / arquivo
+                    )
+
+            with open(BackupService.HASH_FILE, "w", encoding="utf-8") as f:
+                f.write(hash_atual)
+
+            print("✔ Backup criado com sucesso.")
+
+        except Exception as erro:
+
+            print(f"⚠ Erro ao criar backup: {erro}")
 
     @staticmethod
     def rotacionar():
 
-        if os.path.exists("backups/backup_05"):
+        ultimo = Path(f"backups/backup_{BackupService.MAX_BACKUPS}")
 
-            shutil.rmtree("backups/backup_05")
+        if ultimo.exists():
+            shutil.rmtree(ultimo)
 
-        for i in range(4, 0, -1):
+        for i in range(BackupService.MAX_BACKUPS - 1, 0, -1):
 
-            origem = f"backups/backup_{i}"
+            origem = Path(f"backups/backup_{i}")
+            destino = Path(f"backups/backup_{i + 1}")
 
-            destino = f"backups/backup_{i+1}"
+            if origem.exists():
 
-            if os.path.exists(origem):
+                if destino.exists():
+                    shutil.rmtree(destino)
 
                 shutil.move(origem, destino)

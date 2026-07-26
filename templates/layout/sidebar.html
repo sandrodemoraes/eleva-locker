@@ -1,0 +1,63 @@
+<aside class="sidebar">
+
+    <nav class="sidebar-menu">
+
+        <a href="{{ url_for('dashboard.dashboard') }}">
+            <i class="fa-solid fa-chart-line"></i>
+            <span>Dashboard</span>
+        </a>
+
+        <a href="{{ url_for('usuarios.usuarios') }}">
+            <i class="fa-solid fa-users"></i>
+            <span>Usuários</span>
+        </a>
+
+        <a href="{{ url_for('empresas.empresas') }}">
+            <i class="fa-solid fa-building"></i>
+            <span>Empresas</span>
+        </a>
+
+        <hr>
+
+        <a href="/armarios">
+            <i class="fa-solid fa-box"></i>
+            <span>Armários</span>
+        </a>
+
+        <a href="/compartimentos">
+            <i class="fa-solid fa-table-cells-large"></i>
+            <span>Compartimentos</span>
+        </a>
+
+        <a href="/encomendas">
+            <i class="fa-solid fa-box-open"></i>
+            <span>Encomendas</span>
+        </a>
+
+        <a href="/esp32">
+            <i class="fa-solid fa-microchip"></i>
+            <span>ESP32</span>
+        </a>
+
+        <hr>
+
+        <a href="/logs">
+            <i class="fa-solid fa-file-lines"></i>
+            <span>Logs</span>
+        </a>
+
+        <a href="/configuracoes">
+            <i class="fa-solid fa-gear"></i>
+            <span>Configurações</span>
+        </a>
+
+        <hr>
+
+        <a href="{{ url_for('auth.logout') }}" class="logout">
+            <i class="fa-solid fa-right-from-bracket"></i>
+            <span>Sair</span>
+        </a>
+
+    </nav>
+
+</aside>

@@ -23,6 +23,42 @@ class EmpresaService:
 
 
     @staticmethod
+    def buscar_por_id(id):
+
+        conn = sqlite3.connect(DB)
+        conn.row_factory = sqlite3.Row
+
+        empresa = conn.execute("""
+            SELECT *
+            FROM empresas
+            WHERE id=?
+        """, (id,)).fetchone()
+
+        conn.close()
+
+        return empresa
+
+
+    @staticmethod
+    def cnpj_existe(cnpj):
+
+        conn = sqlite3.connect(DB)
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            SELECT id
+            FROM empresas
+            WHERE cnpj = ?
+        """, (cnpj,))
+
+        empresa = cursor.fetchone()
+
+        conn.close()
+
+        return empresa is not None
+
+
+    @staticmethod
     def inserir(dados):
 
         conn = sqlite3.connect(DB)
@@ -116,6 +152,21 @@ class EmpresaService:
             id
 
         ))
+
+        conn.commit()
+        conn.close()
+
+
+    @staticmethod
+    def excluir(id):
+
+        conn = sqlite3.connect(DB)
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            DELETE FROM empresas
+            WHERE id=?
+        """, (id,))
 
         conn.commit()
         conn.close()

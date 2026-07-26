@@ -1,44 +1,67 @@
 import hashlib
-import os
-
-EXCLUIR = {
-    "__pycache__",
-    ".git",
-    "backups",
-    ".idea",
-    ".vscode"
-}
-
-EXTENSOES = (
-    ".py",
-    ".html",
-    ".css",
-    ".js",
-    ".json",
-    ".db",
-    ".md"
-)
+from pathlib import Path
 
 
 class HashService:
 
+    PASTAS = [
+        "database",
+        "uploads",
+        "config",
+        "logs"
+    ]
+
+    ARQUIVOS = [
+        "PROJETO.md"
+    ]
+
     @staticmethod
-    def gerar_hash(projeto):
+    def gerar_hash(raiz):
+
+        raiz = Path(raiz)
 
         sha = hashlib.sha256()
 
-        for raiz, dirs, arquivos in os.walk(projeto):
+        # ==========================
+        # Pastas
+        # ==========================
 
-            dirs[:] = [d for d in dirs if d not in EXCLUIR]
+        for pasta in HashService.PASTAS:
 
-            arquivos.sort()
+            caminho = raiz / pasta
 
-            for arquivo in arquivos:
+            if not caminho.exists():
+                continue
 
-                if not arquivo.endswith(EXTENSOES):
-                    continue
+            for arquivo in sorted(caminho.rglob("*")):
 
-                caminho = os.path.join(raiz, arquivo)
+                if arquivo.is_file():
+
+                    try:
+
+                        with open(arquivo, "rb") as f:
+
+                            while True:
+
+                                bloco = f.read(4096)
+
+                                if not bloco:
+                                    break
+
+                                sha.update(bloco)
+
+                    except Exception:
+                        pass
+
+        # ==========================
+        # Arquivos
+        # ==========================
+
+        for arquivo in HashService.ARQUIVOS:
+
+            caminho = raiz / arquivo
+
+            if caminho.exists():
 
                 try:
 
