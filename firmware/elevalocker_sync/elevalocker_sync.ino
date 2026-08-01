@@ -10,8 +10,8 @@
  *   3. Sem internet: retirada por código usando cache local + fila de eventos
  *   4. Com internet: heartbeat + upload eventos + sync automático
  *
- * IMPORTANTE: abra/grave ESTE arquivo completo (firmware/elevalocker_sync.ino).
- * Nao copie trechos para Armario_Inteligente_*.ino — o sketch fica incompleto e nao compila.
+ * IMPORTANTE: abra/grave ESTE arquivo completo:
+ *   firmware/elevalocker_sync/elevalocker_sync.ino
  */
 
 #include <WiFi.h>
