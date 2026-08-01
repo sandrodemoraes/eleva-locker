@@ -425,7 +425,7 @@ void conectarWiFi() {
   }
 
   wl_status_t st = WiFi.status();
-  if (st == WL_CONNECT_FAILED || st == WL_NO_SSHIELD) {
+  if (st == WL_CONNECT_FAILED || st == WL_NO_SHIELD) {
     WiFi.disconnect(true);
     delay(100);
   } else if (st == WL_CONNECTED || st == WL_IDLE_STATUS) {
