@@ -11,6 +11,16 @@ def conectar():
     return conn
 
 
+def _coluna_existe(cursor, tabela, coluna):
+    cursor.execute(f"PRAGMA table_info({tabela})")
+    return any(row[1] == coluna for row in cursor.fetchall())
+
+
+def _adicionar_coluna(cursor, tabela, coluna, definicao):
+    if not _coluna_existe(cursor, tabela, coluna):
+        cursor.execute(f"ALTER TABLE {tabela} ADD COLUMN {coluna} {definicao}")
+
+
 def criar_banco():
 
     os.makedirs("database", exist_ok=True)
@@ -158,6 +168,25 @@ def criar_banco():
         data TEXT,
         acao TEXT
     )
+    """)
+
+    # ============================
+    # MIGRAÇÕES (Fase 1)
+    # ============================
+    _adicionar_coluna(cursor, "armarios", "empresa_id", "INTEGER")
+    _adicionar_coluna(cursor, "compartimentos", "tamanho", "TEXT DEFAULT 'M'")
+    _adicionar_coluna(cursor, "encomendas", "operador", "TEXT")
+    _adicionar_coluna(cursor, "encomendas", "transportadora", "TEXT")
+    _adicionar_coluna(cursor, "encomendas", "observacao", "TEXT")
+
+    cursor.execute("""
+        UPDATE armarios SET status = 'ativo'
+        WHERE status IS NULL OR status = ''
+    """)
+
+    cursor.execute("""
+        UPDATE compartimentos SET status = 'livre'
+        WHERE status IS NULL OR status = ''
     """)
 
     # ============================
