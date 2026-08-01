@@ -23,7 +23,7 @@
 // Bancada ELEVA: ESP32 + BESTER 8ch | GPIO 16,17,18,19,21,22,23,25
 
 const char* WIFI_SSID     = "ELEVA - ENERGIA SOLAR";
-const char* WIFI_PASSWORD = "SUA_SENHA_WIFI";
+const char* WIFI_PASSWORD = "SUA_SENHA_WIFI";  // ← TROQUE pela senha real!
 
 // IP do PC com python app.py (ipconfig) — NÃO use localhost
 const char* SERVIDOR_URL  = "http://192.168.16.130:15000";
@@ -392,9 +392,25 @@ void rotaPainel() {
 // ============ SETUP / LOOP ============
 
 void conectarWiFi() {
+
+  if (WiFi.status() == WL_CONNECTED) {
+    return;
+  }
+
+  wl_status_t st = WiFi.status();
+  if (st == WL_CONNECT_FAILED || st == WL_NO_SSHIELD) {
+    WiFi.disconnect(true);
+    delay(100);
+  } else if (st == WL_CONNECTED || st == WL_IDLE_STATUS) {
+    return;
+  } else if (st != WL_DISCONNECTED && st != WL_CONNECTION_LOST) {
+    // Ainda conectando — não chamar WiFi.begin de novo
+    return;
+  }
+
   WiFi.mode(WIFI_STA);
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
-  Serial.print("WiFi");
+  Serial.print("Conectando WiFi");
   int tent = 0;
   while (WiFi.status() != WL_CONNECTED && tent < 40) {
     delay(500);
@@ -403,12 +419,26 @@ void conectarWiFi() {
   }
   Serial.println();
   if (WiFi.status() == WL_CONNECTED) {
-    Serial.println("IP: " + WiFi.localIP().toString());
+    Serial.println("WiFi OK — IP: " + WiFi.localIP().toString());
+  } else {
+    Serial.println("WiFi FALHOU — verifique SSID e senha no codigo!");
+  }
+}
+
+void avisarConfigPendente() {
+  if (strcmp(WIFI_PASSWORD, "SUA_SENHA_WIFI") == 0) {
+    Serial.println("AVISO: troque WIFI_PASSWORD no codigo (ainda esta SUA_SENHA_WIFI)!");
+  }
+  if (strcmp(ESP32_TOKEN, "cole_o_token_aqui") == 0) {
+    Serial.println("AVISO: troque ESP32_TOKEN — rode: python tools/setup_bancada.py");
   }
 }
 
 void setup() {
   Serial.begin(115200);
+  delay(500);
+  Serial.println("\n=== ELEVA LOCKER ESP32 ===");
+  avisarConfigPendente();
 
   for (int i = 0; i < MAX_PORTAS; i++) {
     int g = GPIO_PADRAO[i];
