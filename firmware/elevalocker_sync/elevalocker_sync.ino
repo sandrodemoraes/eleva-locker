@@ -420,8 +420,30 @@ void rotaPainel() {
 
 bool wifiJaConectou = false;
 bool wifiIniciado = false;
+bool webServerIniciado = false;
 unsigned long wifiInicioMs = 0;
 unsigned long wifiUltimoPonto = 0;
+
+void registrarRotasWeb() {
+  server.on("/status", HTTP_GET, rotaStatus);
+  server.on("/", HTTP_GET, rotaPainel);
+  server.on("/retirar", HTTP_POST, rotaRetirarLocal);
+  server.onNotFound([]() {
+    if (server.uri().startsWith("/abrir/")) {
+      rotaAbrir();
+    } else {
+      server.send(404, "text/plain", "Not found");
+    }
+  });
+}
+
+void iniciarWebServer() {
+  if (webServerIniciado) return;
+  registrarRotasWeb();
+  server.begin();
+  webServerIniciado = true;
+  Serial.println("Web server OK.");
+}
 
 void iniciarWiFi() {
   if (wifiIniciado) return;
