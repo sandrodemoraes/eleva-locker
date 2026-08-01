@@ -130,6 +130,30 @@ def abrir_compartimento(compartimento_id):
     return redirect(request.referrer or "/compartimentos")
 
 
+@esp32_bp.route("/esp32/bancada")
+@login_required
+@perfil_required("Administrador")
+def bancada():
+
+    dispositivos = Esp32Service.listar()
+    from repositories.compartimento_repository import CompartimentoRepository
+
+    compartimentos = CompartimentoRepository.listar()
+
+    bancada_comps = [
+        c for c in compartimentos
+        if c.get("armario_nome") == "Bancada Teste" or c.get("esp32_id")
+    ]
+
+    return render_template(
+        "esp32_bancada.html",
+        usuario=session.get("usuario"),
+        perfil=session.get("perfil"),
+        dispositivos=dispositivos,
+        compartimentos=sorted(bancada_comps, key=lambda x: x.get("numero") or 0),
+    )
+
+
 @esp32_bp.route("/configuracoes")
 @login_required
 @perfil_required("Administrador")

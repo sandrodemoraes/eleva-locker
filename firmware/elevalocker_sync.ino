@@ -20,14 +20,15 @@
 #include <ArduinoJson.h>
 
 // ============ CONFIGURAÇÃO — EDITE AQUI ============
+// Bancada ELEVA: ESP32 + BESTER 8ch | GPIO 16,17,18,19,21,22,23,25
 
-const char* WIFI_SSID     = "SUA_REDE_WIFI";
+const char* WIFI_SSID     = "ELEVA - ENERGIA SOLAR";
 const char* WIFI_PASSWORD = "SUA_SENHA_WIFI";
 
-// IP do PC/servidor Flask (NÃO use localhost)
-const char* SERVIDOR_URL  = "http://192.168.1.10:15000";
+// IP do PC com python app.py (ipconfig) — NÃO use localhost
+const char* SERVIDOR_URL  = "http://192.168.16.130:15000";
 
-// Token copiado do painel ELEVA LOCKER → ESP32 → Editar
+// Token: python tools/setup_bancada.py → copiar token
 const char* ESP32_TOKEN   = "cole_o_token_aqui";
 
 const int HTTP_PORT       = 80;
