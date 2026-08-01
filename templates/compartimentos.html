@@ -69,7 +69,7 @@
                         <button type="submit" class="btn btn-sm btn-success" title="Abrir via ESP32"><i class="fa-solid fa-lock-open"></i></button>
                     </form>
                     {% endif %}
-                    <button class="btn btn-sm" onclick="editarComp({{ c.id }}, {{ c.armario }}, {{ c.numero }}, '{{ c.tamanho or 'M' }}', '{{ c.rele or '' }}', '{{ c.esp32_id or '' }}', '{{ c.status }}')">
+                    <button class="btn btn-sm" onclick="editarComp({{ c.id }}, {{ c.armario }}, {{ c.numero }}, '{{ c.tamanho or 'M' }}', '{{ c.rele or '' }}', '{{ c.esp32_id or '' }}', '{{ c.gpio or '' }}', '{{ c.status }}')">
                         <i class="fa-solid fa-pen"></i>
                     </button>
                     <form method="POST" action="/compartimentos/excluir/{{ c.id }}" style="display:inline" onsubmit="return confirm('Excluir compartimento #{{ c.numero }}?')">
@@ -129,6 +129,10 @@
                         {% endfor %}
                     </select>
                 </div>
+                <div class="form-group">
+                    <label>GPIO (opcional)</label>
+                    <input type="number" name="gpio" min="0" placeholder="Ex: 16">
+                </div>
             </div>
             <div class="form-group">
                 <label>Status</label>
@@ -185,6 +189,10 @@
                         {% endfor %}
                     </select>
                 </div>
+                <div class="form-group">
+                    <label>GPIO</label>
+                    <input type="number" name="gpio" id="edit_gpio" min="0" placeholder="Ex: 16">
+                </div>
             </div>
             <div class="form-group">
                 <label>Status</label>
@@ -210,13 +218,14 @@
 function abrirModal(id){ document.getElementById(id).classList.add('active'); }
 function fecharModal(id){ document.getElementById(id).classList.remove('active'); }
 
-function editarComp(id, armario, numero, tamanho, rele, esp32_id, status){
+function editarComp(id, armario, numero, tamanho, rele, esp32_id, gpio, status){
     document.getElementById('formEditar').action = '/compartimentos/editar/' + id;
     document.getElementById('edit_armario').value = armario;
     document.getElementById('edit_numero').value = numero;
     document.getElementById('edit_tamanho').value = tamanho;
     document.getElementById('edit_rele').value = rele;
     document.getElementById('edit_esp32_id').value = esp32_id || '';
+    document.getElementById('edit_gpio').value = gpio || '';
     document.getElementById('edit_status').value = status;
     abrirModal('modalEditar');
 }

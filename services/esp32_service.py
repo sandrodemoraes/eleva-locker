@@ -41,6 +41,9 @@ class Esp32Service:
         dados["nome"] = nome
         dados["token"] = dados.get("token") or config.gerar_token_esp32()
 
+        max_portas = int(dados.get("max_portas") or 16)
+        dados["max_portas"] = max(8, min(32, max_portas))
+
         return Esp32Repository.criar(dados)
 
     @staticmethod
@@ -55,7 +58,14 @@ class Esp32Service:
 
         dados["nome"] = nome
 
+        if "max_portas" in dados:
+            max_portas = int(dados.get("max_portas") or 16)
+            dados["max_portas"] = max(8, min(32, max_portas))
+
         Esp32Repository.atualizar(esp32_id, dados)
+
+        from services.esp32_sync_service import Esp32SyncService
+        Esp32SyncService.incrementar_versao(esp32_id)
 
     @staticmethod
     def excluir(esp32_id):

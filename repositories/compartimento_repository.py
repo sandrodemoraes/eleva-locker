@@ -64,9 +64,9 @@ class CompartimentoRepository:
 
             cursor.execute("""
                 INSERT INTO compartimentos (
-                    armario, numero, rele, esp32_id, status, tamanho
+                    armario, numero, rele, esp32_id, status, tamanho, gpio
                 )
-                VALUES (?, ?, ?, ?, ?, ?)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
             """, (
                 dados["armario"],
                 dados["numero"],
@@ -74,6 +74,7 @@ class CompartimentoRepository:
                 dados.get("esp32_id"),
                 dados.get("status", "livre"),
                 dados.get("tamanho", "M"),
+                dados.get("gpio"),
             ))
 
             conn.commit()
@@ -93,7 +94,8 @@ class CompartimentoRepository:
                     rele = ?,
                     esp32_id = ?,
                     status = ?,
-                    tamanho = ?
+                    tamanho = ?,
+                    gpio = ?
                 WHERE id = ?
             """, (
                 dados["armario"],
@@ -102,6 +104,7 @@ class CompartimentoRepository:
                 dados.get("esp32_id"),
                 dados["status"],
                 dados.get("tamanho", "M"),
+                dados.get("gpio"),
                 compartimento_id,
             ))
 

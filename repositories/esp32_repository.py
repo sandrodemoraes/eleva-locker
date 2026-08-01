@@ -70,9 +70,10 @@ class Esp32Repository:
 
             cursor.execute("""
                 INSERT INTO esp32 (
-                    nome, ip, mac, armario, status, token, porta, ultimo_heartbeat
+                    nome, ip, mac, armario, status, token, porta, ultimo_heartbeat,
+                    max_portas, sync_versao
                 )
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, (
                 dados["nome"],
                 dados.get("ip"),
@@ -82,6 +83,8 @@ class Esp32Repository:
                 dados["token"],
                 dados.get("porta", 80),
                 dados.get("ultimo_heartbeat"),
+                dados.get("max_portas", 16),
+                dados.get("sync_versao", 1),
             ))
 
             conn.commit()
@@ -102,7 +105,8 @@ class Esp32Repository:
                     armario = ?,
                     status = ?,
                     token = ?,
-                    porta = ?
+                    porta = ?,
+                    max_portas = ?
                 WHERE id = ?
             """, (
                 dados["nome"],
@@ -112,6 +116,7 @@ class Esp32Repository:
                 dados.get("status", "offline"),
                 dados.get("token"),
                 dados.get("porta", 80),
+                dados.get("max_portas", 16),
                 esp32_id,
             ))
 

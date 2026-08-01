@@ -2,8 +2,53 @@ from flask import Blueprint, request, jsonify
 
 from middleware.esp32_token import esp32_token_required
 from services.esp32_service import Esp32Service
+from services.esp32_sync_service import Esp32SyncService
 
 esp32_api_bp = Blueprint("esp32_api", __name__, url_prefix="/api/esp32")
+
+
+@esp32_api_bp.route("/sync", methods=["GET"])
+@esp32_token_required
+def sync():
+
+    try:
+
+        pacote = Esp32SyncService.obter_pacote_sync(request.esp32["id"])
+
+        return jsonify({
+            "sucesso": True,
+            "sync": pacote,
+        })
+
+    except ValueError as erro:
+
+        return jsonify({"sucesso": False, "mensagem": str(erro)}), 400
+
+
+@esp32_api_bp.route("/eventos", methods=["POST"])
+@esp32_token_required
+def eventos_batch():
+
+    dados = request.get_json(silent=True) or {}
+    eventos = dados.get("eventos", [])
+
+    if not isinstance(eventos, list):
+
+        return jsonify({
+            "sucesso": False,
+            "mensagem": "Campo 'eventos' deve ser uma lista.",
+        }), 400
+
+    resultados = Esp32SyncService.processar_eventos(
+        request.esp32["id"],
+        eventos,
+        esp_nome=request.esp32["nome"],
+    )
+
+    return jsonify({
+        "sucesso": True,
+        "processados": resultados,
+    })
 
 
 @esp32_api_bp.route("/heartbeat", methods=["POST"])
@@ -14,15 +59,35 @@ def heartbeat():
 
     ip = dados.get("ip") or request.remote_addr
     mac = dados.get("mac")
+    versao_local = dados.get("sync_versao")
 
     try:
 
         esp32_id = Esp32Service.heartbeat(request.esp32["token"], ip, mac)
 
+        versao_servidor = request.esp32.get("sync_versao") or 1
+
+        with __import__(
+            "repositories.base_repository", fromlist=["BaseRepository"]
+        ).BaseRepository.get_connection() as conn:
+            row = conn.execute(
+                "SELECT sync_versao FROM esp32 WHERE id = ?",
+                (esp32_id,),
+            ).fetchone()
+            if row:
+                versao_servidor = row["sync_versao"] or 1
+
+        precisa_sync = (
+            versao_local is None
+            or int(versao_local) < int(versao_servidor)
+        )
+
         return jsonify({
             "sucesso": True,
             "esp32_id": esp32_id,
             "mensagem": "Heartbeat recebido.",
+            "sync_versao": versao_servidor,
+            "precisa_sync": precisa_sync,
         })
 
     except ValueError as erro:

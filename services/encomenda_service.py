@@ -7,6 +7,7 @@ from services.log_service import LogService
 from services.esp32_service import Esp32Service
 from services.notificacao_service import NotificacaoService
 from services.limite_plano_service import LimitePlanoService
+from services.esp32_sync_service import Esp32SyncService
 
 
 class EncomendaService:
@@ -102,6 +103,8 @@ class EncomendaService:
             compartimento=compartimento["numero"],
         )
 
+        Esp32SyncService.incrementar_por_compartimento(compartimento_id)
+
         return {
             "id": encomenda_id,
             "codigo": codigo,
@@ -136,6 +139,8 @@ class EncomendaService:
         )
 
         abertura = Esp32Service.abrir_compartimento(encomenda["compartimento"], operador)
+
+        Esp32SyncService.incrementar_por_compartimento(encomenda["compartimento"])
 
         return {
             "id": encomenda["id"],

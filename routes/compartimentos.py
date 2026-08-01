@@ -37,6 +37,7 @@ def novo():
             "numero": request.form.get("numero"),
             "rele": int(request.form["rele"]) if request.form.get("rele") else None,
             "esp32_id": int(request.form["esp32_id"]) if request.form.get("esp32_id") else None,
+            "gpio": int(request.form["gpio"]) if request.form.get("gpio") else None,
             "status": request.form.get("status", "livre"),
             "tamanho": request.form.get("tamanho", "M"),
         })
@@ -63,6 +64,7 @@ def editar(compartimento_id):
             "numero": request.form.get("numero"),
             "rele": int(request.form["rele"]) if request.form.get("rele") else None,
             "esp32_id": int(request.form["esp32_id"]) if request.form.get("esp32_id") else None,
+            "gpio": int(request.form["gpio"]) if request.form.get("gpio") else None,
             "status": request.form.get("status", "livre"),
             "tamanho": request.form.get("tamanho", "M"),
         })

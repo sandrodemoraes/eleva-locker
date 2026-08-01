@@ -37,6 +37,7 @@ def novo():
             "mac": request.form.get("mac", ""),
             "armario": int(armario) if armario else None,
             "porta": int(request.form.get("porta", 80)),
+            "max_portas": int(request.form.get("max_portas", 16)),
             "status": "offline",
         })
 
@@ -65,6 +66,7 @@ def editar(esp32_id):
             "mac": request.form.get("mac", ""),
             "armario": int(armario) if armario else None,
             "porta": int(request.form.get("porta", 80)),
+            "max_portas": int(request.form.get("max_portas", 16)),
             "status": request.form.get("status", "offline"),
             "token": request.form.get("token", ""),
         })
