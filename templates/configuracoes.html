@@ -1,0 +1,87 @@
+{% extends "layout/base.html" %}
+
+{% block title %}Configurações | ELEVA LOCKER{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/crud.css') }}">
+{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+    <div>
+        <h1>Configurações</h1>
+        <p>Backup, restauração e parâmetros do sistema</p>
+    </div>
+    <form method="POST" action="/configuracoes/backup">
+        <button type="submit" class="btn btn-success">
+            <i class="fa-solid fa-floppy-disk"></i> Criar backup agora
+        </button>
+    </form>
+</div>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% for category, message in messages %}
+        <div class="alert alert-{{ category }}">{{ message }}</div>
+    {% endfor %}
+{% endwith %}
+
+<div class="panels">
+
+    <div class="table-box">
+        <h2 style="color:#0f3d75;margin-bottom:15px;">Backups disponíveis</h2>
+        <p style="color:#666;margin-bottom:15px;">
+            O sistema mantém até <strong>5 backups</strong> rotativos.
+            Antes de cada atualização importante, um backup é criado automaticamente.
+        </p>
+
+        {% if backups %}
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Banco de dados</th>
+                    <th>Tamanho</th>
+                    <th>Ação</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for b in backups %}
+                <tr>
+                    <td>backup_{{ '%02d' | format(b.numero) }}</td>
+                    <td>{% if b.tem_banco %}✅ Sim{% else %}❌ Não{% endif %}</td>
+                    <td>{{ b.tamanho_kb }} KB</td>
+                    <td>
+                        <form method="POST" action="/configuracoes/restaurar/{{ b.numero }}"
+                              onsubmit="return confirm('Restaurar backup #{{ b.numero }}? Os dados atuais serão substituídos.')">
+                            <button type="submit" class="btn btn-sm btn-danger">
+                                <i class="fa-solid fa-rotate-left"></i> Restaurar
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="empty-state">
+            <p>Nenhum backup encontrado. Clique em "Criar backup agora".</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="table-box">
+        <h2 style="color:#0f3d75;margin-bottom:15px;">Parâmetros ESP32</h2>
+        <table>
+            <tr><td style="padding:8px;">Duração do relé</td><td><strong>{{ config.ESP32_RELE_DURACAO }}s</strong></td></tr>
+            <tr><td style="padding:8px;">Timeout heartbeat</td><td><strong>{{ config.ESP32_HEARTBEAT_TIMEOUT }}s</strong></td></tr>
+            <tr><td style="padding:8px;">Modo simulação</td><td><strong>{% if config.ESP32_MODO_SIMULACAO %}Ativo{% else %}Inativo{% endif %}</strong></td></tr>
+        </table>
+        <p style="color:#888;font-size:13px;margin-top:15px;">
+            Configure via variáveis de ambiente: ESP32_MODO_SIMULACAO=1, ESP32_RELE_DURACAO=3
+        </p>
+    </div>
+
+</div>
+
+{% endblock %}

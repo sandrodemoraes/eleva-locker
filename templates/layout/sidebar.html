@@ -19,34 +19,34 @@
 
         <hr>
 
-        <a href="/armarios">
+        <a href="{{ url_for('armarios.listar') }}">
             <i class="fa-solid fa-box"></i>
             <span>Armários</span>
         </a>
 
-        <a href="/compartimentos">
+        <a href="{{ url_for('compartimentos.listar') }}">
             <i class="fa-solid fa-table-cells-large"></i>
             <span>Compartimentos</span>
         </a>
 
-        <a href="/encomendas">
+        <a href="{{ url_for('encomendas.listar') }}">
             <i class="fa-solid fa-box-open"></i>
             <span>Encomendas</span>
         </a>
 
-        <a href="/esp32">
+        <a href="{{ url_for('esp32.listar') }}">
             <i class="fa-solid fa-microchip"></i>
             <span>ESP32</span>
         </a>
 
         <hr>
 
-        <a href="/logs">
+        <a href="{{ url_for('logs.listar') }}">
             <i class="fa-solid fa-file-lines"></i>
             <span>Logs</span>
         </a>
 
-        <a href="/configuracoes">
+        <a href="{{ url_for('esp32.configuracoes') }}">
             <i class="fa-solid fa-gear"></i>
             <span>Configurações</span>
         </a>
