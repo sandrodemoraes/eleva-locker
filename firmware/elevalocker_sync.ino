@@ -24,13 +24,13 @@
 // Bancada ELEVA: ESP32 + BESTER 8ch | GPIO 16,17,18,19,21,22,23,25
 
 const char* WIFI_SSID     = "ELEVA - ENERGIA SOLAR";
-const char* WIFI_PASSWORD = "SUA_SENHA_WIFI";  // ← TROQUE pela senha real!
+const char* WIFI_PASSWORD = "SUA_SENHA_WIFI";  // ex: eleva2277
 
 // IP do PC com python app.py (ipconfig) — NÃO use localhost
 const char* SERVIDOR_URL  = "http://192.168.16.130:15000";
 
 // Token: python tools/setup_bancada.py → copiar token
-const char* ESP32_TOKEN   = "cole_o_token_aqui";
+const char* ESP32_TOKEN   = "cole_o_token_aqui";  // ex: 784b417975f530a6cb4623df6c950154
 
 const int HTTP_PORT       = 80;
 const int MIN_PORTAS      = 8;
