@@ -418,37 +418,58 @@ void rotaPainel() {
 
 // ============ SETUP / LOOP ============
 
-void conectarWiFi() {
+bool wifiJaConectou = false;
+bool wifiIniciado = false;
+unsigned long wifiInicioMs = 0;
+unsigned long wifiUltimoPonto = 0;
 
-  if (WiFi.status() == WL_CONNECTED) {
-    return;
-  }
+void iniciarWiFi() {
+  if (wifiIniciado) return;
 
-  wl_status_t st = WiFi.status();
-  if (st == WL_CONNECT_FAILED || st == WL_NO_SHIELD) {
-    WiFi.disconnect(true);
-    delay(100);
-  } else if (st == WL_CONNECTED || st == WL_IDLE_STATUS) {
-    return;
-  } else if (st != WL_DISCONNECTED && st != WL_CONNECTION_LOST) {
-    // Ainda conectando — não chamar WiFi.begin de novo
-    return;
-  }
-
+  WiFi.persistent(false);
+  WiFi.mode(WIFI_OFF);
+  delay(200);
   WiFi.mode(WIFI_STA);
+  WiFi.setAutoReconnect(true);
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
-  Serial.print("Conectando WiFi");
-  int tent = 0;
-  while (WiFi.status() != WL_CONNECTED && tent < 40) {
-    delay(500);
-    Serial.print(".");
-    tent++;
-  }
-  Serial.println();
+
+  wifiIniciado = true;
+  wifiInicioMs = millis();
+  wifiUltimoPonto = wifiInicioMs;
+  Serial.println("Conectando WiFi...");
+}
+
+void gerenciarWiFi() {
   if (WiFi.status() == WL_CONNECTED) {
-    Serial.println("WiFi OK - IP: " + WiFi.localIP().toString());
-  } else {
-    Serial.println("WiFi FALHOU - verifique SSID e senha no codigo!");
+    if (!wifiJaConectou) {
+      wifiJaConectou = true;
+      Serial.println();
+      Serial.println("WiFi OK - IP: " + WiFi.localIP().toString());
+      tarefasRedePendentes = true;
+    }
+    return;
+  }
+
+  wifiJaConectou = false;
+
+  if (!wifiIniciado) {
+    iniciarWiFi();
+    return;
+  }
+
+  unsigned long agora = millis();
+
+  if (agora - wifiUltimoPonto > 500) {
+    Serial.print(".");
+    wifiUltimoPonto = agora;
+  }
+
+  // Timeout 30s — tenta de novo
+  if (agora - wifiInicioMs > 30000) {
+    Serial.println();
+    Serial.println("WiFi demorou — tentando novamente...");
+    WiFi.disconnect(true);
+    wifiIniciado = false;
   }
 }
 
@@ -463,25 +484,24 @@ void avisarConfigPendente() {
 
 void setup() {
   Serial.begin(115200);
-  delay(500);
+  delay(1000);
   Serial.println("\n=== ELEVA LOCKER ESP32 ===");
   avisarConfigPendente();
 
-  // Bancada 8ch: so inicializa GPIO dos 8 reles (evita pinos sensiveis do boot)
+  Serial.println("Init GPIO...");
   for (int i = 0; i < MIN_PORTAS; i++) {
     int g = GPIO_PADRAO[i];
     pinMode(g, OUTPUT);
     digitalWrite(g, LOW);
   }
 
+  Serial.println("Init cache...");
   prefs.begin("sync", true);
   syncVersao = prefs.getInt("versao", 0);
   totalCache = prefs.getInt("portas", 0);
   prefs.end();
 
-  conectarWiFi();
-  tarefasRedePendentes = (WiFi.status() == WL_CONNECTED);
-
+  Serial.println("Init web...");
   server.on("/status", HTTP_GET, rotaStatus);
   server.on("/", HTTP_GET, rotaPainel);
   server.on("/retirar", HTTP_POST, rotaRetirarLocal);
@@ -503,15 +523,9 @@ void loop() {
 
   unsigned long agora = millis();
 
+  gerenciarWiFi();
+
   if (WiFi.status() != WL_CONNECTED) {
-    static unsigned long ultimaTentativa = 0;
-    if (agora - ultimaTentativa > 10000) {
-      conectarWiFi();
-      if (WiFi.status() == WL_CONNECTED) {
-        tarefasRedePendentes = true;
-      }
-      ultimaTentativa = agora;
-    }
     return;
   }
 
