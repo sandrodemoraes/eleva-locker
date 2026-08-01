@@ -509,9 +509,21 @@ void avisarConfigPendente() {
 }
 
 void setup() {
+  // Primeira coisa: desliga WiFi/NVS antigo que pode causar crash no boot
+  WiFi.persistent(false);
+  WiFi.mode(WIFI_OFF);
+
   Serial.begin(115200);
-  delay(300);
+  delay(500);
+
+  // Pausa no boot para conseguir ler o Serial Monitor (reboot loop)
   Serial.println("\n=== ELEVA LOCKER ESP32 ===");
+  Serial.printf("Reset: %d | Aguarde 5s...\n", (int)esp_reset_reason());
+  for (int s = 5; s >= 1; s--) {
+    Serial.printf("  %d...\n", s);
+    delay(1000);
+  }
+
   Serial.println("Boot OK");
   avisarConfigPendente();
 
