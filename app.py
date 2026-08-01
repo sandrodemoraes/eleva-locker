@@ -7,46 +7,27 @@ from routes.auth import auth_bp
 from routes.dashboard import dashboard_bp
 from routes.usuarios import usuarios_bp
 from routes.empresas import empresas_bp
+from routes.armarios import armarios_bp
+from routes.compartimentos import compartimentos_bp
+from routes.encomendas import encomendas_bp
+from routes.logs import logs_bp
 
 
 app = Flask(__name__)
 app.secret_key = "ElevaLocker2026"
 
 
-# ==========================================
-# Inicialização do banco de dados
-# ==========================================
-
 criar_banco()
-
-
-# ==========================================
-# Registro dos Blueprints
-# ==========================================
 
 app.register_blueprint(auth_bp)
 app.register_blueprint(dashboard_bp)
 app.register_blueprint(usuarios_bp)
 app.register_blueprint(empresas_bp)
+app.register_blueprint(armarios_bp)
+app.register_blueprint(compartimentos_bp)
+app.register_blueprint(encomendas_bp)
+app.register_blueprint(logs_bp)
 
-
-# ==========================================
-# Mostrar todas as rotas registradas
-# ==========================================
-
-print("\n====================================")
-print("ROTAS REGISTRADAS")
-print("====================================")
-
-for regra in app.url_map.iter_rules():
-    print(f"{regra.rule} -> {regra.methods}")
-
-print("====================================\n")
-
-
-# ==========================================
-# Inicialização da aplicação
-# ==========================================
 
 if __name__ == "__main__":
 
