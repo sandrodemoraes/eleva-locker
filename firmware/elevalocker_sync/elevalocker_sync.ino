@@ -464,10 +464,7 @@ void iniciarWebServer() {
 void iniciarWiFi() {
   if (wifiIniciado) return;
 
-  WiFi.persistent(false);
-  WiFi.mode(WIFI_OFF);
-  delay(100);
-  WiFi.mode(WIFI_STA);
+  iniciarStackRede();
   WiFi.setAutoReconnect(true);
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
 
@@ -520,33 +517,59 @@ void avisarConfigPendente() {
   }
 }
 
+int faseBoot = 0;
+
+void avancarBoot() {
+  switch (faseBoot) {
+    case 0:
+      Serial.println("\n=== ELEVA LOCKER ESP32 ===");
+      Serial.println("Boot OK");
+      avisarConfigPendente();
+      faseBoot++;
+      break;
+    case 1:
+      Serial.println("Init GPIO...");
+      for (int i = 0; i < MIN_PORTAS; i++) {
+        int g = GPIO_PADRAO[i];
+        pinMode(g, OUTPUT);
+        digitalWrite(g, LOW);
+      }
+      faseBoot++;
+      break;
+    case 2:
+      Serial.println("Init cache...");
+      prefs.begin("sync", true);
+      syncVersao = prefs.getInt("versao", 0);
+      totalCache = prefs.getInt("portas", 0);
+      prefs.end();
+      faseBoot++;
+      break;
+    case 3:
+      iniciarStackRede();
+      faseBoot++;
+      break;
+    case 4:
+      iniciarWebServer();
+      faseBoot++;
+      break;
+    case 5:
+      Serial.println("ESP32 ELEVA LOCKER pronto.");
+      faseBoot++;
+      break;
+  }
+}
+
 void setup() {
   Serial.begin(115200);
-  delay(300);
-  Serial.println("\n=== ELEVA LOCKER ESP32 ===");
-  Serial.println("Boot OK");
-  avisarConfigPendente();
-
-  Serial.println("Init GPIO...");
-  for (int i = 0; i < MIN_PORTAS; i++) {
-    int g = GPIO_PADRAO[i];
-    pinMode(g, OUTPUT);
-    digitalWrite(g, LOW);
-  }
-
-  Serial.println("Init cache...");
-  prefs.begin("sync", true);
-  syncVersao = prefs.getInt("versao", 0);
-  totalCache = prefs.getInt("portas", 0);
-  prefs.end();
-
-  Serial.println("ESP32 ELEVA LOCKER pronto.");
 }
 
 void loop() {
-  if (!webServerIniciado) {
-    iniciarWebServer();
+  if (faseBoot < 6) {
+    avancarBoot();
+    yield();
+    return;
   }
+
   if (httpServer) {
     httpServer->handleClient();
   }
