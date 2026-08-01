@@ -15,6 +15,11 @@ from routes.logs import logs_bp
 from routes.esp32 import esp32_bp
 from routes.totem import totem_bp
 from routes.notificacoes import notificacoes_bp
+from routes.planos import planos_bp
+from routes.contratos import contratos_bp
+from routes.faturas import faturas_bp
+from routes.financeiro import financeiro_bp
+from routes.portal import portal_bp
 from routes.api.esp32_api import esp32_api_bp
 from routes.api.compartimento_api import compartimento_api_bp
 
@@ -43,6 +48,11 @@ app.register_blueprint(logs_bp)
 app.register_blueprint(esp32_bp)
 app.register_blueprint(totem_bp)
 app.register_blueprint(notificacoes_bp)
+app.register_blueprint(planos_bp)
+app.register_blueprint(contratos_bp)
+app.register_blueprint(faturas_bp)
+app.register_blueprint(financeiro_bp)
+app.register_blueprint(portal_bp)
 app.register_blueprint(esp32_api_bp)
 app.register_blueprint(compartimento_api_bp)
 

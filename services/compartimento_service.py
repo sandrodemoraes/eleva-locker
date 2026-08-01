@@ -1,5 +1,6 @@
 from repositories.compartimento_repository import CompartimentoRepository
 from repositories.armario_repository import ArmarioRepository
+from services.limite_plano_service import LimitePlanoService
 
 
 class CompartimentoService:
@@ -41,6 +42,10 @@ class CompartimentoService:
         if CompartimentoRepository.numero_existe(armario_id, numero):
             raise ValueError("Este número já existe neste armário.")
 
+        empresa_id = LimitePlanoService.empresa_id_do_armario(armario_id)
+        if empresa_id:
+            LimitePlanoService.verificar_compartimento(empresa_id)
+
         dados["numero"] = numero
         dados["status"] = dados.get("status", "livre")
 
@@ -59,6 +64,10 @@ class CompartimentoService:
 
         if CompartimentoRepository.numero_existe(armario_id, numero, compartimento_id):
             raise ValueError("Este número já existe neste armário.")
+
+        empresa_id = LimitePlanoService.empresa_id_do_armario(armario_id)
+        if empresa_id:
+            LimitePlanoService.verificar_compartimento(empresa_id)
 
         dados["numero"] = numero
 

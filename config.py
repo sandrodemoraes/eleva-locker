@@ -36,6 +36,12 @@ SMS_API_KEY = os.getenv("SMS_API_KEY", "")
 # URL base para links no totem/QR (ex: http://192.168.1.10:15000)
 APP_URL_BASE = os.getenv("APP_URL_BASE", "http://localhost:15000")
 
+# Pagamentos — modo: console | producao
+PAGAMENTO_MODO = os.getenv("PAGAMENTO_MODO", "console")
+PAGAMENTO_API_URL = os.getenv("PAGAMENTO_API_URL", "")
+PAGAMENTO_API_KEY = os.getenv("PAGAMENTO_API_KEY", "")
+PAGAMENTO_DIAS_VENCIMENTO = int(os.getenv("PAGAMENTO_DIAS_VENCIMENTO", "10"))
+
 
 def gerar_token_esp32():
     return secrets.token_hex(16)

@@ -6,6 +6,7 @@ from repositories.compartimento_repository import CompartimentoRepository
 from services.log_service import LogService
 from services.esp32_service import Esp32Service
 from services.notificacao_service import NotificacaoService
+from services.limite_plano_service import LimitePlanoService
 
 
 class EncomendaService:
@@ -59,6 +60,11 @@ class EncomendaService:
 
         if compartimento["status"] != "livre":
             raise ValueError("Compartimento não está livre.")
+
+        empresa_id = LimitePlanoService.empresa_id_do_compartimento(compartimento_id)
+
+        if empresa_id:
+            LimitePlanoService.verificar_encomenda(empresa_id)
 
         codigo = EncomendaService._gerar_codigo()
         agora = datetime.now().strftime("%Y-%m-%d %H:%M:%S")

@@ -214,6 +214,74 @@ def criar_banco():
         UPDATE compartimentos SET status = 'livre'
         WHERE status IS NULL OR status = ''
     """)
+
+    # ============================
+    # FASE 4 — COMERCIAL
+    # ============================
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS planos(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        nome TEXT NOT NULL,
+        descricao TEXT,
+        preco_mensal REAL NOT NULL,
+        max_armarios INTEGER DEFAULT -1,
+        max_compartimentos INTEGER DEFAULT -1,
+        max_encomendas_mes INTEGER DEFAULT -1,
+        inclui_whatsapp INTEGER DEFAULT 0,
+        inclui_relatorios INTEGER DEFAULT 1,
+        status INTEGER DEFAULT 1,
+        criado_em DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+    """)
+
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS contratos(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        empresa_id INTEGER NOT NULL,
+        plano_id INTEGER NOT NULL,
+        data_inicio TEXT NOT NULL,
+        data_fim TEXT,
+        status TEXT DEFAULT 'ativo',
+        valor_mensal REAL NOT NULL,
+        renovacao_automatica INTEGER DEFAULT 1,
+        criado_em DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+    """)
+
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS faturas(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        contrato_id INTEGER NOT NULL,
+        referencia TEXT NOT NULL,
+        valor REAL NOT NULL,
+        status TEXT DEFAULT 'pendente',
+        data_vencimento TEXT,
+        data_pagamento TEXT,
+        link_pagamento TEXT,
+        gateway_id TEXT,
+        criado_em DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+    """)
+
+    _adicionar_coluna(cursor, "usuarios", "empresa_id", "INTEGER")
+
+    # Planos padrão
+    cursor.execute("SELECT COUNT(*) FROM planos")
+    if cursor.fetchone()[0] == 0:
+        cursor.executemany("""
+            INSERT INTO planos (
+                nome, descricao, preco_mensal,
+                max_armarios, max_compartimentos, max_encomendas_mes,
+                inclui_whatsapp, inclui_relatorios
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        """, [
+            ("Starter", "Ideal para condomínios pequenos", 199.0, 1, 20, 500, 0, 1),
+            ("Profissional", "Até 5 armários", 499.0, 5, 100, 2000, 1, 1),
+            ("Enterprise", "Recursos ilimitados", 1499.0, -1, -1, -1, 1, 1),
+        ])
+
+    # ============================
+    # USUÁRIO ADMINISTRADOR PADRÃO
     # ============================
     cursor.execute("""
     SELECT id FROM usuarios

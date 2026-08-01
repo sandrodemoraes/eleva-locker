@@ -103,7 +103,9 @@ tr:hover{
 
 .badge-ativo,.badge-livre,.badge-retirada{background:#d4edda;color:#155724;}
 .badge-ocupado,.badge-aguardando_retirada{background:#fff3cd;color:#856404;}
-.badge-online{background:#d4edda;color:#155724;}
+.badge-pendente,.badge-vencido{background:#fff3cd;color:#856404;}
+.badge-pago,.badge-ativo{background:#d4edda;color:#155724;}
+.badge-suspenso,.badge-cancelado{background:#f8d7da;color:#721c24;}
 .badge-offline{background:#f8d7da;color:#721c24;}
 .badge-erro{background:#fff3cd;color:#856404;}
 

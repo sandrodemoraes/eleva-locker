@@ -1,4 +1,5 @@
 from repositories.armario_repository import ArmarioRepository
+from services.limite_plano_service import LimitePlanoService
 
 
 class ArmarioService:
@@ -31,6 +32,11 @@ class ArmarioService:
 
         dados["nome"] = nome
         dados["status"] = dados.get("status", "ativo")
+
+        empresa_id = dados.get("empresa_id")
+
+        if empresa_id:
+            LimitePlanoService.verificar_armario(int(empresa_id))
 
         return ArmarioRepository.criar(dados)
 
