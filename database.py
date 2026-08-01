@@ -178,9 +178,24 @@ def criar_banco():
     adicionar_coluna(cursor, "esp32", "token", "TEXT")
     adicionar_coluna(cursor, "esp32", "porta", "INTEGER DEFAULT 80")
     adicionar_coluna(cursor, "esp32", "ultimo_heartbeat", "DATETIME")
+    adicionar_coluna(cursor, "esp32", "max_portas", "INTEGER DEFAULT 16")
+    adicionar_coluna(cursor, "esp32", "sync_versao", "INTEGER DEFAULT 1")
+
+    adicionar_coluna(cursor, "compartimentos", "gpio", "INTEGER")
 
     # Migrações Fase 3 — Notificações
     adicionar_coluna(cursor, "encomendas", "notificado_em", "DATETIME")
+
+    ddl("""
+    CREATE TABLE IF NOT EXISTS esp32_eventos_sync(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        esp32_id INTEGER NOT NULL,
+        evento_uid TEXT NOT NULL UNIQUE,
+        tipo TEXT NOT NULL,
+        payload TEXT,
+        criado_em DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+    """)
 
     ddl("""
     CREATE TABLE IF NOT EXISTS notificacoes(

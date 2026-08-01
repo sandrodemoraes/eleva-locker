@@ -1,6 +1,7 @@
 from repositories.compartimento_repository import CompartimentoRepository
 from repositories.armario_repository import ArmarioRepository
 from services.limite_plano_service import LimitePlanoService
+from services.esp32_sync_service import Esp32SyncService
 
 
 class CompartimentoService:
@@ -49,7 +50,12 @@ class CompartimentoService:
         dados["numero"] = numero
         dados["status"] = dados.get("status", "livre")
 
-        return CompartimentoRepository.criar(dados)
+        comp_id = CompartimentoRepository.criar(dados)
+
+        if dados.get("esp32_id"):
+            Esp32SyncService.incrementar_versao(dados["esp32_id"])
+
+        return comp_id
 
     @staticmethod
     def atualizar(compartimento_id, dados):
@@ -72,6 +78,9 @@ class CompartimentoService:
         dados["numero"] = numero
 
         CompartimentoRepository.atualizar(compartimento_id, dados)
+
+        if dados.get("esp32_id"):
+            Esp32SyncService.incrementar_versao(dados["esp32_id"])
 
     @staticmethod
     def excluir(compartimento_id):
