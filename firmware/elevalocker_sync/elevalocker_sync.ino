@@ -19,6 +19,7 @@
 #include <HTTPClient.h>
 #include <Preferences.h>
 #include <ArduinoJson.h>
+#include <esp_system.h>
 
 // ============ CONFIGURAÇÃO — EDITE AQUI ============
 // Bancada ELEVA: ESP32 + BESTER 8ch | GPIO 16,17,18,19,21,22,23,25
@@ -313,8 +314,11 @@ void executarTarefasRede() {
   if (WiFi.status() != WL_CONNECTED) return;
 
   Serial.println("Conectando ao servidor...");
+  yield();
   enviarHeartbeat();
+  yield();
   sincronizarComServidor();
+  yield();
   enviarEventosPendentes();
   Serial.println("Servidor OK.");
 }
@@ -506,8 +510,9 @@ void avisarConfigPendente() {
 
 void setup() {
   Serial.begin(115200);
-  delay(1000);
+  delay(300);
   Serial.println("\n=== ELEVA LOCKER ESP32 ===");
+  Serial.println("Boot OK");
   avisarConfigPendente();
 
   Serial.println("Init GPIO...");
@@ -523,19 +528,7 @@ void setup() {
   totalCache = prefs.getInt("portas", 0);
   prefs.end();
 
-  Serial.println("Init web...");
-  server.on("/status", HTTP_GET, rotaStatus);
-  server.on("/", HTTP_GET, rotaPainel);
-  server.on("/retirar", HTTP_POST, rotaRetirarLocal);
-  server.onNotFound([]() {
-    if (server.uri().startsWith("/abrir/")) {
-      rotaAbrir();
-    } else {
-      server.send(404, "text/plain", "Not found");
-    }
-  });
-
-  server.begin();
+  iniciarWebServer();
   Serial.println("ESP32 ELEVA LOCKER pronto.");
 }
 
