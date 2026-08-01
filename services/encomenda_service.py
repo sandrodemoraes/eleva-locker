@@ -4,6 +4,7 @@ from datetime import datetime
 from repositories.encomenda_repository import EncomendaRepository
 from repositories.compartimento_repository import CompartimentoRepository
 from services.log_service import LogService
+from services.esp32_service import Esp32Service
 
 
 class EncomendaService:
@@ -82,11 +83,14 @@ class EncomendaService:
             f"Depósito encomenda #{encomenda_id} - código {codigo} - {cliente}",
         )
 
+        abertura = Esp32Service.abrir_compartimento(compartimento_id, operador)
+
         return {
             "id": encomenda_id,
             "codigo": codigo,
             "compartimento": compartimento["numero"],
             "armario": compartimento["armario_nome"],
+            "esp32": abertura,
         }
 
     @staticmethod
@@ -113,11 +117,14 @@ class EncomendaService:
             f"Retirada encomenda #{encomenda['id']} - código {codigo} - {encomenda['cliente']}",
         )
 
+        abertura = Esp32Service.abrir_compartimento(encomenda["compartimento"], operador)
+
         return {
             "id": encomenda["id"],
             "cliente": encomenda["cliente"],
             "compartimento": encomenda["compartimento_numero"],
             "armario": encomenda["armario_nome"],
+            "esp32": abertura,
         }
 
     @staticmethod

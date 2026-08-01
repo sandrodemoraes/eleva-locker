@@ -179,6 +179,16 @@ def criar_banco():
     _adicionar_coluna(cursor, "encomendas", "transportadora", "TEXT")
     _adicionar_coluna(cursor, "encomendas", "observacao", "TEXT")
 
+    # Migrações Fase 2 — ESP32
+    _adicionar_coluna(cursor, "esp32", "token", "TEXT")
+    _adicionar_coluna(cursor, "esp32", "porta", "INTEGER DEFAULT 80")
+    _adicionar_coluna(cursor, "esp32", "ultimo_heartbeat", "DATETIME")
+
+    cursor.execute("""
+        UPDATE esp32 SET status = 'offline'
+        WHERE status IS NULL OR status = ''
+    """)
+
     cursor.execute("""
         UPDATE armarios SET status = 'ativo'
         WHERE status IS NULL OR status = ''
@@ -188,9 +198,6 @@ def criar_banco():
         UPDATE compartimentos SET status = 'livre'
         WHERE status IS NULL OR status = ''
     """)
-
-    # ============================
-    # USUÁRIO ADMINISTRADOR PADRÃO
     # ============================
     cursor.execute("""
     SELECT id FROM usuarios

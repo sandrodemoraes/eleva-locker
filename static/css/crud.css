@@ -103,7 +103,9 @@ tr:hover{
 
 .badge-ativo,.badge-livre,.badge-retirada{background:#d4edda;color:#155724;}
 .badge-ocupado,.badge-aguardando_retirada{background:#fff3cd;color:#856404;}
-.badge-inativo,.badge-manutencao{background:#f8d7da;color:#721c24;}
+.badge-online{background:#d4edda;color:#155724;}
+.badge-offline{background:#f8d7da;color:#721c24;}
+.badge-erro{background:#fff3cd;color:#856404;}
 
 .modal-overlay{
     display:none;

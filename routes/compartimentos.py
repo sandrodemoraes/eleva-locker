@@ -3,6 +3,7 @@ from flask import Blueprint, render_template, request, redirect, session, flash
 from middleware.auth_required import login_required
 from services.compartimento_service import CompartimentoService
 from services.armario_service import ArmarioService
+from services.esp32_service import Esp32Service
 from services.log_service import LogService
 
 compartimentos_bp = Blueprint("compartimentos", __name__)
@@ -20,6 +21,7 @@ def listar():
         perfil=session.get("perfil"),
         compartimentos=CompartimentoService.listar(armario_id),
         armarios=ArmarioService.listar_ativos(),
+        dispositivos_esp32=Esp32Service.listar(),
         armario_filtro=armario_id,
     )
 
@@ -33,8 +35,8 @@ def novo():
         CompartimentoService.criar({
             "armario": int(request.form.get("armario")),
             "numero": request.form.get("numero"),
-            "rele": request.form.get("rele") or None,
-            "esp32_id": request.form.get("esp32_id") or None,
+            "rele": int(request.form["rele"]) if request.form.get("rele") else None,
+            "esp32_id": int(request.form["esp32_id"]) if request.form.get("esp32_id") else None,
             "status": request.form.get("status", "livre"),
             "tamanho": request.form.get("tamanho", "M"),
         })
@@ -59,8 +61,8 @@ def editar(compartimento_id):
         CompartimentoService.atualizar(compartimento_id, {
             "armario": int(request.form.get("armario")),
             "numero": request.form.get("numero"),
-            "rele": request.form.get("rele") or None,
-            "esp32_id": request.form.get("esp32_id") or None,
+            "rele": int(request.form["rele"]) if request.form.get("rele") else None,
+            "esp32_id": int(request.form["esp32_id"]) if request.form.get("esp32_id") else None,
             "status": request.form.get("status", "livre"),
             "tamanho": request.form.get("tamanho", "M"),
         })

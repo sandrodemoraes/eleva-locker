@@ -48,6 +48,7 @@
                 <th>Número</th>
                 <th>Tamanho</th>
                 <th>Relé</th>
+                <th>ESP32</th>
                 <th>Status</th>
                 <th>Ações</th>
             </tr>
@@ -60,9 +61,15 @@
                 <td><strong>#{{ c.numero }}</strong></td>
                 <td>{{ c.tamanho or 'M' }}</td>
                 <td>{{ c.rele or '—' }}</td>
+                <td>{{ c.esp32_id or '—' }}</td>
                 <td><span class="badge badge-{{ c.status }}">{{ c.status }}</span></td>
                 <td>
-                    <button class="btn btn-sm" onclick="editarComp({{ c.id }}, {{ c.armario }}, {{ c.numero }}, '{{ c.tamanho or 'M' }}', '{{ c.rele or '' }}', '{{ c.status }}')">
+                    {% if c.rele and c.esp32_id %}
+                    <form method="POST" action="/esp32/abrir/{{ c.id }}" style="display:inline">
+                        <button type="submit" class="btn btn-sm btn-success" title="Abrir via ESP32"><i class="fa-solid fa-lock-open"></i></button>
+                    </form>
+                    {% endif %}
+                    <button class="btn btn-sm" onclick="editarComp({{ c.id }}, {{ c.armario }}, {{ c.numero }}, '{{ c.tamanho or 'M' }}', '{{ c.rele or '' }}', '{{ c.esp32_id or '' }}', '{{ c.status }}')">
                         <i class="fa-solid fa-pen"></i>
                     </button>
                     <form method="POST" action="/compartimentos/excluir/{{ c.id }}" style="display:inline" onsubmit="return confirm('Excluir compartimento #{{ c.numero }}?')">
@@ -111,15 +118,24 @@
             <div class="grid-2">
                 <div class="form-group">
                     <label>Relé (ESP32)</label>
-                    <input type="number" name="rele" min="1" placeholder="Opcional">
+                    <input type="number" name="rele" min="1" placeholder="1, 2, 3...">
                 </div>
                 <div class="form-group">
-                    <label>Status</label>
-                    <select name="status">
-                        <option value="livre">Livre</option>
-                        <option value="manutencao">Manutenção</option>
+                    <label>ESP32</label>
+                    <select name="esp32_id">
+                        <option value="">— Nenhum —</option>
+                        {% for d in dispositivos_esp32 %}
+                        <option value="{{ d.id }}">{{ d.nome }}</option>
+                        {% endfor %}
                     </select>
                 </div>
+            </div>
+            <div class="form-group">
+                <label>Status</label>
+                <select name="status">
+                    <option value="livre">Livre</option>
+                    <option value="manutencao">Manutenção</option>
+                </select>
             </div>
             <div class="form-actions">
                 <button type="submit" class="btn">Salvar</button>
@@ -161,8 +177,18 @@
                     <input type="number" name="rele" id="edit_rele" min="1">
                 </div>
                 <div class="form-group">
-                    <label>Status</label>
-                    <select name="status" id="edit_status">
+                    <label>ESP32</label>
+                    <select name="esp32_id" id="edit_esp32_id">
+                        <option value="">— Nenhum —</option>
+                        {% for d in dispositivos_esp32 %}
+                        <option value="{{ d.id }}">{{ d.nome }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Status</label>
+                <select name="status" id="edit_status">
                         <option value="livre">Livre</option>
                         <option value="ocupado">Ocupado</option>
                         <option value="manutencao">Manutenção</option>
@@ -184,12 +210,13 @@
 function abrirModal(id){ document.getElementById(id).classList.add('active'); }
 function fecharModal(id){ document.getElementById(id).classList.remove('active'); }
 
-function editarComp(id, armario, numero, tamanho, rele, status){
+function editarComp(id, armario, numero, tamanho, rele, esp32_id, status){
     document.getElementById('formEditar').action = '/compartimentos/editar/' + id;
     document.getElementById('edit_armario').value = armario;
     document.getElementById('edit_numero').value = numero;
     document.getElementById('edit_tamanho').value = tamanho;
     document.getElementById('edit_rele').value = rele;
+    document.getElementById('edit_esp32_id').value = esp32_id || '';
     document.getElementById('edit_status').value = status;
     abrirModal('modalEditar');
 }
