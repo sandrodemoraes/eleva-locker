@@ -184,6 +184,22 @@ def criar_banco():
     _adicionar_coluna(cursor, "esp32", "porta", "INTEGER DEFAULT 80")
     _adicionar_coluna(cursor, "esp32", "ultimo_heartbeat", "DATETIME")
 
+    # Migrações Fase 3 — Notificações
+    _adicionar_coluna(cursor, "encomendas", "notificado_em", "DATETIME")
+
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS notificacoes(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        encomenda_id INTEGER,
+        canal TEXT,
+        destinatario TEXT,
+        mensagem TEXT,
+        status TEXT,
+        detalhe TEXT,
+        criado_em DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+    """)
+
     cursor.execute("""
         UPDATE esp32 SET status = 'offline'
         WHERE status IS NULL OR status = ''

@@ -5,6 +5,7 @@ from repositories.encomenda_repository import EncomendaRepository
 from repositories.compartimento_repository import CompartimentoRepository
 from services.log_service import LogService
 from services.esp32_service import Esp32Service
+from services.notificacao_service import NotificacaoService
 
 
 class EncomendaService:
@@ -85,12 +86,23 @@ class EncomendaService:
 
         abertura = Esp32Service.abrir_compartimento(compartimento_id, operador)
 
+        notificacoes = NotificacaoService.notificar_encomenda_chegou(
+            encomenda_id=encomenda_id,
+            codigo=codigo,
+            cliente=cliente,
+            telefone=telefone,
+            email=email,
+            armario=compartimento["armario_nome"] or "Armário",
+            compartimento=compartimento["numero"],
+        )
+
         return {
             "id": encomenda_id,
             "codigo": codigo,
             "compartimento": compartimento["numero"],
             "armario": compartimento["armario_nome"],
             "esp32": abertura,
+            "notificacoes": notificacoes,
         }
 
     @staticmethod

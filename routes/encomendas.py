@@ -1,9 +1,11 @@
-from flask import Blueprint, render_template, request, redirect, session, flash, jsonify
+from flask import Blueprint, render_template, request, redirect, session, flash, jsonify, send_file
 
 from middleware.auth_required import login_required
 from services.encomenda_service import EncomendaService
 from services.armario_service import ArmarioService
 from services.compartimento_service import CompartimentoService
+from services.notificacao_service import NotificacaoService
+from services.qrcode_service import QrcodeService
 
 encomendas_bp = Blueprint("encomendas", __name__)
 
@@ -52,12 +54,16 @@ def depositar():
             observacao=request.form.get("observacao", ""),
         )
 
+        canais = ", ".join(n["canal"] for n in resultado.get("notificacoes", []))
+
         flash(
-            f"Encomenda depositada! Código de retirada: {resultado['codigo']}",
+            f"Encomenda depositada! Código: {resultado['codigo']}"
+            + (f" — Notificação: {canais}" if canais else ""),
             "success",
         )
 
         session["ultimo_codigo"] = resultado["codigo"]
+        session["ultimo_encomenda_id"] = resultado["id"]
 
     except (ValueError, TypeError) as erro:
         flash(str(erro), "warning")
@@ -87,5 +93,40 @@ def retirar():
         flash(str(erro), "warning")
     except Exception:
         flash("Erro ao processar retirada.", "danger")
+
+    return redirect("/encomendas")
+
+
+@encomendas_bp.route("/encomendas/qrcode/<int:encomenda_id>")
+@login_required
+def qrcode(encomenda_id):
+
+    encomenda = EncomendaService.buscar_por_id(encomenda_id)
+
+    png = QrcodeService.gerar_png(
+        encomenda["codigo"],
+        encomenda["armario_nome"],
+    )
+
+    return send_file(
+        png,
+        mimetype="image/png",
+        download_name=f"qrcode_{encomenda['codigo']}.png",
+    )
+
+
+@encomendas_bp.route("/encomendas/reenviar/<int:encomenda_id>", methods=["POST"])
+@login_required
+def reenviar_notificacao(encomenda_id):
+
+    try:
+
+        NotificacaoService.reenviar(encomenda_id)
+        flash("Notificação reenviada com sucesso!", "success")
+
+    except ValueError as erro:
+        flash(str(erro), "warning")
+    except Exception:
+        flash("Erro ao reenviar notificação.", "danger")
 
     return redirect("/encomendas")

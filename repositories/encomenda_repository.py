@@ -121,6 +121,24 @@ class EncomendaRepository:
             conn.commit()
 
     @staticmethod
+    def marcar_notificado(encomenda_id):
+
+        from datetime import datetime
+
+        with BaseRepository.get_connection() as conn:
+
+            conn.execute("""
+                UPDATE encomendas
+                SET notificado_em = ?
+                WHERE id = ?
+            """, (
+                datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                encomenda_id,
+            ))
+
+            conn.commit()
+
+    @staticmethod
     def contar(status=None):
 
         with BaseRepository.get_connection() as conn:

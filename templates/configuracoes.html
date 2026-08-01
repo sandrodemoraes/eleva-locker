@@ -82,6 +82,17 @@
         </p>
     </div>
 
+    <div class="table-box">
+        <h2 style="color:#0f3d75;margin-bottom:15px;">Notificações (Fase 3)</h2>
+        <table>
+            <tr><td style="padding:8px;">Modo</td><td><strong>{{ config.NOTIF_MODO }}</strong></td></tr>
+            <tr><td style="padding:8px;">E-mail</td><td><strong>{% if config.NOTIF_EMAIL_ATIVO %}Ativo{% else %}Inativo{% endif %}</strong></td></tr>
+            <tr><td style="padding:8px;">WhatsApp</td><td><strong>{% if config.NOTIF_WHATSAPP_ATIVO %}Ativo{% else %}Inativo{% endif %}</strong></td></tr>
+            <tr><td style="padding:8px;">SMS</td><td><strong>{% if config.NOTIF_SMS_ATIVO %}Ativo{% else %}Inativo{% endif %}</strong></td></tr>
+            <tr><td style="padding:8px;">Totem</td><td><strong><a href="/totem" target="_blank">/totem</a></strong></td></tr>
+        </table>
+    </div>
+
 </div>
 
 {% endblock %}

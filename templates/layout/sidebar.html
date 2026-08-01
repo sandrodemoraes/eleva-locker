@@ -39,7 +39,17 @@
             <span>ESP32</span>
         </a>
 
+        <a href="{{ url_for('totem.index') }}" target="_blank">
+            <i class="fa-solid fa-tablet-screen-button"></i>
+            <span>Totem</span>
+        </a>
+
         <hr>
+
+        <a href="{{ url_for('notificacoes.listar') }}">
+            <i class="fa-solid fa-bell"></i>
+            <span>Notificações</span>
+        </a>
 
         <a href="{{ url_for('logs.listar') }}">
             <i class="fa-solid fa-file-lines"></i>

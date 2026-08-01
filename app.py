@@ -13,6 +13,8 @@ from routes.compartimentos import compartimentos_bp
 from routes.encomendas import encomendas_bp
 from routes.logs import logs_bp
 from routes.esp32 import esp32_bp
+from routes.totem import totem_bp
+from routes.notificacoes import notificacoes_bp
 from routes.api.esp32_api import esp32_api_bp
 from routes.api.compartimento_api import compartimento_api_bp
 
@@ -24,7 +26,6 @@ app.secret_key = SECRET_KEY
 
 criar_banco()
 
-# Backup automático antes de iniciar (forçado na Fase 2+)
 if os.getenv("SKIP_BACKUP") != "1":
     try:
         BackupService.criar_backup(forcar=True)
@@ -40,6 +41,8 @@ app.register_blueprint(compartimentos_bp)
 app.register_blueprint(encomendas_bp)
 app.register_blueprint(logs_bp)
 app.register_blueprint(esp32_bp)
+app.register_blueprint(totem_bp)
+app.register_blueprint(notificacoes_bp)
 app.register_blueprint(esp32_api_bp)
 app.register_blueprint(compartimento_api_bp)
 

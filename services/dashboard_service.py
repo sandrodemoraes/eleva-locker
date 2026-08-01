@@ -3,6 +3,7 @@ from repositories.armario_repository import ArmarioRepository
 from repositories.compartimento_repository import CompartimentoRepository
 from repositories.encomenda_repository import EncomendaRepository
 from repositories.esp32_repository import Esp32Repository
+from repositories.notificacao_repository import NotificacaoRepository
 
 
 class DashboardService:
@@ -20,4 +21,5 @@ class DashboardService:
             "encomendas_pendentes": EncomendaRepository.contar_pendentes(),
             "esp32_online": Esp32Repository.contar_online(),
             "esp32_total": len(Esp32Repository.listar()),
+            "notificacoes_hoje": NotificacaoRepository.contar_hoje(),
         }

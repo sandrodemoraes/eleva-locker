@@ -32,6 +32,12 @@
 {% if session.get('ultimo_codigo') %}
 <div class="codigo-box">
     Código gerado: {{ session.pop('ultimo_codigo') }}
+    {% set eid = session.pop('ultimo_encomenda_id', None) %}
+    {% if eid %}
+    <br><br>
+    <img src="/encomendas/qrcode/{{ eid }}" alt="QR Code" style="max-width:180px;border-radius:8px;background:#fff;padding:10px;">
+    <br><small style="opacity:.8;">Escaneie no totem ou envie ao morador</small>
+    {% endif %}
 </div>
 {% endif %}
 
@@ -62,7 +68,8 @@
                 <th>Entrada</th>
                 <th>Retirada</th>
                 <th>Status</th>
-                <th>Operador</th>
+                <th>Notificado</th>
+                <th>Ações</th>
             </tr>
         </thead>
         <tbody>
@@ -77,7 +84,15 @@
                 <td>{{ e.data_entrada or '—' }}</td>
                 <td>{{ e.data_retirada or '—' }}</td>
                 <td><span class="badge badge-{{ e.status }}">{{ e.status }}</span></td>
-                <td>{{ e.operador or '—' }}</td>
+                <td>{{ e.notificado_em or '—' }}</td>
+                <td>
+                    <a href="/encomendas/qrcode/{{ e.id }}" class="btn btn-sm" title="QR Code" target="_blank"><i class="fa-solid fa-qrcode"></i></a>
+                    {% if e.status == 'aguardando_retirada' %}
+                    <form method="POST" action="/encomendas/reenviar/{{ e.id }}" style="display:inline">
+                        <button type="submit" class="btn btn-sm" title="Reenviar notificação"><i class="fa-solid fa-bell"></i></button>
+                    </form>
+                    {% endif %}
+                </td>
             </tr>
             {% endfor %}
         </tbody>
