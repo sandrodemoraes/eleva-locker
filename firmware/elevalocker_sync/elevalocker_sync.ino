@@ -19,7 +19,6 @@
 #include <HTTPClient.h>
 #include <Preferences.h>
 #include <ArduinoJson.h>
-#include <esp_system.h>
 
 // ============ CONFIGURAÇÃO — EDITE AQUI ============
 // Bancada ELEVA: ESP32 + BESTER 8ch | GPIO 16,17,18,19,21,22,23,25
@@ -424,9 +423,19 @@ void rotaPainel() {
 
 bool wifiJaConectou = false;
 bool wifiIniciado = false;
+bool stackRedeOk = false;
 bool webServerIniciado = false;
 unsigned long wifiInicioMs = 0;
 unsigned long wifiUltimoPonto = 0;
+
+void iniciarStackRede() {
+  if (stackRedeOk) return;
+  WiFi.persistent(false);
+  WiFi.mode(WIFI_STA);
+  delay(100);
+  stackRedeOk = true;
+  Serial.println("Stack WiFi OK.");
+}
 
 void registrarRotasWeb() {
   httpServer->on("/status", HTTP_GET, rotaStatus);
@@ -512,15 +521,9 @@ void avisarConfigPendente() {
 }
 
 void setup() {
-  // Primeira coisa: desliga WiFi/NVS antigo que pode causar crash no boot
-  WiFi.persistent(false);
-  WiFi.mode(WIFI_OFF);
-
   Serial.begin(115200);
   delay(300);
-
   Serial.println("\n=== ELEVA LOCKER ESP32 ===");
-  Serial.printf("Reset anterior: %d\n", (int)esp_reset_reason());
   Serial.println("Boot OK");
   avisarConfigPendente();
 
@@ -537,12 +540,16 @@ void setup() {
   totalCache = prefs.getInt("portas", 0);
   prefs.end();
 
-  iniciarWebServer();
   Serial.println("ESP32 ELEVA LOCKER pronto.");
 }
 
 void loop() {
-  httpServer->handleClient();
+  if (!webServerIniciado) {
+    iniciarWebServer();
+  }
+  if (httpServer) {
+    httpServer->handleClient();
+  }
   atualizarRele();
 
   unsigned long agora = millis();
