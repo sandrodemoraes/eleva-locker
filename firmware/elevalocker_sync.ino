@@ -57,6 +57,7 @@ int gpioAtivo = -1;
 
 unsigned long ultimoHeartbeat = 0;
 unsigned long ultimoSync = 0;
+bool tarefasRedePendentes = false;
 const unsigned long INTERVALO_HEARTBEAT = 30000;
 const unsigned long INTERVALO_SYNC      = 60000;
 const unsigned long DURACAO_RELE_PADRAO = 3000;
@@ -137,6 +138,14 @@ void enfileirarEvento(const char* tipo, const char* codigo, int compId) {
   Serial.println("Evento enfileirado: " + json);
 }
 
+// ============ REDE (HTTP) ============
+
+void configurarHttp(HTTPClient& http, const String& url) {
+  http.setConnectTimeout(5000);
+  http.setTimeout(8000);
+  http.begin(url);
+}
+
 bool enviarEventosPendentes() {
   if (WiFi.status() != WL_CONNECTED) return false;
 
@@ -144,7 +153,7 @@ bool enviarEventosPendentes() {
   int qtd = prefs.getInt("qtd", 0);
   if (qtd == 0) { prefs.end(); return true; }
 
-  StaticJsonDocument<4096> body;
+  DynamicJsonDocument body(2048);
   JsonArray arr = body.createNestedArray("eventos");
 
   for (int i = 0; i < qtd; i++) {
@@ -152,9 +161,9 @@ bool enviarEventosPendentes() {
     snprintf(chave, sizeof(chave), "e%d", i);
     String ev = prefs.getString(chave, "");
     if (ev.length() > 0) {
-      StaticJsonDocument<256> one;
-      deserializeJson(one, ev);
-      arr.add(one);
+      DynamicJsonDocument one(256);
+      if (deserializeJson(one, ev)) continue;
+      arr.add(one.as<JsonObject>());
     }
   }
 
@@ -164,7 +173,7 @@ bool enviarEventosPendentes() {
 
   HTTPClient http;
   String url = String(SERVIDOR_URL) + "/api/esp32/eventos";
-  http.begin(url);
+  configurarHttp(http, url);
   http.addHeader("Content-Type", "application/json");
   http.addHeader("X-ESP32-Token", ESP32_TOKEN);
   int code = http.POST(payload);
@@ -237,7 +246,7 @@ bool sincronizarComServidor() {
 
   HTTPClient http;
   String url = String(SERVIDOR_URL) + "/api/esp32/sync";
-  http.begin(url);
+  configurarHttp(http, url);
   http.addHeader("X-ESP32-Token", ESP32_TOKEN);
   int code = http.GET();
 
@@ -250,9 +259,15 @@ bool sincronizarComServidor() {
   String body = http.getString();
   http.end();
 
-  StaticJsonDocument<8192> doc;
-  if (deserializeJson(doc, body)) return false;
-  if (!doc["sucesso"]) return false;
+  DynamicJsonDocument doc(4096);
+  if (deserializeJson(doc, body)) {
+    Serial.println("Sync falhou - JSON invalido");
+    return false;
+  }
+  if (!doc["sucesso"]) {
+    Serial.println("Sync falhou - servidor recusou");
+    return false;
+  }
 
   return aplicarSync(doc["sync"]);
 }
@@ -262,7 +277,7 @@ bool enviarHeartbeat() {
 
   HTTPClient http;
   String url = String(SERVIDOR_URL) + "/api/esp32/heartbeat";
-  http.begin(url);
+  configurarHttp(http, url);
   http.addHeader("Content-Type", "application/json");
   http.addHeader("X-ESP32-Token", ESP32_TOKEN);
 
@@ -276,6 +291,7 @@ bool enviarHeartbeat() {
   int code = http.POST(payload);
 
   if (code != 200) {
+    Serial.printf("Heartbeat falhou HTTP %d\n", code);
     http.end();
     return false;
   }
@@ -283,14 +299,24 @@ bool enviarHeartbeat() {
   String resp = http.getString();
   http.end();
 
-  StaticJsonDocument<512> res;
-  deserializeJson(res, resp);
+  StaticJsonDocument<256> res;
+  if (deserializeJson(res, resp)) return true;
 
   if (res["precisa_sync"] | false) {
-    sincronizarComServidor();
+    tarefasRedePendentes = true;
   }
 
   return true;
+}
+
+void executarTarefasRede() {
+  if (WiFi.status() != WL_CONNECTED) return;
+
+  Serial.println("Conectando ao servidor...");
+  enviarHeartbeat();
+  sincronizarComServidor();
+  enviarEventosPendentes();
+  Serial.println("Servidor OK.");
 }
 
 // ============ RETIRADA OFFLINE ============
@@ -441,7 +467,8 @@ void setup() {
   Serial.println("\n=== ELEVA LOCKER ESP32 ===");
   avisarConfigPendente();
 
-  for (int i = 0; i < MAX_PORTAS; i++) {
+  // Bancada 8ch: so inicializa GPIO dos 8 reles (evita pinos sensiveis do boot)
+  for (int i = 0; i < MIN_PORTAS; i++) {
     int g = GPIO_PADRAO[i];
     pinMode(g, OUTPUT);
     digitalWrite(g, LOW);
@@ -453,12 +480,7 @@ void setup() {
   prefs.end();
 
   conectarWiFi();
-
-  if (WiFi.status() == WL_CONNECTED) {
-    enviarHeartbeat();
-    sincronizarComServidor();
-    enviarEventosPendentes();
-  }
+  tarefasRedePendentes = (WiFi.status() == WL_CONNECTED);
 
   server.on("/status", HTTP_GET, rotaStatus);
   server.on("/", HTTP_GET, rotaPainel);
@@ -485,8 +507,19 @@ void loop() {
     static unsigned long ultimaTentativa = 0;
     if (agora - ultimaTentativa > 10000) {
       conectarWiFi();
+      if (WiFi.status() == WL_CONNECTED) {
+        tarefasRedePendentes = true;
+      }
       ultimaTentativa = agora;
     }
+    return;
+  }
+
+  if (tarefasRedePendentes) {
+    executarTarefasRede();
+    tarefasRedePendentes = false;
+    ultimoHeartbeat = agora;
+    ultimoSync = agora;
     return;
   }
 
@@ -494,10 +527,14 @@ void loop() {
     enviarHeartbeat();
     enviarEventosPendentes();
     ultimoHeartbeat = agora;
+    if (tarefasRedePendentes) {
+      ultimoSync = 0;
+    }
   }
 
-  if (agora - ultimoSync > INTERVALO_SYNC) {
+  if (agora - ultimoSync > INTERVALO_SYNC || tarefasRedePendentes) {
     sincronizarComServidor();
     ultimoSync = agora;
+    tarefasRedePendentes = false;
   }
 }
