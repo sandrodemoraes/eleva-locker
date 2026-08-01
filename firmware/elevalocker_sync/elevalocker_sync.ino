@@ -47,7 +47,7 @@ const int GPIO_PADRAO[] = {
 
 // ============ INTERNOS ============
 
-WebServer server(HTTP_PORT);
+WebServer* httpServer = nullptr;
 Preferences prefs;
 
 int syncVersao = 0;
@@ -363,48 +363,48 @@ bool retirarPorCodigo(const char* codigo, bool online) {
 // ============ ROTAS HTTP NA ESP (servidor chama + totem local) ============
 
 bool tokenValido() {
-  return server.hasArg("token") && server.arg("token") == ESP32_TOKEN;
+  return httpServer->hasArg("token") && httpServer->arg("token") == ESP32_TOKEN;
 }
 
 void rotaStatus() {
   if (!tokenValido()) {
-    server.send(403, "application/json", "{\"erro\":\"token invalido\"}");
+    httpServer->send(403, "application/json", "{\"erro\":\"token invalido\"}");
     return;
   }
   String json = "{\"online\":true,\"sync_versao\":" + String(syncVersao) +
                 ",\"portas\":" + String(totalCache) + "}";
-  server.send(200, "application/json", json);
+  httpServer->send(200, "application/json", json);
 }
 
 void rotaAbrir() {
   if (!tokenValido()) {
-    server.send(403, "application/json", "{\"erro\":\"token invalido\"}");
+    httpServer->send(403, "application/json", "{\"erro\":\"token invalido\"}");
     return;
   }
-  String path = server.uri();
+  String path = httpServer->uri();
   int rele = path.substring(path.lastIndexOf('/') + 1).toInt();
-  unsigned long dur = server.hasArg("duracao") ? server.arg("duracao").toInt() * 1000UL : DURACAO_RELE_PADRAO;
+  unsigned long dur = httpServer->hasArg("duracao") ? httpServer->arg("duracao").toInt() * 1000UL : DURACAO_RELE_PADRAO;
   acionarPorRele(rele, dur);
-  server.send(200, "application/json", "{\"sucesso\":true,\"rele\":" + String(rele) + "}");
+  httpServer->send(200, "application/json", "{\"sucesso\":true,\"rele\":" + String(rele) + "}");
 }
 
 void rotaRetirarLocal() {
-  if (!server.hasArg("plain") && server.args() == 0) {
-    server.send(400, "application/json", "{\"sucesso\":false}");
+  if (!httpServer->hasArg("plain") && httpServer->args() == 0) {
+    httpServer->send(400, "application/json", "{\"sucesso\":false}");
     return;
   }
-  String codigo = server.arg("codigo");
+  String codigo = httpServer->arg("codigo");
   if (codigo.length() == 0) {
     StaticJsonDocument<128> doc;
-    deserializeJson(doc, server.arg("plain"));
+    deserializeJson(doc, httpServer->arg("plain"));
     codigo = doc["codigo"] | "";
   }
   codigo.trim();
   bool online = (WiFi.status() == WL_CONNECTED);
   if (retirarPorCodigo(codigo.c_str(), online)) {
-    server.send(200, "application/json", "{\"sucesso\":true,\"offline\":" + String(!online) + "}");
+    httpServer->send(200, "application/json", "{\"sucesso\":true,\"offline\":" + String(!online) + "}");
   } else {
-    server.send(403, "application/json", "{\"sucesso\":false,\"mensagem\":\"codigo invalido\"}");
+    httpServer->send(403, "application/json", "{\"sucesso\":false,\"mensagem\":\"codigo invalido\"}");
   }
 }
 
@@ -417,7 +417,7 @@ void rotaPainel() {
   html += "<input name='codigo' maxlength='6' placeholder='Codigo 6 digitos' style='font-size:24px'>";
   html += "<br><br><button type='submit' style='font-size:20px;padding:12px'>RETIRAR</button>";
   html += "</form></body></html>";
-  server.send(200, "text/html", html);
+  httpServer->send(200, "text/html", html);
 }
 
 // ============ SETUP / LOOP ============
@@ -429,22 +429,25 @@ unsigned long wifiInicioMs = 0;
 unsigned long wifiUltimoPonto = 0;
 
 void registrarRotasWeb() {
-  server.on("/status", HTTP_GET, rotaStatus);
-  server.on("/", HTTP_GET, rotaPainel);
-  server.on("/retirar", HTTP_POST, rotaRetirarLocal);
-  server.onNotFound([]() {
-    if (server.uri().startsWith("/abrir/")) {
+  httpServer->on("/status", HTTP_GET, rotaStatus);
+  httpServer->on("/", HTTP_GET, rotaPainel);
+  httpServer->on("/retirar", HTTP_POST, rotaRetirarLocal);
+  httpServer->onNotFound([]() {
+    if (httpServer->uri().startsWith("/abrir/")) {
       rotaAbrir();
     } else {
-      server.send(404, "text/plain", "Not found");
+      httpServer->send(404, "text/plain", "Not found");
     }
   });
 }
 
 void iniciarWebServer() {
   if (webServerIniciado) return;
+  if (!httpServer) {
+    httpServer = new WebServer(HTTP_PORT);
+  }
   registrarRotasWeb();
-  server.begin();
+  httpServer->begin();
   webServerIniciado = true;
   Serial.println("Web server OK.");
 }
@@ -454,7 +457,7 @@ void iniciarWiFi() {
 
   WiFi.persistent(false);
   WiFi.mode(WIFI_OFF);
-  delay(200);
+  delay(100);
   WiFi.mode(WIFI_STA);
   WiFi.setAutoReconnect(true);
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
@@ -539,7 +542,7 @@ void setup() {
 }
 
 void loop() {
-  server.handleClient();
+  httpServer->handleClient();
   atualizarRele();
 
   unsigned long agora = millis();
