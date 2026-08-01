@@ -1,0 +1,186 @@
+{% extends "layout/base.html" %}
+
+{% block title %}Armários | ELEVA LOCKER{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/crud.css') }}">
+{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+    <div>
+        <h1>Armários</h1>
+        <p>Gerencie os armários inteligentes do sistema</p>
+    </div>
+    <button class="btn" onclick="abrirModal('modalNovo')">
+        <i class="fa-solid fa-plus"></i> Novo Armário
+    </button>
+</div>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% for category, message in messages %}
+        <div class="alert alert-{{ category }}">{{ message }}</div>
+    {% endfor %}
+{% endwith %}
+
+<div class="table-box">
+    {% if armarios %}
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nome</th>
+                <th>Empresa</th>
+                <th>Endereço</th>
+                <th>Cidade/UF</th>
+                <th>Compartimentos</th>
+                <th>Status</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for a in armarios %}
+            <tr>
+                <td>{{ a.id }}</td>
+                <td><strong>{{ a.nome }}</strong></td>
+                <td>{{ a.empresa_nome or '—' }}</td>
+                <td>{{ a.endereco or '—' }}</td>
+                <td>{{ a.cidade or '' }}{% if a.estado %}/{{ a.estado }}{% endif %}</td>
+                <td>{{ a.compartimentos_ocupados or 0 }}/{{ a.total_compartimentos or 0 }}</td>
+                <td><span class="badge badge-{{ a.status }}">{{ a.status }}</span></td>
+                <td>
+                    <button class="btn btn-sm" onclick="editarArmario({{ a.id }}, '{{ a.nome | replace("'", "\\'") }}', {{ a.empresa_id or 'null' }}, '{{ a.endereco or '' }}', '{{ a.cidade or '' }}', '{{ a.estado or '' }}', '{{ a.status }}')">
+                        <i class="fa-solid fa-pen"></i>
+                    </button>
+                    <form method="POST" action="/armarios/excluir/{{ a.id }}" style="display:inline" onsubmit="return confirm('Excluir este armário?')">
+                        <button type="submit" class="btn btn-sm btn-danger"><i class="fa-solid fa-trash"></i></button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state">
+        <i class="fa-solid fa-box fa-3x"></i>
+        <p>Nenhum armário cadastrado. Clique em "Novo Armário" para começar.</p>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Modal Novo -->
+<div class="modal-overlay" id="modalNovo">
+    <div class="modal">
+        <h2>Novo Armário</h2>
+        <form method="POST" action="/armarios/novo">
+            <div class="form-group">
+                <label>Nome *</label>
+                <input type="text" name="nome" required placeholder="Ex: Armário Bloco A">
+            </div>
+            <div class="form-group">
+                <label>Empresa</label>
+                <select name="empresa_id">
+                    <option value="">— Sem vínculo —</option>
+                    {% for e in empresas %}
+                    <option value="{{ e.id }}">{{ e.razao_social }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Endereço</label>
+                <input type="text" name="endereco" placeholder="Rua, condomínio...">
+            </div>
+            <div class="grid-2">
+                <div class="form-group">
+                    <label>Cidade</label>
+                    <input type="text" name="cidade">
+                </div>
+                <div class="form-group">
+                    <label>Estado</label>
+                    <input type="text" name="estado" maxlength="2" placeholder="SP">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Status</label>
+                <select name="status">
+                    <option value="ativo">Ativo</option>
+                    <option value="inativo">Inativo</option>
+                    <option value="manutencao">Manutenção</option>
+                </select>
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn">Salvar</button>
+                <button type="button" class="btn btn-danger" onclick="fecharModal('modalNovo')">Cancelar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal Editar -->
+<div class="modal-overlay" id="modalEditar">
+    <div class="modal">
+        <h2>Editar Armário</h2>
+        <form method="POST" id="formEditar">
+            <div class="form-group">
+                <label>Nome *</label>
+                <input type="text" name="nome" id="edit_nome" required>
+            </div>
+            <div class="form-group">
+                <label>Empresa</label>
+                <select name="empresa_id" id="edit_empresa_id">
+                    <option value="">— Sem vínculo —</option>
+                    {% for e in empresas %}
+                    <option value="{{ e.id }}">{{ e.razao_social }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Endereço</label>
+                <input type="text" name="endereco" id="edit_endereco">
+            </div>
+            <div class="grid-2">
+                <div class="form-group">
+                    <label>Cidade</label>
+                    <input type="text" name="cidade" id="edit_cidade">
+                </div>
+                <div class="form-group">
+                    <label>Estado</label>
+                    <input type="text" name="estado" id="edit_estado" maxlength="2">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Status</label>
+                <select name="status" id="edit_status">
+                    <option value="ativo">Ativo</option>
+                    <option value="inativo">Inativo</option>
+                    <option value="manutencao">Manutenção</option>
+                </select>
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn">Salvar</button>
+                <button type="button" class="btn btn-danger" onclick="fecharModal('modalEditar')">Cancelar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+function abrirModal(id){ document.getElementById(id).classList.add('active'); }
+function fecharModal(id){ document.getElementById(id).classList.remove('active'); }
+
+function editarArmario(id, nome, empresa_id, endereco, cidade, estado, status){
+    document.getElementById('formEditar').action = '/armarios/editar/' + id;
+    document.getElementById('edit_nome').value = nome;
+    document.getElementById('edit_empresa_id').value = empresa_id || '';
+    document.getElementById('edit_endereco').value = endereco;
+    document.getElementById('edit_cidade').value = cidade;
+    document.getElementById('edit_estado').value = estado;
+    document.getElementById('edit_status').value = status || 'ativo';
+    abrirModal('modalEditar');
+}
+</script>
+{% endblock %}

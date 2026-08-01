@@ -11,6 +11,16 @@ def conectar():
     return conn
 
 
+def _coluna_existe(cursor, tabela, coluna):
+    cursor.execute(f"PRAGMA table_info({tabela})")
+    return any(row[1] == coluna for row in cursor.fetchall())
+
+
+def _adicionar_coluna(cursor, tabela, coluna, definicao):
+    if not _coluna_existe(cursor, tabela, coluna):
+        cursor.execute(f"ALTER TABLE {tabela} ADD COLUMN {coluna} {definicao}")
+
+
 def criar_banco():
 
     os.makedirs("database", exist_ok=True)
@@ -159,6 +169,116 @@ def criar_banco():
         acao TEXT
     )
     """)
+
+    # ============================
+    # MIGRAÇÕES (Fase 1)
+    # ============================
+    _adicionar_coluna(cursor, "armarios", "empresa_id", "INTEGER")
+    _adicionar_coluna(cursor, "compartimentos", "tamanho", "TEXT DEFAULT 'M'")
+    _adicionar_coluna(cursor, "encomendas", "operador", "TEXT")
+    _adicionar_coluna(cursor, "encomendas", "transportadora", "TEXT")
+    _adicionar_coluna(cursor, "encomendas", "observacao", "TEXT")
+
+    # Migrações Fase 2 — ESP32
+    _adicionar_coluna(cursor, "esp32", "token", "TEXT")
+    _adicionar_coluna(cursor, "esp32", "porta", "INTEGER DEFAULT 80")
+    _adicionar_coluna(cursor, "esp32", "ultimo_heartbeat", "DATETIME")
+
+    # Migrações Fase 3 — Notificações
+    _adicionar_coluna(cursor, "encomendas", "notificado_em", "DATETIME")
+
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS notificacoes(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        encomenda_id INTEGER,
+        canal TEXT,
+        destinatario TEXT,
+        mensagem TEXT,
+        status TEXT,
+        detalhe TEXT,
+        criado_em DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+    """)
+
+    cursor.execute("""
+        UPDATE esp32 SET status = 'offline'
+        WHERE status IS NULL OR status = ''
+    """)
+
+    cursor.execute("""
+        UPDATE armarios SET status = 'ativo'
+        WHERE status IS NULL OR status = ''
+    """)
+
+    cursor.execute("""
+        UPDATE compartimentos SET status = 'livre'
+        WHERE status IS NULL OR status = ''
+    """)
+
+    # ============================
+    # FASE 4 — COMERCIAL
+    # ============================
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS planos(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        nome TEXT NOT NULL,
+        descricao TEXT,
+        preco_mensal REAL NOT NULL,
+        max_armarios INTEGER DEFAULT -1,
+        max_compartimentos INTEGER DEFAULT -1,
+        max_encomendas_mes INTEGER DEFAULT -1,
+        inclui_whatsapp INTEGER DEFAULT 0,
+        inclui_relatorios INTEGER DEFAULT 1,
+        status INTEGER DEFAULT 1,
+        criado_em DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+    """)
+
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS contratos(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        empresa_id INTEGER NOT NULL,
+        plano_id INTEGER NOT NULL,
+        data_inicio TEXT NOT NULL,
+        data_fim TEXT,
+        status TEXT DEFAULT 'ativo',
+        valor_mensal REAL NOT NULL,
+        renovacao_automatica INTEGER DEFAULT 1,
+        criado_em DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+    """)
+
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS faturas(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        contrato_id INTEGER NOT NULL,
+        referencia TEXT NOT NULL,
+        valor REAL NOT NULL,
+        status TEXT DEFAULT 'pendente',
+        data_vencimento TEXT,
+        data_pagamento TEXT,
+        link_pagamento TEXT,
+        gateway_id TEXT,
+        criado_em DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+    """)
+
+    _adicionar_coluna(cursor, "usuarios", "empresa_id", "INTEGER")
+
+    # Planos padrão
+    cursor.execute("SELECT COUNT(*) FROM planos")
+    if cursor.fetchone()[0] == 0:
+        cursor.executemany("""
+            INSERT INTO planos (
+                nome, descricao, preco_mensal,
+                max_armarios, max_compartimentos, max_encomendas_mes,
+                inclui_whatsapp, inclui_relatorios
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        """, [
+            ("Starter", "Ideal para condomínios pequenos", 199.0, 1, 20, 500, 0, 1),
+            ("Profissional", "Até 5 armários", 499.0, 5, 100, 2000, 1, 1),
+            ("Enterprise", "Recursos ilimitados", 1499.0, -1, -1, -1, 1, 1),
+        ])
 
     # ============================
     # USUÁRIO ADMINISTRADOR PADRÃO

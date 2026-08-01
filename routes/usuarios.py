@@ -7,16 +7,15 @@ from flask import (
     flash
 )
 
+from middleware.auth_required import login_required
 from services.usuario_service import UsuarioService
 
 usuarios_bp = Blueprint("usuarios", __name__)
 
 
 @usuarios_bp.route("/usuarios")
+@login_required
 def usuarios():
-
-    if "usuario" not in session:
-        return redirect("/")
 
     lista = UsuarioService.listar()
 
@@ -29,10 +28,8 @@ def usuarios():
 
 
 @usuarios_bp.route("/usuarios/novo", methods=["POST"])
+@login_required
 def novo_usuario():
-
-    if "usuario" not in session:
-        return redirect("/")
 
     try:
 
@@ -60,10 +57,8 @@ def novo_usuario():
 
 
 @usuarios_bp.route("/usuarios/editar/<int:usuario_id>", methods=["POST"])
+@login_required
 def editar_usuario(usuario_id):
-
-    if "usuario" not in session:
-        return redirect("/")
 
     try:
 
@@ -90,10 +85,8 @@ def editar_usuario(usuario_id):
 
 
 @usuarios_bp.route("/usuarios/excluir/<int:usuario_id>", methods=["POST"])
+@login_required
 def excluir_usuario(usuario_id):
-
-    if "usuario" not in session:
-        return redirect("/")
 
     try:
 
@@ -113,10 +106,8 @@ def excluir_usuario(usuario_id):
 
 
 @usuarios_bp.route("/usuarios/senha/<int:usuario_id>", methods=["POST"])
+@login_required
 def alterar_senha(usuario_id):
-
-    if "usuario" not in session:
-        return redirect("/")
 
     try:
 
