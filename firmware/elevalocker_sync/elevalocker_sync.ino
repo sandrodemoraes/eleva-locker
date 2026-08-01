@@ -514,16 +514,10 @@ void setup() {
   WiFi.mode(WIFI_OFF);
 
   Serial.begin(115200);
-  delay(500);
+  delay(300);
 
-  // Pausa no boot para conseguir ler o Serial Monitor (reboot loop)
   Serial.println("\n=== ELEVA LOCKER ESP32 ===");
-  Serial.printf("Reset: %d | Aguarde 5s...\n", (int)esp_reset_reason());
-  for (int s = 5; s >= 1; s--) {
-    Serial.printf("  %d...\n", s);
-    delay(1000);
-  }
-
+  Serial.printf("Reset anterior: %d\n", (int)esp_reset_reason());
   Serial.println("Boot OK");
   avisarConfigPendente();
 
