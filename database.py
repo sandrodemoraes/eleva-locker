@@ -11,6 +11,16 @@ def conectar():
     return conn
 
 
+def _coluna_existe(cursor, tabela, coluna):
+    cursor.execute(f"PRAGMA table_info({tabela})")
+    return any(row[1] == coluna for row in cursor.fetchall())
+
+
+def _adicionar_coluna(cursor, tabela, coluna, definicao):
+    if not _coluna_existe(cursor, tabela, coluna):
+        cursor.execute(f"ALTER TABLE {tabela} ADD COLUMN {coluna} {definicao}")
+
+
 def criar_banco():
 
     os.makedirs("database", exist_ok=True)
@@ -161,7 +171,49 @@ def criar_banco():
     """)
 
     # ============================
-    # USUÁRIO ADMINISTRADOR PADRÃO
+    # MIGRAÇÕES (Fase 1)
+    # ============================
+    _adicionar_coluna(cursor, "armarios", "empresa_id", "INTEGER")
+    _adicionar_coluna(cursor, "compartimentos", "tamanho", "TEXT DEFAULT 'M'")
+    _adicionar_coluna(cursor, "encomendas", "operador", "TEXT")
+    _adicionar_coluna(cursor, "encomendas", "transportadora", "TEXT")
+    _adicionar_coluna(cursor, "encomendas", "observacao", "TEXT")
+
+    # Migrações Fase 2 — ESP32
+    _adicionar_coluna(cursor, "esp32", "token", "TEXT")
+    _adicionar_coluna(cursor, "esp32", "porta", "INTEGER DEFAULT 80")
+    _adicionar_coluna(cursor, "esp32", "ultimo_heartbeat", "DATETIME")
+
+    # Migrações Fase 3 — Notificações
+    _adicionar_coluna(cursor, "encomendas", "notificado_em", "DATETIME")
+
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS notificacoes(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        encomenda_id INTEGER,
+        canal TEXT,
+        destinatario TEXT,
+        mensagem TEXT,
+        status TEXT,
+        detalhe TEXT,
+        criado_em DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+    """)
+
+    cursor.execute("""
+        UPDATE esp32 SET status = 'offline'
+        WHERE status IS NULL OR status = ''
+    """)
+
+    cursor.execute("""
+        UPDATE armarios SET status = 'ativo'
+        WHERE status IS NULL OR status = ''
+    """)
+
+    cursor.execute("""
+        UPDATE compartimentos SET status = 'livre'
+        WHERE status IS NULL OR status = ''
+    """)
     # ============================
     cursor.execute("""
     SELECT id FROM usuarios
