@@ -22,6 +22,9 @@ from routes.financeiro import financeiro_bp
 from routes.portal import portal_bp
 from routes.api.esp32_api import esp32_api_bp
 from routes.api.compartimento_api import compartimento_api_bp
+from routes.sites import sites_bp
+from routes.relatorios import relatorios_bp
+from routes.api.v1.public_api import v1_bp
 
 
 app = Flask(__name__)
@@ -55,6 +58,22 @@ app.register_blueprint(financeiro_bp)
 app.register_blueprint(portal_bp)
 app.register_blueprint(esp32_api_bp)
 app.register_blueprint(compartimento_api_bp)
+app.register_blueprint(sites_bp)
+app.register_blueprint(relatorios_bp)
+app.register_blueprint(v1_bp)
+
+
+@app.context_processor
+def inject_site_context():
+    from flask import session
+    if "usuario_id" in session:
+        from services.site_service import SiteService
+        from middleware.site_scope import get_site_id
+        return {
+            "sites": SiteService.listar_ativos(),
+            "site_atual": get_site_id(),
+        }
+    return {}
 
 
 if __name__ == "__main__":

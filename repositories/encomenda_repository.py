@@ -139,29 +139,38 @@ class EncomendaRepository:
             conn.commit()
 
     @staticmethod
-    def contar(status=None):
+    def contar(status=None, site_id=None):
 
         with BaseRepository.get_connection() as conn:
 
-            if status:
+            filtro = ""
+            params = []
 
-                return conn.execute("""
+            if status:
+                filtro += " AND e.status = ?"
+                params.append(status)
+
+            if site_id is not None:
+                filtro += " AND a.site_id = ?"
+                params.append(site_id)
+
+            if status or site_id is not None:
+                return conn.execute(f"""
                     SELECT COUNT(*) AS total
-                    FROM encomendas
-                    WHERE status = ?
-                """, (status,)).fetchone()["total"]
+                    FROM encomendas e
+                    JOIN compartimentos c ON c.id = e.compartimento
+                    JOIN armarios a ON a.id = c.armario
+                    WHERE 1=1 {filtro}
+                """, tuple(params)).fetchone()["total"]
 
             return conn.execute("""
                 SELECT COUNT(*) AS total FROM encomendas
             """).fetchone()["total"]
 
     @staticmethod
-    def contar_pendentes():
+    def contar_pendentes(site_id=None):
 
-        with BaseRepository.get_connection() as conn:
-
-            return conn.execute("""
-                SELECT COUNT(*) AS total
-                FROM encomendas
-                WHERE status = 'aguardando_retirada'
-            """).fetchone()["total"]
+        return EncomendaRepository.contar(
+            status="aguardando_retirada",
+            site_id=site_id,
+        )

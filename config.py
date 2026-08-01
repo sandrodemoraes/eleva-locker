@@ -36,7 +36,9 @@ SMS_API_KEY = os.getenv("SMS_API_KEY", "")
 # URL base para links no totem/QR (ex: http://192.168.1.10:15000)
 APP_URL_BASE = os.getenv("APP_URL_BASE", "http://localhost:15000")
 
-# Pagamentos — modo: console | producao
+# Database — sqlite (dev) | postgresql (produção)
+DATABASE_URL = os.getenv("DATABASE_URL", "")
+DB_ENGINE = os.getenv("DB_ENGINE", "sqlite")
 PAGAMENTO_MODO = os.getenv("PAGAMENTO_MODO", "console")
 PAGAMENTO_API_URL = os.getenv("PAGAMENTO_API_URL", "")
 PAGAMENTO_API_KEY = os.getenv("PAGAMENTO_API_KEY", "")

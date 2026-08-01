@@ -194,12 +194,37 @@ class Esp32Repository:
             conn.commit()
 
     @staticmethod
-    def contar_online():
+    def contar_online(site_id=None):
 
         with BaseRepository.get_connection() as conn:
+
+            if site_id is not None:
+                return conn.execute("""
+                    SELECT COUNT(*) AS total
+                    FROM esp32 e
+                    JOIN armarios a ON a.id = e.armario
+                    WHERE e.status = 'online' AND a.site_id = ?
+                """, (site_id,)).fetchone()["total"]
 
             return conn.execute("""
                 SELECT COUNT(*) AS total
                 FROM esp32
                 WHERE status = 'online'
+            """).fetchone()["total"]
+
+    @staticmethod
+    def contar(site_id=None):
+
+        with BaseRepository.get_connection() as conn:
+
+            if site_id is not None:
+                return conn.execute("""
+                    SELECT COUNT(*) AS total
+                    FROM esp32 e
+                    JOIN armarios a ON a.id = e.armario
+                    WHERE a.site_id = ?
+                """, (site_id,)).fetchone()["total"]
+
+            return conn.execute("""
+                SELECT COUNT(*) AS total FROM esp32
             """).fetchone()["total"]

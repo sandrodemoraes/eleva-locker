@@ -52,6 +52,7 @@ def login():
         session["nome"] = usuario["nome"]
         session["perfil"] = usuario["perfil"]
         session["usuario_id"] = usuario["id"]
+        session["site_id"] = 1
 
         return redirect("/dashboard")
 

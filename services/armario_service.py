@@ -1,12 +1,13 @@
 from repositories.armario_repository import ArmarioRepository
 from services.limite_plano_service import LimitePlanoService
+from middleware.site_scope import get_site_id
 
 
 class ArmarioService:
 
     @staticmethod
     def listar():
-        return ArmarioRepository.listar()
+        return ArmarioRepository.listar(site_id=get_site_id())
 
     @staticmethod
     def listar_ativos():
@@ -37,6 +38,9 @@ class ArmarioService:
 
         if empresa_id:
             LimitePlanoService.verificar_armario(int(empresa_id))
+
+        if not dados.get("site_id"):
+            dados["site_id"] = get_site_id() or 1
 
         return ArmarioRepository.criar(dados)
 

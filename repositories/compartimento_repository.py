@@ -133,9 +133,17 @@ class CompartimentoRepository:
             conn.commit()
 
     @staticmethod
-    def contar():
+    def contar(site_id=None):
 
         with BaseRepository.get_connection() as conn:
+
+            if site_id is not None:
+                return conn.execute("""
+                    SELECT COUNT(*) AS total
+                    FROM compartimentos c
+                    JOIN armarios a ON a.id = c.armario
+                    WHERE a.site_id = ?
+                """, (site_id,)).fetchone()["total"]
 
             return conn.execute("""
                 SELECT COUNT(*) AS total FROM compartimentos

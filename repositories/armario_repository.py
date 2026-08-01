@@ -4,14 +4,22 @@ from repositories.base_repository import BaseRepository
 class ArmarioRepository:
 
     @staticmethod
-    def listar():
+    def listar(site_id=None):
 
         with BaseRepository.get_connection() as conn:
 
-            return conn.execute("""
+            filtro = ""
+            params = ()
+
+            if site_id is not None:
+                filtro = " WHERE a.site_id = ?"
+                params = (site_id,)
+
+            return conn.execute(f"""
                 SELECT
                     a.*,
                     e.razao_social AS empresa_nome,
+                    s.nome AS site_nome,
                     (
                         SELECT COUNT(*)
                         FROM compartimentos c
@@ -24,8 +32,10 @@ class ArmarioRepository:
                     ) AS compartimentos_ocupados
                 FROM armarios a
                 LEFT JOIN empresas e ON e.id = a.empresa_id
+                LEFT JOIN sites s ON s.id = a.site_id
+                {filtro}
                 ORDER BY a.nome
-            """).fetchall()
+            """, params).fetchall()
 
     @staticmethod
     def buscar_por_id(armario_id):
@@ -62,9 +72,9 @@ class ArmarioRepository:
 
             cursor.execute("""
                 INSERT INTO armarios (
-                    nome, endereco, cidade, estado, status, empresa_id
+                    nome, endereco, cidade, estado, status, empresa_id, site_id
                 )
-                VALUES (?, ?, ?, ?, ?, ?)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
             """, (
                 dados["nome"],
                 dados["endereco"],
@@ -72,6 +82,7 @@ class ArmarioRepository:
                 dados["estado"],
                 dados["status"],
                 dados.get("empresa_id"),
+                dados.get("site_id"),
             ))
 
             conn.commit()
@@ -91,7 +102,8 @@ class ArmarioRepository:
                     cidade = ?,
                     estado = ?,
                     status = ?,
-                    empresa_id = ?
+                    empresa_id = ?,
+                    site_id = ?
                 WHERE id = ?
             """, (
                 dados["nome"],
@@ -100,6 +112,7 @@ class ArmarioRepository:
                 dados["estado"],
                 dados["status"],
                 dados.get("empresa_id"),
+                dados.get("site_id"),
                 armario_id,
             ))
 
@@ -118,9 +131,14 @@ class ArmarioRepository:
             conn.commit()
 
     @staticmethod
-    def contar():
+    def contar(site_id=None):
 
         with BaseRepository.get_connection() as conn:
+
+            if site_id is not None:
+                return conn.execute("""
+                    SELECT COUNT(*) AS total FROM armarios WHERE site_id = ?
+                """, (site_id,)).fetchone()["total"]
 
             return conn.execute("""
                 SELECT COUNT(*) AS total FROM armarios
