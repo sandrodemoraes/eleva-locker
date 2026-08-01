@@ -10,7 +10,8 @@
  *   3. Sem internet: retirada por código usando cache local + fila de eventos
  *   4. Com internet: heartbeat + upload eventos + sync automático
  *
- * Configure abaixo: WIFI, SERVIDOR, TOKEN (copiar do painel /esp32)
+ * IMPORTANTE: abra/grave ESTE arquivo completo (firmware/elevalocker_sync.ino).
+ * Nao copie trechos para Armario_Inteligente_*.ino — o sketch fica incompleto e nao compila.
  */
 
 #include <WiFi.h>
@@ -227,7 +228,7 @@ bool aplicarSync(JsonObject sync) {
   prefs.putInt("portas", totalCache);
   prefs.end();
 
-  Serial.printf("Sync OK v%d — %d compartimentos\n", syncVersao, totalCache);
+  Serial.printf("Sync OK v%d - %d compartimentos\n", syncVersao, totalCache);
   return true;
 }
 
@@ -419,9 +420,9 @@ void conectarWiFi() {
   }
   Serial.println();
   if (WiFi.status() == WL_CONNECTED) {
-    Serial.println("WiFi OK — IP: " + WiFi.localIP().toString());
+    Serial.println("WiFi OK - IP: " + WiFi.localIP().toString());
   } else {
-    Serial.println("WiFi FALHOU — verifique SSID e senha no codigo!");
+    Serial.println("WiFi FALHOU - verifique SSID e senha no codigo!");
   }
 }
 
@@ -430,7 +431,7 @@ void avisarConfigPendente() {
     Serial.println("AVISO: troque WIFI_PASSWORD no codigo (ainda esta SUA_SENHA_WIFI)!");
   }
   if (strcmp(ESP32_TOKEN, "cole_o_token_aqui") == 0) {
-    Serial.println("AVISO: troque ESP32_TOKEN — rode: python tools/setup_bancada.py");
+    Serial.println("AVISO: troque ESP32_TOKEN - rode: python tools/setup_bancada.py");
   }
 }
 
