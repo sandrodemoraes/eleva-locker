@@ -114,7 +114,7 @@ def main():
     print("\n" + "=" * 60)
     print("BANCADA CONFIGURADA")
     print("=" * 60)
-    print(f"\n1. No firmware elevalocker_sync.ino configure:")
+    print(f"\n1. No Arduino IDE abra: firmware/elevalocker_sync/elevalocker_sync.ino")
     print(f'   SERVIDOR_URL = "http://SEU_IP_PC:15000"')
     print(f'   ESP32_TOKEN  = "{token}"')
     print(f"\n2. Painel: http://localhost:15000/esp32")

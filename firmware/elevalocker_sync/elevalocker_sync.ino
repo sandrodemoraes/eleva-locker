@@ -10,7 +10,8 @@
  *   3. Sem internet: retirada por código usando cache local + fila de eventos
  *   4. Com internet: heartbeat + upload eventos + sync automático
  *
- * Configure abaixo: WIFI, SERVIDOR, TOKEN (copiar do painel /esp32)
+ * IMPORTANTE: abra/grave ESTE arquivo completo:
+ *   firmware/elevalocker_sync/elevalocker_sync.ino
  */
 
 #include <WiFi.h>
@@ -23,13 +24,13 @@
 // Bancada ELEVA: ESP32 + BESTER 8ch | GPIO 16,17,18,19,21,22,23,25
 
 const char* WIFI_SSID     = "ELEVA - ENERGIA SOLAR";
-const char* WIFI_PASSWORD = "SUA_SENHA_WIFI";
+const char* WIFI_PASSWORD = "SUA_SENHA_WIFI";  // ex: eleva2277
 
 // IP do PC com python app.py (ipconfig) — NÃO use localhost
 const char* SERVIDOR_URL  = "http://192.168.16.130:15000";
 
 // Token: python tools/setup_bancada.py → copiar token
-const char* ESP32_TOKEN   = "cole_o_token_aqui";
+const char* ESP32_TOKEN   = "cole_o_token_aqui";  // ex: 784b417975f530a6cb4623df6c950154
 
 const int HTTP_PORT       = 80;
 const int MIN_PORTAS      = 8;
@@ -45,7 +46,7 @@ const int GPIO_PADRAO[] = {
 
 // ============ INTERNOS ============
 
-WebServer server(HTTP_PORT);
+WebServer* httpServer = nullptr;
 Preferences prefs;
 
 int syncVersao = 0;
@@ -56,6 +57,7 @@ int gpioAtivo = -1;
 
 unsigned long ultimoHeartbeat = 0;
 unsigned long ultimoSync = 0;
+bool tarefasRedePendentes = false;
 const unsigned long INTERVALO_HEARTBEAT = 30000;
 const unsigned long INTERVALO_SYNC      = 60000;
 const unsigned long DURACAO_RELE_PADRAO = 3000;
@@ -136,6 +138,14 @@ void enfileirarEvento(const char* tipo, const char* codigo, int compId) {
   Serial.println("Evento enfileirado: " + json);
 }
 
+// ============ REDE (HTTP) ============
+
+void configurarHttp(HTTPClient& http, const String& url) {
+  http.setConnectTimeout(5000);
+  http.setTimeout(8000);
+  http.begin(url);
+}
+
 bool enviarEventosPendentes() {
   if (WiFi.status() != WL_CONNECTED) return false;
 
@@ -143,7 +153,7 @@ bool enviarEventosPendentes() {
   int qtd = prefs.getInt("qtd", 0);
   if (qtd == 0) { prefs.end(); return true; }
 
-  StaticJsonDocument<4096> body;
+  DynamicJsonDocument body(2048);
   JsonArray arr = body.createNestedArray("eventos");
 
   for (int i = 0; i < qtd; i++) {
@@ -151,9 +161,9 @@ bool enviarEventosPendentes() {
     snprintf(chave, sizeof(chave), "e%d", i);
     String ev = prefs.getString(chave, "");
     if (ev.length() > 0) {
-      StaticJsonDocument<256> one;
-      deserializeJson(one, ev);
-      arr.add(one);
+      DynamicJsonDocument one(256);
+      if (deserializeJson(one, ev)) continue;
+      arr.add(one.as<JsonObject>());
     }
   }
 
@@ -163,7 +173,7 @@ bool enviarEventosPendentes() {
 
   HTTPClient http;
   String url = String(SERVIDOR_URL) + "/api/esp32/eventos";
-  http.begin(url);
+  configurarHttp(http, url);
   http.addHeader("Content-Type", "application/json");
   http.addHeader("X-ESP32-Token", ESP32_TOKEN);
   int code = http.POST(payload);
@@ -227,7 +237,7 @@ bool aplicarSync(JsonObject sync) {
   prefs.putInt("portas", totalCache);
   prefs.end();
 
-  Serial.printf("Sync OK v%d — %d compartimentos\n", syncVersao, totalCache);
+  Serial.printf("Sync OK v%d - %d compartimentos\n", syncVersao, totalCache);
   return true;
 }
 
@@ -236,7 +246,7 @@ bool sincronizarComServidor() {
 
   HTTPClient http;
   String url = String(SERVIDOR_URL) + "/api/esp32/sync";
-  http.begin(url);
+  configurarHttp(http, url);
   http.addHeader("X-ESP32-Token", ESP32_TOKEN);
   int code = http.GET();
 
@@ -249,9 +259,15 @@ bool sincronizarComServidor() {
   String body = http.getString();
   http.end();
 
-  StaticJsonDocument<8192> doc;
-  if (deserializeJson(doc, body)) return false;
-  if (!doc["sucesso"]) return false;
+  DynamicJsonDocument doc(4096);
+  if (deserializeJson(doc, body)) {
+    Serial.println("Sync falhou - JSON invalido");
+    return false;
+  }
+  if (!doc["sucesso"]) {
+    Serial.println("Sync falhou - servidor recusou");
+    return false;
+  }
 
   return aplicarSync(doc["sync"]);
 }
@@ -261,7 +277,7 @@ bool enviarHeartbeat() {
 
   HTTPClient http;
   String url = String(SERVIDOR_URL) + "/api/esp32/heartbeat";
-  http.begin(url);
+  configurarHttp(http, url);
   http.addHeader("Content-Type", "application/json");
   http.addHeader("X-ESP32-Token", ESP32_TOKEN);
 
@@ -275,6 +291,7 @@ bool enviarHeartbeat() {
   int code = http.POST(payload);
 
   if (code != 200) {
+    Serial.printf("Heartbeat falhou HTTP %d\n", code);
     http.end();
     return false;
   }
@@ -282,14 +299,27 @@ bool enviarHeartbeat() {
   String resp = http.getString();
   http.end();
 
-  StaticJsonDocument<512> res;
-  deserializeJson(res, resp);
+  StaticJsonDocument<256> res;
+  if (deserializeJson(res, resp)) return true;
 
   if (res["precisa_sync"] | false) {
-    sincronizarComServidor();
+    tarefasRedePendentes = true;
   }
 
   return true;
+}
+
+void executarTarefasRede() {
+  if (WiFi.status() != WL_CONNECTED) return;
+
+  Serial.println("Conectando ao servidor...");
+  yield();
+  enviarHeartbeat();
+  yield();
+  sincronizarComServidor();
+  yield();
+  enviarEventosPendentes();
+  Serial.println("Servidor OK.");
 }
 
 // ============ RETIRADA OFFLINE ============
@@ -332,48 +362,48 @@ bool retirarPorCodigo(const char* codigo, bool online) {
 // ============ ROTAS HTTP NA ESP (servidor chama + totem local) ============
 
 bool tokenValido() {
-  return server.hasArg("token") && server.arg("token") == ESP32_TOKEN;
+  return httpServer->hasArg("token") && httpServer->arg("token") == ESP32_TOKEN;
 }
 
 void rotaStatus() {
   if (!tokenValido()) {
-    server.send(403, "application/json", "{\"erro\":\"token invalido\"}");
+    httpServer->send(403, "application/json", "{\"erro\":\"token invalido\"}");
     return;
   }
   String json = "{\"online\":true,\"sync_versao\":" + String(syncVersao) +
                 ",\"portas\":" + String(totalCache) + "}";
-  server.send(200, "application/json", json);
+  httpServer->send(200, "application/json", json);
 }
 
 void rotaAbrir() {
   if (!tokenValido()) {
-    server.send(403, "application/json", "{\"erro\":\"token invalido\"}");
+    httpServer->send(403, "application/json", "{\"erro\":\"token invalido\"}");
     return;
   }
-  String path = server.uri();
+  String path = httpServer->uri();
   int rele = path.substring(path.lastIndexOf('/') + 1).toInt();
-  unsigned long dur = server.hasArg("duracao") ? server.arg("duracao").toInt() * 1000UL : DURACAO_RELE_PADRAO;
+  unsigned long dur = httpServer->hasArg("duracao") ? httpServer->arg("duracao").toInt() * 1000UL : DURACAO_RELE_PADRAO;
   acionarPorRele(rele, dur);
-  server.send(200, "application/json", "{\"sucesso\":true,\"rele\":" + String(rele) + "}");
+  httpServer->send(200, "application/json", "{\"sucesso\":true,\"rele\":" + String(rele) + "}");
 }
 
 void rotaRetirarLocal() {
-  if (!server.hasArg("plain") && server.args() == 0) {
-    server.send(400, "application/json", "{\"sucesso\":false}");
+  if (!httpServer->hasArg("plain") && httpServer->args() == 0) {
+    httpServer->send(400, "application/json", "{\"sucesso\":false}");
     return;
   }
-  String codigo = server.arg("codigo");
+  String codigo = httpServer->arg("codigo");
   if (codigo.length() == 0) {
     StaticJsonDocument<128> doc;
-    deserializeJson(doc, server.arg("plain"));
+    deserializeJson(doc, httpServer->arg("plain"));
     codigo = doc["codigo"] | "";
   }
   codigo.trim();
   bool online = (WiFi.status() == WL_CONNECTED);
   if (retirarPorCodigo(codigo.c_str(), online)) {
-    server.send(200, "application/json", "{\"sucesso\":true,\"offline\":" + String(!online) + "}");
+    httpServer->send(200, "application/json", "{\"sucesso\":true,\"offline\":" + String(!online) + "}");
   } else {
-    server.send(403, "application/json", "{\"sucesso\":false,\"mensagem\":\"codigo invalido\"}");
+    httpServer->send(403, "application/json", "{\"sucesso\":false,\"mensagem\":\"codigo invalido\"}");
   }
 }
 
@@ -386,76 +416,178 @@ void rotaPainel() {
   html += "<input name='codigo' maxlength='6' placeholder='Codigo 6 digitos' style='font-size:24px'>";
   html += "<br><br><button type='submit' style='font-size:20px;padding:12px'>RETIRAR</button>";
   html += "</form></body></html>";
-  server.send(200, "text/html", html);
+  httpServer->send(200, "text/html", html);
 }
 
 // ============ SETUP / LOOP ============
 
-void conectarWiFi() {
+bool wifiJaConectou = false;
+bool wifiIniciado = false;
+bool stackRedeOk = false;
+bool webServerIniciado = false;
+unsigned long wifiInicioMs = 0;
+unsigned long wifiUltimoPonto = 0;
+
+void iniciarStackRede() {
+  if (stackRedeOk) return;
+  WiFi.persistent(false);
   WiFi.mode(WIFI_STA);
-  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
-  Serial.print("WiFi");
-  int tent = 0;
-  while (WiFi.status() != WL_CONNECTED && tent < 40) {
-    delay(500);
-    Serial.print(".");
-    tent++;
+  delay(100);
+  stackRedeOk = true;
+  Serial.println("Stack WiFi OK.");
+}
+
+void registrarRotasWeb() {
+  httpServer->on("/status", HTTP_GET, rotaStatus);
+  httpServer->on("/", HTTP_GET, rotaPainel);
+  httpServer->on("/retirar", HTTP_POST, rotaRetirarLocal);
+  httpServer->onNotFound([]() {
+    if (httpServer->uri().startsWith("/abrir/")) {
+      rotaAbrir();
+    } else {
+      httpServer->send(404, "text/plain", "Not found");
+    }
+  });
+}
+
+void iniciarWebServer() {
+  if (webServerIniciado) return;
+  if (!httpServer) {
+    httpServer = new WebServer(HTTP_PORT);
   }
-  Serial.println();
+  registrarRotasWeb();
+  httpServer->begin();
+  webServerIniciado = true;
+  Serial.println("Web server OK.");
+}
+
+void iniciarWiFi() {
+  if (wifiIniciado) return;
+
+  iniciarStackRede();
+  WiFi.setAutoReconnect(true);
+  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+
+  wifiIniciado = true;
+  wifiInicioMs = millis();
+  wifiUltimoPonto = wifiInicioMs;
+  Serial.println("Conectando WiFi...");
+}
+
+void gerenciarWiFi() {
   if (WiFi.status() == WL_CONNECTED) {
-    Serial.println("IP: " + WiFi.localIP().toString());
+    if (!wifiJaConectou) {
+      wifiJaConectou = true;
+      Serial.println();
+      Serial.println("WiFi OK - IP: " + WiFi.localIP().toString());
+      tarefasRedePendentes = true;
+    }
+    return;
+  }
+
+  wifiJaConectou = false;
+
+  if (!wifiIniciado) {
+    iniciarWiFi();
+    return;
+  }
+
+  unsigned long agora = millis();
+
+  if (agora - wifiUltimoPonto > 500) {
+    Serial.print(".");
+    wifiUltimoPonto = agora;
+  }
+
+  // Timeout 30s — tenta de novo
+  if (agora - wifiInicioMs > 30000) {
+    Serial.println();
+    Serial.println("WiFi demorou — tentando novamente...");
+    WiFi.disconnect(true);
+    wifiIniciado = false;
+  }
+}
+
+void avisarConfigPendente() {
+  if (strcmp(WIFI_PASSWORD, "SUA_SENHA_WIFI") == 0) {
+    Serial.println("AVISO: troque WIFI_PASSWORD no codigo (ainda esta SUA_SENHA_WIFI)!");
+  }
+  if (strcmp(ESP32_TOKEN, "cole_o_token_aqui") == 0) {
+    Serial.println("AVISO: troque ESP32_TOKEN - rode: python tools/setup_bancada.py");
+  }
+}
+
+int faseBoot = 0;
+
+void avancarBoot() {
+  switch (faseBoot) {
+    case 0:
+      Serial.println("\n=== ELEVA LOCKER ESP32 ===");
+      Serial.println("Boot OK");
+      avisarConfigPendente();
+      faseBoot++;
+      break;
+    case 1:
+      Serial.println("Init GPIO...");
+      for (int i = 0; i < MIN_PORTAS; i++) {
+        int g = GPIO_PADRAO[i];
+        pinMode(g, OUTPUT);
+        digitalWrite(g, LOW);
+      }
+      faseBoot++;
+      break;
+    case 2:
+      Serial.println("Init cache...");
+      prefs.begin("sync", true);
+      syncVersao = prefs.getInt("versao", 0);
+      totalCache = prefs.getInt("portas", 0);
+      prefs.end();
+      faseBoot++;
+      break;
+    case 3:
+      iniciarStackRede();
+      faseBoot++;
+      break;
+    case 4:
+      iniciarWebServer();
+      faseBoot++;
+      break;
+    case 5:
+      Serial.println("ESP32 ELEVA LOCKER pronto.");
+      faseBoot++;
+      break;
   }
 }
 
 void setup() {
   Serial.begin(115200);
-
-  for (int i = 0; i < MAX_PORTAS; i++) {
-    int g = GPIO_PADRAO[i];
-    pinMode(g, OUTPUT);
-    digitalWrite(g, LOW);
-  }
-
-  prefs.begin("sync", true);
-  syncVersao = prefs.getInt("versao", 0);
-  totalCache = prefs.getInt("portas", 0);
-  prefs.end();
-
-  conectarWiFi();
-
-  if (WiFi.status() == WL_CONNECTED) {
-    enviarHeartbeat();
-    sincronizarComServidor();
-    enviarEventosPendentes();
-  }
-
-  server.on("/status", HTTP_GET, rotaStatus);
-  server.on("/", HTTP_GET, rotaPainel);
-  server.on("/retirar", HTTP_POST, rotaRetirarLocal);
-  server.onNotFound([]() {
-    if (server.uri().startsWith("/abrir/")) {
-      rotaAbrir();
-    } else {
-      server.send(404, "text/plain", "Not found");
-    }
-  });
-
-  server.begin();
-  Serial.println("ESP32 ELEVA LOCKER pronto.");
 }
 
 void loop() {
-  server.handleClient();
+  if (faseBoot < 6) {
+    avancarBoot();
+    yield();
+    return;
+  }
+
+  if (httpServer) {
+    httpServer->handleClient();
+  }
   atualizarRele();
 
   unsigned long agora = millis();
 
+  gerenciarWiFi();
+
   if (WiFi.status() != WL_CONNECTED) {
-    static unsigned long ultimaTentativa = 0;
-    if (agora - ultimaTentativa > 10000) {
-      conectarWiFi();
-      ultimaTentativa = agora;
-    }
+    return;
+  }
+
+  if (tarefasRedePendentes) {
+    executarTarefasRede();
+    tarefasRedePendentes = false;
+    ultimoHeartbeat = agora;
+    ultimoSync = agora;
     return;
   }
 
@@ -463,10 +595,14 @@ void loop() {
     enviarHeartbeat();
     enviarEventosPendentes();
     ultimoHeartbeat = agora;
+    if (tarefasRedePendentes) {
+      ultimoSync = 0;
+    }
   }
 
-  if (agora - ultimoSync > INTERVALO_SYNC) {
+  if (agora - ultimoSync > INTERVALO_SYNC || tarefasRedePendentes) {
     sincronizarComServidor();
     ultimoSync = agora;
+    tarefasRedePendentes = false;
   }
 }
