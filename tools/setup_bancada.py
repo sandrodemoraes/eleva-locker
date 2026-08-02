@@ -21,7 +21,7 @@ from services.esp32_service import Esp32Service
 from services.compartimento_service import CompartimentoService
 from repositories.base_repository import BaseRepository
 
-GPIO_BANCADA = [16, 17, 18, 19, 21, 22, 23, 25]
+GPIO_BANCADA = [16, 17, 18, 19, 21, 22, 23, 27]
 
 
 def main():

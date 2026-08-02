@@ -13,7 +13,7 @@
               │  sync + abrir relé
               ▼
 [ESP32 — firmware elevalocker_sync.ino]
-  8 relés GPIO 16,17,18,19,21,22,23,25
+  8 relés GPIO 16,17,18,19,21,22,23,27
 ```
 
 **Usuários** cadastram no painel → **Encomendas** no painel → **ESP** só abre portas e valida códigos.

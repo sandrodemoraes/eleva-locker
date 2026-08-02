@@ -20,7 +20,7 @@
 #include <ArduinoJson.h>
 
 // ============ CONFIGURAÇÃO — EDITE AQUI ============
-// Bancada ELEVA: ESP32 + BESTER 8ch | GPIO 16,17,18,19,21,22,23,25
+// Bancada ELEVA: ESP32 + BESTER 8ch | GPIO 16,17,18,19,21,22,23,27
 
 const char* WIFI_SSID     = "ELEVA - ENERGIA SOLAR";
 const char* WIFI_PASSWORD = "SUA_SENHA_WIFI";
@@ -37,9 +37,9 @@ const int MAX_PORTAS      = 32;
 
 // GPIO padrão por relé (se servidor não enviar gpio no compartimento)
 const int GPIO_PADRAO[] = {
-  16, 17, 18, 19, 21, 22, 23, 25,
+  16, 17, 18, 19, 21, 22, 23, 27,
   26, 27, 32, 33, 12, 13, 14, 15,
-  16, 17, 18, 19, 21, 22, 23, 25,
+  16, 17, 18, 19, 21, 22, 23, 27,
   26, 27, 32, 33, 12, 13, 14, 15
 };
 
