@@ -47,7 +47,7 @@ class ArmarioService:
     @staticmethod
     def atualizar(armario_id, dados):
 
-        ArmarioService.buscar_por_id(armario_id)
+        armario = ArmarioService.buscar_por_id(armario_id)
 
         nome = dados.get("nome", "").strip()
 
@@ -55,6 +55,9 @@ class ArmarioService:
             raise ValueError("Nome do armário é obrigatório.")
 
         dados["nome"] = nome
+
+        if dados.get("site_id") is None:
+            dados["site_id"] = armario["site_id"] if armario["site_id"] is not None else (get_site_id() or 1)
 
         ArmarioRepository.atualizar(armario_id, dados)
 
