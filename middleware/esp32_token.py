@@ -22,7 +22,7 @@ def esp32_token_required(f):
         if not esp:
             return jsonify({"sucesso": False, "mensagem": "Token inválido."}), 403
 
-        request.esp32 = esp
+        request.esp32 = dict(esp)
 
         return f(*args, **kwargs)
 
