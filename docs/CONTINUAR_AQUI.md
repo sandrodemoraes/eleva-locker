@@ -3,7 +3,8 @@
 > **Última atualização:** 03/08/2026  
 > **Estado:** Servidor antigo recuperado nesta branch · Bancada 8 relés VALIDADA ✅ — próximo: WhatsApp produção  
 > **Recuperação pós-formatação:** [`docs/RECUPERAR_SERVIDOR.md`](RECUPERAR_SERVIDOR.md)  
-> **Windows não inicia:** [`docs/RECUPERAR_BOOT_WINDOWS.md`](RECUPERAR_BOOT_WINDOWS.md)
+> **Windows não inicia:** [`docs/RECUPERAR_BOOT_WINDOWS.md`](RECUPERAR_BOOT_WINDOWS.md)  
+> **Cópia da pasta Windows antiga:** [`docs/RECUPERAR_COPIA_WINDOWS.md`](RECUPERAR_COPIA_WINDOWS.md)
 
 ---
 

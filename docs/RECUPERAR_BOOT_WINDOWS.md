@@ -7,6 +7,7 @@ Contexto conhecido:
 - Máquina: **SERVIDOR-ELEVA** (Windows 11 Pro, i7-12700K, 32 GB)
 - O Windows antigo **parou de iniciar** → você colocou **outro HD** e reinstalou
 - O **HD velho** foi mantido com dados (backup / possível Windows antigo)
+- Há uma **cópia da pasta Windows antiga no disco novo** → veja [`RECUPERAR_COPIA_WINDOWS.md`](RECUPERAR_COPIA_WINDOWS.md) (extrair dados; **não** serve para boot sozinha)
 
 ---
 
@@ -15,7 +16,8 @@ Contexto conhecido:
 | Objetivo | O que fazer |
 |----------|-------------|
 | **A)** Só ler dados do HD velho | Conectar como disco secundário no Windows novo → copiar pastas → **não** tente bootar nele |
-| **B)** Fazer o Windows do HD velho voltar a dar boot | Siga a seção **Reparar boot (BCD/UEFI)** abaixo |
+| **A2)** Tem cópia da pasta `Windows` no disco novo | [`RECUPERAR_COPIA_WINDOWS.md`](RECUPERAR_COPIA_WINDOWS.md) + `05_localizar` / `06_extrair` |
+| **B)** Fazer o Windows do HD velho voltar a dar boot | Siga a seção **Reparar boot (BCD/UEFI)** abaixo (instalação completa no disco, não só pasta copiada) |
 | **C)** Windows novo não inicia | Mesmos passos, apontando para a partição `Windows` do HD **novo** |
 
 Se o Windows **novo** já está ok e você só precisa do ElevaLocker no boot do Windows: use `tools\criar_atalho_desktop.bat` (isso **não** é boot do SO).
