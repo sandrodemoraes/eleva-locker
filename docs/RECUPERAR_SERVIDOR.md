@@ -1,31 +1,24 @@
 # Recuperar servidor antigo — ELEVA LOCKER
 
-Guia para voltar ao servidor completo (Fases 1–5 + bancada ESP32) depois da formatação do PC.
+Guia para voltar ao servidor completo (Fases 1–5 + bancada ESP32) no PC novo.
 
-> **Branch desta recuperação:** `cursor/recuperar-servidor-antigo-615b`  
-> Base: `cursor/fix-editar-armario-c05c` (bancada validada) + scripts Windows (atalho / autoinício)
-
----
-
-## O que estava “perdido”
-
-Após formatar, o clone em `main` traz só a versão inicial (login, usuários, empresas).  
-O servidor antigo completo (armários, compartimentos, ESP32, bancada, comercial, etc.) está nesta branch.
+> **Branch:** `cursor/recuperar-servidor-antigo-615b`  
+> **03/08/2026:** não recuperar mais boot do HD velho — usar **backup Defender** + dados em `D:\backup pc fabio` + esta branch.
 
 ---
 
-## 1. Baixar o código no PC
+## O que usar agora
 
-```cmd
-cd %USERPROFILE%
-git clone https://github.com/sandrodemoraes/eleva-locker.git
-cd eleva-locker
-git fetch origin
-git checkout cursor/recuperar-servidor-antigo-615b
-pip install -r requirements.txt
-```
+| Fonte | Para quê |
+|-------|----------|
+| Esta branch (GitHub) | Código completo do ElevaLocker |
+| Backup Windows Defender | Arquivos que o Defender salvou |
+| `D:\backup pc fabio\` | Users / projetos / possível `elevalocker.db` |
+| `D:\Recuperado_Windows_Antigo\` | Se a extração `06`/`07` tiver terminado |
 
-Se o projeto já existir:
+---
+
+## 1. Código no PC
 
 ```cmd
 cd %USERPROFILE%\eleva-locker
@@ -37,91 +30,57 @@ pip install -r requirements.txt
 
 ---
 
-## 2. Atalho na área de trabalho + início com Windows
+## 2. Atalho + início com Windows
 
 ```cmd
 tools\criar_atalho_desktop.bat
 ```
 
-Isso cria:
-- Atalho **ElevaLocker** na área de trabalho
-- Entrada na pasta **Startup** (inicia com o Windows, minimizado)
-
-Para remover o autoinício: `tools\remover_inicio_windows.bat`
-
 ---
 
 ## 3. Subir o servidor
 
-**Opção A — atalho**  
-Duplo clique em **ElevaLocker** → abre `http://localhost:15000`
-
-**Opção B — terminal**
-
 ```cmd
-cd %USERPROFILE%\eleva-locker
-set ESP32_MODO_SIMULACAO=0
-set APP_URL_BASE=http://192.168.16.130:15000
-py app.py
-```
-
-Porta: **15000**
-
----
-
-## 4. Recriar a bancada ESP32 (se precisar)
-
-WiFi: `ELEVA - ENERGIA SOLAR`  
-ESP: `192.168.16.162` · PC: `192.168.16.130`
-
-```cmd
-py tools\setup_bancada.py --ip-esp 192.168.16.162
-```
-
-Copie o TOKEN gerado para o firmware `firmware\elevalocker_sync.ino`, grave na ESP e abra:
-
-- http://localhost:15000/esp32/bancada
-- http://192.168.16.162/
-
-Se armários “sumirem” após editar:
-
-```cmd
-py tools\fix_armarios_site.py
-```
-
----
-
-## 5. Login e URLs
-
-| Item | Valor |
-|------|--------|
-| Admin | `admin@elevalocker.com` / `123456` |
-| App | http://localhost:15000 |
-| Encomendas | http://localhost:15000/encomendas |
-| Bancada | http://localhost:15000/esp32/bancada |
-| Totem ESP | http://192.168.16.162/ |
-
----
-
-## 6. Atualizar depois
-
-```cmd
-tools\atualizar.bat
+iniciar_elevalocker.bat
 ```
 
 Ou:
 
 ```cmd
-git pull origin cursor/recuperar-servidor-antigo-615b
+set ESP32_MODO_SIMULACAO=0
+set APP_URL_BASE=http://192.168.16.130:15000
+py app.py
+```
+
+→ http://localhost:15000  
+Login: `admin@elevalocker.com` / `123456`
+
+---
+
+## 4. Restaurar banco (se tiver no backup)
+
+Com o app **parado**:
+
+```cmd
+copy /Y "D:\Recuperado_Windows_Antigo\databases\elevalocker.db" "%USERPROFILE%\eleva-locker\database\elevalocker.db"
+```
+
+Se o DB estiver no Defender ou em `D:\backup pc fabio\...`, ajuste a origem. Faça cópia de segurança do `database\elevalocker.db` atual antes.
+
+---
+
+## 5. Bancada ESP32 (se precisar)
+
+```cmd
+py tools\setup_bancada.py --ip-esp 192.168.16.162
 ```
 
 ---
 
 ## Referências
 
-- `docs/RECUPERAR_BOOT_WINDOWS.md` — reparar boot do Windows (WinRE / BCD / UEFI)
-- `tools/windows_boot/` — scripts para Prompt de Recuperação
-- `docs/CONTINUAR_AQUI.md` — estado da bancada e próximo passo (WhatsApp)
-- `docs/TESTE_BANCADA.md` — guia da bancada
-- `docs/ESP32_SYNC.md` — protocolo ESP
-- `docs/PLANO_IMPLEMENTACAO.md` — plano completo
+- `docs/CONTINUAR_AQUI.md` — estado atual  
+- `docs/RECUPERAR_COPIA_WINDOWS.md` — extrair de `D:\backup pc fabio\Windows`  
+- `docs/TESTE_BANCADA.md` · `docs/ESP32_SYNC.md` · `docs/PLANO_IMPLEMENTACAO.md`  
+
+Docs de boot/HD velho (`RECUPERAR_BOOT_WINDOWS`, `RECUPERAR_PENDRIVE_WIN11`) ficam só como histórico — **não seguir**.

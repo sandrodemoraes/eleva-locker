@@ -1,15 +1,42 @@
 # CONTINUAR AQUI — Retomada do projeto
 
-> **Última atualização:** 03/08/2026  
-> **Estado:** Servidor antigo recuperado nesta branch · Bancada 8 relés VALIDADA ✅ — próximo: WhatsApp produção  
-> **Recuperação pós-formatação:** [`docs/RECUPERAR_SERVIDOR.md`](RECUPERAR_SERVIDOR.md)  
-> **Windows não inicia:** [`docs/RECUPERAR_BOOT_WINDOWS.md`](RECUPERAR_BOOT_WINDOWS.md)  
-> **Cópia da pasta Windows antiga:** [`docs/RECUPERAR_COPIA_WINDOWS.md`](RECUPERAR_COPIA_WINDOWS.md)  
-> **Pendrive bootável Win11:** [`docs/RECUPERAR_PENDRIVE_WIN11.md`](RECUPERAR_PENDRIVE_WIN11.md)
+> **Última atualização:** 03/08/2026 (tarde)  
+> **Estado:** Servidor ElevaLocker nesta branch · Bancada validada · **HD velho / boot Windows antigo: DESISTIDO** — seguir com backup Defender + `D:\backup pc fabio` + esta branch  
+> **Recuperação app:** [`docs/RECUPERAR_SERVIDOR.md`](RECUPERAR_SERVIDOR.md)  
+> **Cópia pasta Windows (dados):** [`docs/RECUPERAR_COPIA_WINDOWS.md`](RECUPERAR_COPIA_WINDOWS.md)  
+
+> ~~Windows boot / HD velho / pendrive WinRE~~ — não seguir (backup Defender disponível)
 
 ---
 
-## Onde paramos
+## Decisão 03/08/2026
+
+| Tema | Status |
+|------|--------|
+| Recuperar boot do HD velho | ❌ **Cancelado** |
+| Backup Windows Defender | ✅ Usar o que tiver |
+| Cópia `D:\backup pc fabio\Windows` | ✅ Só para extrair arquivos (Users / ElevaLocker / DB) |
+| ElevaLocker nesta branch | ✅ Caminho principal |
+
+### Próximo foco (PC novo)
+
+```bat
+cd %USERPROFILE%\eleva-locker
+git fetch origin
+git checkout cursor/recuperar-servidor-antigo-615b
+git pull origin cursor/recuperar-servidor-antigo-615b
+pip install -r requirements.txt
+tools\criar_atalho_desktop.bat
+iniciar_elevalocker.bat
+```
+
+App: http://localhost:15000 · admin `admin@elevalocker.com` / `123456`
+
+Se a extração em `D:\Recuperado_Windows_Antigo` tiver `databases\elevalocker.db`, copiar para `database\elevalocker.db` do projeto (com o app parado).
+
+---
+
+## Onde paramos (projeto)
 
 | Item | Status |
 |------|--------|
