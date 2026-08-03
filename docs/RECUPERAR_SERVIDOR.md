@@ -119,6 +119,8 @@ git pull origin cursor/recuperar-servidor-antigo-615b
 
 ## Referências
 
+- `docs/RECUPERAR_BOOT_WINDOWS.md` — reparar boot do Windows (WinRE / BCD / UEFI)
+- `tools/windows_boot/` — scripts para Prompt de Recuperação
 - `docs/CONTINUAR_AQUI.md` — estado da bancada e próximo passo (WhatsApp)
 - `docs/TESTE_BANCADA.md` — guia da bancada
 - `docs/ESP32_SYNC.md` — protocolo ESP

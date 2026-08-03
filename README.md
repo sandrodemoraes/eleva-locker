@@ -29,5 +29,6 @@ Ou: `iniciar_elevalocker.bat` → http://localhost:15000
 ## Documentação
 
 - `docs/RECUPERAR_SERVIDOR.md` — recuperar servidor após formatação
+- `docs/RECUPERAR_BOOT_WINDOWS.md` — reparar boot do Windows
 - `docs/CONTINUAR_AQUI.md` — estado atual e próximos passos
 - `PROJETO.md`
