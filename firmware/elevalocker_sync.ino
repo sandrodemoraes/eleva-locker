@@ -378,59 +378,73 @@ void rotaRetirarLocal() {
 }
 
 void rotaPainel() {
-  bool admin = tokenValido();
+  bool admin = server.hasArg("token") && server.arg("token") == ESP32_TOKEN;
 
-  String html = "<!DOCTYPE html><html><head>";
-  html += "<meta charset='utf-8'>";
-  html += "<meta name='viewport' content='width=device-width,initial-scale=1'>";
-  html += "<title>ELEVA LOCKER ESP</title>";
-  html += "<style>";
-  html += "body{font-family:Arial,sans-serif;margin:0;padding:16px;background:#f0f4f8;color:#1a1a2e}";
-  html += "h1{text-align:center;margin:0 0 4px;font-size:1.5rem}";
-  html += ".sub{text-align:center;color:#666;margin-bottom:16px;font-size:.9rem}";
-  html += ".grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;max-width:640px;margin:0 auto 20px}";
-  html += ".porta{background:#fff;border-radius:10px;padding:12px;text-align:center;box-shadow:0 2px 6px rgba(0,0,0,.08)}";
-  html += ".porta-num{font-size:1.4rem;font-weight:bold;margin-bottom:4px}";
-  html += ".porta-rele{font-size:.75rem;color:#888}";
-  html += ".badge{display:inline-block;padding:4px 10px;border-radius:20px;font-size:.8rem;font-weight:bold;margin-top:6px}";
-  html += ".livre{background:#d4edda;color:#155724}";
-  html += ".ocupado{background:#fff3cd;color:#856404}";
-  html += ".retirar-box{max-width:400px;margin:0 auto;background:#fff;padding:20px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.1)}";
-  html += "input[name=codigo]{width:100%;font-size:1.5rem;text-align:center;padding:10px;border:2px solid #ccc;border-radius:8px;box-sizing:border-box}";
-  html += "button[type=submit]{width:100%;margin-top:12px;font-size:1.1rem;padding:14px;background:#2563eb;color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:bold}";
-  html += ".btn-abrir{display:inline-block;margin-top:8px;padding:6px 12px;background:#16a34a;color:#fff;text-decoration:none;border-radius:6px;font-size:.75rem}";
-  html += "</style></head><body>";
+  int n = totalCache;
+  if (n > MAX_PORTAS) n = MAX_PORTAS;
+  if (n < 0) n = 0;
 
-  html += "<h1>ELEVA LOCKER ESP</h1>";
-  html += "<p class='sub'>Sync v" + String(syncVersao) + " | Portas: " + String(totalCache);
-  html += " | WiFi: " + String(WiFi.status() == WL_CONNECTED ? "Online" : "OFFLINE") + "</p>";
+  server.setContentLength(CONTENT_LENGTH_UNKNOWN);
+  server.send(200, "text/html", "");
 
-  html += "<div class='grid'>";
-  for (int i = 0; i < totalCache; i++) {
-    html += "<div class='porta'>";
-    html += "<div class='porta-num'>#" + String(cache[i].numero) + "</div>";
-    html += "<div class='porta-rele'>Relé " + String(cache[i].rele) + "</div>";
+  server.sendContent(
+    "<!DOCTYPE html><html><head><meta charset=utf-8>"
+    "<meta name=viewport content=\"width=device-width,initial-scale=1\">"
+    "<title>ELEVA LOCKER ESP</title>"
+    "<style>"
+    "body{font-family:Arial,sans-serif;margin:16px;background:#f0f4f8;text-align:center}"
+    "h1{margin:0 0 8px;font-size:1.4rem}"
+    ".sub{color:#666;font-size:.85rem;margin-bottom:16px}"
+    ".grid{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;max-width:520px;margin:0 auto 20px}"
+    ".p{background:#fff;border-radius:8px;padding:10px 14px;min-width:100px;box-shadow:0 1px 4px rgba(0,0,0,.1)}"
+    ".n{font-size:1.3rem;font-weight:bold}"
+    ".r{font-size:.7rem;color:#888}"
+    ".ok{color:#155724;background:#d4edda;padding:3px 8px;border-radius:12px;font-size:.75rem}"
+    ".busy{color:#856404;background:#fff3cd;padding:3px 8px;border-radius:12px;font-size:.75rem}"
+    ".box{max-width:360px;margin:0 auto;background:#fff;padding:16px;border-radius:10px}"
+    "input{width:90%;font-size:1.4rem;text-align:center;padding:8px}"
+    "button{width:95%;margin-top:10px;padding:12px;font-size:1rem;background:#2563eb;color:#fff;border:0;border-radius:8px}"
+    "a.btn{display:inline-block;margin-top:6px;padding:4px 10px;background:#16a34a;color:#fff;text-decoration:none;border-radius:6px;font-size:.7rem}"
+    "</style></head><body>"
+  );
+
+  server.sendContent("<h1>ELEVA LOCKER ESP</h1>");
+
+  char buf[128];
+  snprintf(buf, sizeof(buf),
+    "<p class=sub>Sync v%d | Portas: %d | WiFi: %s</p>",
+    syncVersao, n,
+    WiFi.status() == WL_CONNECTED ? "Online" : "OFFLINE");
+  server.sendContent(buf);
+
+  server.sendContent("<div class=grid>");
+  for (int i = 0; i < n; i++) {
+    snprintf(buf, sizeof(buf),
+      "<div class=p><div class=n>#%d</div><div class=r>Relé %d</div>",
+      cache[i].numero, cache[i].rele);
+    server.sendContent(buf);
     if (cache[i].ocupado) {
-      html += "<span class='badge ocupado'>Ocupado</span>";
+      server.sendContent("<span class=busy>Ocupado</span>");
     } else {
-      html += "<span class='badge livre'>Livre</span>";
+      server.sendContent("<span class=ok>Livre</span>");
     }
     if (admin && cache[i].rele > 0) {
-      html += "<br><a class='btn-abrir' href='/abrir/" + String(cache[i].rele);
-      html += "?token=" + String(ESP32_TOKEN) + "&duracao=3'>Abrir</a>";
+      snprintf(buf, sizeof(buf),
+        "<br><a class=btn href='/abrir/%d?token=%s&duracao=3'>Abrir</a>",
+        cache[i].rele, ESP32_TOKEN);
+      server.sendContent(buf);
     }
-    html += "</div>";
+    server.sendContent("</div>");
   }
-  html += "</div>";
+  server.sendContent("</div>");
 
-  html += "<div class='retirar-box'>";
-  html += "<form action='/retirar' method='POST'>";
-  html += "<input name='codigo' maxlength='6' placeholder='Código 6 dígitos' inputmode='numeric' autocomplete='off'>";
-  html += "<button type='submit'>RETIRAR</button>";
-  html += "</form></div>";
-
-  html += "</body></html>";
-  server.send(200, "text/html", html);
+  server.sendContent(
+    "<div class=box><form action=/retirar method=POST>"
+    "<input name=codigo maxlength=6 placeholder='Código 6 dígitos' inputmode=numeric>"
+    "<button type=submit>RETIRAR</button></form></div>"
+    "</body></html>"
+  );
+  server.sendContent("");
 }
 
 // ============ SETUP / LOOP ============
