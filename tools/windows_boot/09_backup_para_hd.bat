@@ -36,20 +36,35 @@ mkdir "%ROOT%\PC\Arduino" 2>nul
 
 echo.
 echo [1/4] eleva-locker ...
-robocopy "%USERPROFILE%\eleva-locker" "%ROOT%\eleva-locker" /E /COPY:DAT /R:2 /W:2 /XD .git __pycache__ .venv venv node_modules /NFL /NDL /NP
+if exist "%USERPROFILE%\eleva-locker\" (
+  robocopy "%USERPROFILE%\eleva-locker" "%ROOT%\eleva-locker" /E /COPY:DAT /R:2 /W:2 /XD .git __pycache__ .venv venv node_modules /NFL /NDL /NP
+) else if exist "C:\ElevaLocker\" (
+  echo Usando C:\ElevaLocker ...
+  robocopy "C:\ElevaLocker" "%ROOT%\eleva-locker" /E /COPY:DAT /R:2 /W:2 /XD .git __pycache__ .venv venv node_modules /NFL /NDL /NP
+) else (
+  echo [AVISO] Pasta eleva-locker nao encontrada.
+)
+
+REM OneDrive redireciona Desktop/Documents em muitos PCs Windows 11
+set "DOCS=%USERPROFILE%\Documents"
+set "DESK=%USERPROFILE%\Desktop"
+if exist "%USERPROFILE%\OneDrive\Documents\" set "DOCS=%USERPROFILE%\OneDrive\Documents"
+if exist "%USERPROFILE%\OneDrive\Desktop\" set "DESK=%USERPROFILE%\OneDrive\Desktop"
 
 echo [2/4] Documents ...
-robocopy "%USERPROFILE%\Documents" "%ROOT%\PC\Documents" /E /COPY:DAT /R:1 /W:1 /NFL /NDL /NP
+echo   origem: %DOCS%
+robocopy "%DOCS%" "%ROOT%\PC\Documents" /E /COPY:DAT /R:1 /W:1 /NFL /NDL /NP
 
 echo [3/4] Desktop ...
-robocopy "%USERPROFILE%\Desktop" "%ROOT%\PC\Desktop" /E /COPY:DAT /R:1 /W:1 /NFL /NDL /NP
+echo   origem: %DESK%
+robocopy "%DESK%" "%ROOT%\PC\Desktop" /E /COPY:DAT /R:1 /W:1 /NFL /NDL /NP
 
 echo [4/4] Downloads ...
 robocopy "%USERPROFILE%\Downloads" "%ROOT%\PC\Downloads" /E /COPY:DAT /R:1 /W:1 /NFL /NDL /NP
 
-if exist "%USERPROFILE%\Documents\Arduino" (
+if exist "%DOCS%\Arduino\" (
   echo [+] Arduino sketches ...
-  robocopy "%USERPROFILE%\Documents\Arduino" "%ROOT%\PC\Arduino" /E /COPY:DAT /R:1 /W:1 /NFL /NDL /NP
+  robocopy "%DOCS%\Arduino" "%ROOT%\PC\Arduino" /E /COPY:DAT /R:1 /W:1 /NFL /NDL /NP
 )
 
 echo.
