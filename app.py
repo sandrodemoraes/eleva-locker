@@ -8,6 +8,7 @@ from routes.dashboard import dashboard_bp
 from routes.usuarios import usuarios_bp
 from routes.empresas import empresas_bp
 from routes.armarios import armarios_bp
+from routes.esp32 import esp32_bp
 
 
 app = Flask(__name__)
@@ -30,6 +31,7 @@ app.register_blueprint(dashboard_bp)
 app.register_blueprint(usuarios_bp)
 app.register_blueprint(empresas_bp)
 app.register_blueprint(armarios_bp)
+app.register_blueprint(esp32_bp)
 
 
 # ==========================================
