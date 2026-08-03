@@ -378,14 +378,58 @@ void rotaRetirarLocal() {
 }
 
 void rotaPainel() {
-  String html = "<html><body style='font-family:Arial;text-align:center'>";
+  bool admin = tokenValido();
+
+  String html = "<!DOCTYPE html><html><head>";
+  html += "<meta charset='utf-8'>";
+  html += "<meta name='viewport' content='width=device-width,initial-scale=1'>";
+  html += "<title>ELEVA LOCKER ESP</title>";
+  html += "<style>";
+  html += "body{font-family:Arial,sans-serif;margin:0;padding:16px;background:#f0f4f8;color:#1a1a2e}";
+  html += "h1{text-align:center;margin:0 0 4px;font-size:1.5rem}";
+  html += ".sub{text-align:center;color:#666;margin-bottom:16px;font-size:.9rem}";
+  html += ".grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;max-width:640px;margin:0 auto 20px}";
+  html += ".porta{background:#fff;border-radius:10px;padding:12px;text-align:center;box-shadow:0 2px 6px rgba(0,0,0,.08)}";
+  html += ".porta-num{font-size:1.4rem;font-weight:bold;margin-bottom:4px}";
+  html += ".porta-rele{font-size:.75rem;color:#888}";
+  html += ".badge{display:inline-block;padding:4px 10px;border-radius:20px;font-size:.8rem;font-weight:bold;margin-top:6px}";
+  html += ".livre{background:#d4edda;color:#155724}";
+  html += ".ocupado{background:#fff3cd;color:#856404}";
+  html += ".retirar-box{max-width:400px;margin:0 auto;background:#fff;padding:20px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.1)}";
+  html += "input[name=codigo]{width:100%;font-size:1.5rem;text-align:center;padding:10px;border:2px solid #ccc;border-radius:8px;box-sizing:border-box}";
+  html += "button[type=submit]{width:100%;margin-top:12px;font-size:1.1rem;padding:14px;background:#2563eb;color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:bold}";
+  html += ".btn-abrir{display:inline-block;margin-top:8px;padding:6px 12px;background:#16a34a;color:#fff;text-decoration:none;border-radius:6px;font-size:.75rem}";
+  html += "</style></head><body>";
+
   html += "<h1>ELEVA LOCKER ESP</h1>";
-  html += "<p>Sync v" + String(syncVersao) + " | Portas: " + String(totalCache) + "</p>";
-  html += "<p>WiFi: " + String(WiFi.status() == WL_CONNECTED ? "Online" : "OFFLINE") + "</p>";
+  html += "<p class='sub'>Sync v" + String(syncVersao) + " | Portas: " + String(totalCache);
+  html += " | WiFi: " + String(WiFi.status() == WL_CONNECTED ? "Online" : "OFFLINE") + "</p>";
+
+  html += "<div class='grid'>";
+  for (int i = 0; i < totalCache; i++) {
+    html += "<div class='porta'>";
+    html += "<div class='porta-num'>#" + String(cache[i].numero) + "</div>";
+    html += "<div class='porta-rele'>Relé " + String(cache[i].rele) + "</div>";
+    if (cache[i].ocupado) {
+      html += "<span class='badge ocupado'>Ocupado</span>";
+    } else {
+      html += "<span class='badge livre'>Livre</span>";
+    }
+    if (admin && cache[i].rele > 0) {
+      html += "<br><a class='btn-abrir' href='/abrir/" + String(cache[i].rele);
+      html += "?token=" + String(ESP32_TOKEN) + "&duracao=3'>Abrir</a>";
+    }
+    html += "</div>";
+  }
+  html += "</div>";
+
+  html += "<div class='retirar-box'>";
   html += "<form action='/retirar' method='POST'>";
-  html += "<input name='codigo' maxlength='6' placeholder='Codigo 6 digitos' style='font-size:24px'>";
-  html += "<br><br><button type='submit' style='font-size:20px;padding:12px'>RETIRAR</button>";
-  html += "</form></body></html>";
+  html += "<input name='codigo' maxlength='6' placeholder='Código 6 dígitos' inputmode='numeric' autocomplete='off'>";
+  html += "<button type='submit'>RETIRAR</button>";
+  html += "</form></div>";
+
+  html += "</body></html>";
   server.send(200, "text/html", html);
 }
 
