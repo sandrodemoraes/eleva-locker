@@ -1,11 +1,12 @@
 # CONTINUAR AQUI — Retomada do projeto
 
-> **Última atualização:** 02/08/2026 (noite)  
-> **Estado:** Bancada 8 relés VALIDADA ✅ — próximo: WhatsApp produção
+> **Última atualização:** 03/08/2026  
+> **Estado:** Servidor antigo recuperado nesta branch · Bancada 8 relés VALIDADA ✅ — próximo: WhatsApp produção  
+> **Recuperação pós-formatação:** [`docs/RECUPERAR_SERVIDOR.md`](RECUPERAR_SERVIDOR.md)
 
 ---
 
-## Onde paramos (02/08/2026)
+## Onde paramos
 
 | Item | Status |
 |------|--------|
@@ -39,16 +40,19 @@ IN4→GPIO19   IN8→GPIO27  ← NÃO usar GPIO25 nesta placa
 
 ---
 
-## Comandos para subir amanhã
+## Comandos para subir o servidor
 
 ```cmd
-cd C:\ElevaLocker
+cd %USERPROFILE%\eleva-locker
 git fetch origin
-git pull origin cursor/esp32-offline-sync-c05c
+git checkout cursor/recuperar-servidor-antigo-615b
+git pull origin cursor/recuperar-servidor-antigo-615b
 set ESP32_MODO_SIMULACAO=0
 set APP_URL_BASE=http://192.168.16.130:15000
 py app.py
 ```
+
+Ou use o atalho **ElevaLocker** (`tools\criar_atalho_desktop.bat`).
 
 ESP liga sozinha → sync automático.
 
@@ -91,21 +95,22 @@ Detalhes: `docs/PLANO_IMPLEMENTACAO.md` seção 5 (Fase 6A) e seção 6.
 
 ---
 
-## PRs abertos
+## PRs / branches
 
 | PR | Branch | Conteúdo |
 |----|--------|----------|
+| recuperação | `cursor/recuperar-servidor-antigo-615b` | **Servidor completo + atalho Windows** |
+| [#8](https://github.com/sandrodemoraes/eleva-locker/pull/8) | `cursor/fix-editar-armario-c05c` | Fix editar armário + bancada |
+| [#9](https://github.com/sandrodemoraes/eleva-locker/pull/9) | `cursor/atalho-desktop-elevalocker-ffcf` | Atalho / autoinício Windows |
 | [#6](https://github.com/sandrodemoraes/eleva-locker/pull/6) | `cursor/esp32-offline-sync-c05c` | ESP offline + fases |
-| [#7](https://github.com/sandrodemoraes/eleva-locker/pull/7) | `cursor/wifi-fix-firmware-c05c` | WiFi boot fixes |
-| [#8](https://github.com/sandrodemoraes/eleva-locker/pull/8) | `cursor/fix-editar-armario-c05c` | Fix editar armário |
 
-**Branch recomendada no PC:** `cursor/esp32-offline-sync-c05c` (+ merges pendentes)
+**Branch recomendada no PC:** `cursor/recuperar-servidor-antigo-615b`
 
 ---
 
 ## Mensagem para retomar no Cursor
 
-> "Voltei — li o PLANO_IMPLEMENTACAO.md. Bancada OK. Vamos implementar WhatsApp Fase 6A."
+> "Voltei — li o RECUPERAR_SERVIDOR.md e CONTINUAR_AQUI. Servidor OK. Vamos implementar WhatsApp Fase 6A."
 
 ---
 
