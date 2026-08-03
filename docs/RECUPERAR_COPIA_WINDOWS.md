@@ -17,6 +17,30 @@ O Windows precisa de partição EFI + BCD + drivers do disco atual + registro co
 
 ---
 
+## Ambiente Sandro (cópia local)
+
+| Item | Valor |
+|------|--------|
+| Cópia da pasta Windows antiga | `D:\backup pc fabio\Windows` |
+| Destino sugerido da extração | `D:\Recuperado_Windows_Antigo` |
+
+Comando (CMD no Windows novo):
+
+```bat
+tools\windows_boot\06_extrair_dados_windows_antigo.bat "D:\backup pc fabio\Windows" "D:\Recuperado_Windows_Antigo"
+```
+
+Confirme antes:
+
+```bat
+dir "D:\backup pc fabio\Windows\System32\ntoskrnl.exe"
+dir "D:\backup pc fabio\Users"
+```
+
+Se `Users` existir em `D:\backup pc fabio\Users`, o script já copia Desktop/Documents/Downloads/ElevaLocker de lá.
+
+---
+
 ## 1. Achar onde está a cópia
 
 No Windows **novo** (PowerShell ou CMD):
