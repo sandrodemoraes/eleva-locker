@@ -17,6 +17,7 @@
 | Backup Windows Defender | ✅ Usar o que tiver |
 | Cópia `D:\backup pc fabio\Windows` | ✅ Só para extrair arquivos (Users / ElevaLocker / DB) |
 | ElevaLocker nesta branch | ✅ Caminho principal |
+| HD velho formatado como backup | ✅ **Plano atual** — ver [`docs/HD_BACKUP.md`](HD_BACKUP.md) |
 
 ### Próximo foco (PC novo)
 
