@@ -22,6 +22,8 @@ from services.compartimento_service import CompartimentoService
 from repositories.base_repository import BaseRepository
 
 GPIO_BANCADA = [16, 17, 18, 19, 21, 22, 23, 27]
+# Compartimentos 1–4 P, 5–6 M, 7 G, 8 GG
+TAMANHO_BANCADA = ["P", "P", "P", "P", "M", "M", "G", "GG"]
 
 
 def main():
@@ -101,15 +103,16 @@ def main():
             "esp32_id": esp_id,
             "gpio": GPIO_BANCADA[num - 1],
             "status": "livre",
-            "tamanho": "M",
+            "tamanho": TAMANHO_BANCADA[num - 1],
         }
 
+        tam = TAMANHO_BANCADA[num - 1]
         if existe:
             CompartimentoRepository.atualizar(existe["id"], dados)
-            print(f"  Compartimento #{num} atualizado (rele={num}, gpio={GPIO_BANCADA[num-1]})")
+            print(f"  Compartimento #{num} atualizado (rele={num}, gpio={GPIO_BANCADA[num-1]}, tamanho={tam})")
         else:
             CompartimentoService.criar(dados)
-            print(f"  Compartimento #{num} criado (rele={num}, gpio={GPIO_BANCADA[num-1]})")
+            print(f"  Compartimento #{num} criado (rele={num}, gpio={GPIO_BANCADA[num-1]}, tamanho={tam})")
 
     print("\n" + "=" * 60)
     print("BANCADA CONFIGURADA")
