@@ -50,7 +50,14 @@
                 <td>{{ a.compartimentos_ocupados or 0 }}/{{ a.total_compartimentos or 0 }}</td>
                 <td><span class="badge badge-{{ a.status }}">{{ a.status }}</span></td>
                 <td>
-                    <button class="btn btn-sm" onclick="editarArmario({{ a.id }}, '{{ a.nome | replace("'", "\\'") }}', {{ a.empresa_id or 'null' }}, '{{ a.endereco or '' }}', '{{ a.cidade or '' }}', '{{ a.estado or '' }}', '{{ a.status }}')">
+                    <button type="button" class="btn btn-sm btn-editar-armario"
+                        data-id="{{ a.id }}"
+                        data-nome="{{ a.nome }}"
+                        data-empresa-id="{{ a.empresa_id or '' }}"
+                        data-endereco="{{ a.endereco or '' }}"
+                        data-cidade="{{ a.cidade or '' }}"
+                        data-estado="{{ a.estado or '' }}"
+                        data-status="{{ a.status }}">
                         <i class="fa-solid fa-pen"></i>
                     </button>
                     <form method="POST" action="/armarios/excluir/{{ a.id }}" style="display:inline" onsubmit="return confirm('Excluir este armário?')">
@@ -182,5 +189,19 @@ function editarArmario(id, nome, empresa_id, endereco, cidade, estado, status){
     document.getElementById('edit_status').value = status || 'ativo';
     abrirModal('modalEditar');
 }
+
+document.querySelectorAll('.btn-editar-armario').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+        editarArmario(
+            this.dataset.id,
+            this.dataset.nome,
+            this.dataset.empresaId,
+            this.dataset.endereco,
+            this.dataset.cidade,
+            this.dataset.estado,
+            this.dataset.status
+        );
+    });
+});
 </script>
 {% endblock %}

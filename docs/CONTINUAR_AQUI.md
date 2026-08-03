@@ -1,119 +1,117 @@
 # CONTINUAR AQUI — Retomada do projeto
 
-> Última atualização: 01/08/2026  
-> Estado: ESP32 offline-first implementado, aguardando teste físico na placa.
+> **Última atualização:** 02/08/2026 (noite)  
+> **Estado:** Bancada 8 relés VALIDADA ✅ — próximo: WhatsApp produção
 
 ---
 
-## Onde paramos
+## Onde paramos (02/08/2026)
 
 | Item | Status |
 |------|--------|
-| Fases 1–5 (operacional → escala) | ✅ PRs #1–#5 |
-| Edição de usuários | ✅ PR fase-5 (commit eafc53b) |
-| ESP32 sync offline 8–32 portas | ✅ PR #6 — branch `cursor/esp32-offline-sync-c05c` |
-| Firmware novo | ✅ `firmware/elevalocker_sync.ino` |
-| Seu firmware antigo (standalone) | ⚠️ Substituir pelo novo para integrar com Flask |
-| Teste físico ESP + relé GPIO16 | ⏳ Pendente quando voltar |
+| Fases 1–5 (operacional → escala) | ✅ |
+| ESP32 sync offline 8 portas | ✅ |
+| Bancada física 8 relés BESTER | ✅ **VALIDADA** |
+| Depósito + retirada por código (ESP totem) | ✅ |
+| Fix editar armário (site_id) | ✅ PR #8 |
+| **WhatsApp produção** | ⏳ **PRÓXIMO (Fase 6A)** |
+
+### Mapa GPIO bancada (definitivo)
+
+```
+IN1→GPIO16   IN5→GPIO21
+IN2→GPIO17   IN6→GPIO22
+IN3→GPIO18   IN7→GPIO23
+IN4→GPIO19   IN8→GPIO27  ← NÃO usar GPIO25 nesta placa
+```
+
+### Ambiente Sandro
+
+| Item | Valor |
+|------|-------|
+| PC servidor | `192.168.16.130:15000` |
+| ESP32 IP | `192.168.16.162` |
+| Token ESP | `784b417975f530a6cb4623df6c950154` |
+| WiFi | `ELEVA - ENERGIA SOLAR` |
+| Login admin | `admin@elevalocker.com` / `123456` |
+| Armário teste | Bancada Teste (id=4) |
+| ESP cadastro | ESP Bancada 8ch (id=4) |
 
 ---
 
-## Comandos para executar ao voltar (Windows / VS Code)
+## Comandos para subir amanhã
 
-### 1. Atualizar código (branch mais completa)
-
-```powershell
+```cmd
 cd C:\ElevaLocker
 git fetch origin
-git checkout cursor/esp32-offline-sync-c05c
 git pull origin cursor/esp32-offline-sync-c05c
-pip install -r requirements.txt
-python app.py
+set ESP32_MODO_SIMULACAO=0
+set APP_URL_BASE=http://192.168.16.130:15000
+py app.py
 ```
 
-Abrir: http://localhost:15000  
-Login: `sandro.demoraes@gmail.com` + sua senha
-
-### 2. Cadastrar ESP no painel (antes de gravar firmware)
-
-1. **ESP32** → Novo dispositivo  
-   - Nome: ex. `ESP Matriz`  
-   - Armário: vincular  
-   - **Max portas:** 8, 16 ou 32  
-   - Copiar o **token** gerado  
-
-2. **Compartimentos** → Para porta 1 (teste físico):  
-   - Relé: `1`  
-   - ESP32: selecionar o cadastrado  
-   - **GPIO:** `16`  
-
-3. Anotar **IP do PC** na rede (ex: `192.168.1.10`) — não use `localhost` na ESP.
-
-### 3. Gravar firmware na ESP32 (Arduino IDE)
-
-1. Instalar biblioteca **ArduinoJson 6.x**  
-2. Abrir: `firmware/elevalocker_sync.ino`  
-3. Editar no topo do arquivo:
-
-```cpp
-const char* WIFI_SSID     = "ELEVA - ENERGIA SOLAR";
-const char* WIFI_PASSWORD = "sua_senha";
-const char* SERVIDOR_URL  = "http://192.168.x.x:15000";  // IP do PC
-const char* ESP32_TOKEN   = "token_copiado_do_painel";
-```
-
-4. Placa: ESP32 Dev Module → Upload  
-5. Serial Monitor 115200 → confirmar IP da ESP  
-
-### 4. Teste rápido
-
-| Teste | Como |
-|-------|------|
-| Sync | Painel ESP32 → ícone Wi-Fi (testar) → deve ficar online |
-| Abrir relé | Compartimentos → botão cadeado |
-| Depósito | Encomendas → depositar → sync na ESP (~60s ou reiniciar ESP) |
-| Retirada offline | Desligar roteador Wi-Fi → `http://IP_ESP/` → código 6 dígitos |
-| Sync eventos | Religar Wi-Fi → heartbeat envia fila |
-
-### 5. Variável importante (.env ou ambiente)
-
-```
-ESP32_MODO_SIMULACAO=0
-APP_URL_BASE=http://SEU_IP:15000
-```
+ESP liga sozinha → sync automático.
 
 ---
 
-## PRs no GitHub
+## Plano completo de implementação
+
+**Leia:** [`docs/PLANO_IMPLEMENTACAO.md`](PLANO_IMPLEMENTACAO.md)
+
+Contém:
+- Análise profunda de todos os módulos
+- O que está pronto vs console vs ausente
+- **Fase 6A:** WhatsApp produção (prioridade amanhã)
+- Fases 6B–9: robustez, comercial, hardware
+- Checklist técnico arquivo por arquivo
+- Config `.env` proposta
+
+---
+
+## Prioridade amanhã — Fase 6A WhatsApp
+
+1. Escolher provedor: **Evolution API** (rápido) ou **Meta Business** (oficial)
+2. Configurar `.env` com `NOTIF_MODO=producao` + credenciais
+3. Melhorar mensagem (link totem + código)
+4. Testar: depositar encomenda → WhatsApp no celular
+5. Verificar histórico em `/notificacoes`
+
+Detalhes: `docs/PLANO_IMPLEMENTACAO.md` seção 5 (Fase 6A) e seção 6.
+
+---
+
+## URLs úteis
+
+| URL | Função |
+|-----|--------|
+| http://localhost:15000/encomendas | Depositar/retirar |
+| http://localhost:15000/esp32/bancada | Testar relés |
+| http://localhost:15000/notificacoes | Histórico WhatsApp/email |
+| http://192.168.16.162/ | Totem retirada ESP |
+
+---
+
+## PRs abertos
 
 | PR | Branch | Conteúdo |
 |----|--------|----------|
-| [#5](https://github.com/sandrodemoraes/eleva-locker/pull/5) | `cursor/fase-5-escala-c05c` | PostgreSQL, multi-site, API, BI |
-| [#6](https://github.com/sandrodemoraes/eleva-locker/pull/6) | `cursor/esp32-offline-sync-c05c` | ESP offline + sync (inclui fase-5) |
+| [#6](https://github.com/sandrodemoraes/eleva-locker/pull/6) | `cursor/esp32-offline-sync-c05c` | ESP offline + fases |
+| [#7](https://github.com/sandrodemoraes/eleva-locker/pull/7) | `cursor/wifi-fix-firmware-c05c` | WiFi boot fixes |
+| [#8](https://github.com/sandrodemoraes/eleva-locker/pull/8) | `cursor/fix-editar-armario-c05c` | Fix editar armário |
 
-**Use a branch `cursor/esp32-offline-sync-c05c`** — é a mais atual.
-
----
-
-## Documentação relacionada
-
-- `docs/ESP32_SYNC.md` — protocolo ESP ↔ servidor  
-- `docs/VISAO_MUNDIAL.md` — roadmap para ser referência mundial  
-- `docs/PROJETO.md` — documento mestre  
-
----
-
-## Próximos passos sugeridos (quando voltar)
-
-1. Executar comandos acima  
-2. Gravar firmware e testar GPIO16  
-3. Me avisar resultado (print Serial Monitor + painel ESP online)  
-4. Decidir prioridade do roadmap (Fase 6+) em `docs/VISAO_MUNDIAL.md`  
+**Branch recomendada no PC:** `cursor/esp32-offline-sync-c05c` (+ merges pendentes)
 
 ---
 
 ## Mensagem para retomar no Cursor
 
-> "Voltei — estou na branch esp32-offline-sync, executei os comandos. [colar resultado do teste ou dúvida]"
+> "Voltei — li o PLANO_IMPLEMENTACAO.md. Bancada OK. Vamos implementar WhatsApp Fase 6A."
 
-Assim continuamos exatamente deste ponto.
+---
+
+## Documentação
+
+- `docs/PLANO_IMPLEMENTACAO.md` — **plano completo (NOVO)**
+- `docs/TESTE_BANCADA.md` — guia bancada
+- `docs/ESP32_SYNC.md` — protocolo ESP
+- `docs/VISAO_MUNDIAL.md` — roadmap longo prazo
