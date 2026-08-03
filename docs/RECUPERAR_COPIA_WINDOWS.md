@@ -27,7 +27,16 @@ O Windows precisa de partição EFI + BCD + drivers do disco atual + registro co
 Comando (CMD no Windows novo):
 
 ```bat
+cd %USERPROFILE%\eleva-locker
+git pull origin cursor/recuperar-servidor-antigo-615b
 tools\windows_boot\06_extrair_dados_windows_antigo.bat "D:\backup pc fabio\Windows" "D:\Recuperado_Windows_Antigo"
+```
+
+Ou direto no PowerShell:
+
+```powershell
+cd $env:USERPROFILE\eleva-locker
+.\tools\windows_boot\06_extrair_dados_windows_antigo.ps1 -OrigWin "D:\backup pc fabio\Windows" -Dest "D:\Recuperado_Windows_Antigo"
 ```
 
 Confirme antes:
