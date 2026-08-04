@@ -75,8 +75,8 @@ class Esp32Service:
         from services.esp32_sync_service import Esp32SyncService
         from services.esp32_portas_service import Esp32PortasService
 
-        max_novo = dados.get("max_portas", esp_antigo.get("max_portas"))
-        if max_novo and esp_antigo.get("armario"):
+        max_novo = dados.get("max_portas", esp_antigo["max_portas"] if esp_antigo["max_portas"] else None)
+        if max_novo and esp_antigo["armario"]:
             try:
                 Esp32PortasService.sincronizar_compartimentos(esp32_id, max_novo)
             except ValueError:

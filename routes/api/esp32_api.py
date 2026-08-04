@@ -65,7 +65,7 @@ def heartbeat():
 
         esp32_id = Esp32Service.heartbeat(request.esp32["token"], ip, mac)
 
-        versao_servidor = request.esp32.get("sync_versao") or 1
+        versao_servidor = request.esp32["sync_versao"] or 1
 
         with __import__(
             "repositories.base_repository", fromlist=["BaseRepository"]
