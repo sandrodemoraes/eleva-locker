@@ -142,8 +142,10 @@ def bancada():
 
     bancada_comps = [
         c for c in compartimentos
-        if c.get("armario_nome") == "Bancada Teste" or c.get("esp32_id")
+        if c.get("armario_nome") in ("ELEVA Locker Matriz", "Bancada Teste")
     ]
+    if not bancada_comps:
+        bancada_comps = [c for c in compartimentos if c.get("esp32_id")]
 
     return render_template(
         "esp32_bancada.html",

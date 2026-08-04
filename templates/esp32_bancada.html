@@ -10,8 +10,8 @@
 
 <div class="page-header">
     <div>
-        <h1>Teste de Bancada ESP32</h1>
-        <p>Acione relés 1–8 e valide integração com a placa BESTER</p>
+        <h1>Teste de Relés ESP32</h1>
+        <p>Acione relés 1–8 — instalação oficial ELEVA Locker Matriz</p>
     </div>
     <a href="{{ url_for('esp32.listar') }}" class="btn btn-secondary">← Voltar ESP32</a>
 </div>
@@ -25,7 +25,7 @@
 <div class="table-box" style="margin-bottom:20px;">
     <h2>Passo a passo rápido</h2>
     <ol style="line-height:2;margin-left:20px;">
-        <li>Rode no PC: <code>python tools/setup_bancada.py --ip-esp 192.168.16.162</code></li>
+        <li>Rode no PC: <code>python tools/setup_oficial.py --ip-esp 192.168.16.162</code></li>
         <li>Copie o <strong>token</strong> para <code>firmware/elevalocker_sync.ino</code></li>
         <li>Grave o firmware na ESP (ArduinoJson 6.x)</li>
         <li>Clique nos botões abaixo — cada relé deve clicar</li>
@@ -72,7 +72,7 @@
     </table>
     {% else %}
     <div class="empty-state">
-        <p>Nenhum compartimento. Execute <code>python tools/setup_bancada.py</code></p>
+        <p>Nenhum compartimento. Execute <code>python tools/setup_oficial.py</code></p>
     </div>
     {% endif %}
 </div>
