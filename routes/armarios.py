@@ -129,7 +129,7 @@ def esp32_novo(armario_id):
             "mac": request.form.get("mac", ""),
             "armario": armario_id,
             "porta": int(request.form.get("porta", 80)),
-            "max_portas": armario.get("max_portas") or 16,
+            "max_portas": armario["max_portas"] or 16,
             "status": "offline",
         })
         flash("Placa ESP adicionada ao armário!", "success")
@@ -154,7 +154,7 @@ def esp32_editar(armario_id, esp32_id):
             "mac": request.form.get("mac", ""),
             "armario": armario_id,
             "porta": int(request.form.get("porta", 80)),
-            "max_portas": armario.get("max_portas") or 16,
+            "max_portas": armario["max_portas"] or 16,
             "status": request.form.get("status", "offline"),
             "token": request.form.get("token", ""),
         })

@@ -65,6 +65,7 @@
                 <td><span class="token-box">{{ e.token }}</span></td>
                 <td>
                     <form method="POST" action="{{ url_for('esp32.testar', esp32_id=e.id) }}" style="display:inline">
+                        <input type="hidden" name="redirect" value="/armarios/{{ armario.id }}">
                         <button type="submit" class="btn btn-sm" title="Testar"><i class="fa-solid fa-wifi"></i></button>
                     </form>
                     {% if perfil == 'Administrador' %}
@@ -105,6 +106,7 @@
                 <td>
                     {% if c.rele and c.esp32_id %}
                     <form method="POST" action="/esp32/abrir/{{ c.id }}" style="display:inline">
+                        <input type="hidden" name="redirect" value="/armarios/{{ armario.id }}">
                         <button type="submit" class="btn btn-sm btn-success"><i class="fa-solid fa-lock-open"></i></button>
                     </form>
                     {% else %}—{% endif %}

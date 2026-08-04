@@ -38,7 +38,7 @@ class Esp32PortasService:
         if max_portas is None:
             arm = ArmarioRepository.buscar_por_id(armario_id)
             max_portas = config.normalizar_max_portas(
-                (arm.get("max_portas") if arm else None) or esp.get("max_portas") or 16
+                (arm["max_portas"] if arm else None) or esp["max_portas"] or 16
             )
         else:
             max_portas = config.normalizar_max_portas(max_portas)

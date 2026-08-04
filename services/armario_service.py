@@ -63,7 +63,7 @@ class ArmarioService:
             dados["site_id"] = armario["site_id"] if armario["site_id"] is not None else (get_site_id() or 1)
 
         if "max_portas" in dados:
-            dados["max_portas"] = config.normalizar_max_portas(dados.get("max_portas") or armario.get("max_portas") or 16)
+            dados["max_portas"] = config.normalizar_max_portas(dados.get("max_portas") or armario["max_portas"] or 16)
 
         ArmarioRepository.atualizar(armario_id, dados)
 

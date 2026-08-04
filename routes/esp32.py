@@ -4,9 +4,29 @@ from middleware.auth_required import login_required, perfil_required
 from services.esp32_service import Esp32Service
 from services.armario_service import ArmarioService
 from services.backup.backup_service import BackupService
+from repositories.compartimento_repository import CompartimentoRepository
+from repositories.esp32_repository import Esp32Repository
 import config
 
 esp32_bp = Blueprint("esp32", __name__)
+
+
+def _redirect_pos_acao_esp(esp32_id=None, compartimento_id=None, fallback="/armarios"):
+    destino = request.form.get("redirect") or request.referrer
+    if destino:
+        return redirect(destino)
+
+    if esp32_id:
+        esp = Esp32Repository.buscar_por_id(esp32_id)
+        if esp and esp["armario"]:
+            return redirect(f"/armarios/{esp['armario']}")
+
+    if compartimento_id:
+        comp = CompartimentoRepository.buscar_por_id(compartimento_id)
+        if comp and comp["armario"]:
+            return redirect(f"/armarios/{comp['armario']}")
+
+    return redirect(fallback)
 
 
 @esp32_bp.route("/esp32")
@@ -110,7 +130,7 @@ def testar(esp32_id):
     else:
         flash(f"Falha na conexão: {resultado.get('mensagem')}", "warning")
 
-    return redirect("/esp32")
+    return _redirect_pos_acao_esp(esp32_id=esp32_id)
 
 
 @esp32_bp.route("/esp32/abrir/<int:compartimento_id>", methods=["POST"])
@@ -127,7 +147,7 @@ def abrir_compartimento(compartimento_id):
     else:
         flash(resultado["mensagem"], "warning")
 
-    return redirect(request.referrer or "/compartimentos")
+    return _redirect_pos_acao_esp(compartimento_id=compartimento_id, fallback="/compartimentos")
 
 
 @esp32_bp.route("/esp32/bancada")
@@ -136,8 +156,6 @@ def abrir_compartimento(compartimento_id):
 def bancada():
 
     dispositivos = Esp32Service.listar()
-    from repositories.compartimento_repository import CompartimentoRepository
-
     compartimentos = CompartimentoRepository.listar()
 
     bancada_comps = [
