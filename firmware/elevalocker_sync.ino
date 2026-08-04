@@ -10,7 +10,7 @@
  *   3. Sem internet: retirada por código usando cache local + fila de eventos
  *   4. Com internet: heartbeat + upload eventos + sync automático
  *
- * Configure abaixo: WIFI, SERVIDOR, TOKEN (copiar do painel /esp32)
+ * Configure abaixo: WIFI, SERVIDOR, TOKEN (painel → Armários → ELEVA Locker Matriz)
  */
 
 #include <WiFi.h>
@@ -19,17 +19,17 @@
 #include <Preferences.h>
 #include <ArduinoJson.h>
 
-// ============ CONFIGURAÇÃO — EDITE AQUI ============
-// Bancada ELEVA: ESP32 + BESTER 8ch | GPIO 16,17,18,19,21,22,23,27
+// ============ CONFIGURAÇÃO — INSTALAÇÃO OFICIAL ELEVA MATRIZ ============
+// ESP32 + placa BESTER 8ch | GPIO: 16,17,18,19,21,22,23,27 (GPIO 25 NÃO usar)
 
 const char* WIFI_SSID     = "ELEVA - ENERGIA SOLAR";
-const char* WIFI_PASSWORD = "SUA_SENHA_WIFI";
+const char* WIFI_PASSWORD = "eleva2277";
 
-// IP do PC com python app.py (ipconfig) — NÃO use localhost
+// IP do PC com py app.py (ipconfig) — NÃO use localhost
 const char* SERVIDOR_URL  = "http://192.168.16.130:15000";
 
-// Token: python tools/setup_bancada.py → copiar token
-const char* ESP32_TOKEN   = "cole_o_token_aqui";
+// Token ESP Matriz 8ch — painel /armarios/3 ou: py tools/diagnostico_bancada.py
+const char* ESP32_TOKEN   = "2e5bb4db71d8330be8bae43b13ac19f6";
 
 const int HTTP_PORT       = 80;
 const int MIN_PORTAS      = 8;
@@ -326,7 +326,7 @@ bool enviarHeartbeat() {
   if (WiFi.status() != WL_CONNECTED) return false;
 
   HTTPClient http;
-  String url = String(SERVIDOR_URL) + "/api/esp32/heartbeat";
+  String url = String(SERVIDOR_URL) + "/api/esp32/heartbeat?token=" + String(ESP32_TOKEN);
   http.begin(url);
   http.addHeader("Content-Type", "application/json");
   http.addHeader("X-ESP32-Token", ESP32_TOKEN);
