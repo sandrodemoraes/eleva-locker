@@ -124,6 +124,23 @@ class CompartimentoRepository:
             conn.commit()
 
     @staticmethod
+    def remover_acima_porta(armario_id, esp32_id, max_portas):
+
+        with BaseRepository.get_connection() as conn:
+
+            cursor = conn.cursor()
+            cursor.execute("""
+                DELETE FROM compartimentos
+                WHERE armario = ?
+                  AND esp32_id = ?
+                  AND numero > ?
+                  AND status = 'livre'
+            """, (armario_id, esp32_id, max_portas))
+            removidos = cursor.rowcount
+            conn.commit()
+            return removidos
+
+    @staticmethod
     def excluir(compartimento_id):
 
         with BaseRepository.get_connection() as conn:

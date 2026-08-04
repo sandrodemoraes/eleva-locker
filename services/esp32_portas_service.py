@@ -66,6 +66,10 @@ class Esp32PortasService:
                 CompartimentoRepository.criar(dados)
                 criados += 1
 
+        removidos = CompartimentoRepository.remover_acima_porta(
+            armario_id, esp32_id, max_portas
+        )
+
         Esp32SyncService.incrementar_versao(esp32_id)
 
         return {
@@ -73,4 +77,5 @@ class Esp32PortasService:
             "max_portas": max_portas,
             "criados": criados,
             "atualizados": atualizados,
+            "removidos": removidos,
         }

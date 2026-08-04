@@ -20,6 +20,7 @@ criar_banco()
 import config
 from repositories.base_repository import BaseRepository
 from repositories.esp32_repository import Esp32Repository
+from repositories.armario_repository import ArmarioRepository
 from services.esp32_portas_service import Esp32PortasService
 
 
@@ -55,8 +56,22 @@ def main():
         "max_portas": max_portas,
     })
 
+    if esp["armario"]:
+        arm = ArmarioRepository.buscar_por_id(esp["armario"])
+        if arm:
+            ArmarioRepository.atualizar(esp["armario"], {
+                "nome": arm["nome"],
+                "endereco": arm["endereco"],
+                "cidade": arm["cidade"],
+                "estado": arm["estado"],
+                "status": arm["status"],
+                "empresa_id": arm["empresa_id"],
+                "site_id": arm["site_id"],
+                "max_portas": max_portas,
+            })
+
     r = Esp32PortasService.sincronizar_compartimentos(esp_id, max_portas)
-    print(f"OK — {r['criados']} criados, {r['atualizados']} atualizados")
+    print(f"OK — {r['criados']} criados, {r['atualizados']} atualizados, {r['removidos']} removidos")
     print("Regrave o firmware (suporta até 64 portas) e aguarde Sync na ESP.")
 
 
