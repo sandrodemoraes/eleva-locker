@@ -153,6 +153,17 @@ class CompartimentoRepository:
             """).fetchone()["total"]
 
     @staticmethod
+    def buscar_por_armario_numero(armario_id, numero):
+
+        with BaseRepository.get_connection() as conn:
+
+            return conn.execute("""
+                SELECT *
+                FROM compartimentos
+                WHERE armario = ? AND numero = ?
+            """, (armario_id, numero)).fetchone()
+
+    @staticmethod
     def numero_existe(armario_id, numero, excluir_id=None):
 
         with BaseRepository.get_connection() as conn:

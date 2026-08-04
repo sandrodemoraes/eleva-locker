@@ -19,18 +19,13 @@ from database import criar_banco
 
 criar_banco()
 
+import config
 from repositories.armario_repository import ArmarioRepository
-from repositories.compartimento_repository import CompartimentoRepository
 from repositories.empresa_repository import EmpresaRepository
 from repositories.esp32_repository import Esp32Repository
-from services.compartimento_service import CompartimentoService
 from services.esp32_service import Esp32Service
-from services.esp32_sync_service import Esp32SyncService
+from services.esp32_portas_service import Esp32PortasService
 from repositories.base_repository import BaseRepository
-
-# Hardware bancada BESTER 8ch (mesmo GPIO validado)
-GPIO_PORTAS = [16, 17, 18, 19, 21, 22, 23, 27]
-TAMANHO_PORTAS = ["P", "P", "P", "P", "M", "M", "G", "GG"]
 
 NOME_ARMARIO = "ELEVA Locker Matriz"
 NOME_ESP = "ESP Matriz 8ch"
@@ -78,7 +73,13 @@ def main():
     parser.add_argument("--ip-esp", default="192.168.16.162", help="IP da ESP32")
     parser.add_argument("--nome-armario", default=NOME_ARMARIO, help="Nome do armário")
     parser.add_argument("--nome-esp", default=NOME_ESP, help="Nome do ESP32")
+    parser.add_argument(
+        "--portas", type=int, default=8, choices=config.ESP32_PORTAS_OPCOES,
+        help="Quantidade de portas (8, 16, 24, 32, 64)",
+    )
     args = parser.parse_args()
+
+    max_portas = config.normalizar_max_portas(args.portas)
 
     with BaseRepository.get_connection() as conn:
         site_id = obter_site_id(conn)
@@ -130,9 +131,9 @@ def main():
             "porta": 80,
             "status": "offline",
             "token": token,
-            "max_portas": 8,
+            "max_portas": max_portas,
         })
-        print(f"ESP atualizado id={esp_id} ip={args.ip_esp}")
+        print(f"ESP atualizado id={esp_id} ip={args.ip_esp} portas={max_portas}")
     else:
         esp_id = Esp32Service.criar({
             "nome": args.nome_esp,
@@ -140,45 +141,22 @@ def main():
             "mac": "",
             "armario": armario_id,
             "porta": 80,
-            "max_portas": 8,
+            "max_portas": max_portas,
             "status": "offline",
         })
         esp = Esp32Repository.buscar_por_id(esp_id)
         token = esp["token"]
-        print(f"ESP criado id={esp_id} ip={args.ip_esp}")
+        print(f"ESP criado id={esp_id} ip={args.ip_esp} portas={max_portas}")
 
-    for num in range(1, 9):
-        with BaseRepository.get_connection() as conn:
-            existe = conn.execute("""
-                SELECT id FROM compartimentos
-                WHERE armario = ? AND numero = ?
-            """, (armario_id, num)).fetchone()
-
-        tam = TAMANHO_PORTAS[num - 1]
-        dados = {
-            "armario": armario_id,
-            "numero": num,
-            "rele": num,
-            "esp32_id": esp_id,
-            "gpio": GPIO_PORTAS[num - 1],
-            "status": "livre",
-            "tamanho": tam,
-        }
-
-        if existe:
-            CompartimentoRepository.atualizar(existe["id"], dados)
-            print(f"  #{num} atualizado (relé={num}, gpio={GPIO_PORTAS[num-1]}, {tam})")
-        else:
-            CompartimentoService.criar(dados)
-            print(f"  #{num} criado (relé={num}, gpio={GPIO_PORTAS[num-1]}, {tam})")
-
-    Esp32SyncService.incrementar_versao(esp_id)
+    resultado = Esp32PortasService.sincronizar_compartimentos(esp_id, max_portas)
+    print(f"  Compartimentos: {resultado['criados']} criados, {resultado['atualizados']} atualizados")
 
     print("\n" + "=" * 60)
     print("INSTALAÇÃO OFICIAL CONFIGURADA")
     print("=" * 60)
     print(f"\n  Armário : {args.nome_armario}")
     print(f"  ESP32   : {args.nome_esp} @ {args.ip_esp}")
+    print(f"  Portas  : {max_portas}")
     print(f"  Empresa : {FANTASIA_EMPRESA}")
     print(f"\n  Firmware elevalocker_sync.ino:")
     print(f'    SERVIDOR_URL = "http://192.168.16.130:15000"')

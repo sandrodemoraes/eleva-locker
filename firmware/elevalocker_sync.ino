@@ -33,15 +33,13 @@ const char* ESP32_TOKEN   = "cole_o_token_aqui";
 
 const int HTTP_PORT       = 80;
 const int MIN_PORTAS      = 8;
-const int MAX_PORTAS      = 32;
+const int MAX_PORTAS      = 64;
 
-// GPIO padrão por relé (se servidor não enviar gpio no compartimento)
-const int GPIO_PADRAO[] = {
+const int GPIO_BASE[] = {
   16, 17, 18, 19, 21, 22, 23, 27,
-  26, 27, 32, 33, 12, 13, 14, 15,
-  16, 17, 18, 19, 21, 22, 23, 27,
-  26, 27, 32, 33, 12, 13, 14, 15
+  26, 32, 33, 12, 13, 14, 15
 };
+const int GPIO_BASE_LEN = 15;
 
 // ============ INTERNOS ============
 
@@ -139,7 +137,8 @@ void carregarCacheNvs() {
 
 int gpioDoRele(int rele, int gpioServidor) {
   if (gpioServidor > 0) return gpioServidor;
-  if (rele >= 1 && rele <= MAX_PORTAS) return GPIO_PADRAO[rele - 1];
+  if (rele >= 1 && rele <= MAX_PORTAS)
+    return GPIO_BASE[(rele - 1) % GPIO_BASE_LEN];
   return -1;
 }
 
@@ -316,7 +315,7 @@ bool sincronizarComServidor() {
   String body = http.getString();
   http.end();
 
-  DynamicJsonDocument doc(8192);
+  DynamicJsonDocument doc(24576);
   if (deserializeJson(doc, body)) return false;
   if (!doc["sucesso"]) return false;
 
@@ -537,7 +536,7 @@ void setup() {
   Serial.begin(115200);
 
   for (int i = 0; i < MAX_PORTAS; i++) {
-    int g = GPIO_PADRAO[i];
+    int g = GPIO_BASE[i % GPIO_BASE_LEN];
     pinMode(g, OUTPUT);
     digitalWrite(g, LOW);
   }

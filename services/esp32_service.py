@@ -41,15 +41,24 @@ class Esp32Service:
         dados["nome"] = nome
         dados["token"] = dados.get("token") or config.gerar_token_esp32()
 
-        max_portas = int(dados.get("max_portas") or 16)
-        dados["max_portas"] = max(8, min(32, max_portas))
+        max_portas = config.normalizar_max_portas(dados.get("max_portas") or 16)
+        dados["max_portas"] = max_portas
 
-        return Esp32Repository.criar(dados)
+        esp_id = Esp32Repository.criar(dados)
+
+        from services.esp32_portas_service import Esp32PortasService
+        if dados.get("armario"):
+            try:
+                Esp32PortasService.sincronizar_compartimentos(esp_id, max_portas)
+            except ValueError:
+                pass
+
+        return esp_id
 
     @staticmethod
     def atualizar(esp32_id, dados):
 
-        Esp32Service.buscar_por_id(esp32_id)
+        esp_antigo = Esp32Service.buscar_por_id(esp32_id)
 
         nome = dados.get("nome", "").strip()
 
@@ -59,13 +68,21 @@ class Esp32Service:
         dados["nome"] = nome
 
         if "max_portas" in dados:
-            max_portas = int(dados.get("max_portas") or 16)
-            dados["max_portas"] = max(8, min(32, max_portas))
+            dados["max_portas"] = config.normalizar_max_portas(dados.get("max_portas") or 16)
 
         Esp32Repository.atualizar(esp32_id, dados)
 
         from services.esp32_sync_service import Esp32SyncService
-        Esp32SyncService.incrementar_versao(esp32_id)
+        from services.esp32_portas_service import Esp32PortasService
+
+        max_novo = dados.get("max_portas", esp_antigo.get("max_portas"))
+        if max_novo and esp_antigo.get("armario"):
+            try:
+                Esp32PortasService.sincronizar_compartimentos(esp32_id, max_novo)
+            except ValueError:
+                Esp32SyncService.incrementar_versao(esp32_id)
+        else:
+            Esp32SyncService.incrementar_versao(esp32_id)
 
     @staticmethod
     def excluir(esp32_id):

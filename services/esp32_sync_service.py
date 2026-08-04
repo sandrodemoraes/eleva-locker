@@ -54,8 +54,7 @@ class Esp32SyncService:
             raise ValueError("ESP32 não encontrado.")
 
         esp = dict(esp)
-        max_portas = esp.get("max_portas") or 16
-        max_portas = max(8, min(32, int(max_portas)))
+        max_portas = config.normalizar_max_portas(esp.get("max_portas") or 16)
 
         with BaseRepository.get_connection() as conn:
 

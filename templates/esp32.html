@@ -36,6 +36,7 @@
                 <th>IP</th>
                 <th>MAC</th>
                 <th>Armário</th>
+                <th>Portas</th>
                 <th>Compart.</th>
                 <th>Status</th>
                 <th>Último heartbeat</th>
@@ -50,6 +51,7 @@
                 <td>{{ d.ip or '—' }}:{{ d.porta or 80 }}</td>
                 <td>{{ d.mac or '—' }}</td>
                 <td>{{ d.armario_nome or '—' }}</td>
+                <td>{{ d.max_portas or 16 }}</td>
                 <td>{{ d.total_compartimentos or 0 }}</td>
                 <td>
                     <span class="badge badge-{{ d.status }}">
@@ -128,8 +130,15 @@
                 </select>
             </div>
             <div class="form-group">
-                <label>Max portas (8–32)</label>
-                <input type="number" name="max_portas" min="8" max="32" value="16">
+                <label>Quantidade de portas</label>
+                <select name="max_portas">
+                    <option value="8">8 portas</option>
+                    <option value="16" selected>16 portas</option>
+                    <option value="24">24 portas</option>
+                    <option value="32">32 portas</option>
+                    <option value="64">64 portas</option>
+                </select>
+                <small style="color:#666;">Alterar recria/atualiza compartimentos 1..N no armário vinculado.</small>
             </div>
             <div class="form-actions">
                 <button type="submit" class="btn">Salvar</button>
@@ -171,8 +180,15 @@
                 </select>
             </div>
             <div class="form-group">
-                <label>Max portas (8–32)</label>
-                <input type="number" name="max_portas" id="edit_max_portas" min="8" max="32" value="16">
+                <label>Quantidade de portas</label>
+                <select name="max_portas" id="edit_max_portas">
+                    <option value="8">8 portas</option>
+                    <option value="16">16 portas</option>
+                    <option value="24">24 portas</option>
+                    <option value="32">32 portas</option>
+                    <option value="64">64 portas</option>
+                </select>
+                <small style="color:#666;">Salvar aplica no armário e sincroniza com a ESP.</small>
             </div>
             <div class="form-group">
                 <label>Token (para firmware)</label>
