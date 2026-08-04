@@ -1,0 +1,44 @@
+{% extends "layout/base.html" %}
+{% block title %}{{ empresa.razao_social }} | Portal{% endblock %}
+{% block styles %}<link rel="stylesheet" href="{{ url_for('static', filename='css/crud.css') }}">{% endblock %}
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>{{ empresa.razao_social }}</h1>
+        <p>Portal self-service — plano, uso e faturas</p>
+    </div>
+    <a href="/portal" class="btn">← Voltar</a>
+</div>
+{% if uso.contrato %}
+<div class="cards">
+    <div class="card"><div class="numero">{{ uso.plano_nome }}</div><div class="titulo-card">Plano atual</div></div>
+    <div class="card"><div class="numero">{{ uso.armarios }}{% if uso.limites.armarios >= 0 %}/{{ uso.limites.armarios }}{% else %}/∞{% endif %}</div><div class="titulo-card">Armários</div></div>
+    <div class="card"><div class="numero">{{ uso.compartimentos }}{% if uso.limites.compartimentos >= 0 %}/{{ uso.limites.compartimentos }}{% else %}/∞{% endif %}</div><div class="titulo-card">Compartimentos</div></div>
+    <div class="card"><div class="numero">{{ uso.encomendas_mes }}{% if uso.limites.encomendas_mes >= 0 %}/{{ uso.limites.encomendas_mes }}{% else %}/∞{% endif %}</div><div class="titulo-card">Encomendas/mês</div></div>
+</div>
+{% else %}
+<div class="alert alert-warning">Esta empresa não possui contrato ativo. <a href="/contratos">Contratar plano</a></div>
+{% endif %}
+<div class="panels" style="margin-top:25px;">
+<div class="table-box">
+<h2 style="color:#0f3d75;margin-bottom:15px;">Contratos</h2>
+{% for c in contratos %}
+<p><strong>{{ c.plano_nome }}</strong> — R$ {{ '%.2f'|format(c.valor_mensal) }}/mês — <span class="badge badge-{{ c.status }}">{{ c.status }}</span></p>
+{% else %}<p>Nenhum contrato.</p>{% endfor %}
+</div>
+<div class="table-box">
+<h2 style="color:#0f3d75;margin-bottom:15px;">Faturas</h2>
+<table><thead><tr><th>Ref.</th><th>Valor</th><th>Status</th><th></th></tr></thead>
+<tbody>
+{% for f in faturas %}
+<tr>
+    <td>{{ f.referencia }}</td>
+    <td>R$ {{ '%.2f'|format(f.valor) }}</td>
+    <td>{{ f.status }}</td>
+    <td>{% if f.link_pagamento and f.status != 'pago' %}<a href="{{ f.link_pagamento }}" class="btn btn-sm" target="_blank">Pagar</a>{% endif %}</td>
+</tr>
+{% else %}<tr><td colspan="4">Nenhuma fatura.</td></tr>{% endfor %}
+</tbody></table>
+</div>
+</div>
+{% endblock %}

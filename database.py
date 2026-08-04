@@ -1,27 +1,32 @@
-import sqlite3
 import os
 from werkzeug.security import generate_password_hash
+
+from db.connection import (
+    get_connection, get_engine, coluna_existe, adicionar_coluna, adapt_ddl,
+)
 
 DB_PATH = os.path.join("database", "elevalocker.db")
 
 
 def conectar():
-    conn = sqlite3.connect(DB_PATH)
-    conn.row_factory = sqlite3.Row
-    return conn
+    return get_connection()
 
 
 def criar_banco():
 
     os.makedirs("database", exist_ok=True)
 
-    conn = sqlite3.connect(DB_PATH)
+    engine = get_engine()
+    conn = get_connection()
     cursor = conn.cursor()
+
+    def ddl(sql):
+        cursor.execute(adapt_ddl(sql, engine))
 
     # ============================
     # TABELA USUÁRIOS
     # ============================
-    cursor.execute("""
+    ddl("""
     CREATE TABLE IF NOT EXISTS usuarios(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
 
@@ -48,7 +53,7 @@ def criar_banco():
     # ============================
     # TABELA EMPRESAS
     # ============================
-    cursor.execute("""
+    ddl("""
     CREATE TABLE IF NOT EXISTS empresas(
 
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -91,7 +96,7 @@ def criar_banco():
     # ============================
     # TABELA ARMÁRIOS
     # ============================
-    cursor.execute("""
+    ddl("""
     CREATE TABLE IF NOT EXISTS armarios(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         nome TEXT,
@@ -105,7 +110,7 @@ def criar_banco():
     # ============================
     # TABELA ESP32
     # ============================
-    cursor.execute("""
+    ddl("""
     CREATE TABLE IF NOT EXISTS esp32(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         nome TEXT,
@@ -119,7 +124,7 @@ def criar_banco():
     # ============================
     # TABELA COMPARTIMENTOS
     # ============================
-    cursor.execute("""
+    ddl("""
     CREATE TABLE IF NOT EXISTS compartimentos(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         armario INTEGER,
@@ -133,7 +138,7 @@ def criar_banco():
     # ============================
     # TABELA ENCOMENDAS
     # ============================
-    cursor.execute("""
+    ddl("""
     CREATE TABLE IF NOT EXISTS encomendas(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         codigo TEXT,
@@ -150,7 +155,7 @@ def criar_banco():
     # ============================
     # TABELA LOGS
     # ============================
-    cursor.execute("""
+    ddl("""
     CREATE TABLE IF NOT EXISTS logs(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         compartimento INTEGER,
@@ -159,6 +164,171 @@ def criar_banco():
         acao TEXT
     )
     """)
+
+    # ============================
+    # MIGRAÇÕES (Fase 1)
+    # ============================
+    adicionar_coluna(cursor, "armarios", "empresa_id", "INTEGER")
+    adicionar_coluna(cursor, "compartimentos", "tamanho", "TEXT DEFAULT 'M'")
+    adicionar_coluna(cursor, "encomendas", "operador", "TEXT")
+    adicionar_coluna(cursor, "encomendas", "transportadora", "TEXT")
+    adicionar_coluna(cursor, "encomendas", "observacao", "TEXT")
+
+    # Migrações Fase 2 — ESP32
+    adicionar_coluna(cursor, "esp32", "token", "TEXT")
+    adicionar_coluna(cursor, "esp32", "porta", "INTEGER DEFAULT 80")
+    adicionar_coluna(cursor, "esp32", "ultimo_heartbeat", "DATETIME")
+    adicionar_coluna(cursor, "esp32", "max_portas", "INTEGER DEFAULT 16")
+    adicionar_coluna(cursor, "esp32", "sync_versao", "INTEGER DEFAULT 1")
+
+    adicionar_coluna(cursor, "compartimentos", "gpio", "INTEGER")
+
+    # Migrações Fase 3 — Notificações
+    adicionar_coluna(cursor, "encomendas", "notificado_em", "DATETIME")
+
+    ddl("""
+    CREATE TABLE IF NOT EXISTS esp32_eventos_sync(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        esp32_id INTEGER NOT NULL,
+        evento_uid TEXT NOT NULL UNIQUE,
+        tipo TEXT NOT NULL,
+        payload TEXT,
+        criado_em DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+    """)
+
+    ddl("""
+    CREATE TABLE IF NOT EXISTS notificacoes(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        encomenda_id INTEGER,
+        canal TEXT,
+        destinatario TEXT,
+        mensagem TEXT,
+        status TEXT,
+        detalhe TEXT,
+        criado_em DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+    """)
+
+    cursor.execute("""
+        UPDATE esp32 SET status = 'offline'
+        WHERE status IS NULL OR status = ''
+    """)
+
+    cursor.execute("""
+        UPDATE armarios SET status = 'ativo'
+        WHERE status IS NULL OR status = ''
+    """)
+
+    cursor.execute("""
+        UPDATE compartimentos SET status = 'livre'
+        WHERE status IS NULL OR status = ''
+    """)
+
+    # ============================
+    # FASE 4 — COMERCIAL
+    # ============================
+    ddl("""
+    CREATE TABLE IF NOT EXISTS planos(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        nome TEXT NOT NULL,
+        descricao TEXT,
+        preco_mensal REAL NOT NULL,
+        max_armarios INTEGER DEFAULT -1,
+        max_compartimentos INTEGER DEFAULT -1,
+        max_encomendas_mes INTEGER DEFAULT -1,
+        inclui_whatsapp INTEGER DEFAULT 0,
+        inclui_relatorios INTEGER DEFAULT 1,
+        status INTEGER DEFAULT 1,
+        criado_em DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+    """)
+
+    ddl("""
+    CREATE TABLE IF NOT EXISTS contratos(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        empresa_id INTEGER NOT NULL,
+        plano_id INTEGER NOT NULL,
+        data_inicio TEXT NOT NULL,
+        data_fim TEXT,
+        status TEXT DEFAULT 'ativo',
+        valor_mensal REAL NOT NULL,
+        renovacao_automatica INTEGER DEFAULT 1,
+        criado_em DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+    """)
+
+    ddl("""
+    CREATE TABLE IF NOT EXISTS faturas(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        contrato_id INTEGER NOT NULL,
+        referencia TEXT NOT NULL,
+        valor REAL NOT NULL,
+        status TEXT DEFAULT 'pendente',
+        data_vencimento TEXT,
+        data_pagamento TEXT,
+        link_pagamento TEXT,
+        gateway_id TEXT,
+        criado_em DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+    """)
+
+    adicionar_coluna(cursor, "usuarios", "empresa_id", "INTEGER")
+
+    # FASE 5 — ESCALA
+    ddl("""
+    CREATE TABLE IF NOT EXISTS sites(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        nome TEXT NOT NULL,
+        codigo TEXT UNIQUE,
+        endereco TEXT,
+        cidade TEXT,
+        estado TEXT,
+        status INTEGER DEFAULT 1,
+        criado_em DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+    """)
+
+    ddl("""
+    CREATE TABLE IF NOT EXISTS api_keys(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        site_id INTEGER,
+        nome TEXT NOT NULL,
+        chave TEXT UNIQUE NOT NULL,
+        permissoes TEXT DEFAULT 'read',
+        ativo INTEGER DEFAULT 1,
+        criado_em DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+    """)
+
+    adicionar_coluna(cursor, "empresas", "site_id", "INTEGER")
+    adicionar_coluna(cursor, "armarios", "site_id", "INTEGER")
+
+    cursor.execute("SELECT COUNT(*) AS c FROM sites")
+    rs = cursor.fetchone()
+    n_sites = list(rs.values())[0] if hasattr(rs, "values") else rs[0]
+    if n_sites == 0:
+        cursor.execute("""
+            INSERT INTO sites (nome, codigo, cidade, estado)
+            VALUES ('Matriz ELEVA', 'matriz', 'São Paulo', 'SP')
+        """)
+
+    # Planos padrão
+    cursor.execute("SELECT COUNT(*) AS c FROM planos")
+    rs = cursor.fetchone()
+    n_planos = list(rs.values())[0] if hasattr(rs, "values") else rs[0]
+    if n_planos == 0:
+        cursor.executemany("""
+            INSERT INTO planos (
+                nome, descricao, preco_mensal,
+                max_armarios, max_compartimentos, max_encomendas_mes,
+                inclui_whatsapp, inclui_relatorios
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        """, [
+            ("Starter", "Ideal para condomínios pequenos", 199.0, 1, 20, 500, 0, 1),
+            ("Profissional", "Até 5 armários", 499.0, 5, 100, 2000, 1, 1),
+            ("Enterprise", "Recursos ilimitados", 1499.0, -1, -1, -1, 1, 1),
+        ])
 
     # ============================
     # USUÁRIO ADMINISTRADOR PADRÃO
@@ -197,4 +367,4 @@ def criar_banco():
     conn.commit()
     conn.close()
 
-    print("Banco criado com sucesso.")
+    print(f"Banco criado com sucesso ({get_engine()}).")

@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <title>ELEVA LOCKER — Totem</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/totem.css') }}">
+    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+</head>
+<body>
+
+<div class="totem">
+
+    <div class="totem-logo">
+        <i class="fa-solid fa-box"></i>
+        <h1>ELEVA LOCKER</h1>
+        <p>Digite o código de retirada</p>
+    </div>
+
+    {% if armario %}
+    <div class="totem-armario">
+        <i class="fa-solid fa-location-dot"></i> {{ armario.nome }}
+    </div>
+    {% elif armarios %}
+    <div class="totem-armario">
+        <select id="selArmario" onchange="if(this.value) location.href='/totem/'+this.value" style="background:transparent;border:none;color:#fff;font-size:16px;">
+            <option value="">Selecione o armário</option>
+            {% for a in armarios %}
+            <option value="{{ a.id }}">{{ a.nome }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    {% endif %}
+
+    <div class="codigo-display" id="display">______</div>
+
+    <div class="teclado">
+        <button class="tecla" onclick="digitar('1')">1</button>
+        <button class="tecla" onclick="digitar('2')">2</button>
+        <button class="tecla" onclick="digitar('3')">3</button>
+        <button class="tecla" onclick="digitar('4')">4</button>
+        <button class="tecla" onclick="digitar('5')">5</button>
+        <button class="tecla" onclick="digitar('6')">6</button>
+        <button class="tecla" onclick="digitar('7')">7</button>
+        <button class="tecla" onclick="digitar('8')">8</button>
+        <button class="tecla" onclick="digitar('9')">9</button>
+        <button class="tecla tecla-limpar tecla-acao" onclick="limpar()"><i class="fa-solid fa-delete-left"></i></button>
+        <button class="tecla" onclick="digitar('0')">0</button>
+        <button class="tecla tecla-acao" onclick="backspace()"><i class="fa-solid fa-backspace"></i></button>
+        <button class="tecla tecla-confirmar" onclick="confirmar()">
+            <i class="fa-solid fa-lock-open"></i> Abrir compartimento
+        </button>
+    </div>
+
+    <div class="resultado" id="resultado"></div>
+
+    <div class="totem-footer">ELEVA LOCKER © 2026 — Totem de retirada</div>
+
+</div>
+
+<script>
+let codigo = "";
+
+function atualizarDisplay(){
+    let txt = codigo.padEnd(6, "_").split("").join(" ");
+    document.getElementById("display").textContent = txt;
+}
+
+function digitar(n){
+    if(codigo.length >= 6) return;
+    codigo += n;
+    atualizarDisplay();
+    if(codigo.length === 6) setTimeout(confirmar, 300);
+}
+
+function limpar(){
+    codigo = "";
+    atualizarDisplay();
+    document.getElementById("resultado").className = "resultado";
+}
+
+function backspace(){
+    codigo = codigo.slice(0, -1);
+    atualizarDisplay();
+}
+
+function confirmar(){
+    if(codigo.length !== 6){
+        mostrarResultado(false, "Digite os 6 dígitos do código.");
+        return;
+    }
+
+    fetch("/totem/retirar", {
+        method: "POST",
+        headers: {"Content-Type": "application/x-www-form-urlencoded"},
+        body: "codigo=" + codigo
+    })
+    .then(r => r.json())
+    .then(data => {
+        if(data.sucesso){
+            mostrarResultado(true, data.mensagem + " — " + data.cliente);
+            setTimeout(limpar, 5000);
+        } else {
+            mostrarResultado(false, data.mensagem);
+            codigo = "";
+            atualizarDisplay();
+        }
+    })
+    .catch(() => mostrarResultado(false, "Erro de conexão."));
+}
+
+function mostrarResultado(ok, msg){
+    const el = document.getElementById("resultado");
+    el.className = "resultado " + (ok ? "sucesso" : "erro");
+    el.innerHTML = (ok ? "✅ " : "❌ ") + msg;
+}
+
+document.addEventListener("keydown", e => {
+    if(e.key >= "0" && e.key <= "9") digitar(e.key);
+    if(e.key === "Backspace") backspace();
+    if(e.key === "Enter") confirmar();
+    if(e.key === "Escape") limpar();
+});
+
+atualizarDisplay();
+</script>
+
+</body>
+</html>
