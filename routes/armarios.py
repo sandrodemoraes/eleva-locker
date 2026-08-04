@@ -80,7 +80,7 @@ def editar(armario_id):
 
     try:
         empresa_id = request.form.get("empresa_id")
-        ArmarioService.atualizar(armario_id, {
+        removidos = ArmarioService.atualizar(armario_id, {
             "nome": request.form.get("nome", ""),
             "endereco": request.form.get("endereco", ""),
             "cidade": request.form.get("cidade", ""),
@@ -90,7 +90,10 @@ def editar(armario_id):
             "max_portas": request.form.get("max_portas", 16),
         })
         LogService.registrar(None, session.get("usuario"), f"Armário #{armario_id} atualizado")
-        flash("Armário atualizado!", "success")
+        msg = "Armário atualizado!"
+        if removidos:
+            msg += f" {removidos} compartimento(s) extra removido(s)."
+        flash(msg, "success")
     except ValueError as erro:
         flash(str(erro), "warning")
     except Exception:

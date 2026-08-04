@@ -60,15 +60,14 @@ class Esp32PortasService:
             }
 
             if existe:
+                dados["status"] = existe["status"]
                 CompartimentoRepository.atualizar(existe["id"], dados)
                 atualizados += 1
             else:
                 CompartimentoRepository.criar(dados)
                 criados += 1
 
-        removidos = CompartimentoRepository.remover_acima_porta(
-            armario_id, esp32_id, max_portas
-        )
+        removidos = CompartimentoRepository.remover_acima_porta(armario_id, max_portas)
 
         Esp32SyncService.incrementar_versao(esp32_id)
 

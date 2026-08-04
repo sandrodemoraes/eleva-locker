@@ -68,12 +68,16 @@ class ArmarioService:
         ArmarioRepository.atualizar(armario_id, dados)
 
         if "max_portas" in dados:
-            ArmarioService._sincronizar_portas_armario(armario_id, dados["max_portas"])
+            removidos = ArmarioService._sincronizar_portas_armario(armario_id, dados["max_portas"])
+            dados["_sync_removidos"] = removidos
+
+        return dados.get("_sync_removidos", 0)
 
     @staticmethod
     def _sincronizar_portas_armario(armario_id, max_portas):
         from services.esp32_portas_service import Esp32PortasService
 
+        total_removidos = 0
         esps = Esp32Repository.listar_por_armario(armario_id)
         for esp in esps:
             Esp32Repository.atualizar(esp["id"], {
@@ -86,7 +90,10 @@ class ArmarioService:
                 "porta": esp["porta"] or 80,
                 "max_portas": max_portas,
             })
-            Esp32PortasService.sincronizar_compartimentos(esp["id"], max_portas)
+            resultado = Esp32PortasService.sincronizar_compartimentos(esp["id"], max_portas)
+            total_removidos += resultado.get("removidos", 0)
+
+        return total_removidos
 
     @staticmethod
     def excluir(armario_id):
