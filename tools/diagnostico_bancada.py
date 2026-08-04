@@ -59,7 +59,7 @@ def main():
 
     print("\n" + "=" * 60)
     print("URLs:")
-    print("  Painel ESP:  http://192.168.16.130:15000/esp32")
+    print("  Painel armário: http://192.168.16.130:15000/armarios")
     print("  Totem ESP:   http://192.168.16.162/")
     print("  Teste relé:  http://192.168.16.162/abrir/1?token=TOKEN&duracao=3")
     print("=" * 60)

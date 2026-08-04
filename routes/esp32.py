@@ -33,13 +33,8 @@ def _redirect_pos_acao_esp(esp32_id=None, compartimento_id=None, fallback="/arma
 @login_required
 def listar():
 
-    return render_template(
-        "esp32.html",
-        usuario=session.get("usuario"),
-        perfil=session.get("perfil"),
-        dispositivos=Esp32Service.listar(),
-        armarios=ArmarioService.listar_ativos(),
-    )
+    flash("Gerencie a placa ESP pelo armário: Armários → abrir o armário desejado.", "info")
+    return redirect("/armarios")
 
 
 @esp32_bp.route("/esp32/novo", methods=["POST"])

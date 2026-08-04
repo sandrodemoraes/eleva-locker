@@ -165,7 +165,6 @@ def main():
     print(f'    ESP32_TOKEN  = "{token}"')
     print(f"\n  Painel:")
     print(f"    http://192.168.16.130:15000/armarios")
-    print(f"    http://192.168.16.130:15000/esp32")
     print(f"    http://192.168.16.130:15000/encomendas")
     print(f"    http://192.168.16.130:15000/esp32/bancada  (teste relés)")
     print(f"\n  Totem ESP: http://{args.ip_esp}/")
