@@ -16,7 +16,6 @@ from database import criar_banco
 criar_banco()
 
 from repositories.base_repository import BaseRepository
-from db.connection import get_connection
 
 
 def main():
@@ -24,7 +23,6 @@ def main():
     parser.add_argument("--token", help="Token do firmware para comparar")
     args = parser.parse_args()
 
-    db_path = get_connection().__enter__()._conn.execute("PRAGMA database_list").fetchone()
     print("=" * 60)
     print("DIAGNÓSTICO BANCADA")
     print("=" * 60)

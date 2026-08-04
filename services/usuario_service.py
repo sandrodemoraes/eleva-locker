@@ -6,14 +6,11 @@ from repositories.usuario_repository import UsuarioRepository
 class UsuarioService:
 
     @staticmethod
-    def listar():
-        return UsuarioRepository.listar()
+    def listar(armario_id=None):
+        return UsuarioRepository.listar(armario_id)
 
     @staticmethod
     def buscar_por_id(usuario_id):
-        """
-        Retorna um usuário pelo ID.
-        """
 
         usuario = UsuarioRepository.buscar_por_id(usuario_id)
 
@@ -23,15 +20,7 @@ class UsuarioService:
         return usuario
 
     @staticmethod
-    def criar(
-        nome,
-        email,
-        telefone,
-        senha,
-        confirmar,
-        perfil,
-        status
-    ):
+    def criar(nome, email, telefone, senha, confirmar, perfil, status, armario_id=None):
 
         nome = nome.strip()
         email = email.strip().lower()
@@ -48,27 +37,12 @@ class UsuarioService:
 
         senha_hash = generate_password_hash(senha)
 
-        UsuarioRepository.criar(
-            nome,
-            email,
-            telefone,
-            senha_hash,
-            perfil,
-            status
+        return UsuarioRepository.criar(
+            nome, email, telefone, senha_hash, perfil, status, armario_id
         )
 
     @staticmethod
-    def atualizar(
-        usuario_id,
-        nome,
-        email,
-        telefone,
-        perfil,
-        status
-    ):
-        """
-        Atualiza os dados de um usuário.
-        """
+    def atualizar(usuario_id, nome, email, telefone, perfil, status, armario_id=None):
 
         nome = nome.strip()
         email = email.strip().lower()
@@ -88,23 +62,11 @@ class UsuarioService:
             raise ValueError("Este e-mail já está cadastrado.")
 
         UsuarioRepository.atualizar(
-            usuario_id,
-            nome,
-            email,
-            telefone,
-            perfil,
-            status
+            usuario_id, nome, email, telefone, perfil, status, armario_id
         )
 
     @staticmethod
-    def alterar_senha(
-        usuario_id,
-        senha,
-        confirmar
-    ):
-        """
-        Altera a senha do usuário.
-        """
+    def alterar_senha(usuario_id, senha, confirmar):
 
         if not senha:
             raise ValueError("Informe a nova senha.")
@@ -112,22 +74,12 @@ class UsuarioService:
         if senha != confirmar:
             raise ValueError("As senhas não conferem.")
 
-        senha_hash = generate_password_hash(senha)
-
-        UsuarioRepository.alterar_senha(
-            usuario_id,
-            senha_hash
-        )
+        UsuarioRepository.alterar_senha(usuario_id, generate_password_hash(senha))
 
     @staticmethod
     def excluir(usuario_id):
-        """
-        Exclui um usuário.
-        """
 
-        usuario = UsuarioRepository.buscar_por_id(usuario_id)
-
-        if not usuario:
+        if not UsuarioRepository.buscar_por_id(usuario_id):
             raise ValueError("Usuário não encontrado.")
 
         UsuarioRepository.excluir(usuario_id)

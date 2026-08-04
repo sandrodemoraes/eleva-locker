@@ -17,7 +17,27 @@ Cria automaticamente:
 | Empresa | ELEVA Energia Solar |
 | Armário | ELEVA Locker Matriz |
 | ESP32 | ESP Matriz 8ch |
-| Compartimentos | 8 portas (1–4 P, 5–6 M, 7 G, 8 GG) |
+| Compartimentos | 8 portas padrão (configurável: **8, 16, 24, 32, 64**) |
+
+```cmd
+py tools/setup_oficial.py --ip-esp 192.168.16.162 --portas 8
+```
+
+## Alternar quantidade de portas
+
+**No painel:** ESP32 → Editar → **Quantidade de portas** → Salvar  
+(cria/atualiza compartimentos 1..N automaticamente)
+
+**Via script:**
+
+```cmd
+py tools/ajustar_portas.py --portas 16
+py tools/ajustar_portas.py --nome-esp "ESP Matriz 8ch" --portas 32
+```
+
+Opções: **8, 16, 24, 32, 64**
+
+> **Hardware:** 8 relés = 1 placa BESTER. Para 16+ portas serão necessárias placas/expansores adicionais; o GPIO é atribuído em ciclo até o cadastro real por compartimento.
 
 ## Depois do script
 

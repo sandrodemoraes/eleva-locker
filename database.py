@@ -274,6 +274,7 @@ def criar_banco():
     """)
 
     adicionar_coluna(cursor, "usuarios", "empresa_id", "INTEGER")
+    adicionar_coluna(cursor, "usuarios", "armario_id", "INTEGER")
 
     # FASE 5 — ESCALA
     ddl("""
@@ -303,6 +304,7 @@ def criar_banco():
 
     adicionar_coluna(cursor, "empresas", "site_id", "INTEGER")
     adicionar_coluna(cursor, "armarios", "site_id", "INTEGER")
+    adicionar_coluna(cursor, "armarios", "max_portas", "INTEGER DEFAULT 16")
 
     cursor.execute("SELECT COUNT(*) AS c FROM sites")
     rs = cursor.fetchone()

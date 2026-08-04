@@ -100,6 +100,7 @@ def main():
             "status": "ativo",
             "empresa_id": empresa_id,
             "site_id": site_id,
+            "max_portas": max_portas,
         })
         print(f"Armário '{args.nome_armario}' atualizado (id={armario_id})")
     else:
@@ -111,6 +112,7 @@ def main():
             "status": "ativo",
             "empresa_id": empresa_id,
             "site_id": site_id,
+            "max_portas": max_portas,
         })
         print(f"Armário criado id={armario_id}")
 

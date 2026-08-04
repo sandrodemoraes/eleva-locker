@@ -3,6 +3,7 @@
 import config
 from repositories.compartimento_repository import CompartimentoRepository
 from repositories.esp32_repository import Esp32Repository
+from repositories.armario_repository import ArmarioRepository
 from services.esp32_sync_service import Esp32SyncService
 
 GPIO_PADRAO = [16, 17, 18, 19, 21, 22, 23, 27, 26, 32, 33, 12, 13, 14, 15]
@@ -35,7 +36,10 @@ class Esp32PortasService:
             raise ValueError("ESP32 sem armário vinculado.")
 
         if max_portas is None:
-            max_portas = config.normalizar_max_portas(esp.get("max_portas") or 16)
+            arm = ArmarioRepository.buscar_por_id(armario_id)
+            max_portas = config.normalizar_max_portas(
+                (arm.get("max_portas") if arm else None) or esp.get("max_portas") or 16
+            )
         else:
             max_portas = config.normalizar_max_portas(max_portas)
 

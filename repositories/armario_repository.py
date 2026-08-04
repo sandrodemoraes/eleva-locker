@@ -72,9 +72,9 @@ class ArmarioRepository:
 
             cursor.execute("""
                 INSERT INTO armarios (
-                    nome, endereco, cidade, estado, status, empresa_id, site_id
+                    nome, endereco, cidade, estado, status, empresa_id, site_id, max_portas
                 )
-                VALUES (?, ?, ?, ?, ?, ?, ?)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             """, (
                 dados["nome"],
                 dados["endereco"],
@@ -83,6 +83,7 @@ class ArmarioRepository:
                 dados["status"],
                 dados.get("empresa_id"),
                 dados.get("site_id"),
+                dados.get("max_portas", 16),
             ))
 
             conn.commit()
@@ -103,7 +104,8 @@ class ArmarioRepository:
                     estado = ?,
                     status = ?,
                     empresa_id = ?,
-                    site_id = ?
+                    site_id = ?,
+                    max_portas = ?
                 WHERE id = ?
             """, (
                 dados["nome"],
@@ -113,6 +115,7 @@ class ArmarioRepository:
                 dados["status"],
                 dados.get("empresa_id"),
                 dados.get("site_id"),
+                dados.get("max_portas", 16),
                 armario_id,
             ))
 

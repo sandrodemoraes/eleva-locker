@@ -181,6 +181,24 @@ class Esp32Repository:
             conn.commit()
 
     @staticmethod
+    def listar_por_armario(armario_id):
+
+        with BaseRepository.get_connection() as conn:
+
+            return conn.execute("""
+                SELECT
+                    e.*,
+                    (
+                        SELECT COUNT(*)
+                        FROM compartimentos c
+                        WHERE c.esp32_id = e.id
+                    ) AS total_compartimentos
+                FROM esp32 e
+                WHERE e.armario = ?
+                ORDER BY e.nome
+            """, (armario_id,)).fetchall()
+
+    @staticmethod
     def excluir(esp32_id):
 
         with BaseRepository.get_connection() as conn:
