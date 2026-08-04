@@ -74,6 +74,67 @@ struct CompartimentoCache {
 CompartimentoCache cache[MAX_PORTAS];
 int totalCache = 0;
 
+// ============ CACHE NVS (offline) ============
+
+void salvarCacheNvs() {
+  prefs.begin("sync", false);
+  prefs.putInt("versao", syncVersao);
+  prefs.putInt("portas", totalCache);
+  for (int i = 0; i < totalCache; i++) {
+    char k[12];
+    snprintf(k, sizeof(k), "id%d", i);
+    prefs.putInt(k, cache[i].id);
+    snprintf(k, sizeof(k), "nu%d", i);
+    prefs.putInt(k, cache[i].numero);
+    snprintf(k, sizeof(k), "re%d", i);
+    prefs.putInt(k, cache[i].rele);
+    snprintf(k, sizeof(k), "gp%d", i);
+    prefs.putInt(k, cache[i].gpio);
+    snprintf(k, sizeof(k), "tm%d", i);
+    prefs.putString(k, cache[i].tamanho);
+    snprintf(k, sizeof(k), "cd%d", i);
+    prefs.putString(k, cache[i].codigo);
+    snprintf(k, sizeof(k), "oc%d", i);
+    prefs.putBool(k, cache[i].ocupado);
+  }
+  prefs.end();
+}
+
+void carregarCacheNvs() {
+  prefs.begin("sync", true);
+  syncVersao = prefs.getInt("versao", 0);
+  totalCache = prefs.getInt("portas", 0);
+  if (totalCache > MAX_PORTAS) totalCache = MAX_PORTAS;
+  if (totalCache < 0) totalCache = 0;
+
+  for (int i = 0; i < totalCache; i++) {
+    char k[12];
+    snprintf(k, sizeof(k), "id%d", i);
+    cache[i].id = prefs.getInt(k, 0);
+    snprintf(k, sizeof(k), "nu%d", i);
+    cache[i].numero = prefs.getInt(k, 0);
+    snprintf(k, sizeof(k), "re%d", i);
+    cache[i].rele = prefs.getInt(k, 0);
+    snprintf(k, sizeof(k), "gp%d", i);
+    cache[i].gpio = prefs.getInt(k, 0);
+    snprintf(k, sizeof(k), "tm%d", i);
+    String tam = prefs.getString(k, "M");
+    strncpy(cache[i].tamanho, tam.c_str(), 3);
+    cache[i].tamanho[3] = '\0';
+    snprintf(k, sizeof(k), "cd%d", i);
+    String cod = prefs.getString(k, "");
+    strncpy(cache[i].codigo, cod.c_str(), 7);
+    cache[i].codigo[7] = '\0';
+    snprintf(k, sizeof(k), "oc%d", i);
+    cache[i].ocupado = prefs.getBool(k, false);
+  }
+  prefs.end();
+
+  if (totalCache > 0 && cache[0].numero <= 0) {
+    totalCache = 0;
+  }
+}
+
 // ============ RELÉ (non-blocking) ============
 
 int gpioDoRele(int rele, int gpioServidor) {
@@ -231,6 +292,7 @@ bool aplicarSync(JsonObject sync) {
   prefs.putInt("versao", syncVersao);
   prefs.putInt("portas", totalCache);
   prefs.end();
+  salvarCacheNvs();
 
   Serial.printf("Sync OK v%d — %d compartimentos\n", syncVersao, totalCache);
   return true;
@@ -480,15 +542,13 @@ void setup() {
     digitalWrite(g, LOW);
   }
 
-  prefs.begin("sync", true);
-  syncVersao = prefs.getInt("versao", 0);
-  totalCache = prefs.getInt("portas", 0);
-  prefs.end();
+  carregarCacheNvs();
 
   conectarWiFi();
 
   if (WiFi.status() == WL_CONNECTED) {
-    redePendente = true;
+    sincronizarComServidor();
+    redePendente = false;
   }
 
   server.on("/status", HTTP_GET, rotaStatus);
