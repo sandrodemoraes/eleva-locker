@@ -30,7 +30,7 @@ class Esp32SyncService:
 
         comp = CompartimentoRepository.buscar_por_id(compartimento_id)
 
-        if comp and comp.get("esp32_id"):
+        if comp and comp["esp32_id"]:
             Esp32SyncService.incrementar_versao(comp["esp32_id"])
 
     @staticmethod
