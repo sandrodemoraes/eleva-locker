@@ -21,7 +21,6 @@ from database import criar_banco
 
 criar_banco()
 
-from db.connection import get_connection
 from repositories.esp32_repository import Esp32Repository
 
 

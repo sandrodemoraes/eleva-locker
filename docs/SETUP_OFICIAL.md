@@ -2,6 +2,17 @@
 
 > Substitui o fluxo "Bancada Teste" para operação real no painel.
 
+## Fluxo simples (tudo no armário)
+
+1. **Armários** → Novo armário → escolha **8 a 64 portas**
+2. Clique no armário → **Gerenciar**
+3. Dentro do armário:
+   - **Adicionar ESP** (placa + IP → token para firmware)
+   - **Compartimentos** criados automaticamente
+   - **Usuários** cadastrados só neste armário
+
+Não precisa mais ir em menus separados de ESP32 ou Compartimentos.
+
 ## Um comando
 
 ```cmd

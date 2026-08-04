@@ -49,10 +49,16 @@ class CompartimentoRepository:
         with BaseRepository.get_connection() as conn:
 
             return conn.execute("""
-                SELECT id, numero, tamanho
-                FROM compartimentos
-                WHERE armario = ? AND status = 'livre'
-                ORDER BY numero
+                SELECT c.id, c.numero, c.tamanho
+                FROM compartimentos c
+                WHERE c.armario = ?
+                  AND c.status = 'livre'
+                  AND NOT EXISTS (
+                    SELECT 1 FROM encomendas e
+                    WHERE e.compartimento = c.id
+                      AND e.status = 'aguardando_retirada'
+                  )
+                ORDER BY c.numero
             """, (armario_id,)).fetchall()
 
     @staticmethod

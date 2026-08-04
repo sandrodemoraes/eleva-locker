@@ -14,6 +14,7 @@ class EncomendaRepository:
                     SELECT
                         e.*,
                         c.numero AS compartimento_numero,
+                        c.tamanho AS compartimento_tamanho,
                         a.nome AS armario_nome
                     FROM encomendas e
                     LEFT JOIN compartimentos c ON c.id = e.compartimento
@@ -26,6 +27,7 @@ class EncomendaRepository:
                 SELECT
                     e.*,
                     c.numero AS compartimento_numero,
+                    c.tamanho AS compartimento_tamanho,
                     a.nome AS armario_nome
                 FROM encomendas e
                 LEFT JOIN compartimentos c ON c.id = e.compartimento
@@ -42,6 +44,7 @@ class EncomendaRepository:
                 SELECT
                     e.*,
                     c.numero AS compartimento_numero,
+                    c.tamanho AS compartimento_tamanho,
                     a.nome AS armario_nome
                 FROM encomendas e
                 LEFT JOIN compartimentos c ON c.id = e.compartimento
@@ -58,6 +61,7 @@ class EncomendaRepository:
                 SELECT
                     e.*,
                     c.numero AS compartimento_numero,
+                    c.tamanho AS compartimento_tamanho,
                     a.nome AS armario_nome
                 FROM encomendas e
                 LEFT JOIN compartimentos c ON c.id = e.compartimento
@@ -74,6 +78,19 @@ class EncomendaRepository:
                 SELECT id FROM encomendas
                 WHERE codigo = ? AND status = 'aguardando_retirada'
             """, (codigo,)).fetchone()
+
+            return row is not None
+
+    @staticmethod
+    def tem_pendente_no_compartimento(compartimento_id):
+
+        with BaseRepository.get_connection() as conn:
+
+            row = conn.execute("""
+                SELECT id FROM encomendas
+                WHERE compartimento = ? AND status = 'aguardando_retirada'
+                LIMIT 1
+            """, (compartimento_id,)).fetchone()
 
             return row is not None
 
@@ -106,6 +123,76 @@ class EncomendaRepository:
             conn.commit()
 
             return cursor.lastrowid
+
+    @staticmethod
+    def criar_deposito_atomico(compartimento_id, dados):
+        """Cria encomenda e marca compartimento ocupado na mesma transação."""
+
+        with BaseRepository.get_connection() as conn:
+
+            if conn._engine == "sqlite":
+                conn._conn.execute("BEGIN IMMEDIATE")
+
+            try:
+                comp = conn.execute("""
+                    SELECT
+                        c.*,
+                        a.nome AS armario_nome
+                    FROM compartimentos c
+                    JOIN armarios a ON a.id = c.armario
+                    WHERE c.id = ?
+                """, (compartimento_id,)).fetchone()
+
+                if not comp:
+                    raise ValueError("Compartimento não encontrado.")
+
+                pendente = conn.execute("""
+                    SELECT id FROM encomendas
+                    WHERE compartimento = ? AND status = 'aguardando_retirada'
+                    LIMIT 1
+                """, (compartimento_id,)).fetchone()
+
+                if pendente or comp["status"] != "livre":
+                    raise ValueError(
+                        f"Compartimento #{comp['numero']} já está ocupado. "
+                        "Escolha outro compartimento livre."
+                    )
+
+                cursor = conn.cursor()
+                cursor.execute("""
+                    INSERT INTO encomendas (
+                        codigo, cliente, telefone, email, compartimento,
+                        data_entrada, status, operador, transportadora, observacao
+                    )
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """, (
+                    dados["codigo"],
+                    dados["cliente"],
+                    dados.get("telefone"),
+                    dados.get("email"),
+                    compartimento_id,
+                    dados["data_entrada"],
+                    dados.get("status", "aguardando_retirada"),
+                    dados.get("operador"),
+                    dados.get("transportadora"),
+                    dados.get("observacao"),
+                ))
+
+                encomenda_id = cursor.lastrowid
+
+                conn.execute("""
+                    UPDATE compartimentos SET status = 'ocupado' WHERE id = ?
+                """, (compartimento_id,))
+
+                conn.commit()
+                return encomenda_id, comp
+
+            except Exception:
+                if conn._engine == "sqlite":
+                    conn._conn.rollback()
+                else:
+                    conn._conn.rollback()
+                raise
 
     @staticmethod
     def atualizar_retirada(encomenda_id, data_retirada):

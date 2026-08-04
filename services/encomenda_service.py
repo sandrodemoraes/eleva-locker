@@ -59,9 +59,6 @@ class EncomendaService:
         if not compartimento:
             raise ValueError("Compartimento não encontrado.")
 
-        if compartimento["status"] != "livre":
-            raise ValueError("Compartimento não está livre.")
-
         empresa_id = LimitePlanoService.empresa_id_do_compartimento(compartimento_id)
 
         if empresa_id:
@@ -70,20 +67,20 @@ class EncomendaService:
         codigo = EncomendaService._gerar_codigo()
         agora = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-        encomenda_id = EncomendaRepository.criar({
-            "codigo": codigo,
-            "cliente": cliente,
-            "telefone": telefone.strip() if telefone else None,
-            "email": email.strip() if email else None,
-            "compartimento": compartimento_id,
-            "data_entrada": agora,
-            "status": "aguardando_retirada",
-            "operador": operador,
-            "transportadora": transportadora,
-            "observacao": observacao,
-        })
-
-        CompartimentoRepository.atualizar_status(compartimento_id, "ocupado")
+        encomenda_id, compartimento = EncomendaRepository.criar_deposito_atomico(
+            compartimento_id,
+            {
+                "codigo": codigo,
+                "cliente": cliente,
+                "telefone": telefone.strip() if telefone else None,
+                "email": email.strip() if email else None,
+                "data_entrada": agora,
+                "status": "aguardando_retirada",
+                "operador": operador,
+                "transportadora": transportadora,
+                "observacao": observacao,
+            },
+        )
 
         LogService.registrar(
             compartimento_id,
