@@ -42,12 +42,17 @@ class Esp32Repository:
     @staticmethod
     def buscar_por_token(token):
 
+        if not token:
+            return None
+
+        token = token.strip()
+
         with BaseRepository.get_connection() as conn:
 
             return conn.execute("""
                 SELECT *
                 FROM esp32
-                WHERE token = ?
+                WHERE TRIM(token) = ?
             """, (token,)).fetchone()
 
     @staticmethod

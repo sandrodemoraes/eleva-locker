@@ -67,6 +67,9 @@ class Esp32Service:
 
         dados["nome"] = nome
 
+        if not dados.get("token"):
+            dados["token"] = esp_antigo["token"]
+
         if "max_portas" in dados:
             dados["max_portas"] = config.normalizar_max_portas(dados.get("max_portas") or 16)
 

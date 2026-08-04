@@ -301,7 +301,7 @@ bool sincronizarComServidor() {
   if (WiFi.status() != WL_CONNECTED) return false;
 
   HTTPClient http;
-  String url = String(SERVIDOR_URL) + "/api/esp32/sync";
+  String url = String(SERVIDOR_URL) + "/api/esp32/sync?token=" + String(ESP32_TOKEN);
   http.begin(url);
   http.addHeader("X-ESP32-Token", ESP32_TOKEN);
   int code = http.GET();
