@@ -49,7 +49,7 @@ class CompartimentoRepository:
         with BaseRepository.get_connection() as conn:
 
             return conn.execute("""
-                SELECT id, numero
+                SELECT id, numero, tamanho
                 FROM compartimentos
                 WHERE armario = ? AND status = 'livre'
                 ORDER BY numero

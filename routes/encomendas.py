@@ -33,7 +33,11 @@ def compartimentos_livres(armario_id):
     livres = CompartimentoService.listar_livres(armario_id)
 
     return jsonify([
-        {"id": c["id"], "numero": c["numero"]}
+        {
+            "id": c["id"],
+            "numero": c["numero"],
+            "tamanho": c["tamanho"] or "M",
+        }
         for c in livres
     ])
 
