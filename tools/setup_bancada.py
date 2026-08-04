@@ -19,6 +19,7 @@ from repositories.compartimento_repository import CompartimentoRepository
 from repositories.esp32_repository import Esp32Repository
 from services.esp32_service import Esp32Service
 from services.compartimento_service import CompartimentoService
+from services.esp32_sync_service import Esp32SyncService
 from repositories.base_repository import BaseRepository
 
 GPIO_BANCADA = [16, 17, 18, 19, 21, 22, 23, 27]
@@ -113,6 +114,8 @@ def main():
         else:
             CompartimentoService.criar(dados)
             print(f"  Compartimento #{num} criado (rele={num}, gpio={GPIO_BANCADA[num-1]}, tamanho={tam})")
+
+    Esp32SyncService.incrementar_versao(esp_id)
 
     print("\n" + "=" * 60)
     print("BANCADA CONFIGURADA")

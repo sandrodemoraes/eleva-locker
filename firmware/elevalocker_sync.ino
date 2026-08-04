@@ -66,6 +66,7 @@ struct CompartimentoCache {
   int numero;
   int rele;
   int gpio;
+  char tamanho[4];
   char codigo[8];
   bool ocupado;
 };
@@ -205,6 +206,9 @@ bool aplicarSync(JsonObject sync) {
     cache[totalCache].numero = c["numero"];
     cache[totalCache].rele = c["rele"] | 0;
     cache[totalCache].gpio = c["gpio"] | 0;
+    const char* tam = c["tamanho"] | "M";
+    strncpy(cache[totalCache].tamanho, tam, 3);
+    cache[totalCache].tamanho[3] = '\0';
     cache[totalCache].codigo[0] = '\0';
     cache[totalCache].ocupado = (strcmp(c["status"] | "livre", "ocupado") == 0);
     totalCache++;
@@ -400,6 +404,7 @@ void rotaPainel() {
     ".p{background:#fff;border-radius:8px;padding:10px 14px;min-width:100px;box-shadow:0 1px 4px rgba(0,0,0,.1)}"
     ".n{font-size:1.3rem;font-weight:bold}"
     ".r{font-size:.7rem;color:#888}"
+    ".tam{font-size:.65rem;color:#555;margin-top:2px}"
     ".ok{color:#155724;background:#d4edda;padding:3px 8px;border-radius:12px;font-size:.75rem}"
     ".busy{color:#856404;background:#fff3cd;padding:3px 8px;border-radius:12px;font-size:.75rem}"
     ".box{max-width:360px;margin:0 auto;background:#fff;padding:16px;border-radius:10px}"
@@ -421,8 +426,8 @@ void rotaPainel() {
   server.sendContent("<div class=grid>");
   for (int i = 0; i < n; i++) {
     snprintf(buf, sizeof(buf),
-      "<div class=p><div class=n>#%d</div><div class=r>Relé %d</div>",
-      cache[i].numero, cache[i].rele);
+      "<div class=p><div class=n>#%d</div><div class=r>Relé %d</div><div class=tam>%s</div>",
+      cache[i].numero, cache[i].rele, cache[i].tamanho[0] ? cache[i].tamanho : "M");
     server.sendContent(buf);
     if (cache[i].ocupado) {
       server.sendContent("<span class=busy>Ocupado</span>");
