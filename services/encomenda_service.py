@@ -1,6 +1,7 @@
 import random
 from datetime import datetime
 
+import config
 from repositories.encomenda_repository import EncomendaRepository
 from repositories.compartimento_repository import CompartimentoRepository
 from services.log_service import LogService
@@ -59,6 +60,15 @@ class EncomendaService:
 
         if not cliente:
             raise ValueError("Nome do destinatário é obrigatório.")
+
+        telefone = telefone.strip() if telefone else ""
+
+        if config.NOTIF_WHATSAPP_ATIVO:
+            if not telefone:
+                raise ValueError("Telefone é obrigatório para enviar WhatsApp ao destinatário.")
+            _, erro_tel = NotificacaoService.validar_telefone_br(telefone)
+            if erro_tel:
+                raise ValueError(erro_tel)
 
         compartimento = CompartimentoRepository.buscar_por_id(compartimento_id)
 

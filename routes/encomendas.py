@@ -1,5 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, session, flash, jsonify, send_file
 
+import config
 from middleware.auth_required import login_required
 from middleware.operador_scope import get_armario_restrito, operador_acessa_armario, redirect_home
 from services.encomenda_service import EncomendaService
@@ -28,6 +29,7 @@ def listar():
         status_filtro=status,
         armario_filtro=armario_filtro,
         operador_restrito=restrito is not None,
+        whatsapp_ativo=config.NOTIF_WHATSAPP_ATIVO,
     )
 
 
@@ -66,13 +68,19 @@ def depositar():
             observacao=request.form.get("observacao", ""),
         )
 
-        canais = ", ".join(n["canal"] for n in resultado.get("notificacoes", []))
-
-        flash(
-            f"Encomenda depositada! Código: {resultado['codigo']}"
-            + (f" — Notificação: {canais}" if canais else ""),
-            "success",
+        canais = NotificacaoService.formatar_resultado_notificacoes(
+            resultado.get("notificacoes", [])
         )
+
+        msg = f"Encomenda depositada! Código: {resultado['codigo']}"
+        if canais:
+            msg += f" — Notificações: {canais}"
+
+        whatsapp_falhou = any(
+            n.get("canal") == "whatsapp" and not n.get("sucesso")
+            for n in resultado.get("notificacoes", [])
+        )
+        flash(msg, "warning" if whatsapp_falhou else "success")
 
         session["ultimo_codigo"] = resultado["codigo"]
         session["ultimo_encomenda_id"] = resultado["id"]
