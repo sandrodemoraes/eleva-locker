@@ -1,11 +1,88 @@
 # CONTINUAR AQUI — Retomada do projeto
 
-> **Última atualização:** 03/08/2026 (noite)  
-> **Estado:** Bancada OK ✅ — parou na configuração de tamanhos P/M/G/GG (stash pendente)
+> **Última atualização:** 05/08/2026  
+> **Estado:** Matriz OK ✅ — WhatsApp em configuração ⏳ — menu mobile anotado para resolver
 
 ---
 
-## Onde paramos (03/08/2026 — noite)
+## Onde paramos (05/08/2026)
+
+| Item | Status |
+|------|--------|
+| Operador global + síndico por armário | ✅ PR #12 |
+| Docker + Evolution API WhatsApp | ✅ containers rodando |
+| Instância `eleva-locker` no manager | ✅ criada |
+| Acesso externo IP público | ✅ `http://177.74.79.32:15000` |
+| WhatsApp no depósito | ⏳ testar à noite (`py app.py` + não usar container web) |
+| Menu mobile (celular) | 🔧 parcial — ver pendência abaixo |
+
+### Ambiente atual
+
+| Item | Valor |
+|------|-------|
+| PC servidor (rede local) | `192.168.16.130:15000` |
+| PC servidor (rede externa) | `http://177.74.79.32:15000` |
+| Evolution API / manager | `http://192.168.16.130:8080/manager` |
+| Branch | `cursor/whatsapp-producao-c05c` |
+| Login admin | `admin@elevalocker.com` / `123456` |
+
+---
+
+## ⏳ PENDENTE — Menu vertical vs horizontal (UX)
+
+**Reportado pelo Sandro (05/08/2026):**
+
+| Dispositivo | Comportamento atual | Problema |
+|-------------|---------------------|----------|
+| **PC (tela grande)** | Menu **vertical** (sidebar esquerda) abre e funciona | Menu **horizontal** (topo) não abre / não existe navegação horizontal |
+| **Celular (tela pequena)** | Só aparece barra **horizontal** do topo | Menu **vertical** fica escondido → não dá para ir em Armários, Encomendas, etc. |
+
+**Por que acontece:** no CSS, em telas &lt; 768px a sidebar vertical é movida para fora da tela (`left: -260px`) sem botão visível (até correção recente).
+
+**O que já foi feito (commit `2de4fff`):**
+- Botão ☰ (hambúrguer) no celular para abrir menu vertical
+- Overlay escuro ao abrir menu
+
+**Ainda falta resolver:**
+1. [ ] Testar ☰ no celular após `git pull` + reiniciar `py app.py`
+2. [ ] Definir se no **PC** quer menu horizontal (abas no topo) **ou** melhorar navbar (sino/engrenagem/site selector)
+3. [ ] Links diretos no dashboard (cards clicáveis → Armários, Encomendas)
+4. [ ] Botões sino ⚙️ do topo hoje não fazem nada — implementar ou remover
+
+**Workaround celular (funciona hoje):**
+- http://177.74.79.32:15000/armarios
+- http://177.74.79.32:15000/encomendas
+- http://177.74.79.32:15000/notificacoes
+
+---
+
+## À noite — WhatsApp (retomar)
+
+```cmd
+docker stop elevalocker-web-1
+cd C:\ElevaLocker
+git pull
+py app.py
+```
+
+1. Manager → instância `eleva-locker` **connected/open**
+2. Notificações → Testar WhatsApp
+3. Depositar encomenda com telefone
+4. Se falhar: `py tools/testar_whatsapp_direto.py 48996587858`
+
+`.env` importante:
+```env
+NOTIF_MODO=producao
+NOTIF_WHATSAPP_ATIVO=1
+APP_URL_BASE=http://177.74.79.32:15000
+WHATSAPP_API_URL=http://192.168.16.130:8080
+WHATSAPP_API_KEY=ElevaWhatsApp2026
+WHATSAPP_INSTANCIA=eleva-locker
+```
+
+---
+
+## Onde paramos (03/08/2026 — noite) — histórico bancada
 
 Você estava configurando tamanhos dos compartimentos:
 
