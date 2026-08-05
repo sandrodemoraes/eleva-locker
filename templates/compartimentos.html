@@ -1,0 +1,235 @@
+{% extends "layout/base.html" %}
+
+{% block title %}Compartimentos | ELEVA LOCKER{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/crud.css') }}">
+{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+    <div>
+        <h1>Compartimentos</h1>
+        <p>Gerencie os compartimentos de cada armário</p>
+    </div>
+    <button class="btn" onclick="abrirModal('modalNovo')">
+        <i class="fa-solid fa-plus"></i> Novo Compartimento
+    </button>
+</div>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% for category, message in messages %}
+        <div class="alert alert-{{ category }}">{{ message }}</div>
+    {% endfor %}
+{% endwith %}
+
+<div class="table-box" style="margin-bottom:20px;">
+    <form method="GET" action="/compartimentos" style="display:flex;gap:12px;align-items:end;">
+        <div class="form-group" style="margin:0;flex:1;">
+            <label>Filtrar por armário</label>
+            <select name="armario_id" onchange="this.form.submit()">
+                <option value="">Todos os armários</option>
+                {% for a in armarios %}
+                <option value="{{ a.id }}" {% if armario_filtro == a.id %}selected{% endif %}>{{ a.nome }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </form>
+</div>
+
+<div class="table-box">
+    {% if compartimentos %}
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Armário</th>
+                <th>Número</th>
+                <th>Tamanho</th>
+                <th>Relé</th>
+                <th>ESP32</th>
+                <th>Status</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for c in compartimentos %}
+            <tr>
+                <td>{{ c.id }}</td>
+                <td>{{ c.armario_nome }}</td>
+                <td><strong>#{{ c.numero }}</strong></td>
+                <td>{{ c.tamanho or 'M' }}</td>
+                <td>{{ c.rele or '—' }}</td>
+                <td>{{ c.esp32_id or '—' }}</td>
+                <td><span class="badge badge-{{ c.status }}">{{ c.status }}</span></td>
+                <td>
+                    {% if c.rele and c.esp32_id %}
+                    <form method="POST" action="/esp32/abrir/{{ c.id }}" style="display:inline">
+                        <button type="submit" class="btn btn-sm btn-success" title="Abrir via ESP32"><i class="fa-solid fa-lock-open"></i></button>
+                    </form>
+                    {% endif %}
+                    <button class="btn btn-sm" onclick="editarComp({{ c.id }}, {{ c.armario }}, {{ c.numero }}, '{{ c.tamanho or 'M' }}', '{{ c.rele or '' }}', '{{ c.esp32_id or '' }}', '{{ c.gpio or '' }}', '{{ c.status }}')">
+                        <i class="fa-solid fa-pen"></i>
+                    </button>
+                    <form method="POST" action="/compartimentos/excluir/{{ c.id }}" style="display:inline" onsubmit="return confirm('Excluir compartimento #{{ c.numero }}?')">
+                        <button type="submit" class="btn btn-sm btn-danger"><i class="fa-solid fa-trash"></i></button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state">
+        <i class="fa-solid fa-table-cells-large fa-3x"></i>
+        <p>Nenhum compartimento cadastrado.</p>
+    </div>
+    {% endif %}
+</div>
+
+<div class="modal-overlay" id="modalNovo">
+    <div class="modal">
+        <h2>Novo Compartimento</h2>
+        <form method="POST" action="/compartimentos/novo">
+            <div class="form-group">
+                <label>Armário *</label>
+                <select name="armario" required>
+                    <option value="">Selecione...</option>
+                    {% for a in armarios %}
+                    <option value="{{ a.id }}" {% if armario_filtro == a.id %}selected{% endif %}>{{ a.nome }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="grid-2">
+                <div class="form-group">
+                    <label>Número *</label>
+                    <input type="number" name="numero" min="1" required>
+                </div>
+                <div class="form-group">
+                    <label>Tamanho</label>
+                    <select name="tamanho">
+                        <option value="P">P (Pequeno)</option>
+                        <option value="M" selected>M (Médio)</option>
+                        <option value="G">G (Grande)</option>
+                        <option value="GG">GG (Extra grande)</option>
+                    </select>
+                </div>
+            </div>
+            <div class="grid-2">
+                <div class="form-group">
+                    <label>Relé (ESP32)</label>
+                    <input type="number" name="rele" min="1" placeholder="1, 2, 3...">
+                </div>
+                <div class="form-group">
+                    <label>ESP32</label>
+                    <select name="esp32_id">
+                        <option value="">— Nenhum —</option>
+                        {% for d in dispositivos_esp32 %}
+                        <option value="{{ d.id }}">{{ d.nome }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>GPIO (opcional)</label>
+                    <input type="number" name="gpio" min="0" placeholder="Ex: 16">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Status</label>
+                <select name="status">
+                    <option value="livre">Livre</option>
+                    <option value="manutencao">Manutenção</option>
+                </select>
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn">Salvar</button>
+                <button type="button" class="btn btn-danger" onclick="fecharModal('modalNovo')">Cancelar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="modal-overlay" id="modalEditar">
+    <div class="modal">
+        <h2>Editar Compartimento</h2>
+        <form method="POST" id="formEditar">
+            <div class="form-group">
+                <label>Armário *</label>
+                <select name="armario" id="edit_armario" required>
+                    {% for a in armarios %}
+                    <option value="{{ a.id }}">{{ a.nome }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="grid-2">
+                <div class="form-group">
+                    <label>Número *</label>
+                    <input type="number" name="numero" id="edit_numero" min="1" required>
+                </div>
+                <div class="form-group">
+                    <label>Tamanho</label>
+                    <select name="tamanho" id="edit_tamanho">
+                        <option value="P">P (Pequeno)</option>
+                        <option value="M">M (Médio)</option>
+                        <option value="G">G (Grande)</option>
+                        <option value="GG">GG (Extra grande)</option>
+                    </select>
+                </div>
+            </div>
+            <div class="grid-2">
+                <div class="form-group">
+                    <label>Relé</label>
+                    <input type="number" name="rele" id="edit_rele" min="1">
+                </div>
+                <div class="form-group">
+                    <label>ESP32</label>
+                    <select name="esp32_id" id="edit_esp32_id">
+                        <option value="">— Nenhum —</option>
+                        {% for d in dispositivos_esp32 %}
+                        <option value="{{ d.id }}">{{ d.nome }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>GPIO</label>
+                    <input type="number" name="gpio" id="edit_gpio" min="0" placeholder="Ex: 16">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Status</label>
+                <select name="status" id="edit_status">
+                        <option value="livre">Livre</option>
+                        <option value="ocupado">Ocupado</option>
+                        <option value="manutencao">Manutenção</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn">Salvar</button>
+                <button type="button" class="btn btn-danger" onclick="fecharModal('modalEditar')">Cancelar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+function abrirModal(id){ document.getElementById(id).classList.add('active'); }
+function fecharModal(id){ document.getElementById(id).classList.remove('active'); }
+
+function editarComp(id, armario, numero, tamanho, rele, esp32_id, gpio, status){
+    document.getElementById('formEditar').action = '/compartimentos/editar/' + id;
+    document.getElementById('edit_armario').value = armario;
+    document.getElementById('edit_numero').value = numero;
+    document.getElementById('edit_tamanho').value = tamanho;
+    document.getElementById('edit_rele').value = rele;
+    document.getElementById('edit_esp32_id').value = esp32_id || '';
+    document.getElementById('edit_gpio').value = gpio || '';
+    document.getElementById('edit_status').value = status;
+    abrirModal('modalEditar');
+}
+</script>
+{% endblock %}
