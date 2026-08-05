@@ -3,17 +3,30 @@ from repositories.armario_repository import ArmarioRepository
 from repositories.esp32_repository import Esp32Repository
 from services.limite_plano_service import LimitePlanoService
 from middleware.site_scope import get_site_id
+from middleware.operador_scope import get_armario_restrito
 
 
 class ArmarioService:
 
     @staticmethod
+    def _filtrar_operador(armarios):
+        restrito = get_armario_restrito()
+        if restrito is None:
+            return armarios
+        return [a for a in armarios if a["id"] == restrito]
+
+    @staticmethod
     def listar():
-        return ArmarioRepository.listar(site_id=get_site_id())
+        armarios = ArmarioRepository.listar(site_id=get_site_id())
+        return ArmarioService._filtrar_operador(armarios)
 
     @staticmethod
     def listar_ativos():
-        return ArmarioRepository.listar_ativos()
+        armarios = ArmarioRepository.listar_ativos()
+        restrito = get_armario_restrito()
+        if restrito is None:
+            return armarios
+        return [a for a in armarios if a["id"] == restrito]
 
     @staticmethod
     def buscar_por_id(armario_id):

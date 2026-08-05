@@ -1,6 +1,7 @@
-from flask import Blueprint, render_template, session
+from flask import Blueprint, render_template, session, redirect
 
 from middleware.auth_required import login_required
+from middleware.operador_scope import get_armario_restrito
 from services.dashboard_service import DashboardService
 from services.encomenda_service import EncomendaService
 from services.site_service import SiteService
@@ -12,6 +13,10 @@ dashboard_bp = Blueprint("dashboard", __name__)
 @dashboard_bp.route("/dashboard")
 @login_required
 def dashboard():
+
+    restrito = get_armario_restrito()
+    if restrito:
+        return redirect(f"/armarios/{restrito}")
 
     stats = DashboardService.obter_estatisticas()
     encomendas_recentes = EncomendaService.listar()[:5]

@@ -8,21 +8,27 @@ from services.esp32_service import Esp32Service
 from services.notificacao_service import NotificacaoService
 from services.limite_plano_service import LimitePlanoService
 from services.esp32_sync_service import Esp32SyncService
+from middleware.operador_scope import operador_acessa_armario
 
 
 class EncomendaService:
 
     @staticmethod
-    def listar(status=None):
-        return EncomendaRepository.listar(status)
+    def listar(status=None, armario_id=None):
+        return EncomendaRepository.listar(status, armario_id=armario_id)
 
     @staticmethod
-    def buscar_por_id(encomenda_id):
+    def buscar_por_id(encomenda_id, verificar_acesso=False):
 
         encomenda = EncomendaRepository.buscar_por_id(encomenda_id)
 
         if not encomenda:
             raise ValueError("Encomenda não encontrada.")
+
+        if verificar_acesso:
+            comp = CompartimentoRepository.buscar_por_id(encomenda["compartimento"])
+            if comp and not operador_acessa_armario(comp["armario"]):
+                raise ValueError("Sem permissão para acessar esta encomenda.")
 
         return encomenda
 
@@ -58,6 +64,9 @@ class EncomendaService:
 
         if not compartimento:
             raise ValueError("Compartimento não encontrado.")
+
+        if not operador_acessa_armario(compartimento["armario"]):
+            raise ValueError("Sem permissão para depositar neste armário.")
 
         empresa_id = LimitePlanoService.empresa_id_do_compartimento(compartimento_id)
 
@@ -123,6 +132,10 @@ class EncomendaService:
 
         if not encomenda:
             raise ValueError("Código inválido ou encomenda já retirada.")
+
+        comp = CompartimentoRepository.buscar_por_id(encomenda["compartimento"])
+        if not comp or not operador_acessa_armario(comp["armario"]):
+            raise ValueError("Sem permissão para retirar deste armário.")
 
         agora = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 

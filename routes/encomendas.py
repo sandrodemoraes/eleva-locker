@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, request, redirect, session, flash, jsonify, send_file
 
 from middleware.auth_required import login_required
+from middleware.operador_scope import get_armario_restrito, operador_acessa_armario, redirect_home
 from services.encomenda_service import EncomendaService
 from services.armario_service import ArmarioService
 from services.compartimento_service import CompartimentoService
@@ -15,20 +16,27 @@ encomendas_bp = Blueprint("encomendas", __name__)
 def listar():
 
     status = request.args.get("status")
+    restrito = get_armario_restrito()
+    armario_filtro = restrito if restrito else request.args.get("armario_id", type=int)
 
     return render_template(
         "encomendas.html",
         usuario=session.get("usuario"),
         perfil=session.get("perfil"),
-        encomendas=EncomendaService.listar(status),
+        encomendas=EncomendaService.listar(status, armario_id=armario_filtro),
         armarios=ArmarioService.listar_ativos(),
         status_filtro=status,
+        armario_filtro=armario_filtro,
+        operador_restrito=restrito is not None,
     )
 
 
 @encomendas_bp.route("/encomendas/compartimentos-livres/<int:armario_id>")
 @login_required
 def compartimentos_livres(armario_id):
+
+    if not operador_acessa_armario(armario_id):
+        return jsonify({"erro": "Sem permissão"}), 403
 
     livres = CompartimentoService.listar_livres(armario_id)
 
@@ -105,7 +113,11 @@ def retirar():
 @login_required
 def qrcode(encomenda_id):
 
-    encomenda = EncomendaService.buscar_por_id(encomenda_id)
+    try:
+        encomenda = EncomendaService.buscar_por_id(encomenda_id, verificar_acesso=True)
+    except ValueError as erro:
+        flash(str(erro), "warning")
+        return redirect("/encomendas")
 
     png = QrcodeService.gerar_png(
         encomenda["codigo"],

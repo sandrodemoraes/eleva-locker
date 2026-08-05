@@ -2,6 +2,7 @@ from flask import Blueprint, render_template, request, redirect, session, flash
 
 import config
 from middleware.auth_required import login_required, perfil_required
+from middleware.operador_scope import operador_acessa_armario, redirect_home
 from services.armario_service import ArmarioService
 from services.empresa_service import EmpresaService
 from services.esp32_service import Esp32Service
@@ -31,6 +32,10 @@ def listar():
 @login_required
 def detalhe(armario_id):
 
+    if not operador_acessa_armario(armario_id):
+        flash("Você não tem permissão para acessar este armário.", "warning")
+        return redirect(redirect_home())
+
     armario = ArmarioService.buscar_por_id(armario_id)
     esps = Esp32Repository.listar_por_armario(armario_id)
     compartimentos = CompartimentoService.listar(armario_id)
@@ -51,6 +56,7 @@ def detalhe(armario_id):
 
 @armarios_bp.route("/armarios/novo", methods=["POST"])
 @login_required
+@perfil_required("Administrador")
 def novo():
 
     try:
@@ -76,6 +82,7 @@ def novo():
 
 @armarios_bp.route("/armarios/editar/<int:armario_id>", methods=["POST"])
 @login_required
+@perfil_required("Administrador")
 def editar(armario_id):
 
     try:
@@ -105,6 +112,7 @@ def editar(armario_id):
 
 @armarios_bp.route("/armarios/excluir/<int:armario_id>", methods=["POST"])
 @login_required
+@perfil_required("Administrador")
 def excluir(armario_id):
 
     try:

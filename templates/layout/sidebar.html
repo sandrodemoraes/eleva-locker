@@ -2,11 +2,14 @@
 
     <nav class="sidebar-menu">
 
+        {% if session.get('perfil') != 'Operador' or not session.get('armario_id') %}
         <a href="{{ url_for('dashboard.dashboard') }}">
             <i class="fa-solid fa-chart-line"></i>
             <span>Dashboard</span>
         </a>
+        {% endif %}
 
+        {% if session.get('perfil') == 'Administrador' %}
         <a href="{{ url_for('usuarios.usuarios') }}">
             <i class="fa-solid fa-users"></i>
             <span>Usuários</span>
@@ -18,6 +21,7 @@
         </a>
 
         <hr>
+        {% endif %}
 
         <a href="{{ url_for('armarios.listar') }}">
             <i class="fa-solid fa-box"></i>
@@ -34,6 +38,7 @@
             <span>Totem</span>
         </a>
 
+        {% if session.get('perfil') == 'Administrador' %}
         <hr>
 
         <a href="{{ url_for('financeiro.dashboard') }}">
@@ -96,6 +101,7 @@
         </a>
 
         <hr>
+        {% endif %}
 
         <a href="{{ url_for('auth.logout') }}" class="logout">
             <i class="fa-solid fa-right-from-bracket"></i>

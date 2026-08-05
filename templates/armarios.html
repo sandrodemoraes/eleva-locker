@@ -13,9 +13,11 @@
         <h1>Armários</h1>
         <p>Cadastre armários, placas ESP, compartimentos e usuários em um só lugar</p>
     </div>
+    {% if perfil == 'Administrador' %}
     <button class="btn" onclick="abrirModal('modalNovo')">
         <i class="fa-solid fa-plus"></i> Novo Armário
     </button>
+    {% endif %}
 </div>
 
 {% with messages = get_flashed_messages(with_categories=true) %}
@@ -53,6 +55,7 @@
                 <td><span class="badge badge-{{ a.status }}">{{ a.status }}</span></td>
                 <td>
                     <a href="/armarios/{{ a.id }}" class="btn btn-sm btn-success" title="Gerenciar"><i class="fa-solid fa-gear"></i></a>
+                    {% if perfil == 'Administrador' %}
                     <button type="button" class="btn btn-sm btn-editar-armario"
                         data-id="{{ a.id }}"
                         data-nome="{{ a.nome }}"
@@ -67,6 +70,7 @@
                     <form method="POST" action="/armarios/excluir/{{ a.id }}" style="display:inline" onsubmit="return confirm('Excluir este armário?')">
                         <button type="submit" class="btn btn-sm btn-danger"><i class="fa-solid fa-trash"></i></button>
                     </form>
+                    {% endif %}
                 </td>
             </tr>
             {% endfor %}

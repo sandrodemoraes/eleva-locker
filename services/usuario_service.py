@@ -7,6 +7,14 @@ from repositories.usuario_repository import UsuarioRepository
 class UsuarioService:
 
     @staticmethod
+    def _normalizar_armario_id(perfil, armario_id):
+        if perfil != "Operador":
+            return None
+        if armario_id in (None, "", 0, "0"):
+            return None
+        return int(armario_id)
+
+    @staticmethod
     def listar(armario_id=None):
         return UsuarioRepository.listar(armario_id)
 
@@ -36,6 +44,7 @@ class UsuarioService:
         if UsuarioRepository.buscar_por_email(email):
             raise ValueError("Este e-mail já está cadastrado. Use outro e-mail.")
 
+        armario_id = UsuarioService._normalizar_armario_id(perfil, armario_id)
         senha_hash = generate_password_hash(senha)
 
         try:
@@ -64,6 +73,8 @@ class UsuarioService:
 
         if usuario_email and usuario_email["id"] != usuario_id:
             raise ValueError("Este e-mail já está cadastrado.")
+
+        armario_id = UsuarioService._normalizar_armario_id(perfil, armario_id)
 
         UsuarioRepository.atualizar(
             usuario_id, nome, email, telefone, perfil, status, armario_id

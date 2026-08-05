@@ -4,36 +4,36 @@ from repositories.base_repository import BaseRepository
 class EncomendaRepository:
 
     @staticmethod
-    def listar(status=None):
+    def listar(status=None, armario_id=None):
 
         with BaseRepository.get_connection() as conn:
 
+            filtros = []
+            params = []
+
             if status:
+                filtros.append("e.status = ?")
+                params.append(status)
 
-                return conn.execute("""
-                    SELECT
-                        e.*,
-                        c.numero AS compartimento_numero,
-                        c.tamanho AS compartimento_tamanho,
-                        a.nome AS armario_nome
-                    FROM encomendas e
-                    LEFT JOIN compartimentos c ON c.id = e.compartimento
-                    LEFT JOIN armarios a ON a.id = c.armario
-                    WHERE e.status = ?
-                    ORDER BY e.id DESC
-                """, (status,)).fetchall()
+            if armario_id is not None:
+                filtros.append("c.armario = ?")
+                params.append(armario_id)
 
-            return conn.execute("""
+            where = f"WHERE {' AND '.join(filtros)}" if filtros else ""
+
+            return conn.execute(f"""
                 SELECT
                     e.*,
                     c.numero AS compartimento_numero,
                     c.tamanho AS compartimento_tamanho,
+                    c.armario AS compartimento_armario,
                     a.nome AS armario_nome
                 FROM encomendas e
                 LEFT JOIN compartimentos c ON c.id = e.compartimento
                 LEFT JOIN armarios a ON a.id = c.armario
+                {where}
                 ORDER BY e.id DESC
-            """).fetchall()
+            """, tuple(params)).fetchall()
 
     @staticmethod
     def buscar_por_id(encomenda_id):
