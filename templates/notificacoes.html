@@ -23,6 +23,9 @@
         {% if whatsapp_status.conexao %}
         <br><small>Instância <code>{{ whatsapp_status.instancia }}</code> — status: {{ whatsapp_status.conexao }}</small>
         {% endif %}
+        {% if not whatsapp_status.pronto and config.WHATSAPP_API_URL %}
+        <br><a href="{{ config.WHATSAPP_API_URL }}/manager" target="_blank" rel="noopener">Abrir Evolution Manager → escanear QR</a>
+        {% endif %}
     </p>
     {% endif %}
     <p style="margin-top:8px;color:#666;">
