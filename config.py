@@ -1,9 +1,12 @@
 import os
 import secrets
+from pathlib import Path
 
 from dotenv import load_dotenv
 
-load_dotenv()
+# Carrega .env da pasta do projeto (C:\ElevaLocker\.env)
+_ENV_PATH = Path(__file__).resolve().parent / ".env"
+load_dotenv(_ENV_PATH)
 
 # Flask
 SECRET_KEY = os.getenv("SECRET_KEY", "ElevaLocker2026")
