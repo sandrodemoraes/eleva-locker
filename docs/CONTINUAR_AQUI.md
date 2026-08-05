@@ -58,11 +58,22 @@
 
 ## À noite — WhatsApp (retomar)
 
+**Após reiniciar o PC (1 clique):**
+```cmd
+cd C:\ElevaLocker
+git pull
+tools\iniciar_tudo.bat
+```
+Sobe Docker WhatsApp + `python app.py`. Mantenha a janela aberta.
+
+Para parar só o Docker WhatsApp: `tools\parar_tudo.bat` (servidor: Ctrl+C).
+
+**Manual (se preferir):**
 ```cmd
 docker stop elevalocker-web-1
 cd C:\ElevaLocker
 git pull
-tools\criar_env_producao.bat
+docker compose --profile whatsapp up -d evolution-api evolution-postgres evolution-redis
 python app.py
 ```
 
