@@ -40,8 +40,8 @@ def main():
     print(f"OK — .env gravado em:\n  {env_path}")
     print()
     print("Proximo passo:")
-    print("  py tools/verificar_env.py")
-    print("  py app.py")
+    print("  python tools/verificar_env.py")
+    print("  python app.py")
 
 
 if __name__ == "__main__":

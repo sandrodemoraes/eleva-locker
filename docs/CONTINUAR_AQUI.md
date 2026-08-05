@@ -62,13 +62,14 @@
 docker stop elevalocker-web-1
 cd C:\ElevaLocker
 git pull
-py app.py
+tools\criar_env_producao.bat
+python app.py
 ```
 
 1. Manager → instância `eleva-locker` **connected/open**
 2. Notificações → Testar WhatsApp
 3. Depositar encomenda com telefone
-4. Se falhar: `py tools/testar_whatsapp_direto.py 48996587858`
+4. Se falhar: `python tools/testar_whatsapp_direto.py 48996587858`
 
 **Corrigir `.env` (1 clique):**
 ```cmd
@@ -76,7 +77,7 @@ cd C:\ElevaLocker
 git pull
 tools\criar_env_producao.bat
 ```
-Ou: `py tools/criar_env_producao.py` → deve mostrar `OK — WhatsApp pronto para producao`.
+Ou: `python tools/criar_env_producao.py` → deve mostrar `OK — WhatsApp pronto para producao`.
 
 ---
 
