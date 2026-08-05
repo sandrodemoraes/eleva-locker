@@ -1,5 +1,5 @@
 import random
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import config
 from repositories.encomenda_repository import EncomendaRepository
@@ -84,7 +84,9 @@ class EncomendaService:
             LimitePlanoService.verificar_encomenda(empresa_id)
 
         codigo = EncomendaService._gerar_codigo()
-        agora = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        agora = datetime.now()
+        agora_str = agora.strftime("%Y-%m-%d %H:%M:%S")
+        expira = (agora + timedelta(days=config.ENCOMENDA_DIAS_VALIDADE)).strftime("%Y-%m-%d %H:%M:%S")
 
         encomenda_id, compartimento = EncomendaRepository.criar_deposito_atomico(
             compartimento_id,
@@ -93,7 +95,8 @@ class EncomendaService:
                 "cliente": cliente,
                 "telefone": telefone.strip() if telefone else None,
                 "email": email.strip() if email else None,
-                "data_entrada": agora,
+                "data_entrada": agora_str,
+                "expira_em": expira,
                 "status": "aguardando_retirada",
                 "operador": operador,
                 "transportadora": transportadora,
@@ -116,7 +119,9 @@ class EncomendaService:
             telefone=telefone,
             email=email,
             armario=compartimento["armario_nome"] or "Armário",
+            armario_id=compartimento["armario"],
             compartimento=compartimento["numero"],
+            expira_em=expira,
         )
 
         Esp32SyncService.incrementar_por_compartimento(compartimento_id)
@@ -142,6 +147,11 @@ class EncomendaService:
 
         if not encomenda:
             raise ValueError("Código inválido ou encomenda já retirada.")
+
+        if encomenda.get("expira_em"):
+            expira = datetime.strptime(encomenda["expira_em"], "%Y-%m-%d %H:%M:%S")
+            if datetime.now() > expira:
+                raise ValueError("Código expirado. Peça reenvio da notificação à portaria.")
 
         comp = CompartimentoRepository.buscar_por_id(encomenda["compartimento"])
         if not comp or not operador_acessa_armario(comp["armario"]):

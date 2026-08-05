@@ -185,6 +185,7 @@ def criar_banco():
 
     # Migrações Fase 3 — Notificações
     adicionar_coluna(cursor, "encomendas", "notificado_em", "DATETIME")
+    adicionar_coluna(cursor, "encomendas", "expira_em", "DATETIME")
 
     ddl("""
     CREATE TABLE IF NOT EXISTS esp32_eventos_sync(

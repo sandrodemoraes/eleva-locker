@@ -17,9 +17,11 @@
         <button class="btn btn-success" onclick="abrirModal('modalDeposito')">
             <i class="fa-solid fa-box"></i> Depositar
         </button>
+        {% if perfil == 'Administrador' %}
         <button class="btn" onclick="abrirModal('modalRetirada')">
             <i class="fa-solid fa-hand-holding"></i> Retirar
         </button>
+        {% endif %}
     </div>
 </div>
 

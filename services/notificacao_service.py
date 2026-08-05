@@ -4,6 +4,7 @@ import smtplib
 import time
 import urllib.error
 import urllib.request
+from datetime import datetime
 from email.mime.text import MIMEText
 
 import config
@@ -145,30 +146,43 @@ class NotificacaoService:
         return numero if not erro else None
 
     @staticmethod
-    def _montar_mensagem_whatsapp(cliente, armario, compartimento, codigo):
-        totem = config.APP_URL_BASE.rstrip("/") + "/totem"
+    def _link_totem(armario_id=None):
+        base = config.APP_URL_BASE.rstrip("/")
+        if armario_id:
+            return f"{base}/totem/{armario_id}"
+        return f"{base}/totem"
+
+    @staticmethod
+    def _montar_mensagem_whatsapp(cliente, armario, compartimento, codigo, armario_id=None, expira_em=None):
+        totem = NotificacaoService._link_totem(armario_id)
+        validade = ""
+        if expira_em:
+            try:
+                dt = datetime.strptime(expira_em, "%Y-%m-%d %H:%M:%S")
+                validade = f"\n⏰ Válido até *{dt.strftime('%d/%m/%Y')}*\n"
+            except ValueError:
+                validade = "\n"
         return (
-            f"Olá {cliente}! 📦\n\n"
+            f"Olá *{cliente}*! 📦\n\n"
             f"Sua encomenda chegou no *ELEVA LOCKER*.\n\n"
-            f"📍 *{armario}*\n"
+            f"📍 {armario}\n"
             f"🚪 Compartimento *#{compartimento}*\n"
-            f"🔑 Código de retirada: *{codigo}*\n\n"
-            f"Retire no totem:\n→ {totem}\n\n"
-            f"Apresente o código no totem ou informe à portaria.\n"
-            f"Válido até a retirada."
+            f"🔑 Código: *{codigo}*{validade}\n"
+            f"👉 Retire no totem:\n{totem}\n\n"
+            f"_Digite o código na tela do armário._"
         )
 
     @staticmethod
-    def _montar_mensagem_email(cliente, armario, compartimento, codigo):
-        totem = config.APP_URL_BASE.rstrip("/") + "/totem"
+    def _montar_mensagem_email(cliente, armario, compartimento, codigo, armario_id=None, expira_em=None):
+        totem = NotificacaoService._link_totem(armario_id)
+        validade = f"\nVálido até: {expira_em}\n" if expira_em else ""
         return (
             f"Olá {cliente}!\n\n"
             f"Sua encomenda chegou no ELEVA LOCKER.\n\n"
             f"Local: {armario}\n"
             f"Compartimento: #{compartimento}\n"
-            f"Código de retirada: {codigo}\n\n"
-            f"Retire no totem: {totem}\n\n"
-            f"Apresente este código no totem ou informe à portaria."
+            f"Código de retirada: {codigo}{validade}\n"
+            f"Retire no totem: {totem}\n"
         )
 
     @staticmethod
@@ -394,12 +408,14 @@ class NotificacaoService:
         email,
         armario,
         compartimento,
+        armario_id=None,
+        expira_em=None,
     ):
         mensagem_whatsapp = NotificacaoService._montar_mensagem_whatsapp(
-            cliente, armario, compartimento, codigo
+            cliente, armario, compartimento, codigo, armario_id, expira_em
         )
         mensagem_email = NotificacaoService._montar_mensagem_email(
-            cliente, armario, compartimento, codigo
+            cliente, armario, compartimento, codigo, armario_id, expira_em
         )
         assunto = f"ELEVA LOCKER — Encomenda disponível (código {codigo})"
         resultados = []
@@ -464,7 +480,9 @@ class NotificacaoService:
             telefone=encomenda["telefone"],
             email=encomenda["email"],
             armario=encomenda["armario_nome"] or "Armário",
+            armario_id=encomenda.get("compartimento_armario"),
             compartimento=encomenda["compartimento_numero"] or "—",
+            expira_em=encomenda.get("expira_em"),
         )
 
     @staticmethod

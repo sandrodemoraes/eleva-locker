@@ -210,6 +210,83 @@ html,body{
     font-size:14px;
 }
 
+.mapa-portas{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:8px;
+    max-width:min(320px,88vw);
+    margin:12px auto 0;
+}
+
+.porta-celula{
+    background:rgba(255,255,255,.1);
+    border:2px solid rgba(255,255,255,.2);
+    border-radius:10px;
+    padding:10px 4px;
+    font-size:18px;
+    font-weight:700;
+    opacity:.5;
+}
+
+.porta-celula.ativa{
+    background:#6ee7b7;
+    color:#0f3d75;
+    border-color:#6ee7b7;
+    opacity:1;
+    transform:scale(1.08);
+    box-shadow:0 0 20px rgba(110,231,183,.6);
+    animation:porta-pulse 1s ease infinite;
+}
+
+@keyframes porta-pulse{
+    0%,100%{transform:scale(1.08);}
+    50%{transform:scale(1.14);}
+}
+
+.anim-pulse{animation:fade-in .4s ease;}
+
+@keyframes fade-in{
+    from{opacity:0;transform:scale(.9);}
+    to{opacity:1;transform:scale(1);}
+}
+
+.btn-ajuda{
+    margin-top:20px;
+    background:transparent;
+    border:1px solid rgba(255,255,255,.35);
+    color:#fff;
+    padding:12px 20px;
+    border-radius:12px;
+    font-size:15px;
+    cursor:pointer;
+}
+
+.ajuda-overlay{
+    display:none;
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.65);
+    z-index:100;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+}
+
+.ajuda-overlay.ativa{display:flex;}
+
+.ajuda-box{
+    background:#fff;
+    color:#1a1a2e;
+    border-radius:20px;
+    padding:28px;
+    max-width:360px;
+    text-align:center;
+}
+
+.ajuda-box h3{margin-bottom:12px;font-size:22px;}
+.ajuda-tel{font-size:22px;font-weight:700;margin:16px 0;color:#0f3d75;}
+.ajuda-box .btn-principal{margin-top:16px;color:#fff;}
+
 /* 7" paisagem ~800×480 */
 @media (max-height:520px){
     .totem-logo i{font-size:40px;}

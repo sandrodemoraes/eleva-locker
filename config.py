@@ -68,6 +68,12 @@ SMS_API_KEY = os.getenv("SMS_API_KEY", "")
 # URL base para links no totem/QR (ex: http://192.168.1.10:15000)
 APP_URL_BASE = os.getenv("APP_URL_BASE", "http://localhost:15000")
 
+# Totem / encomendas
+ENCOMENDA_DIAS_VALIDADE = int(os.getenv("ENCOMENDA_DIAS_VALIDADE", "7"))
+TOTEM_RATE_LIMIT = int(os.getenv("TOTEM_RATE_LIMIT", "8"))
+TOTEM_RATE_JANELA = int(os.getenv("TOTEM_RATE_JANELA", "300"))
+TOTEM_AJUDA_TELEFONE = os.getenv("TOTEM_AJUDA_TELEFONE", "")
+
 # Database — sqlite (dev) | postgresql (produção)
 DATABASE_URL = os.getenv("DATABASE_URL", "")
 DB_ENGINE = os.getenv("DB_ENGINE", "sqlite")

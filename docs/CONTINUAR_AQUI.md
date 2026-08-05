@@ -40,7 +40,8 @@ Fluxo: **Retirar encomenda** → digitar código WhatsApp → tela com **compart
 
 Código/QR **não aparece** para operador no depósito — só morador recebe WhatsApp.
 
-Teste ESP sem servidor: `docs/TESTE_ESP_OFFLINE.md`
+Teste ESP offline: `docs/TESTE_ESP_OFFLINE.md`  
+**Tablet amanhã:** `docs/AMANHA_TABLET.md`
 
 ---
 

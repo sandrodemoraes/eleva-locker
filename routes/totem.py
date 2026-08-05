@@ -1,5 +1,7 @@
 from flask import Blueprint, render_template, request, jsonify
 
+import config
+from middleware.rate_limit import rate_limit
 from services.encomenda_service import EncomendaService
 from services.armario_service import ArmarioService
 from services.qrcode_service import QrcodeService
@@ -23,10 +25,13 @@ def index(armario_id=None):
         "totem.html",
         armario=armario,
         armarios=ArmarioService.listar_ativos() if not armario else None,
+        max_portas=(armario.get("max_portas") or 8) if armario else 8,
+        ajuda_telefone=config.TOTEM_AJUDA_TELEFONE,
     )
 
 
 @totem_bp.route("/totem/retirar", methods=["POST"])
+@rate_limit("totem-retirar", max_tentativas=config.TOTEM_RATE_LIMIT, janela_seg=config.TOTEM_RATE_JANELA)
 def retirar():
 
     codigo = request.form.get("codigo", "").strip()
@@ -59,6 +64,7 @@ def retirar():
 
 
 @totem_bp.route("/totem/scan", methods=["POST"])
+@rate_limit("totem-scan", max_tentativas=config.TOTEM_RATE_LIMIT, janela_seg=config.TOTEM_RATE_JANELA)
 def scan_qrcode():
 
     dados = request.get_json(silent=True) or {}

@@ -45,6 +45,7 @@ class EncomendaRepository:
                     e.*,
                     c.numero AS compartimento_numero,
                     c.tamanho AS compartimento_tamanho,
+                    c.armario AS compartimento_armario,
                     a.nome AS armario_nome
                 FROM encomendas e
                 LEFT JOIN compartimentos c ON c.id = e.compartimento
@@ -62,6 +63,7 @@ class EncomendaRepository:
                     e.*,
                     c.numero AS compartimento_numero,
                     c.tamanho AS compartimento_tamanho,
+                    c.armario AS compartimento_armario,
                     a.nome AS armario_nome
                 FROM encomendas e
                 LEFT JOIN compartimentos c ON c.id = e.compartimento
@@ -162,9 +164,9 @@ class EncomendaRepository:
                 cursor.execute("""
                     INSERT INTO encomendas (
                         codigo, cliente, telefone, email, compartimento,
-                        data_entrada, status, operador, transportadora, observacao
+                        data_entrada, status, operador, transportadora, observacao, expira_em
                     )
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """, (
                     dados["codigo"],
                     dados["cliente"],
@@ -176,6 +178,7 @@ class EncomendaRepository:
                     dados.get("operador"),
                     dados.get("transportadora"),
                     dados.get("observacao"),
+                    dados.get("expira_em"),
                 ))
 
                 encomenda_id = cursor.lastrowid
