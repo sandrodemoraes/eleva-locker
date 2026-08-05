@@ -12,14 +12,18 @@ DOCKER_TIMEOUT = 180
 
 
 def run(cmd, check=False):
-    return subprocess.run(
-        cmd,
-        cwd=ROOT,
-        capture_output=True,
-        text=True,
-        shell=isinstance(cmd, str),
-        check=check,
-    )
+    try:
+        return subprocess.run(
+            cmd,
+            cwd=ROOT,
+            capture_output=True,
+            text=True,
+            shell=isinstance(cmd, str),
+            check=check,
+        )
+    except FileNotFoundError:
+        r = subprocess.CompletedProcess(cmd, 127, "", "comando nao encontrado")
+        return r
 
 
 def docker_ok():
