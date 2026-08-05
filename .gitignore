@@ -30,3 +30,6 @@ Desktop.ini
 # Banco SQLite local
 database/*.db
 *.db
+
+# Variáveis locais (use tools/criar_env_producao.bat)
+.env

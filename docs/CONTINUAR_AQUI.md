@@ -70,15 +70,13 @@ py app.py
 3. Depositar encomenda com telefone
 4. Se falhar: `py tools/testar_whatsapp_direto.py 48996587858`
 
-`.env` importante:
-```env
-NOTIF_MODO=producao
-NOTIF_WHATSAPP_ATIVO=1
-APP_URL_BASE=http://177.74.79.32:15000
-WHATSAPP_API_URL=http://192.168.16.130:8080
-WHATSAPP_API_KEY=ElevaWhatsApp2026
-WHATSAPP_INSTANCIA=eleva-locker
+**Corrigir `.env` (1 clique):**
+```cmd
+cd C:\ElevaLocker
+git pull
+tools\criar_env_producao.bat
 ```
+Ou: `py tools/criar_env_producao.py` → deve mostrar `OK — WhatsApp pronto para producao`.
 
 ---
 
