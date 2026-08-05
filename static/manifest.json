@@ -1,0 +1,11 @@
+{
+    "name": "ELEVA LOCKER Totem",
+    "short_name": "Totem",
+    "description": "Totem de retirada de encomendas ELEVA LOCKER",
+    "start_url": "/totem",
+    "display": "fullscreen",
+    "orientation": "portrait",
+    "background_color": "#0f3d75",
+    "theme_color": "#0f3d75",
+    "icons": []
+}
