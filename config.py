@@ -1,6 +1,10 @@
 import os
 import secrets
 
+from dotenv import load_dotenv
+
+load_dotenv()
+
 # Flask
 SECRET_KEY = os.getenv("SECRET_KEY", "ElevaLocker2026")
 
