@@ -12,30 +12,40 @@
 
 <div class="cards">
 
+    <a href="{{ url_for('usuarios.usuarios') }}" class="card-link">
     <div class="card">
         <div class="numero">{{ stats.usuarios }}</div>
         <div class="titulo-card">Usuários</div>
     </div>
+    </a>
 
+    <a href="{{ url_for('armarios.listar') }}" class="card-link">
     <div class="card">
         <div class="numero">{{ stats.armarios }}</div>
         <div class="titulo-card">Armários</div>
     </div>
+    </a>
 
+    <a href="{{ url_for('compartimentos.listar') }}" class="card-link">
     <div class="card">
         <div class="numero">{{ stats.compartimentos }}</div>
         <div class="titulo-card">Compartimentos</div>
     </div>
+    </a>
 
+    <a href="{{ url_for('encomendas.listar') }}" class="card-link">
     <div class="card">
         <div class="numero">{{ stats.encomendas_pendentes }}</div>
         <div class="titulo-card">Encomendas pendentes</div>
     </div>
+    </a>
 
+    <a href="{{ url_for('armarios.listar') }}" class="card-link">
     <div class="card">
         <div class="numero">{{ stats.esp32_online }}/{{ stats.esp32_total }}</div>
         <div class="titulo-card">ESP32 online</div>
     </div>
+    </a>
 
 </div>
 

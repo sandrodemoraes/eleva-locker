@@ -22,6 +22,98 @@ class NotificacaoService:
         return bool(config.WHATSAPP_API_URL and config.WHATSAPP_INSTANCIA)
 
     @staticmethod
+    def _evolution_request(method, path, payload=None):
+        url = f"{config.WHATSAPP_API_URL.rstrip('/')}{path}"
+        headers = {
+            "apikey": config.WHATSAPP_API_KEY,
+            "Content-Type": "application/json",
+        }
+        data = json.dumps(payload).encode("utf-8") if payload is not None else None
+        req = urllib.request.Request(url, data=data, headers=headers, method=method)
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            return json.loads(resp.read().decode("utf-8"))
+
+    @staticmethod
+    def _extrair_status_instancia(instancia):
+        if isinstance(instancia, dict):
+            for chave in ("connectionStatus", "status", "state"):
+                if instancia.get(chave):
+                    return str(instancia[chave]).lower()
+            inner = instancia.get("instance") or instancia.get("data") or {}
+            if isinstance(inner, dict):
+                for chave in ("connectionStatus", "status", "state"):
+                    if inner.get(chave):
+                        return str(inner[chave]).lower()
+        return None
+
+    @staticmethod
+    def _buscar_instancia_evolution():
+        dados = NotificacaoService._evolution_request("GET", "/instance/fetchInstances")
+        alvo = config.WHATSAPP_INSTANCIA
+        lista = dados if isinstance(dados, list) else dados.get("instances", [])
+
+        for item in lista:
+            nome = (
+                item.get("name")
+                or item.get("instanceName")
+                or (item.get("instance") or {}).get("instanceName")
+            )
+            if nome == alvo:
+                return item
+        return None
+
+    @staticmethod
+    def status_whatsapp():
+        info = {
+            "ativo": config.NOTIF_WHATSAPP_ATIVO,
+            "modo": config.NOTIF_MODO,
+            "configurado": NotificacaoService.whatsapp_configurado(),
+            "instancia": config.WHATSAPP_INSTANCIA,
+            "conexao": None,
+            "pronto": False,
+            "mensagem": "",
+        }
+
+        if not config.NOTIF_WHATSAPP_ATIVO:
+            info["mensagem"] = "WhatsApp desativado (NOTIF_WHATSAPP_ATIVO=0)."
+            return info
+
+        if config.NOTIF_MODO == "console":
+            info["mensagem"] = (
+                "NOTIF_MODO=console — não envia de verdade. "
+                "Altere para producao no .env e reinicie py app.py"
+            )
+            return info
+
+        if not NotificacaoService.whatsapp_configurado():
+            info["mensagem"] = "WHATSAPP_API_URL ou WHATSAPP_INSTANCIA não configurados."
+            return info
+
+        try:
+            inst = NotificacaoService._buscar_instancia_evolution()
+            if not inst:
+                info["mensagem"] = (
+                    f'Instância "{config.WHATSAPP_INSTANCIA}" não encontrada no manager.'
+                )
+                return info
+
+            conexao = NotificacaoService._extrair_status_instancia(inst)
+            info["conexao"] = conexao
+
+            if conexao in ("open", "connected"):
+                info["pronto"] = True
+                info["mensagem"] = "WhatsApp conectado e pronto para enviar."
+            else:
+                info["mensagem"] = (
+                    f'WhatsApp desconectado (status: {conexao or "desconhecido"}). '
+                    "Abra o manager e escaneie o QR novamente."
+                )
+        except Exception as erro:
+            info["mensagem"] = f"Evolution API inacessível: {erro}"
+
+        return info
+
+    @staticmethod
     def validar_telefone_br(telefone):
         numeros = re.sub(r"\D", "", telefone or "")
 
@@ -140,6 +232,10 @@ class NotificacaoService:
 
     @staticmethod
     def _enviar_whatsapp_evolution(numero, mensagem):
+        status = NotificacaoService.status_whatsapp()
+        if not status["pronto"]:
+            raise ValueError(status["mensagem"] or "WhatsApp não está pronto.")
+
         url = (
             f"{config.WHATSAPP_API_URL.rstrip('/')}/message/sendText/"
             f"{config.WHATSAPP_INSTANCIA}"
@@ -160,7 +256,18 @@ class NotificacaoService:
         )
 
         with urllib.request.urlopen(req, timeout=15) as resp:
-            return json.loads(resp.read().decode("utf-8"))
+            dados = json.loads(resp.read().decode("utf-8"))
+
+        if isinstance(dados, dict):
+            erro = dados.get("error") or dados.get("message")
+            if isinstance(erro, list) and erro:
+                erro = erro[0]
+            if dados.get("status") in (400, 404, 500) or (
+                isinstance(erro, str) and "exist" in erro.lower()
+            ):
+                raise ValueError(str(erro))
+
+        return dados
 
     @staticmethod
     def _enviar_whatsapp_meta(numero, mensagem):

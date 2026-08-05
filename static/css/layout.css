@@ -205,6 +205,20 @@ a{
     transition:.25s;
 }
 
+a.card-link{
+    text-decoration:none;
+    color:inherit;
+}
+
+a.card-link .card{
+    cursor:pointer;
+    height:100%;
+}
+
+a.card-link:hover .card{
+    box-shadow:0 8px 24px rgba(15,61,117,.15);
+}
+
 .numero{
     font-size:48px;
     color:#0f3d75;

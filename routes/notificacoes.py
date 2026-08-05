@@ -18,6 +18,7 @@ def listar():
         notificacoes=NotificacaoService.listar(),
         config=config,
         whatsapp_configurado=NotificacaoService.whatsapp_configurado(),
+        whatsapp_status=NotificacaoService.status_whatsapp(),
     )
 
 

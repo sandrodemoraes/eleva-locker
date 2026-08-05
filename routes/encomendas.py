@@ -80,7 +80,14 @@ def depositar():
             n.get("canal") == "whatsapp" and not n.get("sucesso")
             for n in resultado.get("notificacoes", [])
         )
-        flash(msg, "warning" if whatsapp_falhou else "success")
+        whatsapp_simulado = any(
+            n.get("canal") == "whatsapp" and n.get("sucesso") and n.get("simulado")
+            for n in resultado.get("notificacoes", [])
+        )
+        if whatsapp_falhou or whatsapp_simulado:
+            flash(msg, "warning")
+        else:
+            flash(msg, "success")
 
         session["ultimo_codigo"] = resultado["codigo"]
         session["ultimo_encomenda_id"] = resultado["id"]

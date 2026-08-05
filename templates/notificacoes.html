@@ -17,6 +17,14 @@
 
 <div class="table-box" style="margin-bottom:20px;">
     <p><strong>Modo atual:</strong> {{ config.NOTIF_MODO }}</p>
+    {% if whatsapp_status %}
+    <p style="margin-top:8px;padding:12px;border-radius:8px;background:{% if whatsapp_status.pronto %}#d4edda{% else %}#fff3cd{% endif %};">
+        <strong>WhatsApp:</strong> {{ whatsapp_status.mensagem }}
+        {% if whatsapp_status.conexao %}
+        <br><small>Instância <code>{{ whatsapp_status.instancia }}</code> — status: {{ whatsapp_status.conexao }}</small>
+        {% endif %}
+    </p>
+    {% endif %}
     <p style="margin-top:8px;color:#666;">
         Canais:
         E-mail {% if config.NOTIF_EMAIL_ATIVO %}✅{% else %}❌{% endif %} |
