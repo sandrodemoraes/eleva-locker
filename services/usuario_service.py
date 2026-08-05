@@ -1,4 +1,5 @@
 from werkzeug.security import generate_password_hash
+import sqlite3
 
 from repositories.usuario_repository import UsuarioRepository
 
@@ -33,13 +34,16 @@ class UsuarioService:
             raise ValueError("As senhas não conferem.")
 
         if UsuarioRepository.buscar_por_email(email):
-            raise ValueError("Este e-mail já está cadastrado.")
+            raise ValueError("Este e-mail já está cadastrado. Use outro e-mail.")
 
         senha_hash = generate_password_hash(senha)
 
-        return UsuarioRepository.criar(
-            nome, email, telefone, senha_hash, perfil, status, armario_id
-        )
+        try:
+            return UsuarioRepository.criar(
+                nome, email, telefone, senha_hash, perfil, status, armario_id
+            )
+        except sqlite3.IntegrityError:
+            raise ValueError("Este e-mail já está cadastrado. Use outro e-mail.")
 
     @staticmethod
     def atualizar(usuario_id, nome, email, telefone, perfil, status, armario_id=None):

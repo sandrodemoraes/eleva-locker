@@ -29,9 +29,13 @@
 </div>
 
 {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div id="flash-area">
     {% for category, message in messages %}
         <div class="alert alert-{{ category }}">{{ message }}</div>
     {% endfor %}
+    </div>
+    {% endif %}
 {% endwith %}
 
 <div class="armario-resumo">
@@ -304,5 +308,10 @@ function editarEsp(id, nome, ip, mac, porta, status, token){
     document.getElementById('esp_token').value = token;
     abrirModal('modalEditarEsp');
 }
+
+document.addEventListener('DOMContentLoaded', function(){
+    var flash = document.getElementById('flash-area');
+    if(flash) flash.scrollIntoView({behavior:'smooth', block:'start'});
+});
 </script>
 {% endblock %}

@@ -193,21 +193,24 @@ def usuario_novo(armario_id):
 
     try:
         ArmarioService.buscar_por_id(armario_id)
-        UsuarioService.criar(
-            nome=request.form["nome"],
-            email=request.form["email"],
+        usuario_id = UsuarioService.criar(
+            nome=request.form.get("nome", ""),
+            email=request.form.get("email", ""),
             telefone=request.form.get("telefone", ""),
-            senha=request.form["senha"],
-            confirmar=request.form["confirmar"],
+            senha=request.form.get("senha", ""),
+            confirmar=request.form.get("confirmar", ""),
             perfil=request.form.get("perfil", "Operador"),
             status=int(request.form.get("status", 1)),
             armario_id=armario_id,
         )
+        LogService.registrar(None, session.get("usuario"), f"Usuário #{usuario_id} cadastrado no armário #{armario_id}")
         flash("Usuário cadastrado neste armário!", "success")
     except ValueError as erro:
         flash(str(erro), "warning")
-    except Exception:
-        flash("Erro ao cadastrar usuário.", "danger")
+    except Exception as erro:
+        import traceback
+        traceback.print_exc()
+        flash(f"Erro ao cadastrar usuário: {erro}", "danger")
 
     return redirect(f"/armarios/{armario_id}")
 
