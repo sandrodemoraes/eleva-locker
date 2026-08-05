@@ -4,7 +4,6 @@ cd /d "%~dp0.."
 
 set "STARTUP=%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup"
 set "ATALHO=%STARTUP%\ELEVA LOCKER - Iniciar.lnk"
-set "BAT=%~dp0iniciar_tudo.bat"
 
 echo ============================================================
 echo   Instalar inicio automatico — ELEVA LOCKER
@@ -18,18 +17,16 @@ echo   - Docker WhatsApp (Evolution)
 echo   - python app.py
 echo.
 echo IMPORTANTE: marque no Docker Desktop:
-echo   Settings ^> General ^> Start Docker Desktop when you sign in
+echo   Settings - General - Start Docker Desktop when you sign in
 echo.
 pause
 
-powershell -NoProfile -Command ^
-  "$ws = New-Object -ComObject WScript.Shell; ^
-   $s = $ws.CreateShortcut('%ATALHO%'); ^
-   $s.TargetPath = '%BAT%'; ^
-   $s.WorkingDirectory = '%~dp0..'; ^
-   $s.WindowStyle = 1; ^
-   $s.Description = 'ELEVA LOCKER - Docker WhatsApp + app.py'; ^
-   $s.Save()"
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0criar_atalho_startup.ps1"
+if errorlevel 1 (
+    echo.
+    echo ERRO ao criar atalho.
+    goto fim
+)
 
 if exist "%ATALHO%" (
     echo.
@@ -42,5 +39,6 @@ if exist "%ATALHO%" (
     echo ERRO ao criar atalho.
 )
 
+:fim
 echo.
 pause
