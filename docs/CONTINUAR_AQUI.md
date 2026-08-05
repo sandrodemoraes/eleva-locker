@@ -68,6 +68,13 @@ Sobe Docker WhatsApp + `python app.py`. Mantenha a janela aberta.
 
 Para parar só o Docker WhatsApp: `tools\parar_tudo.bat` (servidor: Ctrl+C).
 
+**Início automático ao ligar o PC (1 vez):**
+```cmd
+tools\instalar_inicio_automatico.bat
+```
+Docker Desktop: Settings → **Start Docker Desktop when you sign in**.  
+Remover: `tools\desinstalar_inicio_automatico.bat`
+
 **Manual (se preferir):**
 ```cmd
 docker stop elevalocker-web-1
