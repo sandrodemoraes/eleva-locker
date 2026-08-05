@@ -30,20 +30,53 @@ services:
       db:
         condition: service_healthy
 
-  # Evolution API — WhatsApp (opcional)
+  # ── WhatsApp (Evolution API v2) — perfil whatsapp ─────────────
   # Suba com: docker compose --profile whatsapp up -d
-  # Depois acesse http://localhost:8080, crie instância e escaneie QR
+  evolution-postgres:
+    profiles: ["whatsapp"]
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: evolution
+      POSTGRES_PASSWORD: evolution
+      POSTGRES_DB: evolution
+    volumes:
+      - evolution_pg:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U evolution -d evolution"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  evolution-redis:
+    profiles: ["whatsapp"]
+    image: redis:7-alpine
+    volumes:
+      - evolution_redis:/data
+
   evolution-api:
     profiles: ["whatsapp"]
-    image: atendai/evolution-api:latest
+    image: evoapicloud/evolution-api:v2.3.0
     ports:
       - "8080:8080"
     environment:
-      AUTHENTICATION_API_KEY: ${WHATSAPP_API_KEY:-eleva-evolution-key}
-      SERVER_URL: http://localhost:8080
+      AUTHENTICATION_TYPE: apikey
+      AUTHENTICATION_API_KEY: ${WHATSAPP_API_KEY:-ElevaWhatsApp2026}
+      SERVER_URL: ${WHATSAPP_SERVER_URL:-http://localhost:8080}
+      DATABASE_ENABLED: "true"
+      DATABASE_PROVIDER: postgresql
+      DATABASE_CONNECTION_URI: postgresql://evolution:evolution@evolution-postgres:5432/evolution?schema=public
+      CACHE_REDIS_ENABLED: "true"
+      CACHE_REDIS_URI: redis://evolution-redis:6379/0
     volumes:
       - evolution_data:/evolution/instances
+    depends_on:
+      evolution-postgres:
+        condition: service_healthy
+      evolution-redis:
+        condition: service_started
 
 volumes:
   pgdata:
+  evolution_pg:
+  evolution_redis:
   evolution_data:
