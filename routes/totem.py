@@ -22,7 +22,7 @@ def index(armario_id=None):
     return render_template(
         "totem.html",
         armario=armario,
-        armarios=ArmarioService.listar_ativos(),
+        armarios=ArmarioService.listar_ativos() if not armario else None,
     )
 
 
@@ -30,14 +30,20 @@ def index(armario_id=None):
 def retirar():
 
     codigo = request.form.get("codigo", "").strip()
+    armario_raw = request.form.get("armario_id", "").strip()
+    armario_id = int(armario_raw) if armario_raw.isdigit() else None
 
     try:
 
-        resultado = EncomendaService.retirar(codigo, operador="Totem")
+        resultado = EncomendaService.retirar(
+            codigo,
+            operador="Totem",
+            armario_id=armario_id,
+        )
 
         return jsonify({
             "sucesso": True,
-            "mensagem": f"Retirada confirmada! Compartimento #{resultado['compartimento']}",
+            "mensagem": "Retirada confirmada!",
             "cliente": resultado["cliente"],
             "compartimento": resultado["compartimento"],
             "armario": resultado["armario"],
@@ -57,6 +63,8 @@ def scan_qrcode():
 
     dados = request.get_json(silent=True) or {}
     conteudo = dados.get("conteudo", "")
+    armario_raw = dados.get("armario_id")
+    armario_id = int(armario_raw) if armario_raw else None
 
     parsed = QrcodeService.parse_conteudo(conteudo)
 
@@ -66,12 +74,18 @@ def scan_qrcode():
 
     try:
 
-        resultado = EncomendaService.retirar(parsed["codigo"], operador="Totem-QR")
+        resultado = EncomendaService.retirar(
+            parsed["codigo"],
+            operador="Totem-QR",
+            armario_id=armario_id,
+        )
 
         return jsonify({
             "sucesso": True,
-            "mensagem": f"Retirada confirmada! Compartimento #{resultado['compartimento']}",
+            "mensagem": "Retirada confirmada!",
             "cliente": resultado["cliente"],
+            "compartimento": resultado["compartimento"],
+            "armario": resultado["armario"],
         })
 
     except ValueError as erro:

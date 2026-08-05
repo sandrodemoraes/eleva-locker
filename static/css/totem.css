@@ -1,142 +1,225 @@
-/* Totem fullscreen — tela do armário */
+/* Totem v2 — tablet 7" paisagem (800×480+) */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 
 html,body{
     height:100%;
     font-family:"Segoe UI",system-ui,sans-serif;
-    background:linear-gradient(160deg,#0f3d75 0%,#1a5fae 50%,#2563eb 100%);
+    background:linear-gradient(160deg,#0f3d75 0%,#1a5fae 45%,#2563eb 100%);
     color:#fff;
     overflow:hidden;
     user-select:none;
+    touch-action:manipulation;
 }
 
 .totem{
     min-height:100vh;
-    display:flex;
+    position:relative;
+}
+
+.tela{
+    display:none;
+    min-height:100vh;
     flex-direction:column;
     align-items:center;
     justify-content:center;
-    padding:30px;
+    padding:24px 20px 48px;
+    text-align:center;
 }
 
-.totem-logo{
-    text-align:center;
-    margin-bottom:40px;
+.tela-ativa{
+    display:flex;
 }
 
 .totem-logo i{
-    font-size:64px;
-    margin-bottom:15px;
-    display:block;
+    font-size:52px;
+    margin-bottom:12px;
+    opacity:.95;
 }
 
 .totem-logo h1{
-    font-size:42px;
+    font-size:clamp(28px,6vw,42px);
     font-weight:700;
 }
 
-.totem-logo p{
-    font-size:18px;
-    opacity:.85;
+.totem-local{
+    margin-top:10px;
+    font-size:16px;
+    background:rgba(255,255,255,.12);
+    padding:8px 18px;
+    border-radius:24px;
+    display:inline-block;
+}
+
+.totem-select{
+    margin-top:12px;
+    background:rgba(0,0,0,.25);
+    border:1px solid rgba(255,255,255,.3);
+    color:#fff;
+    padding:10px 16px;
+    border-radius:12px;
+    font-size:16px;
+    min-width:240px;
+}
+
+.btn-totem{
+    border:none;
+    border-radius:18px;
+    cursor:pointer;
+    font-weight:700;
+    transition:.15s;
+    width:min(420px,92vw);
+}
+
+.btn-principal{
+    background:#2a9d8f;
+    color:#fff;
+    font-size:clamp(20px,4vw,28px);
+    padding:28px 24px;
+    margin:24px 0 16px;
+    box-shadow:0 8px 24px rgba(0,0,0,.25);
+}
+
+.btn-principal:active{transform:scale(.98);background:#21867a;}
+.btn-principal:disabled{opacity:.45;cursor:not-allowed;}
+
+.btn-principal i{
+    display:block;
+    font-size:36px;
+    margin-bottom:10px;
+}
+
+.totem-dica{
+    opacity:.75;
+    font-size:15px;
     margin-top:8px;
 }
 
-.totem-armario{
-    background:rgba(255,255,255,.12);
-    padding:10px 24px;
-    border-radius:30px;
-    margin-bottom:30px;
+.totem-footer{
+    position:fixed;
+    bottom:12px;
+    opacity:.45;
+    font-size:12px;
+}
+
+.btn-voltar{
+    position:absolute;
+    top:16px;
+    left:16px;
+    background:rgba(255,255,255,.15);
+    border:none;
+    color:#fff;
+    padding:10px 16px;
+    border-radius:12px;
+    font-size:15px;
+    cursor:pointer;
+}
+
+.tela-titulo{
+    font-size:clamp(24px,5vw,32px);
+    margin-bottom:6px;
+}
+
+.tela-sub{
+    opacity:.8;
     font-size:16px;
+    margin-bottom:20px;
 }
 
 .codigo-display{
-    background:rgba(0,0,0,.25);
-    border-radius:16px;
-    padding:20px 40px;
-    font-size:48px;
-    letter-spacing:16px;
+    background:rgba(0,0,0,.28);
+    border-radius:14px;
+    padding:16px 24px;
+    font-size:clamp(32px,8vw,44px);
+    letter-spacing:12px;
     font-weight:bold;
-    min-width:360px;
-    text-align:center;
-    margin-bottom:30px;
-    min-height:80px;
+    min-width:min(340px,90vw);
+    margin-bottom:20px;
 }
 
 .teclado{
     display:grid;
     grid-template-columns:repeat(3,1fr);
-    gap:14px;
-    max-width:360px;
+    gap:10px;
+    max-width:min(340px,92vw);
     width:100%;
 }
 
 .tecla{
-    background:rgba(255,255,255,.15);
-    border:2px solid rgba(255,255,255,.25);
-    border-radius:16px;
+    background:rgba(255,255,255,.14);
+    border:2px solid rgba(255,255,255,.22);
+    border-radius:14px;
     color:#fff;
-    font-size:32px;
+    font-size:clamp(22px,5vw,30px);
     font-weight:bold;
-    padding:22px;
+    padding:16px;
     cursor:pointer;
-    transition:.15s;
 }
 
-.tecla:hover,.tecla:active{
-    background:rgba(255,255,255,.3);
-    transform:scale(1.05);
-}
+.tecla:active{background:rgba(255,255,255,.32);}
 
-.tecla-acao{
+.tecla-limpar{
+    background:rgba(214,40,40,.65);
+    border-color:#d62828;
     font-size:18px;
 }
 
-.tecla-confirmar{
-    background:#2a9d8f;
-    border-color:#2a9d8f;
-    grid-column:span 3;
-    padding:18px;
-    font-size:22px;
-}
-
-.tecla-confirmar:hover{
-    background:#21867a;
-}
-
-.tecla-limpar{
-    background:rgba(214,40,40,.7);
-    border-color:#d62828;
-}
-
-.resultado{
-    margin-top:30px;
-    padding:24px 40px;
-    border-radius:16px;
-    font-size:22px;
-    text-align:center;
-    max-width:500px;
-    display:none;
-}
-
-.resultado.sucesso{
-    display:block;
-    background:rgba(42,157,143,.9);
-}
-
 .resultado.erro{
+    margin-top:16px;
+    padding:12px 20px;
+    border-radius:12px;
+    background:rgba(214,40,40,.85);
+    font-size:16px;
+    display:none;
+    max-width:340px;
+}
+
+.resultado.erro.visivel{display:block;}
+
+.sucesso-icon{
+    font-size:64px;
+    color:#6ee7b7;
+    margin-bottom:12px;
+}
+
+.porta-box{
+    background:rgba(0,0,0,.25);
+    border-radius:20px;
+    padding:20px 40px;
+    margin:20px 0;
+    min-width:200px;
+}
+
+.porta-label{
     display:block;
-    background:rgba(214,40,40,.9);
+    font-size:16px;
+    opacity:.85;
+    margin-bottom:8px;
 }
 
-.totem-footer{
-    position:fixed;
-    bottom:20px;
-    opacity:.5;
-    font-size:13px;
+.porta-numero{
+    display:block;
+    font-size:clamp(72px,18vw,120px);
+    font-weight:800;
+    line-height:1;
+    color:#6ee7b7;
 }
 
-@media(max-width:500px){
-    .codigo-display{font-size:36px;letter-spacing:10px;min-width:280px;}
-    .tecla{font-size:26px;padding:18px;}
-    .totem-logo h1{font-size:32px;}
+.contagem{
+    margin-top:16px;
+    opacity:.6;
+    font-size:14px;
+}
+
+/* 7" paisagem ~800×480 */
+@media (max-height:520px){
+    .totem-logo i{font-size:40px;}
+    .btn-principal{padding:18px;font-size:20px;}
+    .btn-principal i{font-size:28px;margin-bottom:6px;}
+    .tecla{padding:12px;}
+    .porta-numero{font-size:72px;}
+}
+
+@media (orientation:portrait){
+    .teclado{max-width:300px;}
+    .codigo-display{letter-spacing:8px;}
 }

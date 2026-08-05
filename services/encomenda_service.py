@@ -131,7 +131,7 @@ class EncomendaService:
         }
 
     @staticmethod
-    def retirar(codigo, operador):
+    def retirar(codigo, operador, armario_id=None):
 
         codigo = codigo.strip()
 
@@ -146,6 +146,9 @@ class EncomendaService:
         comp = CompartimentoRepository.buscar_por_id(encomenda["compartimento"])
         if not comp or not operador_acessa_armario(comp["armario"]):
             raise ValueError("Sem permissão para retirar deste armário.")
+
+        if armario_id is not None and int(comp["armario"]) != int(armario_id):
+            raise ValueError("Este código não é deste armário.")
 
         agora = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 

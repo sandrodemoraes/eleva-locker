@@ -28,7 +28,21 @@
 
 ---
 
-## ⏳ PENDENTE — Menu vertical vs horizontal (UX)
+## Totem tablet (amanhã)
+
+Tablet 7" em modo kiosk → URL fixa do armário:
+
+```
+http://192.168.16.130:15000/totem/3
+```
+
+Fluxo: **Retirar encomenda** → digitar código WhatsApp → tela com **compartimento grande**.
+
+Código/QR **não aparece** para operador no depósito — só morador recebe WhatsApp.
+
+Teste ESP sem servidor: `docs/TESTE_ESP_OFFLINE.md`
+
+---
 
 **Reportado pelo Sandro (05/08/2026):**
 

@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request, redirect, session, flash, jsonify, send_file
 
 import config
-from middleware.auth_required import login_required
+from middleware.auth_required import login_required, perfil_required
 from middleware.operador_scope import get_armario_restrito, operador_acessa_armario, redirect_home
 from services.encomenda_service import EncomendaService
 from services.armario_service import ArmarioService
@@ -72,9 +72,11 @@ def depositar():
             resultado.get("notificacoes", [])
         )
 
-        msg = f"Encomenda depositada! Código: {resultado['codigo']}"
+        msg = "Encomenda depositada! O morador será notificado."
         if canais:
-            msg += f" — Notificações: {canais}"
+            msg += f" Canais: {canais}."
+        else:
+            msg += " Configure notificações se o morador não receber o código."
 
         whatsapp_falhou = any(
             n.get("canal") == "whatsapp" and not n.get("sucesso")
@@ -88,9 +90,6 @@ def depositar():
             flash(msg, "warning")
         else:
             flash(msg, "success")
-
-        session["ultimo_codigo"] = resultado["codigo"]
-        session["ultimo_encomenda_id"] = resultado["id"]
 
     except (ValueError, TypeError) as erro:
         flash(str(erro), "warning")
@@ -126,6 +125,7 @@ def retirar():
 
 @encomendas_bp.route("/encomendas/qrcode/<int:encomenda_id>")
 @login_required
+@perfil_required("Administrador")
 def qrcode(encomenda_id):
 
     try:

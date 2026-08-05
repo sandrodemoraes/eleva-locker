@@ -29,18 +29,6 @@
     {% endfor %}
 {% endwith %}
 
-{% if session.get('ultimo_codigo') %}
-<div class="codigo-box">
-    Código gerado: {{ session.pop('ultimo_codigo') }}
-    {% set eid = session.pop('ultimo_encomenda_id', None) %}
-    {% if eid %}
-    <br><br>
-    <img src="/encomendas/qrcode/{{ eid }}" alt="QR Code" style="max-width:180px;border-radius:8px;background:#fff;padding:10px;">
-    <br><small style="opacity:.8;">Escaneie no totem ou envie ao morador</small>
-    {% endif %}
-</div>
-{% endif %}
-
 <div class="table-box" style="margin-bottom:20px;">
     <form method="GET" action="/encomendas">
         <div class="form-group" style="max-width:300px;margin:0;">
@@ -60,7 +48,7 @@
         <thead>
             <tr>
                 <th>ID</th>
-                <th>Código</th>
+                {% if perfil == 'Administrador' %}<th>Código</th>{% endif %}
                 <th>Destinatário</th>
                 <th>Telefone</th>
                 <th>Armário</th>
@@ -76,7 +64,7 @@
             {% for e in encomendas %}
             <tr>
                 <td>{{ e.id }}</td>
-                <td><strong>{{ e.codigo }}</strong></td>
+                {% if perfil == 'Administrador' %}<td><strong>{{ e.codigo }}</strong></td>{% endif %}
                 <td>{{ e.cliente }}</td>
                 <td>{{ e.telefone or '—' }}</td>
                 <td>{{ e.armario_nome or '—' }}</td>
@@ -86,7 +74,9 @@
                 <td><span class="badge badge-{{ e.status }}">{{ e.status }}</span></td>
                 <td>{{ e.notificado_em or '—' }}</td>
                 <td>
+                    {% if perfil == 'Administrador' %}
                     <a href="/encomendas/qrcode/{{ e.id }}" class="btn btn-sm" title="QR Code" target="_blank"><i class="fa-solid fa-qrcode"></i></a>
+                    {% endif %}
                     {% if e.status == 'aguardando_retirada' %}
                     <form method="POST" action="/encomendas/reenviar/{{ e.id }}" style="display:inline">
                         <button type="submit" class="btn btn-sm" title="Reenviar notificação"><i class="fa-solid fa-bell"></i></button>
@@ -165,7 +155,7 @@
                 <textarea name="observacao" rows="2"></textarea>
             </div>
             <div class="form-actions">
-                <button type="submit" class="btn btn-success">Depositar e gerar código</button>
+                <button type="submit" class="btn btn-success">Depositar e notificar morador</button>
                 <button type="button" class="btn btn-danger" onclick="fecharModal('modalDeposito')">Cancelar</button>
             </div>
         </form>
