@@ -2,6 +2,10 @@
 
     <div class="logo">
 
+        <button type="button" class="btn-menu-mobile" id="btnMenuMobile" aria-label="Abrir menu">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+
         <div class="logo-icon">
             <i class="fa-solid fa-box"></i>
         </div>
@@ -17,6 +21,17 @@
     </div>
 
     <div class="topo-direita">
+
+        {% if session.usuario_id and sites is defined %}
+        <form method="POST" action="{{ url_for('sites.selecionar') }}" class="site-selector" style="margin-right:15px;">
+            <select name="site_id" onchange="this.form.submit()" style="padding:6px 10px;border-radius:8px;border:1px solid #ddd;">
+                <option value="" {% if not site_atual %}selected{% endif %}>Todos os sites</option>
+                {% for s in sites %}
+                <option value="{{ s.id }}" {% if site_atual == s.id %}selected{% endif %}>{{ s.nome }}</option>
+                {% endfor %}
+            </select>
+        </form>
+        {% endif %}
 
         <button class="btn-icon">
 

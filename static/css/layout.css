@@ -205,6 +205,20 @@ a{
     transition:.25s;
 }
 
+a.card-link{
+    text-decoration:none;
+    color:inherit;
+}
+
+a.card-link .card{
+    cursor:pointer;
+    height:100%;
+}
+
+a.card-link:hover .card{
+    box-shadow:0 8px 24px rgba(15,61,117,.15);
+}
+
 .numero{
     font-size:48px;
     color:#0f3d75;
@@ -262,8 +276,42 @@ a{
 
 @media(max-width:768px){
 
+    .btn-menu-mobile{
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        width:42px;
+        height:42px;
+        margin-right:8px;
+        border:none;
+        border-radius:12px;
+        background:rgba(255,255,255,.12);
+        color:#fff;
+        font-size:20px;
+        cursor:pointer;
+    }
+
+    .sidebar-overlay{
+        display:none;
+        position:fixed;
+        inset:0;
+        top:70px;
+        background:rgba(0,0,0,.45);
+        z-index:998;
+    }
+
+    .sidebar-overlay.open{
+        display:block;
+    }
+
     .sidebar-container{
         left:-260px;
+        z-index:999;
+        transition:left .25s ease;
+    }
+
+    .sidebar-container.open{
+        left:0;
     }
 
     .content{
@@ -280,6 +328,23 @@ a{
         grid-template-columns:1fr;
     }
 
+    .topo-direita .site-selector{
+        display:none;
+    }
+
+    .usuario small{
+        display:none;
+    }
+
+}
+
+@media(min-width:769px){
+    .btn-menu-mobile{
+        display:none;
+    }
+    .sidebar-overlay{
+        display:none !important;
+    }
 }
 /* ==========================================================
    NAVBAR PREMIUM
