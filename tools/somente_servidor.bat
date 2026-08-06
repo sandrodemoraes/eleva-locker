@@ -15,6 +15,7 @@ echo.
 
 echo [1] Matando Docker antigo...
 docker stop elevalocker-web-1 2>nul
+docker update --restart=no elevalocker-web-1 2>nul
 docker rm -f elevalocker-web-1 2>nul
 docker compose stop web 2>nul
 
@@ -33,7 +34,7 @@ if not defined PYTHON (
 )
 
 echo [3] Iniciando python app.py...
-echo     Deve aparecer: ELEVA LOCKER — Totem v2.3.3
+echo     Deve aparecer: ELEVA LOCKER — Totem v2.3.4
 echo.
 %PYTHON% app.py
 

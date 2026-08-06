@@ -73,6 +73,7 @@ def index(armario_id=None):
     ))
     resp.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
     resp.headers["Pragma"] = "no-cache"
+    resp.headers["X-Eleva-Totem"] = TOTEM_VERSAO
     return resp
 
 

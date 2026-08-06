@@ -544,3 +544,20 @@ html,body{
     .teclado{max-width:300px;}
     .codigo-display{letter-spacing:8px;}
 }
+
+/* Badge de versão — identifica totem v2 no canto da tela */
+.totem-badge{
+    position:fixed;
+    top:8px;
+    right:10px;
+    z-index:9999;
+    font-size:11px;
+    font-weight:600;
+    letter-spacing:.03em;
+    padding:4px 8px;
+    border-radius:6px;
+    background:rgba(0,0,0,.35);
+    color:rgba(255,255,255,.85);
+    pointer-events:none;
+    font-family:ui-monospace,Consolas,monospace;
+}

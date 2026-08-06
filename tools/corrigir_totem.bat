@@ -63,7 +63,7 @@ echo.
 echo  ============================================================
 echo   AGUARDE 30s e teste:
 echo   http://192.168.16.130:15000/totem/versao
-echo   Deve mostrar: "ok": true, "versao": "2.3.3"
+echo   Deve mostrar: "ok": true, "versao": "2.3.4"
 echo.
 echo   Totem: http://192.168.16.130:15000/totem/3  (Ctrl+F5)
 echo  ============================================================

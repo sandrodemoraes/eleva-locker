@@ -10,8 +10,12 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/totem.css') }}?v={{ totem_versao|default('2') }}">
     <link rel="manifest" href="{% if armario_id %}{{ url_for('totem.manifest_armario', armario_id=armario_id) }}{% else %}{{ url_for('static', filename='manifest.json') }}{% endif %}">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
 </head>
 <body>
+
+<div class="totem-badge">v{{ totem_versao|default('2') }}</div>
 
 <div class="totem" data-armario-id="{{ armario['id'] if armario else '' }}" data-max-portas="{{ max_portas }}">
 
