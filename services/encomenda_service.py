@@ -54,6 +54,7 @@ class EncomendaService:
         operador,
         transportadora=None,
         observacao=None,
+        notificar=True,
     ):
 
         cliente = cliente.strip()
@@ -112,17 +113,19 @@ class EncomendaService:
 
         abertura = Esp32Service.abrir_compartimento(compartimento_id, operador)
 
-        notificacoes = NotificacaoService.notificar_encomenda_chegou(
-            encomenda_id=encomenda_id,
-            codigo=codigo,
-            cliente=cliente,
-            telefone=telefone,
-            email=email,
-            armario=compartimento["armario_nome"] or "Armário",
-            armario_id=compartimento["armario"],
-            compartimento=compartimento["numero"],
-            expira_em=expira,
-        )
+        notificacoes = []
+        if notificar:
+            notificacoes = NotificacaoService.notificar_encomenda_chegou(
+                encomenda_id=encomenda_id,
+                codigo=codigo,
+                cliente=cliente,
+                telefone=telefone,
+                email=email,
+                armario=compartimento["armario_nome"] or "Armário",
+                armario_id=compartimento["armario"],
+                compartimento=compartimento["numero"],
+                expira_em=expira,
+            )
 
         Esp32SyncService.incrementar_por_compartimento(compartimento_id)
 
@@ -130,9 +133,59 @@ class EncomendaService:
             "id": encomenda_id,
             "codigo": codigo,
             "compartimento": compartimento["numero"],
+            "compartimento_id": compartimento_id,
             "armario": compartimento["armario_nome"],
             "esp32": abertura,
             "notificacoes": notificacoes,
+            "notificado": bool(notificacoes),
+        }
+
+    @staticmethod
+    def concluir_deposito_totem(encomenda_id, operador):
+        encomenda = EncomendaRepository.buscar_por_id(encomenda_id)
+
+        if not encomenda:
+            raise ValueError("Encomenda não encontrada.")
+
+        if encomenda["status"] != "aguardando_retirada":
+            raise ValueError("Encomenda não está aguardando retirada.")
+
+        comp = CompartimentoRepository.buscar_por_id(encomenda["compartimento"])
+        if comp and not operador_acessa_armario(comp["armario"]):
+            raise ValueError("Sem permissão para este armário.")
+
+        if encomenda["notificado_em"]:
+            return {
+                "id": encomenda_id,
+                "compartimento": encomenda["compartimento_numero"],
+                "cliente": encomenda["cliente"],
+                "ja_notificado": True,
+            }
+
+        notificacoes = NotificacaoService.notificar_encomenda_chegou(
+            encomenda_id=encomenda_id,
+            codigo=encomenda["codigo"],
+            cliente=encomenda["cliente"],
+            telefone=encomenda["telefone"],
+            email=encomenda["email"],
+            armario=encomenda["armario_nome"] or "Armário",
+            armario_id=comp["armario"] if comp else None,
+            compartimento=encomenda["compartimento_numero"] or "—",
+            expira_em=encomenda["expira_em"] if encomenda["expira_em"] else None,
+        )
+
+        LogService.registrar(
+            encomenda["compartimento"],
+            operador,
+            f"Depósito totem concluído #{encomenda_id} — porta fechada",
+        )
+
+        return {
+            "id": encomenda_id,
+            "compartimento": encomenda["compartimento_numero"],
+            "cliente": encomenda["cliente"],
+            "notificacoes": notificacoes,
+            "ja_notificado": False,
         }
 
     @staticmethod

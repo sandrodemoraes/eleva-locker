@@ -272,6 +272,42 @@ html,body{
     opacity:.5;
 }
 
+.mapa-selecao .porta-celula{
+    cursor:pointer;
+    border:none;
+    font-family:inherit;
+    color:#fff;
+}
+
+.mapa-selecao .porta-celula.livre{
+    opacity:1;
+    background:rgba(110,231,183,.25);
+    border:2px solid rgba(110,231,183,.5);
+}
+
+.mapa-selecao .porta-celula.livre.ativa{
+    background:#6ee7b7;
+    color:#0f3d75;
+    border-color:#6ee7b7;
+    transform:scale(1.08);
+    box-shadow:0 0 16px rgba(110,231,183,.5);
+}
+
+.mapa-selecao .porta-celula.ocupada{
+    opacity:.2;
+    cursor:not-allowed;
+}
+
+.form-compacto{margin-top:16px;}
+
+.porta-aberta-icon{color:#fbbf24;}
+
+.totem-dica.destaque{
+    font-size:17px;
+    margin:16px 0;
+    opacity:1;
+}
+
 .porta-celula.ativa{
     background:#6ee7b7;
     color:#0f3d75;
@@ -280,6 +316,10 @@ html,body{
     transform:scale(1.08);
     box-shadow:0 0 20px rgba(110,231,183,.6);
     animation:porta-pulse 1s ease infinite;
+}
+
+.mapa-selecao .porta-celula.livre.ativa{
+    animation:none;
 }
 
 @keyframes porta-pulse{

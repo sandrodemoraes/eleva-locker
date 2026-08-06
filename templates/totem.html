@@ -79,47 +79,84 @@
         <div class="resultado erro" id="erro-retirar"></div>
     </section>
 
-    <!-- Depósito — autenticação portaria -->
+    <!-- Depósito — PIN portaria (teclado) -->
+    <section id="tela-deposito-pin" class="tela">
+        <button type="button" class="btn-voltar" onclick="irInicio()"><i class="fa-solid fa-arrow-left"></i> Voltar</button>
+        <h2 class="tela-titulo">Depositar encomenda</h2>
+        <p class="tela-sub">PIN da portaria</p>
+        <div class="codigo-display" id="pin-display">_ _ _ _</div>
+        <div class="teclado">
+            <button type="button" class="tecla" onclick="digitarPin('1')">1</button>
+            <button type="button" class="tecla" onclick="digitarPin('2')">2</button>
+            <button type="button" class="tecla" onclick="digitarPin('3')">3</button>
+            <button type="button" class="tecla" onclick="digitarPin('4')">4</button>
+            <button type="button" class="tecla" onclick="digitarPin('5')">5</button>
+            <button type="button" class="tecla" onclick="digitarPin('6')">6</button>
+            <button type="button" class="tecla" onclick="digitarPin('7')">7</button>
+            <button type="button" class="tecla" onclick="digitarPin('8')">8</button>
+            <button type="button" class="tecla" onclick="digitarPin('9')">9</button>
+            <button type="button" class="tecla tecla-limpar" onclick="limparPin()"><i class="fa-solid fa-delete-left"></i></button>
+            <button type="button" class="tecla" onclick="digitarPin('0')">0</button>
+            <button type="button" class="tecla" onclick="backspacePin()"><i class="fa-solid fa-backspace"></i></button>
+        </div>
+        <div class="resultado erro" id="erro-deposito-pin"></div>
+    </section>
+
+    <!-- Depósito — login operador (fallback sem PIN) -->
     <section id="tela-deposito-auth" class="tela tela-scroll">
         <button type="button" class="btn-voltar" onclick="irInicio()"><i class="fa-solid fa-arrow-left"></i> Voltar</button>
         <h2 class="tela-titulo">Depositar encomenda</h2>
-        <p class="tela-sub">Identificação da portaria / operador</p>
-
+        <p class="tela-sub">Login do operador</p>
         <div class="form-totem">
-            {% if usa_pin_deposito %}
-            <label>PIN da portaria</label>
-            <input type="password" id="dep-pin" inputmode="numeric" placeholder="••••" maxlength="12" class="input-totem">
-            <p class="totem-dica">ou use login abaixo</p>
-            {% endif %}
             <label>E-mail operador</label>
             <input type="email" id="dep-operador-email" placeholder="portaria@..." class="input-totem" autocomplete="username">
             <label>Senha</label>
             <input type="password" id="dep-operador-senha" placeholder="••••••" class="input-totem" autocomplete="current-password">
-            <button type="button" class="btn-totem btn-principal" onclick="continuarDeposito()">Continuar</button>
+            <button type="button" class="btn-totem btn-principal" onclick="continuarDepositoLogin()">Continuar</button>
         </div>
         <div class="resultado erro" id="erro-deposito-auth"></div>
     </section>
 
-    <!-- Depósito — formulário -->
+    <!-- Depósito — escolher porta + morador -->
     <section id="tela-deposito" class="tela tela-scroll">
         <button type="button" class="btn-voltar" onclick="irDepositoAuth()"><i class="fa-solid fa-arrow-left"></i> Voltar</button>
-        <h2 class="tela-titulo">Nova encomenda</h2>
+        <h2 class="tela-titulo">Escolha a porta</h2>
+        <p class="tela-sub">Toque no compartimento livre</p>
 
-        <div class="form-totem">
+        <div class="mapa-portas mapa-selecao" id="mapa-livres"></div>
+        <input type="hidden" id="dep-compartimento" value="">
+
+        <div class="form-totem form-compacto">
             <label>Destinatário *</label>
             <input type="text" id="dep-cliente" placeholder="Nome do morador" class="input-totem">
             <label>Telefone {% if whatsapp_ativo %}*{% endif %}</label>
             <input type="tel" id="dep-telefone" placeholder="(48) 99999-9999" class="input-totem">
-            <label>Compartimento livre *</label>
-            <select id="dep-compartimento" class="input-totem"><option value="">Carregando...</option></select>
-            <label>Transportadora</label>
-            <input type="text" id="dep-transportadora" placeholder="Correios, ML..." class="input-totem">
-            <button type="button" class="btn-totem btn-principal btn-depositar" onclick="confirmarDeposito()">
-                <i class="fa-solid fa-box"></i> Depositar e notificar
+            <button type="button" class="btn-totem btn-principal btn-depositar" onclick="confirmarDeposito()" disabled id="btn-abrir-porta">
+                <i class="fa-solid fa-lock-open"></i> Abrir porta selecionada
             </button>
         </div>
-        <p class="totem-dica">O código vai só para o WhatsApp do morador</p>
+        <p class="totem-dica">O código vai só para o WhatsApp após fechar a porta</p>
         <div class="resultado erro" id="erro-deposito"></div>
+    </section>
+
+    <!-- Depósito — aguardando fechar porta -->
+    <section id="tela-deposito-aguardando" class="tela">
+        <div class="sucesso-icon anim-pulse porta-aberta-icon"><i class="fa-solid fa-door-open"></i></div>
+        <h2 class="tela-titulo">Porta aberta</h2>
+        <p class="tela-sub" id="aguardando-cliente"></p>
+
+        <div class="porta-box">
+            <span class="porta-label">Coloque em</span>
+            <span class="porta-numero" id="aguardando-porta">—</span>
+        </div>
+
+        <p class="totem-dica destaque">Coloque a encomenda e <strong>feche a porta</strong></p>
+
+        <button type="button" class="btn-totem btn-principal" onclick="concluirDeposito()">
+            <i class="fa-solid fa-door-closed"></i> Porta fechada — concluir
+        </button>
+        <p class="totem-dica" id="sensor-aviso">Sensor de porta em breve (automático)</p>
+        <div class="resultado erro" id="erro-aguardando"></div>
     </section>
 
     <section id="tela-sucesso" class="tela">
@@ -159,10 +196,15 @@ const ARMARIO_ID = ROOT.dataset.armarioId || "";
 const MAX_PORTAS = parseInt(ROOT.dataset.maxPortas || "8", 10);
 const USA_PIN = {{ 'true' if usa_pin_deposito else 'false' }};
 let codigo = "";
+let pinDeposito = "";
 let authDeposito = {};
+let compartimentosLivres = [];
+let depositoPendente = {};
 let idleTimer = null;
 let contagemTimer = null;
+let pollPortaTimer = null;
 const IDLE_MS = 60000;
+const PIN_TAMANHO = 4;
 
 function mostrarTela(id){
     document.querySelectorAll(".tela").forEach(t => t.classList.remove("tela-ativa"));
@@ -172,6 +214,9 @@ function mostrarTela(id){
 
 function irInicio(){
     limpar();
+    limparPin();
+    depositoPendente = {};
+    if(pollPortaTimer){ clearInterval(pollPortaTimer); pollPortaTimer = null; }
     document.getElementById("erro-retirar").classList.remove("visivel");
     if(contagemTimer) clearInterval(contagemTimer);
     mostrarTela("tela-inicio");
@@ -179,8 +224,17 @@ function irInicio(){
 
 function irDepositoAuth(){
     authDeposito = {};
+    pinDeposito = "";
+    compartimentosLivres = [];
+    depositoPendente = {};
+    document.getElementById("erro-deposito-pin").classList.remove("visivel");
     document.getElementById("erro-deposito-auth").classList.remove("visivel");
-    mostrarTela("tela-deposito-auth");
+    if(USA_PIN){
+        atualizarPinDisplay();
+        mostrarTela("tela-deposito-pin");
+    } else {
+        mostrarTela("tela-deposito-auth");
+    }
 }
 
 function authPayload(){
@@ -191,19 +245,43 @@ function authPayload(){
     return p;
 }
 
-function continuarDeposito(){
-    const pinEl = document.getElementById("dep-pin");
+function atualizarPinDisplay(){
+    const el = document.getElementById("pin-display");
+    if(!el) return;
+    el.textContent = pinDeposito.padEnd(PIN_TAMANHO, "_").split("").join(" ");
+}
+
+function digitarPin(n){
+    if(pinDeposito.length >= PIN_TAMANHO) return;
+    pinDeposito += n;
+    atualizarPinDisplay();
+    document.getElementById("erro-deposito-pin").classList.remove("visivel");
+    if(pinDeposito.length === PIN_TAMANHO) setTimeout(validarPinDeposito, 200);
+}
+
+function limparPin(){ pinDeposito = ""; atualizarPinDisplay(); }
+function backspacePin(){ pinDeposito = pinDeposito.slice(0, -1); atualizarPinDisplay(); }
+
+function validarPinDeposito(){
+    authDeposito = { pin: pinDeposito };
+    carregarCompartimentosLivres("erro-deposito-pin");
+}
+
+function continuarDepositoLogin(){
     authDeposito = {
-        pin: pinEl ? pinEl.value.trim() : "",
         operador_email: document.getElementById("dep-operador-email").value.trim(),
         operador_senha: document.getElementById("dep-operador-senha").value,
     };
-    if(!authDeposito.pin && (!authDeposito.operador_email || !authDeposito.operador_senha)){
+    if(!authDeposito.operador_email || !authDeposito.operador_senha){
         const el = document.getElementById("erro-deposito-auth");
-        el.textContent = USA_PIN ? "Informe PIN ou e-mail e senha." : "Informe e-mail e senha do operador.";
+        el.textContent = "Informe e-mail e senha do operador.";
         el.classList.add("visivel");
         return;
     }
+    carregarCompartimentosLivres("erro-deposito-auth");
+}
+
+function carregarCompartimentosLivres(erroId){
     fetch("/totem/compartimentos-livres", {
         method: "POST",
         headers: {"Content-Type": "application/json"},
@@ -212,22 +290,53 @@ function continuarDeposito(){
     .then(r => r.json().then(d => ({ok: r.ok, d})))
     .then(({ok, d}) => {
         if(!ok){ throw new Error(d.erro || "Não autorizado."); }
-        const sel = document.getElementById("dep-compartimento");
-        if(!d.length){
-            sel.innerHTML = '<option value="">Nenhum compartimento livre</option>';
-        } else {
-            sel.innerHTML = '<option value="">Selecione...</option>';
-            d.forEach(c => {
-                sel.innerHTML += `<option value="${c.id}">#${c.numero} — ${c.tamanho}</option>`;
-            });
-        }
+        compartimentosLivres = d;
+        renderMapaLivres();
+        document.getElementById("dep-compartimento").value = "";
+        document.getElementById("dep-cliente").value = "";
+        document.getElementById("dep-telefone").value = "";
+        document.getElementById("btn-abrir-porta").disabled = true;
         document.getElementById("erro-deposito").classList.remove("visivel");
         mostrarTela("tela-deposito");
     })
     .catch(e => {
-        const el = document.getElementById("erro-deposito-auth");
+        const el = document.getElementById(erroId);
         el.textContent = e.message || "Erro de autenticação.";
         el.classList.add("visivel");
+        pinDeposito = "";
+        atualizarPinDisplay();
+    });
+}
+
+function renderMapaLivres(){
+    const mapa = document.getElementById("mapa-livres");
+    mapa.innerHTML = "";
+    if(!compartimentosLivres.length){
+        mapa.innerHTML = '<p class="totem-dica">Nenhum compartimento livre.</p>';
+        return;
+    }
+    const livresPorNumero = {};
+    compartimentosLivres.forEach(c => { livresPorNumero[c.numero] = c; });
+    for(let i = 1; i <= MAX_PORTAS; i++){
+        const c = livresPorNumero[i];
+        const d = document.createElement("button");
+        d.type = "button";
+        d.className = "porta-celula" + (c ? " livre" : " ocupada");
+        d.textContent = c ? i : "—";
+        d.disabled = !c;
+        if(c){
+            d.title = `#${c.numero} — ${c.tamanho}`;
+            d.onclick = () => selecionarPorta(c.id, c.numero);
+        }
+        mapa.appendChild(d);
+    }
+}
+
+function selecionarPorta(id, numero){
+    document.getElementById("dep-compartimento").value = id;
+    document.getElementById("btn-abrir-porta").disabled = false;
+    document.querySelectorAll("#mapa-livres .porta-celula").forEach(el => {
+        el.classList.toggle("ativa", parseInt(el.textContent, 10) === numero);
     });
 }
 
@@ -235,13 +344,17 @@ function confirmarDeposito(){
     const cliente = document.getElementById("dep-cliente").value.trim();
     const telefone = document.getElementById("dep-telefone").value.trim();
     const compartimento_id = document.getElementById("dep-compartimento").value;
-    if(!cliente || !compartimento_id){
-        mostrarErroDeposito("Preencha destinatário e compartimento.");
+    if(!compartimento_id){
+        mostrarErroDeposito("Selecione um compartimento livre.");
+        return;
+    }
+    if(!cliente){
+        mostrarErroDeposito("Informe o destinatário.");
         return;
     }
     const body = Object.assign({}, authPayload(), {
         cliente, telefone, compartimento_id,
-        transportadora: document.getElementById("dep-transportadora").value.trim(),
+        aguardar_fechamento: "1",
     });
     fetch("/totem/depositar", {
         method: "POST",
@@ -250,10 +363,61 @@ function confirmarDeposito(){
     })
     .then(r => r.json().then(d => ({ok: r.ok, d})))
     .then(({ok, d}) => {
-        if(ok && d.sucesso) irSucesso(d);
-        else mostrarErroDeposito(d.mensagem || "Erro ao depositar.");
+        if(ok && d.sucesso){
+            depositoPendente = d;
+            irAguardandoPorta(d);
+        } else {
+            mostrarErroDeposito(d.mensagem || "Erro ao depositar.");
+        }
     })
     .catch(() => mostrarErroDeposito("Sem conexão com o servidor."));
+}
+
+function irAguardandoPorta(data){
+    document.getElementById("aguardando-porta").textContent = data.compartimento || "—";
+    document.getElementById("aguardando-cliente").textContent = data.cliente ? "Para: " + data.cliente : "";
+    document.getElementById("erro-aguardando").classList.remove("visivel");
+    mostrarTela("tela-deposito-aguardando");
+    if(pollPortaTimer) clearInterval(pollPortaTimer);
+    pollPortaTimer = setInterval(verificarPortaFechada, 2000);
+}
+
+function verificarPortaFechada(){
+    if(!depositoPendente.compartimento_id) return;
+    fetch("/totem/porta/" + depositoPendente.compartimento_id + "/status")
+    .then(r => r.json())
+    .then(d => {
+        if(d.sensor && d.fechada) concluirDeposito(true);
+    })
+    .catch(() => {});
+}
+
+function concluirDeposito(auto){
+    if(pollPortaTimer){ clearInterval(pollPortaTimer); pollPortaTimer = null; }
+    const body = Object.assign({}, authPayload(), {
+        encomenda_id: depositoPendente.encomenda_id,
+    });
+    fetch("/totem/depositar/concluir", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(body)
+    })
+    .then(r => r.json().then(d => ({ok: r.ok, d})))
+    .then(({ok, d}) => {
+        if(ok && d.sucesso){
+            irSucesso(Object.assign({}, d, {modo: "deposito", mensagem: d.mensagem}));
+        } else {
+            const el = document.getElementById("erro-aguardando");
+            el.textContent = d.mensagem || "Erro ao concluir.";
+            el.classList.add("visivel");
+            if(!auto) pollPortaTimer = setInterval(verificarPortaFechada, 2000);
+        }
+    })
+    .catch(() => {
+        const el = document.getElementById("erro-aguardando");
+        el.textContent = "Sem conexão com o servidor.";
+        el.classList.add("visivel");
+    });
 }
 
 function mostrarErroDeposito(msg){
@@ -329,13 +493,13 @@ function mostrarErro(msg){
 function irSucesso(data){
     const num = parseInt(data.compartimento, 10);
     const deposito = data.modo === "deposito";
-    document.getElementById("sucesso-titulo").textContent = deposito ? "Depósito OK!" : "Porta aberta!";
-    document.getElementById("sucesso-label").textContent = deposito ? "Coloque em" : "Retire em";
+    document.getElementById("sucesso-titulo").textContent = deposito ? "Depósito concluído!" : "Porta aberta!";
+    document.getElementById("sucesso-label").textContent = deposito ? "Compartimento" : "Retire em";
     document.getElementById("sucesso-cliente").textContent = data.cliente ? (deposito ? "Para: " + data.cliente : "Olá, " + data.cliente) : "";
-    document.getElementById("sucesso-msg").textContent = deposito ? (data.mensagem || "Morador notificado.") : "";
+    document.getElementById("sucesso-msg").textContent = deposito ? (data.mensagem || "Morador notificado por WhatsApp.") : "";
     document.getElementById("sucesso-porta").textContent = data.compartimento || "—";
     document.getElementById("sucesso-dica").textContent = deposito
-        ? "Coloque a encomenda e feche a porta"
+        ? "Encomenda registrada com sucesso"
         : "Feche a porta ao terminar";
     renderMapaPortas(num);
     beepSucesso();
@@ -382,11 +546,18 @@ function confirmar(){
 }
 
 document.addEventListener("keydown", e => {
-    if(!document.getElementById("tela-retirar").classList.contains("tela-ativa")) return;
-    if(e.key >= "0" && e.key <= "9") digitar(e.key);
-    if(e.key === "Backspace") backspace();
-    if(e.key === "Enter") confirmar();
-    if(e.key === "Escape") irInicio();
+    if(document.getElementById("tela-retirar").classList.contains("tela-ativa")){
+        if(e.key >= "0" && e.key <= "9") digitar(e.key);
+        if(e.key === "Backspace") backspace();
+        if(e.key === "Enter") confirmar();
+        if(e.key === "Escape") irInicio();
+        return;
+    }
+    if(document.getElementById("tela-deposito-pin").classList.contains("tela-ativa")){
+        if(e.key >= "0" && e.key <= "9") digitarPin(e.key);
+        if(e.key === "Backspace") backspacePin();
+        if(e.key === "Escape") irInicio();
+    }
 });
 
 document.addEventListener("click", resetIdle);

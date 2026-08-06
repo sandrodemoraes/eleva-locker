@@ -16,13 +16,19 @@ Confirme:
 - [ ] /notificacoes — WhatsApp **conectado**
 - [ ] ESP Matriz **online**
 
-## Depósito no totem
+## Depósito no totem (v2.2)
 
 Na tela inicial: **Depositar encomenda**
 
-- **PIN portaria:** `TOTEM_DEPOSITO_PIN=2026` no `.env` (ou login operador)
-- Preenche destinatário + telefone + compartimento
-- **Código NÃO aparece** — só WhatsApp do morador
+1. **PIN portaria** (teclado numérico) — `TOTEM_DEPOSITO_PIN=2026` no `.env`
+2. **Escolher porta** — toque no compartimento livre (grade visual)
+3. Destinatário + telefone → **Abrir porta selecionada**
+4. Coloque a encomenda e **feche a porta**
+5. Toque **Porta fechada — concluir** → WhatsApp enviado → **Depósito concluído!**
+
+> **Sensor de porta (fase 2):** quando instalado no ESP32, o passo 5 será automático.
+
+- **Código NÃO aparece** — só WhatsApp do morador após fechar a porta
 
 ## Configurar tablet (10" ou 7")
 

@@ -5,7 +5,7 @@ import json
 
 import config
 
-TOTEM_VERSAO = "2.1.0"
+TOTEM_VERSAO = "2.2.0"
 from middleware.rate_limit import rate_limit
 from services.encomenda_service import EncomendaService
 from services.armario_service import ArmarioService
@@ -223,6 +223,7 @@ def depositar():
         return jsonify({"sucesso": False, "mensagem": "Compartimento inválido."}), 400
 
     try:
+        aguardar_fechamento = str(dados.get("aguardar_fechamento", "1")).lower() in ("1", "true", "sim", "yes")
         resultado = EncomendaService.depositar(
             compartimento_id=compartimento_id,
             cliente=dados.get("cliente", ""),
@@ -231,14 +232,18 @@ def depositar():
             operador=f"Totem ({operador})",
             transportadora=dados.get("transportadora", ""),
             observacao=dados.get("observacao", ""),
+            notificar=not aguardar_fechamento,
         )
 
         return jsonify({
             "sucesso": True,
-            "mensagem": "Morador notificado por WhatsApp.",
+            "mensagem": "Porta aberta. Feche para concluir." if aguardar_fechamento else "Morador notificado por WhatsApp.",
+            "encomenda_id": resultado["id"],
             "compartimento": resultado["compartimento"],
+            "compartimento_id": resultado["compartimento_id"],
             "cliente": dados.get("cliente", ""),
             "modo": "deposito",
+            "aguardar_fechamento": aguardar_fechamento,
         })
 
     except ValueError as erro:
@@ -246,3 +251,55 @@ def depositar():
 
     except Exception:
         return jsonify({"sucesso": False, "mensagem": "Erro ao depositar."}), 500
+
+
+@totem_bp.route("/totem/depositar/concluir", methods=["POST"])
+@rate_limit("totem-depositar-concluir", max_tentativas=30, janela_seg=300)
+def concluir_deposito():
+
+    dados = _dados_form()
+    operador = _auth_deposito(dados)
+
+    if not operador:
+        return jsonify({"sucesso": False, "mensagem": "PIN ou login inválido."}), 403
+
+    try:
+        encomenda_id = int(dados.get("encomenda_id"))
+    except (TypeError, ValueError):
+        return jsonify({"sucesso": False, "mensagem": "Encomenda inválida."}), 400
+
+    try:
+        resultado = EncomendaService.concluir_deposito_totem(
+            encomenda_id,
+            operador=f"Totem ({operador})",
+        )
+
+        return jsonify({
+            "sucesso": True,
+            "mensagem": "Depósito concluído! Morador notificado.",
+            "encomenda_id": resultado["id"],
+            "compartimento": resultado["compartimento"],
+            "cliente": resultado["cliente"],
+            "modo": "deposito",
+        })
+
+    except ValueError as erro:
+        return jsonify({"sucesso": False, "mensagem": str(erro)}), 400
+
+    except Exception:
+        return jsonify({"sucesso": False, "mensagem": "Erro ao concluir depósito."}), 500
+
+
+@totem_bp.route("/totem/porta/<int:compartimento_id>/status")
+def status_porta(compartimento_id):
+    """Status da porta — sensor ESP32 (fase 2); hoje retorna aberta."""
+    try:
+        comp = CompartimentoService.buscar_por_id(compartimento_id)
+        return jsonify({
+            "compartimento_id": compartimento_id,
+            "numero": comp["numero"],
+            "fechada": False,
+            "sensor": False,
+        })
+    except ValueError:
+        return jsonify({"erro": "Compartimento não encontrado."}), 404
