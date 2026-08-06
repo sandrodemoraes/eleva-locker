@@ -418,11 +418,11 @@ function onClienteInput(){
     atualizarBtnDeposito();
     const q = document.getElementById("dep-cliente").value.trim();
     if(sugestoesTimer) clearTimeout(sugestoesTimer);
-    if(q.length < 2){
+    if(!q.length){
         fecharSugestoes();
         return;
     }
-    sugestoesTimer = setTimeout(() => buscarDestinatarios(q), 280);
+    sugestoesTimer = setTimeout(() => buscarDestinatarios(q), 220);
 }
 
 function buscarDestinatarios(q){
@@ -436,6 +436,7 @@ function buscarDestinatarios(q){
 
 function renderSugestoes(lista){
     const box = document.getElementById("dep-sugestoes");
+    const input = document.getElementById("dep-cliente");
     box.innerHTML = "";
     if(!lista.length){
         box.classList.remove("aberta");
@@ -453,6 +454,10 @@ function renderSugestoes(lista){
         };
         box.appendChild(btn);
     });
+    const r = input.getBoundingClientRect();
+    box.style.left = r.left + "px";
+    box.style.top = (r.bottom + 4) + "px";
+    box.style.width = r.width + "px";
     box.classList.add("aberta");
 }
 
