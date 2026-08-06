@@ -16,15 +16,15 @@ Confirme:
 - [ ] /notificacoes — WhatsApp **conectado**
 - [ ] ESP Matriz **online**
 
-## Configurar tablet (manhã)
+## Configurar tablet (10" ou 7")
 
 1. Conecte tablet na mesma WiFi
 2. Abra Chrome → **http://192.168.16.130:15000/totem/3**
-3. **F11** ou modo kiosk (tela cheia)
-4. Opcional: Menu ⋮ → **Instalar app** / Adicionar à tela inicial
-5. Deixe tablet ligado na tomada
+3. Menu ⋮ → **Adicionar à tela inicial** / Instalar app
+4. **Sempre abrir no totem:** ver **`docs/TOTEM_TABLET_KIOSK.md`** (Fully Kiosk recomendado para fixar no armário)
+5. Deixe tablet ligado na tomada — tela **nunca desligar**
 
-Atalho no PC: `tools\abrir_totem.bat`
+Atalho PC: `tools\abrir_totem.bat` | Kiosk Windows: `tools\atalho_totem_kiosk.bat`
 
 ## Fluxo demo (5 min)
 

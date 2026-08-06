@@ -1,4 +1,5 @@
-from flask import Blueprint, render_template, request, jsonify
+from flask import Blueprint, render_template, request, jsonify, Response
+import json
 
 import config
 from middleware.rate_limit import rate_limit
@@ -27,6 +28,41 @@ def index(armario_id=None):
         armarios=ArmarioService.listar_ativos() if not armario else None,
         max_portas=(armario.get("max_portas") or 8) if armario else 8,
         ajuda_telefone=config.TOTEM_AJUDA_TELEFONE,
+        armario_id=armario_id,
+    )
+
+
+@totem_bp.route("/totem/<int:armario_id>/manifest.json")
+def manifest_armario(armario_id):
+
+    start = f"/totem/{armario_id}"
+    nome = "ELEVA Totem"
+    try:
+        arm = ArmarioService.buscar_por_id(armario_id)
+        nome = f"ELEVA — {arm['nome']}"
+    except ValueError:
+        pass
+
+    dados = {
+        "name": nome,
+        "short_name": "Totem",
+        "description": "Totem de retirada ELEVA LOCKER",
+        "start_url": start,
+        "scope": start,
+        "display": "fullscreen",
+        "orientation": "any",
+        "background_color": "#0f3d75",
+        "theme_color": "#0f3d75",
+        "icons": [{
+            "src": "/static/icons/icon.svg",
+            "sizes": "any",
+            "type": "image/svg+xml",
+            "purpose": "any maskable",
+        }],
+    }
+    return Response(
+        json.dumps(dados),
+        mimetype="application/manifest+json",
     )
 
 
