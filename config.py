@@ -37,6 +37,7 @@ def normalizar_max_portas(valor, padrao=16):
 
 # Backup
 BACKUP_MAX = int(os.getenv("BACKUP_MAX", "5"))
+BACKUP_DIR = os.getenv("BACKUP_DIR", "backups")
 
 # Notificações — modo: console | producao
 NOTIF_MODO = os.getenv("NOTIF_MODO", "console")

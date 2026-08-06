@@ -8,6 +8,8 @@ CONTEUDO = """# ELEVA LOCKER — producao (Sandro / Matriz)
 
 SECRET_KEY=ElevaLocker2026
 SKIP_BACKUP=0
+BACKUP_DIR=D:\ElevaLockerBackup\rotativo
+BACKUP_MAX=5
 
 APP_URL_BASE=http://177.74.79.32:15000
 
