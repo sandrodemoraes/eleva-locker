@@ -10,14 +10,21 @@ Atualizado: 2026-08-06
 | **Eleva** | Marca-mãe / grupo | Eleva |
 | **Eleva Locker** | Smart lockers B2B | Eleva Locker |
 | **Eleva Cam** | Câmeras ao vivo em pontos turísticos + mídia IoT | Eleva Cam |
+| **Hospedagem (marca própria)** | Kitnets do 3º piso — **marca separada** da Eleva Cam | A definir (ex. Eleva Stay / nome local) |
 
-**Projeto deste hub (Lauro Müller / Serra do Rio do Rastro): Eleva Cam.**
+**Projeto de câmeras (Lauro Müller / Serra): Eleva Cam.**  
+**Projeto de kitnets: marca de hospedagem independente** (não usar Eleva Cam nos anúncios de reserva).
 
-Padrões:
+Padrões Eleva Cam:
 - Marca: **Eleva Cam**
 - Domínio/handle: `elevacam`
 - Código/repo futuro: `eleva-cam` / `ElevaCam`
 - Não escrever “Elevacam” em textos oficiais (salvo domínio)
+
+**Regra de fronteira:**
+- Eleva Cam = ver a serra / mídia / parcerias de destino  
+- Marca hospedagem = reservar kitnet / check-in / hóspede  
+- No site Eleva Cam pode haver CTA “Reserve com essa vista” apontando para a marca de hospedagem — sem misturar logos na mesma identidade visual principal
 
 ---
 
@@ -96,9 +103,22 @@ Registrar **duas marcas** (podem ser pedidos separados):
 | **38** | Telecomunicação / transmissão de áudio e vídeo | YouTube/live 24/7 |
 | **35** | Publicidade, promoção de destinos, divulgação comercial | Patrocínios / parcerias |
 | **42** | Plataforma web, SaaS de câmeras ao vivo | Site + rede multi-destino |
-| **43** (se hospedagem no mesmo CNPJ/marca) | Hospedagem temporária | Só se Eleva Cam também vender as kitnets |
+**Eleva Cam NÃO registra classe 43** — hospedagem é marca separada (decisão confirmada).
 
-Se as kitnets tiverem marca própria (“Eleva Stay” ou nome local), a classe 43 fica na marca de hospedagem — **Eleva Cam** fica pura de mídia/câmeras.
+#### C) MARCA DE HOSPEDAGEM (kitnets — nome a definir)
+
+**Tipo:** nominativa + mista.
+
+| Classe | Cobertura | Por quê |
+|--------|-----------|---------|
+| **43** | Hospedagem temporária, kitnets, alojamento | Core do 3º piso |
+| **35** (opcional) | Reserva / comercialização online | Se operar canal próprio forte |
+
+Sugestões de nome (ainda não decidido):
+- **Eleva Stay** — fica na família Eleva, claro para Airbnb/Booking  
+- Nome local (ex. ligado à Serra / Lauro Müller) — mais SEO destino, menos “grupo Eleva”  
+
+Domínios: registrar junto quando o nome for escolhido (`.com.br` + `.com`).
 
 #### B) ELEVA LOCKER
 
@@ -553,11 +573,18 @@ Prédio 4 andares (Lauro Müller)
 | Mídia / webcams | **Eleva Cam** | Rede de câmeras ao vivo em pontos turísticos |
 | 1º ponto | Eleva Cam — Serra do Rio do Rastro (Lauro Müller) | Canal 24/7 + site |
 | Produto B2B | **Eleva Locker** | Smart lockers (site separado) |
-| Hospedagem (opcional) | Nome próprio ou “Eleva Stay” | Kitnets do 3º piso |
+| Hospedagem | **Marca separada** (nome a definir) | Kitnets do 3º piso — site/Airbnb próprios |
 | Soft credit | “Tecnologia Eleva” | Rodapé técnico |
 
 SEO do destino continua forte com título/overlay:  
 **“Serra do Rio do Rastro Ao Vivo | Eleva Cam — Lauro Müller/SC”**
+
+**Como as marcas se conectam sem se misturar:**
+```
+YouTube / site Eleva Cam  →  “Reserve com essa vista”  →  site/Booking da marca de hospedagem
+Eleva Locker no hall      →  showroom + entregas do prédio (crédito técnico Eleva)
+Casa 4º piso              →  fora de qualquer marca pública
+```
 
 ### 6.5 Por que o prédio de 4 andares é um ativo estratégico
 
@@ -827,11 +854,11 @@ Prioridade de investimento na fachada: **janelas/sacadas para a serra > luxo int
 Com hospedagem no 3º e casa no 4º:
 
 1. **Canal/site da webcam** → **Eleva Cam** (título: Serra do Rio do Rastro Ao Vivo)  
-2. **Reserva das kitnets** → marca de hospedagem (leve, ex. “Eleva Stay” / nome local) ou CTA no site Eleva Cam  
+2. **Reserva das kitnets** → **marca de hospedagem separada** (nome a definir); CTA a partir do Eleva Cam  
 3. **Eleva Locker + serviços técnicos** → marca B2B no 2º piso  
 4. **Casa no 4º** → fora de qualquer comunicação pública
 
-Quatro usos, uma infraestrutura. **Eleva Cam** é o alto-falante do destino e da hospedagem — **não da vida pessoal**.
+Quatro usos, uma infraestrutura. **Eleva Cam** atrai audiência; a **marca de hospedagem** converte reserva — **sem fundir identidades**.
 
 ### 6.19 Checklist específico “casa no 4º”
 
@@ -850,8 +877,10 @@ Quatro usos, uma infraestrutura. **Eleva Cam** é o alto-falante do destino e da
 2. Quer parceria oficial com a prefeitura desde o dia 1?  
 3. No 3º piso: diária turística, mensal, ou os dois?  
 4. ~~Banheiro privativo~~ → **confirmado: todas as kitnets com banheiro**  
-5. Prefere marca turística própria ou submarca Eleva para escalar outros pontos?  
+5. ~~Marca do projeto de câmeras~~ → **confirmado: Eleva Cam**  
 6. Há restrição de gabarito/platibanda para mast curto na cobertura?  
 7. Haverá elevador ou só escada?  
 8. No 4º: terraço/área externa usável pela família na frente (vista)?  
-9. Cada kitnet terá cooktop/cozinha compacta ou só banheiro + quarto?
+9. Cada kitnet terá cooktop/cozinha compacta ou só banheiro + quarto?  
+10. ~~Kitnets na Eleva Cam ou marca separada?~~ → **confirmado: marca de hospedagem separada**  
+11. Qual o nome da marca de hospedagem? (ex. Eleva Stay vs nome local ligado à Serra)
