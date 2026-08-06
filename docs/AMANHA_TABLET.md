@@ -16,6 +16,14 @@ Confirme:
 - [ ] /notificacoes — WhatsApp **conectado**
 - [ ] ESP Matriz **online**
 
+## Depósito no totem
+
+Na tela inicial: **Depositar encomenda**
+
+- **PIN portaria:** `TOTEM_DEPOSITO_PIN=2026` no `.env` (ou login operador)
+- Preenche destinatário + telefone + compartimento
+- **Código NÃO aparece** — só WhatsApp do morador
+
 ## Configurar tablet (10" ou 7")
 
 1. Conecte tablet na mesma WiFi
