@@ -31,12 +31,16 @@ def parar_docker_web():
     print("Parando container Docker web...")
     if platform.system() == "Windows":
         run("docker stop elevalocker-web-1 2>nul", shell=True)
+        run("docker rm -f elevalocker-web-1 2>nul", shell=True)
         run("docker compose stop web 2>nul", shell=True)
+        run("docker compose --profile legacy-docker stop web 2>nul", shell=True)
         return
     docker = shutil.which("docker")
     if docker:
         run([docker, "stop", "elevalocker-web-1"])
+        run([docker, "rm", "-f", "elevalocker-web-1"])
         run([docker, "compose", "stop", "web"])
+        run([docker, "compose", "--profile", "legacy-docker", "stop", "web"])
     else:
         print("    Docker nao instalado ou fora do PATH.")
 

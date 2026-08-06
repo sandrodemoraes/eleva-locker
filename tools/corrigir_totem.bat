@@ -18,9 +18,11 @@ echo   Branch: %BRANCH%
 echo  ============================================================
 echo.
 
-echo [1] Parando Docker web (versao antiga)...
+echo [1] Parando e REMOVENDO Docker web (versao antiga)...
 docker stop elevalocker-web-1 2>nul
+docker rm -f elevalocker-web-1 2>nul
 docker compose stop web 2>nul
+docker compose --profile legacy-docker stop web 2>nul
 
 echo [2] Liberando porta 15000...
 for /f "tokens=5" %%a in ('netstat -ano ^| findstr ":15000" ^| findstr "LISTENING"') do (
@@ -61,7 +63,7 @@ echo.
 echo  ============================================================
 echo   AGUARDE 30s e teste:
 echo   http://192.168.16.130:15000/totem/versao
-echo   Deve mostrar: "ok": true, "versao": "2.2.0"
+echo   Deve mostrar: "ok": true, "versao": "2.3.3"
 echo.
 echo   Totem: http://192.168.16.130:15000/totem/3  (Ctrl+F5)
 echo  ============================================================

@@ -15,7 +15,10 @@ services:
       timeout: 5s
       retries: 5
 
+  # NÃO use em produção (Sandro usa python app.py).
+  # Só sobe com: docker compose --profile legacy-docker up -d
   web:
+    profiles: ["legacy-docker"]
     build: .
     ports:
       - "15000:15000"

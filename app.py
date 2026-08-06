@@ -77,6 +77,11 @@ def inject_site_context():
 
 
 if __name__ == "__main__":
+    from routes.totem import TOTEM_VERSAO
+    print("=" * 50)
+    print(f"  ELEVA LOCKER — Totem v{TOTEM_VERSAO}")
+    print("  http://0.0.0.0:15000/totem/versao")
+    print("=" * 50)
 
     app.run(
         host="0.0.0.0",
