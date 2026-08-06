@@ -619,7 +619,7 @@ O Eleva Locker continua como produto B2B. A webcam da serra vira **mídia e vitr
 |------|--------------------------|
 | **Térreo** | Garagem + depósito + oficina de trabalhos manuais |
 | **2º piso** | Escritório |
-| **3º piso** | Em estudo: **~6 kitnets ou quartos para alugar** |
+| **3º piso** | **~6 kitnets para alugar, todas com banheiro privativo** |
 | **4º piso** | **Residência da família (casa do Sandro)** |
 | **Vista** | **Frente do prédio inteiro** para a Serra do Rio do Rastro |
 
@@ -640,21 +640,42 @@ Cam     → ímã digital na fachada/cobertura, sem invadir o 4º
 **Veredito do mix:** excelente e clássico em cidade turística — “morar em cima, alugar o meio, trabalhar embaixo”.  
 Com a casa no 4º, a regra nº 1 passa a ser: **hóspede sobe até o 3º; o 4º é território privado.**
 
-#### Kitnets vs quartos — recomendação
+#### Decisão do 3º piso (confirmada)
 
-| Formato | Prós | Contras | Indicado se |
-|---------|------|---------|-------------|
-| **Kitnets** (banheiro + cooktop) | Diária/semana mais alta; autônomo; Airbnb/Booking | Obra mais cara (6 WC, 6 cozinhas, exaustão, hidráulica) | Quiser renda maior e menos serviço diário |
-| **Quartos** (banheiro privativo ou semi) | Obra mais barata; gira bem com turismo de passagem | Mais operação (roupa de cama, limpeza) se for diária | Quiser CAPEX menor e testar demanda |
-| **Híbrido** (4 kitnets + 2 quartos) | Flexível | Layout um pouco mais complexo | Ainda está em dúvida — **melhor opção agora** |
+**6 kitnets, todas com banheiro privativo.**  
+Formato certo para Serra + Airbnb/Booking + mensalista: hóspede independente, menos atrito, diária mais alta.
 
-**Recomendação prática:** se a vista é da **frente inteira**, priorize no 3º piso:
-1. Unidades **voltadas para a serra** (todas, se o lote permitir)
-2. Sacada/janela generosa na fachada principal
-3. 1 unidade “premium vista” (maior) para foto/marketing
-4. Circulação/escada e áreas molhadas no fundo (lado sem vista)
+**Layout recomendado (vista na frente):**
 
-Para turismo da Serra, **diária curta** (1–3 noites) costuma pagar melhor que mensal — mas mensal estabiliza caixa na baixa temporada. Desenhe as unidades para aceitar **os dois regimes** (mobiliário completo + contrato flexível).
+```
+        FACHADA FRENTE (SERRA)
+┌──────┬──────┬──────┬──────┬──────┬──────┐
+│ K1   │ K2   │ K3   │ K4   │ K5   │ K6   │  ← estar/cama/janela para a vista
+│ sala │      │      │      │      │      │
+│ ---- │ ---- │ ---- │ ---- │ ---- │ ---- │
+│ WC+  │ WC+  │ WC+  │ WC+  │ WC+  │ WC+  │  ← banheiro + cooktop no fundo
+│ cook │ cook │ cook │ cook │ cook │ cook │
+└──────┴──────┴──────┴──────┴──────┴──────┘
+        corredor / escada / shaft hidráulico (fundo ou lateral)
+                    ↓ sobe ao 4º (casa — acesso restrito)
+```
+
+**Prioridades de planta:**
+1. Janela/sacada da vista em **todas** as kitnets (produto = serra)
+2. Banheiro + cooktop/cozinha compacta no **fundo** de cada unidade (agrupa prumadas)
+3. Shaft hidráulico/vertical único ou duplo — evita 6 descidas espalhadas
+4. 1 kitnet um pouco maior (“premium vista”) para foto e tarifa top
+5. Porta corta-som no corredor; laje acústica para o 4º (sua casa)
+6. Medição: ideal submedição elétrica por kitnet (ou rateio claro no contrato)
+
+**Kit mínimo por unidade (para diária e mensal):**
+- Banheiro completo (box, vaso, pia, ventilação)
+- Cooktop 2 bocas + frigobar/geladeira compacta + pia
+- Cama casal (ou bilama se unidade permitir)
+- Mesa pequena, Wi-Fi, ar-condicionado ou aquecedor (Serra esfria)
+- Cortina blackout + vidro com boa vedação (vento/chuva)
+
+Para turismo da Serra, **diária curta** (1–3 noites) costuma pagar melhor na alta; mensal estabiliza a baixa. Com banheiro próprio, os dois regimes funcionam bem.
 
 #### Enquadramento legal (atenção antes de fechar planta)
 
@@ -764,8 +785,9 @@ Quatro usos, uma infraestrutura. A câmera é o alto-falante do destino e da hos
 1. Já tem previsão de link de internet (fibra) na obra? Qual upload real?  
 2. Quer parceria oficial com a prefeitura desde o dia 1?  
 3. No 3º piso: diária turística, mensal, ou os dois?  
-4. As 6 unidades terão banheiro privativo cada uma?  
+4. ~~Banheiro privativo~~ → **confirmado: todas as kitnets com banheiro**  
 5. Prefere marca turística própria ou submarca Eleva para escalar outros pontos?  
 6. Há restrição de gabarito/platibanda para mast curto na cobertura?  
 7. Haverá elevador ou só escada?  
-8. No 4º: terraço/área externa usável pela família na frente (vista)?
+8. No 4º: terraço/área externa usável pela família na frente (vista)?  
+9. Cada kitnet terá cooktop/cozinha compacta ou só banheiro + quarto?
