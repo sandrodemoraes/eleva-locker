@@ -340,12 +340,15 @@ function renderMapaLivres(){
         const d = document.createElement("button");
         d.type = "button";
         d.className = "porta-celula" + (c ? " livre" : " ocupada");
-        d.textContent = c ? i : "—";
-        d.disabled = !c;
+        d.dataset.numero = String(i);
         if(c){
-            d.title = `#${c.numero} — ${c.tamanho}`;
+            d.innerHTML = `<span class="porta-num">${i}</span><span class="porta-tam">${c.tamanho || "M"}</span>`;
+            d.title = `#${c.numero} — ${c.tamanho || "M"}`;
             d.onclick = () => selecionarPorta(c.id, c.numero);
+        } else {
+            d.textContent = "—";
         }
+        d.disabled = !c;
         mapa.appendChild(d);
     }
 }
@@ -354,7 +357,7 @@ function selecionarPorta(id, numero){
     document.getElementById("dep-compartimento").value = id;
     document.getElementById("btn-abrir-porta").disabled = false;
     document.querySelectorAll("#mapa-livres .porta-celula").forEach(el => {
-        el.classList.toggle("ativa", parseInt(el.textContent, 10) === numero);
+        el.classList.toggle("ativa", el.dataset.numero === String(numero));
     });
 }
 
