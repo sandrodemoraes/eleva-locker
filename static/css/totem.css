@@ -82,6 +82,50 @@ html,body{
 .btn-principal:active{transform:scale(.98);background:#21867a;}
 .btn-principal:disabled{opacity:.45;cursor:not-allowed;}
 
+.btn-secundario{
+    background:rgba(255,255,255,.18);
+    border:2px solid rgba(255,255,255,.35);
+    color:#fff;
+    font-size:clamp(18px,3.5vw,24px);
+    padding:22px 24px;
+    margin-top:12px;
+}
+
+.btn-secundario i{display:block;font-size:28px;margin-bottom:8px;}
+
+.tela-scroll{
+    justify-content:flex-start;
+    padding-top:56px;
+    overflow-y:auto;
+}
+
+.form-totem{
+    width:min(400px,92vw);
+    text-align:left;
+    margin-top:12px;
+}
+
+.form-totem label{
+    display:block;
+    font-size:14px;
+    opacity:.85;
+    margin:12px 0 6px;
+}
+
+.input-totem{
+    width:100%;
+    padding:14px 16px;
+    font-size:18px;
+    border:none;
+    border-radius:12px;
+    background:rgba(255,255,255,.95);
+    color:#1a1a2e;
+}
+
+.input-totem:focus{outline:3px solid #6ee7b7;}
+
+.btn-depositar{margin-top:20px;}
+
 .btn-principal i{
     display:block;
     font-size:36px;
