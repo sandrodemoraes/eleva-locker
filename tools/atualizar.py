@@ -12,7 +12,9 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 TOTEM_URL = "http://127.0.0.1:15000/totem/versao"
-PORTA = 15000
+
+sys.path.insert(0, str(ROOT / "tools"))
+from parar_servidor import parar_app_py, parar_docker_web, parar_porta  # noqa: E402
 
 
 def run(cmd, check=False, capture=False):
@@ -27,39 +29,15 @@ def run(cmd, check=False, capture=False):
     )
 
 
-def parar_docker_web():
-    print("\n[1/5] Parando container Docker web (imagem antiga)...")
-    run(["docker", "stop", "elevalocker-web-1"], capture=True)
-
-
-def parar_porta(porta=PORTA):
-    print(f"\n[2/5] Liberando porta {porta}...")
-    sistema = platform.system()
-
-    if sistema == "Windows":
-        r = run(["netstat", "-ano"], capture=True)
-        pids = set()
-        for linha in r.stdout.splitlines():
-            if f":{porta}" in linha and "LISTENING" in linha.upper():
-                pid = linha.split()[-1]
-                if pid.isdigit():
-                    pids.add(pid)
-        for pid in pids:
-            print(f"    Encerrando PID {pid}")
-            run(["taskkill", "/F", "/PID", pid], capture=True)
-        if not pids:
-            print("    Porta livre.")
-        return
-
-    for cmd in (["fuser", "-k", f"{porta}/tcp"], ["lsof", "-ti", f":{porta}"]):
-        try:
-            run(cmd, capture=True)
-        except FileNotFoundError:
-            continue
+def parar_servidor():
+    print("\n[1/5] Parando servidor...")
+    parar_docker_web()
+    parar_app_py()
+    parar_porta()
 
 
 def git_atualizar(branch=None):
-    print("\n[3/5] Atualizando codigo (git pull)...")
+    print("\n[2/5] Atualizando codigo (git pull)...")
 
     if not branch:
         r = run(["git", "rev-parse", "--abbrev-ref", "HEAD"], capture=True)
@@ -91,12 +69,12 @@ def git_atualizar(branch=None):
 
 
 def verificar_arquivos():
-    print("\n[4/5] Verificando totem...")
+    print("\n[3/5] Verificando totem...")
     return run([sys.executable, "tools/verificar_totem.py"]).returncode == 0
 
 
 def reiniciar_servidor():
-    print("\n[5/5] Reiniciando servidor...")
+    print("\n[4/5] Reiniciando servidor...")
     bat = ROOT / "tools" / "iniciar_tudo.bat"
 
     if platform.system() == "Windows":
@@ -142,8 +120,7 @@ def main():
     print(f"  Pasta: {ROOT}")
     print()
 
-    parar_docker_web()
-    parar_porta()
+    parar_servidor()
 
     if not git_atualizar(args.branch):
         return 1
@@ -158,6 +135,7 @@ def main():
     reiniciar_servidor()
 
     if aguardar_totem_ok():
+        print("\n[5/5] Confirmando totem v2...")
         print("\n" + "=" * 55)
         print("  SUCESSO — Totem v2 ativo!")
         print("=" * 55)
