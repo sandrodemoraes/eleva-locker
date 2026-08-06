@@ -5,13 +5,14 @@ import json
 
 import config
 
-TOTEM_VERSAO = "2.3.0"
+TOTEM_VERSAO = "2.3.1"
 from middleware.rate_limit import rate_limit
 from services.encomenda_service import EncomendaService
 from services.armario_service import ArmarioService
 from services.compartimento_service import CompartimentoService
 from services.qrcode_service import QrcodeService
 from services.totem_auth_service import autorizar_deposito_totem, deposito_totem_habilitado
+from services.totem_destinatario_service import TotemDestinatarioService
 
 totem_bp = Blueprint("totem", __name__)
 
@@ -188,6 +189,17 @@ def _auth_deposito(dados):
         "email": dados.get("operador_email"),
         "senha": dados.get("operador_senha"),
     })
+
+
+@totem_bp.route("/totem/destinatarios")
+@rate_limit("totem-destinatarios", max_tentativas=60, janela_seg=60)
+def destinatarios_totem():
+
+    termo = request.args.get("q", "").strip()
+    armario_raw = request.args.get("armario_id", "").strip()
+    armario_id = int(armario_raw) if armario_raw.isdigit() else None
+
+    return jsonify(TotemDestinatarioService.buscar(termo, armario_id))
 
 
 @totem_bp.route("/totem/compartimentos-livres", methods=["POST"])

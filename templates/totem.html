@@ -146,7 +146,11 @@
 
         <div class="form-totem form-compacto">
             <label>Destinatário *</label>
-            <input type="text" id="dep-cliente" placeholder="Nome do morador" class="input-totem" oninput="atualizarBtnDeposito()">
+            <div class="autocomplete-wrap">
+                <input type="text" id="dep-cliente" placeholder="Nome do morador" class="input-totem"
+                       autocomplete="off" oninput="onClienteInput()" onfocus="onClienteInput()" onblur="fecharSugestoesAtraso()">
+                <div class="autocomplete-list" id="dep-sugestoes"></div>
+            </div>
             <label>Telefone {% if whatsapp_ativo %}*{% endif %}</label>
             <input type="tel" id="dep-telefone" placeholder="(48) 99999-9999" class="input-totem" oninput="atualizarBtnDeposito()">
             <p class="porta-auto-msg" id="porta-auto-msg"></p>
@@ -226,6 +230,8 @@ let depositoPendente = {};
 let idleTimer = null;
 let contagemTimer = null;
 let pollPortaTimer = null;
+let sugestoesTimer = null;
+let fecharSugestoesTimer = null;
 const IDLE_MS = 60000;
 const PIN_TAMANHO = 4;
 
@@ -406,6 +412,67 @@ function atualizarBtnDeposito(){
     const temPorta = !!document.getElementById("dep-compartimento").value;
     const temTam = !!tamanhoSelecionado;
     document.getElementById("btn-abrir-porta").disabled = !(cliente && temPorta && temTam);
+}
+
+function onClienteInput(){
+    atualizarBtnDeposito();
+    const q = document.getElementById("dep-cliente").value.trim();
+    if(sugestoesTimer) clearTimeout(sugestoesTimer);
+    if(q.length < 2){
+        fecharSugestoes();
+        return;
+    }
+    sugestoesTimer = setTimeout(() => buscarDestinatarios(q), 280);
+}
+
+function buscarDestinatarios(q){
+    let url = "/totem/destinatarios?q=" + encodeURIComponent(q);
+    if(ARMARIO_ID) url += "&armario_id=" + encodeURIComponent(ARMARIO_ID);
+    fetch(url)
+    .then(r => r.json())
+    .then(lista => renderSugestoes(lista || []))
+    .catch(() => fecharSugestoes());
+}
+
+function renderSugestoes(lista){
+    const box = document.getElementById("dep-sugestoes");
+    box.innerHTML = "";
+    if(!lista.length){
+        box.classList.remove("aberta");
+        return;
+    }
+    lista.forEach(item => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "autocomplete-item";
+        const tel = item.telefone ? item.telefone : "sem telefone";
+        btn.innerHTML = `<span class="ac-nome">${item.nome}</span><span class="ac-tel">${tel}</span>`;
+        btn.onmousedown = (e) => {
+            e.preventDefault();
+            selecionarDestinatario(item);
+        };
+        box.appendChild(btn);
+    });
+    box.classList.add("aberta");
+}
+
+function selecionarDestinatario(item){
+    document.getElementById("dep-cliente").value = item.nome;
+    if(item.telefone){
+        document.getElementById("dep-telefone").value = item.telefone;
+    }
+    fecharSugestoes();
+    atualizarBtnDeposito();
+}
+
+function fecharSugestoes(){
+    const box = document.getElementById("dep-sugestoes");
+    if(box) box.classList.remove("aberta");
+}
+
+function fecharSugestoesAtraso(){
+    if(fecharSugestoesTimer) clearTimeout(fecharSugestoesTimer);
+    fecharSugestoesTimer = setTimeout(fecharSugestoes, 200);
 }
 
 function renderMapaLivres(numeroAtivo){
