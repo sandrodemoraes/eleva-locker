@@ -5,7 +5,7 @@ import json
 
 import config
 
-TOTEM_VERSAO = "2.3.4"
+TOTEM_VERSAO = "2.3.5"
 from middleware.rate_limit import rate_limit
 from services.encomenda_service import EncomendaService
 from services.armario_service import ArmarioService
@@ -69,6 +69,7 @@ def index(armario_id=None):
         whatsapp_ativo=config.NOTIF_WHATSAPP_ATIVO,
         usa_pin_deposito=bool(config.TOTEM_DEPOSITO_PIN) and not config.TOTEM_DEPOSITO_SEM_PIN,
         deposito_sem_pin=config.TOTEM_DEPOSITO_SEM_PIN,
+        deposito_somente_cadastrado=config.TOTEM_DEPOSITO_SOMENTE_CADASTRADO,
         totem_versao=TOTEM_VERSAO,
     ))
     resp.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
@@ -283,13 +284,34 @@ def depositar():
     if int(comp["armario"]) != armario_id:
         return jsonify({"sucesso": False, "mensagem": "Compartimento inválido."}), 400
 
+    cliente = (dados.get("cliente") or "").strip()
+    telefone = (dados.get("telefone") or "").strip()
+    email_morador = (dados.get("email_morador") or "").strip()
+    usuario_id_raw = dados.get("usuario_id")
+
+    if config.TOTEM_DEPOSITO_SOMENTE_CADASTRADO:
+        try:
+            usuario_id = int(usuario_id_raw) if usuario_id_raw not in (None, "", "0") else None
+        except (TypeError, ValueError):
+            usuario_id = None
+        try:
+            morador = TotemDestinatarioService.resolver_cadastrado(
+                cliente, telefone, armario_id, usuario_id=usuario_id,
+            )
+            cliente = morador["nome"]
+            telefone = morador["telefone"]
+            if morador.get("email"):
+                email_morador = morador["email"]
+        except ValueError as erro:
+            return jsonify({"sucesso": False, "mensagem": str(erro)}), 400
+
     try:
         aguardar_fechamento = str(dados.get("aguardar_fechamento", "1")).lower() in ("1", "true", "sim", "yes")
         resultado = EncomendaService.depositar(
             compartimento_id=compartimento_id,
-            cliente=dados.get("cliente", ""),
-            telefone=dados.get("telefone", ""),
-            email=dados.get("email_morador", ""),
+            cliente=cliente,
+            telefone=telefone,
+            email=email_morador,
             operador=f"Totem ({operador})",
             transportadora=dados.get("transportadora", ""),
             observacao=dados.get("observacao", ""),
@@ -303,7 +325,7 @@ def depositar():
             "compartimento": resultado["compartimento"],
             "compartimento_id": resultado["compartimento_id"],
             "tamanho": (comp["tamanho"] or "M").upper(),
-            "cliente": dados.get("cliente", ""),
+            "cliente": cliente,
             "modo": "deposito",
             "aguardar_fechamento": aguardar_fechamento,
         })

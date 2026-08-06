@@ -151,10 +151,12 @@
         <div class="form-totem form-compacto">
             <label>Destinatário *</label>
             <div class="autocomplete-wrap">
-                <input type="text" id="dep-cliente" placeholder="Nome do morador" class="input-totem"
+                <input type="text" id="dep-cliente" placeholder="Busque morador cadastrado" class="input-totem"
                        autocomplete="off" oninput="onClienteInput()" onfocus="onClienteInput()" onblur="fecharSugestoesAtraso()">
+                <input type="hidden" id="dep-usuario-id" value="">
                 <div class="autocomplete-list" id="dep-sugestoes"></div>
             </div>
+            <p class="totem-dica" id="dep-cadastro-dica">Selecione um morador cadastrado na lista</p>
             <label>Telefone {% if whatsapp_ativo %}*{% endif %}</label>
             <input type="tel" id="dep-telefone" placeholder="(48) 99999-9999" class="input-totem" oninput="atualizarBtnDeposito()">
             <p class="porta-auto-msg" id="porta-auto-msg"></p>
@@ -224,6 +226,7 @@ const ARMARIO_ID = ROOT.dataset.armarioId || "";
 const MAX_PORTAS = parseInt(ROOT.dataset.maxPortas || "8", 10);
 const USA_PIN = {{ 'true' if usa_pin_deposito else 'false' }};
 const SEM_PIN = {{ 'true' if deposito_sem_pin else 'false' }};
+const SOMENTE_CADASTRADO = {{ 'true' if deposito_somente_cadastrado else 'false' }};
 let codigo = "";
 let pinDeposito = "";
 let authDeposito = {};
@@ -236,6 +239,7 @@ let contagemTimer = null;
 let pollPortaTimer = null;
 let sugestoesTimer = null;
 let fecharSugestoesTimer = null;
+let moradorSelecionado = null;
 const IDLE_MS = 60000;
 const PIN_TAMANHO = 4;
 
@@ -346,6 +350,8 @@ function carregarCompartimentosLivres(erroId){
         document.getElementById("dep-compartimento").value = "";
         document.getElementById("dep-cliente").value = "";
         document.getElementById("dep-telefone").value = "";
+        document.getElementById("dep-usuario-id").value = "";
+        moradorSelecionado = null;
         document.getElementById("porta-auto-msg").textContent = "";
         atualizarContagemTamanhos();
         renderMapaLivres();
@@ -415,10 +421,13 @@ function atualizarBtnDeposito(){
     const cliente = document.getElementById("dep-cliente").value.trim();
     const temPorta = !!document.getElementById("dep-compartimento").value;
     const temTam = !!tamanhoSelecionado;
-    document.getElementById("btn-abrir-porta").disabled = !(cliente && temPorta && temTam);
+    const moradorOk = !SOMENTE_CADASTRADO || !!moradorSelecionado;
+    document.getElementById("btn-abrir-porta").disabled = !(cliente && temPorta && temTam && moradorOk);
 }
 
 function onClienteInput(){
+    moradorSelecionado = null;
+    document.getElementById("dep-usuario-id").value = "";
     atualizarBtnDeposito();
     const q = document.getElementById("dep-cliente").value.trim();
     if(sugestoesTimer) clearTimeout(sugestoesTimer);
@@ -443,7 +452,19 @@ function renderSugestoes(lista){
     const input = document.getElementById("dep-cliente");
     box.innerHTML = "";
     if(!lista.length){
-        box.classList.remove("aberta");
+        if(SOMENTE_CADASTRADO && input.value.trim().length >= 2){
+            const vazio = document.createElement("div");
+            vazio.className = "autocomplete-vazio";
+            vazio.textContent = "Nenhum morador cadastrado com esse nome";
+            box.appendChild(vazio);
+            const r = input.getBoundingClientRect();
+            box.style.left = r.left + "px";
+            box.style.top = (r.bottom + 4) + "px";
+            box.style.width = r.width + "px";
+            box.classList.add("aberta");
+        } else {
+            box.classList.remove("aberta");
+        }
         return;
     }
     lista.forEach(item => {
@@ -467,6 +488,8 @@ function renderSugestoes(lista){
 
 function selecionarDestinatario(item){
     document.getElementById("dep-cliente").value = item.nome;
+    document.getElementById("dep-usuario-id").value = item.id || "";
+    moradorSelecionado = item;
     if(item.telefone){
         document.getElementById("dep-telefone").value = item.telefone;
     }
@@ -525,8 +548,13 @@ function confirmarDeposito(){
         mostrarErroDeposito("Informe o destinatário.");
         return;
     }
+    if(SOMENTE_CADASTRADO && !moradorSelecionado){
+        mostrarErroDeposito("Selecione um morador cadastrado na lista.");
+        return;
+    }
     const body = Object.assign({}, authPayload(), {
         cliente, telefone, compartimento_id, tamanho,
+        usuario_id: document.getElementById("dep-usuario-id").value || "",
         aguardar_fechamento: "1",
     });
     fetch("/totem/depositar", {

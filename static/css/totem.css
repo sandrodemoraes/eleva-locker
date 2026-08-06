@@ -449,6 +449,13 @@ html,body{
     background:#e8f8f0;
 }
 
+.autocomplete-vazio{
+    padding:14px 16px;
+    color:#64748b;
+    font-size:14px;
+    text-align:center;
+}
+
 .ac-nome{
     font-weight:700;
     flex:1;

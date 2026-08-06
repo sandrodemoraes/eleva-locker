@@ -82,6 +82,8 @@ else:
     # Totem fixo no armário: sem PIN (acesso físico já restringe)
     TOTEM_DEPOSITO_SEM_PIN = bool(TOTEM_ARMARIO_ID)
 
+TOTEM_DEPOSITO_SOMENTE_CADASTRADO = os.getenv("TOTEM_DEPOSITO_SOMENTE_CADASTRADO", "1") == "1"
+
 # Database — sqlite (dev) | postgresql (produção)
 DATABASE_URL = os.getenv("DATABASE_URL", "")
 DB_ENGINE = os.getenv("DB_ENGINE", "sqlite")

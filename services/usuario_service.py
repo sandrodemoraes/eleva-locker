@@ -8,11 +8,11 @@ class UsuarioService:
 
     @staticmethod
     def _normalizar_armario_id(perfil, armario_id):
-        if perfil != "Operador":
-            return None
         if armario_id in (None, "", 0, "0"):
             return None
-        return int(armario_id)
+        if perfil in ("Operador", "Usuário"):
+            return int(armario_id)
+        return None
 
     @staticmethod
     def listar(armario_id=None):
