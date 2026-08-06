@@ -124,6 +124,10 @@ class TotemDestinatarioService:
                 """, (usuario_id, *filtro_params)).fetchone()
                 if not row:
                     raise ValueError("Morador não cadastrado ou inativo.")
+                if nome.lower() != row["nome"].strip().lower():
+                    raise ValueError(
+                        "Selecione o morador na lista — nome não confere com o cadastro."
+                    )
                 return TotemDestinatarioService._montar_destinatario(row, telefone)
 
             rows = conn.execute(f"""

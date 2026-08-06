@@ -252,8 +252,8 @@ function mostrarTela(id){
 function irInicio(){
     limpar();
     limparPin();
+    pararPollDeposito();
     depositoPendente = {};
-    if(pollPortaTimer){ clearInterval(pollPortaTimer); pollPortaTimer = null; }
     document.getElementById("erro-retirar").classList.remove("visivel");
     if(contagemTimer) clearInterval(contagemTimer);
     mostrarTela("tela-inicio");
@@ -263,6 +263,7 @@ function irDepositoAuth(){
     authDeposito = {};
     pinDeposito = "";
     compartimentosLivres = [];
+    pararPollDeposito();
     depositoPendente = {};
     document.getElementById("erro-deposito-pin").classList.remove("visivel");
     document.getElementById("erro-deposito-auth").classList.remove("visivel");
@@ -279,6 +280,7 @@ function irDepositoAuth(){
 }
 
 function irDepositoVoltar(){
+    pararPollDeposito();
     if(SEM_PIN) irInicio();
     else if(USA_PIN){
         pinDeposito = "";
@@ -531,7 +533,15 @@ function renderMapaLivres(numeroAtivo){
     }
 }
 
+function pararPollDeposito(){
+    if(pollPortaTimer){
+        clearInterval(pollPortaTimer);
+        pollPortaTimer = null;
+    }
+}
+
 function confirmarDeposito(){
+    pararPollDeposito();
     const cliente = document.getElementById("dep-cliente").value.trim();
     const telefone = document.getElementById("dep-telefone").value.trim();
     const compartimento_id = document.getElementById("dep-compartimento").value;
@@ -551,6 +561,17 @@ function confirmarDeposito(){
     if(SOMENTE_CADASTRADO && !moradorSelecionado){
         mostrarErroDeposito("Selecione um morador cadastrado na lista.");
         return;
+    }
+    if(SOMENTE_CADASTRADO && moradorSelecionado){
+        const uid = document.getElementById("dep-usuario-id").value;
+        if(!uid || String(moradorSelecionado.id || "") !== String(uid)){
+            mostrarErroDeposito("Selecione novamente o morador na lista.");
+            return;
+        }
+        if(cliente.toLowerCase() !== (moradorSelecionado.nome || "").toLowerCase()){
+            mostrarErroDeposito("Nome alterado — selecione o morador na lista.");
+            return;
+        }
     }
     const body = Object.assign({}, authPayload(), {
         cliente, telefone, compartimento_id, tamanho,
@@ -595,7 +616,15 @@ function verificarPortaFechada(){
 }
 
 function concluirDeposito(auto){
-    if(pollPortaTimer){ clearInterval(pollPortaTimer); pollPortaTimer = null; }
+    if(!depositoPendente.encomenda_id){
+        const el = document.getElementById("erro-aguardando");
+        if(el){
+            el.textContent = "Depósito inválido — recomece o fluxo.";
+            el.classList.add("visivel");
+        }
+        return;
+    }
+    pararPollDeposito();
     const body = Object.assign({}, authPayload(), {
         encomenda_id: depositoPendente.encomenda_id,
     });

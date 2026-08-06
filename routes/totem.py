@@ -5,7 +5,7 @@ import json
 
 import config
 
-TOTEM_VERSAO = "2.3.5"
+TOTEM_VERSAO = "2.3.6"
 from middleware.rate_limit import rate_limit
 from services.encomenda_service import EncomendaService
 from services.armario_service import ArmarioService
@@ -294,6 +294,11 @@ def depositar():
             usuario_id = int(usuario_id_raw) if usuario_id_raw not in (None, "", "0") else None
         except (TypeError, ValueError):
             usuario_id = None
+        if not usuario_id:
+            return jsonify({
+                "sucesso": False,
+                "mensagem": "Selecione o morador na lista do totem.",
+            }), 400
         try:
             morador = TotemDestinatarioService.resolver_cadastrado(
                 cliente, telefone, armario_id, usuario_id=usuario_id,

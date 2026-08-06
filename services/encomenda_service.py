@@ -9,6 +9,7 @@ from services.esp32_service import Esp32Service
 from services.notificacao_service import NotificacaoService
 from services.limite_plano_service import LimitePlanoService
 from services.esp32_sync_service import Esp32SyncService
+from services.totem_destinatario_service import TotemDestinatarioService
 from middleware.operador_scope import operador_acessa_armario
 
 
@@ -141,6 +142,46 @@ class EncomendaService:
         }
 
     @staticmethod
+    def cancelar_deposito_totem(encomenda_id, operador):
+        """Cancela depósito pendente no totem (sem WhatsApp) e libera compartimento."""
+        encomenda = EncomendaRepository.buscar_por_id(encomenda_id)
+
+        if not encomenda:
+            raise ValueError("Encomenda não encontrada.")
+
+        if encomenda["status"] != "aguardando_retirada":
+            raise ValueError("Encomenda não está pendente.")
+
+        if encomenda["notificado_em"]:
+            raise ValueError("Encomenda já notificada — não pode cancelar.")
+
+        comp = CompartimentoRepository.buscar_por_id(encomenda["compartimento"])
+        if comp and not operador_acessa_armario(comp["armario"]):
+            raise ValueError("Sem permissão para este armário.")
+
+        with BaseRepository.get_connection() as conn:
+            conn.execute(
+                "DELETE FROM encomendas WHERE id = ? AND notificado_em IS NULL",
+                (encomenda_id,),
+            )
+            if comp:
+                conn.execute(
+                    "UPDATE compartimentos SET status = 'livre' WHERE id = ?",
+                    (encomenda["compartimento"],),
+                )
+            conn.commit()
+
+        if comp:
+            LogService.registrar(
+                encomenda["compartimento"],
+                operador,
+                f"Depósito totem cancelado #{encomenda_id} — {encomenda['cliente']}",
+            )
+            Esp32SyncService.incrementar_por_compartimento(encomenda["compartimento"])
+
+        return {"id": encomenda_id, "cancelado": True}
+
+    @staticmethod
     def concluir_deposito_totem(encomenda_id, operador):
         encomenda = EncomendaRepository.buscar_por_id(encomenda_id)
 
@@ -161,6 +202,14 @@ class EncomendaService:
                 "cliente": encomenda["cliente"],
                 "ja_notificado": True,
             }
+
+        if config.TOTEM_DEPOSITO_SOMENTE_CADASTRADO:
+            armario_id = comp["armario"] if comp else None
+            TotemDestinatarioService.resolver_cadastrado(
+                encomenda["cliente"],
+                encomenda["telefone"],
+                armario_id,
+            )
 
         notificacoes = NotificacaoService.notificar_encomenda_chegou(
             encomenda_id=encomenda_id,
