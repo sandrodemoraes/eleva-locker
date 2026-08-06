@@ -42,8 +42,15 @@ def servidor_info():
     try:
         with urllib.request.urlopen("http://127.0.0.1:15000/totem/versao", timeout=3) as r:
             return json.loads(r.read().decode())
+    except urllib.error.HTTPError as e:
+        if e.code == 404:
+            return {
+                "erro": "404 Not Found — servidor ANTIGO na porta 15000",
+                "solucao": "Feche CMD antigo. Rode: tools\\somente_servidor.bat",
+            }
+        return {"erro": f"HTTP {e.code}"}
     except urllib.error.URLError:
-        return {"erro": "servidor nao responde na porta 15000"}
+        return {"erro": "Nenhum servidor na porta 15000 — rode tools\\somente_servidor.bat"}
     except Exception as e:
         return {"erro": str(e)}
 
