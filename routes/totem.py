@@ -1,11 +1,11 @@
 from pathlib import Path
 
-from flask import Blueprint, render_template, request, jsonify, Response, make_response
+from flask import Blueprint, render_template, request, jsonify, Response, make_response, redirect
 import json
 
 import config
 
-TOTEM_VERSAO = "2.2.0"
+TOTEM_VERSAO = "2.2.1"
 from middleware.rate_limit import rate_limit
 from services.encomenda_service import EncomendaService
 from services.armario_service import ArmarioService
@@ -38,6 +38,9 @@ def versao():
 @totem_bp.route("/totem/<int:armario_id>")
 def index(armario_id=None):
 
+    if armario_id is None and config.TOTEM_ARMARIO_ID:
+        return redirect(f"/totem/{config.TOTEM_ARMARIO_ID}")
+
     armario = None
 
     if armario_id:
@@ -46,10 +49,14 @@ def index(armario_id=None):
         except ValueError:
             armario = None
 
+    armarios_lista = None
+    if not armario and not config.TOTEM_ARMARIO_ID:
+        armarios_lista = ArmarioService.listar_ativos()
+
     resp = make_response(render_template(
         "totem.html",
         armario=armario,
-        armarios=ArmarioService.listar_ativos() if not armario else None,
+        armarios=armarios_lista,
         max_portas=(armario["max_portas"] or 8) if armario else 8,
         ajuda_telefone=config.TOTEM_AJUDA_TELEFONE,
         armario_id=armario_id,

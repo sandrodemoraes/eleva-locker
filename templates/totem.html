@@ -28,6 +28,8 @@
                 <option value="{{ a['id'] }}">{{ a['nome'] }}</option>
                 {% endfor %}
             </select>
+            {% else %}
+            <p class="totem-dica">Armário não configurado — defina TOTEM_ARMARIO_ID no .env</p>
             {% endif %}
         </div>
 

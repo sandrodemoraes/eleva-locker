@@ -74,6 +74,7 @@ TOTEM_RATE_LIMIT = int(os.getenv("TOTEM_RATE_LIMIT", "8"))
 TOTEM_RATE_JANELA = int(os.getenv("TOTEM_RATE_JANELA", "300"))
 TOTEM_AJUDA_TELEFONE = os.getenv("TOTEM_AJUDA_TELEFONE", "")
 TOTEM_DEPOSITO_PIN = os.getenv("TOTEM_DEPOSITO_PIN", "")
+TOTEM_ARMARIO_ID = os.getenv("TOTEM_ARMARIO_ID", "").strip()
 
 # Database — sqlite (dev) | postgresql (produção)
 DATABASE_URL = os.getenv("DATABASE_URL", "")
