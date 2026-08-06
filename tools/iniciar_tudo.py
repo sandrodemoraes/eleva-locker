@@ -48,6 +48,7 @@ def aguardar_docker():
 def parar_web_docker():
     """Evita conflito na porta 15000 — app roda com python app.py."""
     run(["docker", "stop", "elevalocker-web-1"])
+    run(["docker", "compose", "stop", "web"])
 
 
 def subir_whatsapp():

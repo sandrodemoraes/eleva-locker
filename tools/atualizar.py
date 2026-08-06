@@ -12,6 +12,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 TOTEM_URL = "http://127.0.0.1:15000/totem/versao"
+BRANCH_TOTEM = "cursor/totem-seguro-c05c"
 
 sys.path.insert(0, str(ROOT / "tools"))
 from parar_servidor import parar_app_py, parar_docker_web, parar_porta  # noqa: E402
@@ -44,8 +45,11 @@ def git_atualizar(branch=None):
     print("\n[2/5] Atualizando codigo (git pull)...")
 
     if not branch:
+        branch = BRANCH_TOTEM
         r = run(["git", "rev-parse", "--abbrev-ref", "HEAD"], capture=True)
-        branch = (r.stdout or "").strip() or "main"
+        atual = (r.stdout or "").strip()
+        if atual and atual != branch:
+            print(f"    Branch atual: {atual} → mudando para {branch}")
 
     print(f"    Branch: {branch}")
     run(["git", "fetch", "origin", branch], capture=True)

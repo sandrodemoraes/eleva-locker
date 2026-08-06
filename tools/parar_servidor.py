@@ -29,13 +29,14 @@ def run(cmd, capture=True, shell=False):
 
 def parar_docker_web():
     print("Parando container Docker web...")
+    if platform.system() == "Windows":
+        run("docker stop elevalocker-web-1 2>nul", shell=True)
+        run("docker compose stop web 2>nul", shell=True)
+        return
     docker = shutil.which("docker")
     if docker:
         run([docker, "stop", "elevalocker-web-1"])
-        return
-    # CMD encontra docker mesmo quando subprocess direto falha (PATH diferente)
-    if platform.system() == "Windows":
-        run("docker stop elevalocker-web-1 2>nul", shell=True)
+        run([docker, "compose", "stop", "web"])
     else:
         print("    Docker nao instalado ou fora do PATH.")
 

@@ -16,10 +16,15 @@ if not defined PYTHON (
 
 echo.
 echo  ELEVA LOCKER — Atualizacao automatica (git + reinicio)
+echo  Branch: cursor/totem-seguro-c05c
 echo  ========================================================
 echo.
 
-%PYTHON% tools\atualizar.py %*
+if "%~1"=="" (
+    %PYTHON% tools\atualizar.py --branch cursor/totem-seguro-c05c
+) else (
+    %PYTHON% tools\atualizar.py %*
+)
 
 echo.
 pause
