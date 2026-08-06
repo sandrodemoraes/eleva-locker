@@ -28,7 +28,7 @@ def index(armario_id=None):
         "totem.html",
         armario=armario,
         armarios=ArmarioService.listar_ativos() if not armario else None,
-        max_portas=(armario.get("max_portas") or 8) if armario else 8,
+        max_portas=(armario["max_portas"] or 8) if armario else 8,
         ajuda_telefone=config.TOTEM_AJUDA_TELEFONE,
         armario_id=armario_id,
         deposito_habilitado=deposito_totem_habilitado(),
