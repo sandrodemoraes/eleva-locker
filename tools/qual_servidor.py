@@ -48,6 +48,11 @@ try:
         print("  => Resposta nao e JSON — servidor ANTIGO ou erro")
 except urllib.error.HTTPError as e:
     print(f"/totem/versao: HTTP {e.code} — servidor ANTIGO (sem rota versao)")
+    if e.code == 404:
+        print()
+        print("  *** 404 = totem ANTIGO na porta 15000 ***")
+        print("  RODE AGORA:  tools\\recuperar_totem.bat")
+        print("  (ou: tools\\somente_servidor.bat se ja fez git pull)")
 except urllib.error.URLError as e:
     print(f"/totem/versao: OFFLINE — {e.reason}")
     print("Rode: tools\\somente_servidor.bat")

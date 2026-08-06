@@ -28,8 +28,9 @@ def run(cmd, capture=True, shell=False):
 
 
 def parar_docker_web():
-    print("Parando container Docker web...")
+    print("Parando container Docker web (totem antigo)...")
     if platform.system() == "Windows":
+        run("docker update --restart=no elevalocker-web-1 2>nul", shell=True)
         run("docker stop elevalocker-web-1 2>nul", shell=True)
         run("docker rm -f elevalocker-web-1 2>nul", shell=True)
         run("docker compose stop web 2>nul", shell=True)
@@ -37,6 +38,7 @@ def parar_docker_web():
         return
     docker = shutil.which("docker")
     if docker:
+        run([docker, "update", "--restart=no", "elevalocker-web-1"])
         run([docker, "stop", "elevalocker-web-1"])
         run([docker, "rm", "-f", "elevalocker-web-1"])
         run([docker, "compose", "stop", "web"])

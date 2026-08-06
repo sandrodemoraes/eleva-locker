@@ -47,6 +47,7 @@ def aguardar_docker():
 
 def parar_web_docker():
     """Evita conflito na porta 15000 — app roda com python app.py."""
+    run(["docker", "update", "--restart=no", "elevalocker-web-1"])
     run(["docker", "stop", "elevalocker-web-1"])
     run(["docker", "rm", "-f", "elevalocker-web-1"])
     run(["docker", "compose", "stop", "web"])

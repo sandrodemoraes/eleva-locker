@@ -19,6 +19,7 @@ echo  ============================================================
 echo.
 
 echo [1] Parando e REMOVENDO Docker web (versao antiga)...
+docker update --restart=no elevalocker-web-1 2>nul
 docker stop elevalocker-web-1 2>nul
 docker rm -f elevalocker-web-1 2>nul
 docker compose stop web 2>nul
@@ -56,8 +57,8 @@ if not defined PYTHON (
 echo [4] Verificando arquivos...
 %PYTHON% tools\verificar_totem.py
 
-echo [5] Abrindo servidor em nova janela...
-start "ELEVA LOCKER" cmd /k "cd /d %CD% && tools\iniciar_tudo.bat"
+echo [5] Abrindo servidor NOVO em nova janela...
+start "ELEVA LOCKER - Totem v2" cmd /k "cd /d %CD% && tools\somente_servidor.bat"
 
 echo.
 echo  ============================================================
