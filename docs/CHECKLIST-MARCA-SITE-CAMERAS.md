@@ -613,10 +613,121 @@ Você junta:
 
 O Eleva Locker continua como produto B2B. A webcam da serra vira **mídia e vitrine tecnológica** — e, se o prédio tiver uso turístico/comercial, vira também **máquina de atração de público**.
 
-### 6.12 Perguntas que definem o desenho final
+### 6.12 Programa do prédio (atualizado — Sandro)
 
-1. O prédio será pousada/hotel, comercial, residencial ou sede da empresa?  
-2. A vista limpa da serra é do terraço inteiro ou só de um lado/ângulo?  
-3. Já tem previsão de link de internet (fibra) na obra? Qual upload real?  
-4. Quer parceria oficial com a prefeitura desde o dia 1?  
-5. Prefere marca turística própria ou submarca Eleva para escalar outros pontos?
+| Piso | Uso definido / em estudo |
+|------|--------------------------|
+| **Térreo** | Garagem + depósito + oficina de trabalhos manuais |
+| **2º piso** | Escritório |
+| **3º piso** | Em estudo: **~6 kitnets ou quartos para alugar** |
+| **Vista** | **Frente do prédio inteiro** para a Serra do Rio do Rastro |
+
+Isso fecha o modelo: **sede operacional + renda + mídia turística**.
+
+### 6.13 Leitura estratégica desse programa
+
+O prédio deixa de ser “só obra com vista bonita” e vira um **hub de 3 caixas**:
+
+```
+Térreo  → operação (oficina, estoque, veículos, montagem de lockers/solar/CFTV)
+2º      → comando (escritório Eleva / comercial / técnico)
+3º      → receita recorrente (kitnets/quartos) + motivo para o hóspede olhar a cam
+Cam     → ímã digital que alimenta o 3º piso e a marca regional
+```
+
+**Veredito do mix:** excelente. Oficina + escritório sozinhos não monetizam a vista; com 6 unidades de hospedagem, a webcam passa a ter ROI direto (ocupação).
+
+#### Kitnets vs quartos — recomendação
+
+| Formato | Prós | Contras | Indicado se |
+|---------|------|---------|-------------|
+| **Kitnets** (banheiro + cooktop) | Diária/semana mais alta; autônomo; Airbnb/Booking | Obra mais cara (6 WC, 6 cozinhas, exaustão, hidráulica) | Quiser renda maior e menos serviço diário |
+| **Quartos** (banheiro privativo ou semi) | Obra mais barata; gira bem com turismo de passagem | Mais operação (roupa de cama, limpeza) se for diária | Quiser CAPEX menor e testar demanda |
+| **Híbrido** (4 kitnets + 2 quartos) | Flexível | Layout um pouco mais complexo | Ainda está em dúvida — **melhor opção agora** |
+
+**Recomendação prática:** se a vista é da **frente inteira**, priorize no 3º piso:
+1. Unidades **voltadas para a serra** (todas, se o lote permitir)
+2. Sacada/janela generosa na fachada principal
+3. 1 unidade “premium vista” (maior) para foto/marketing
+4. Circulação/escada e áreas molhadas no fundo (lado sem vista)
+
+Para turismo da Serra, **diária curta** (1–3 noites) costuma pagar melhor que mensal — mas mensal estabiliza caixa na baixa temporada. Desenhe as unidades para aceitar **os dois regimes** (mobiliário completo + contrato flexível).
+
+#### Enquadramento legal (atenção antes de fechar planta)
+
+- Confirmar no município se o zoneamento do lote permite **hospedagem / uso misto**
+- Kitnet para Airbnb/Booking: CNPJ + regras locais de hospedagem; em condomínio seria mais travado — aqui o prédio é seu, mais simples
+- Se for “pousada” formal: exigências de acessibilidade, extintores, saídas, eventualmente Habite-se específico
+- Oficina no térreo: ruído/cheiro vs hóspedes no 3º — prever **isolamento acústico** entre pisos e horário de oficina
+
+Não é bloqueio; é item de projeto para não reformar depois.
+
+### 6.14 Onde colocar a câmera com “vista na frente toda”
+
+Como a vista é da fachada principal:
+
+| Posição | Avaliação |
+|---------|-----------|
+| **Peitoril/cobertura da fachada frente (melhor)** | Enquadra a serra sem mostrar oficina/garagem; limpo para YouTube |
+| Lateral do 3º piso | Só se a frente tiver interferência (poste, fio, telhado vizinho) |
+| Dentro de kitnet | **Não** para stream 24/7 — privacidade do hóspede |
+| Térreo | Ruim — ângulo baixo, carros, movimento da oficina |
+
+**Setup ideal:**
+- 1 câmera **fixa wide** na cobertura/platibanda da frente → stream 24/7
+- 1 **PTZ** ao lado → enquadramentos especiais (neblina, neve, zoom nas curvas da serra)
+- Cabos descem para rack no **2º piso (escritório)** ou nicho técnico no térreo com VLAN isolada
+
+**Regra:** a câmera filma a **serra**, não a vida interna do prédio. Hóspede do 3º não pode aparecer no zoom.
+
+### 6.15 Sinergias que quase ninguém faz — e você pode
+
+1. **Página “Serra ao Vivo”** com botão: “Reserve um quarto com essa vista” → WhatsApp / Booking  
+2. **Eleva Locker no térreo/hall** do próprio prédio → hóspede e entregas da oficina; vira **showroom real**  
+3. **Escritório no 2º** recebe cliente que veio pela câmera (“vi a serra no YouTube e vim conhecer”)  
+4. **Oficina no térreo** monta lockers/painéis solares/racks — conteúdo bastidores sem expor o stream turístico  
+5. Wi-Fi hóspede separado do link da câmera (MikroTik: 2 SSID + QoS; upload da cam protegido)
+
+### 6.16 Infraestrutura mínima a prever na obra (programa atual)
+
+| Item | Onde |
+|------|------|
+| Rack / DG de dados | 2º piso (escritório) ou térreo técnico |
+| Fibra + upload ≥ 10 Mbps dedicado à cam (ideal 20+) | Entrada do prédio |
+| PoE cobertura frente (2 pontos) | Platibanda/cobertura |
+| Eletroduto câmera → rack | Vertical dedicado |
+| Nobreak rack + DPS | Sala técnica |
+| Som/ruído: forro + manta entre oficina e 2º/3º | Lajes |
+| Shaft hidráulico agrupado | 3º piso (kitnets) |
+| Medição elétrica: geral + se possível submedição 3º | Gestão de aluguel |
+| Câmera CFTV privada (garagem/oficina) ≠ webcam pública | Mesmo NVR, VLANs/perfis separados |
+| Ponto para locker de encomendas no acesso | Térreo / hall |
+
+### 6.17 Modelo financeiro simples (ordem de grandeza)
+
+Não é orçamento fechado — é lógica de decisão:
+
+- **6 unidades** em diária turística na Serra: mesmo com ocupação média moderada, tendem a pagar internet dedicada + câmera em poucas semanas de pico (feriados, inverno, neve)  
+- A webcam reduz CAC (custo de adquirir hóspede): o visitante já “conheceu” a vista antes de reservar  
+- Oficina + escritório cobrem operação da empresa; o 3º piso é a **perna de renda imobiliária**
+
+Prioridade de investimento na fachada: **janelas/sacadas para a serra > luxo interno**. A vista é o produto.
+
+### 6.18 Decisão de marca com esse mix
+
+Com hospedagem no 3º:
+
+1. **Canal/site da webcam** → nome turístico (Serra / Lauro Müller Ao Vivo)  
+2. **Reserva dos quartos/kitnets** → marca de hospedagem (pode ser leve, ex. “Eleva Stay” / nome local)  
+3. **Eleva Locker + serviços técnicos** → marca B2B no 2º piso  
+
+Três frentes, uma infraestrutura. A câmera é o alto-falante das três.
+
+### 6.19 Perguntas que ainda fecham o projeto
+
+1. Já tem previsão de link de internet (fibra) na obra? Qual upload real?  
+2. Quer parceria oficial com a prefeitura desde o dia 1?  
+3. No 3º piso: diária turística, mensal, ou os dois?  
+4. As 6 unidades terão banheiro privativo cada uma?  
+5. Prefere marca turística própria ou submarca Eleva para escalar outros pontos?  
+6. Há restrição de gabarito/platibanda para mast curto na cobertura?
