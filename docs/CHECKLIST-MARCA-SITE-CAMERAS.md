@@ -1,53 +1,112 @@
-# Eleva Locker — Checklist de Marca, Site e Câmeras ao Vivo
+# Ecossistema Eleva — Marca, Eleva Cam, Site e Checklist
 
 Documento de consultoria estratégica e técnica.
 Atualizado: 2026-08-06
+
+## Família de marcas (decisão)
+
+| Marca | Papel | Escrita padrão |
+|-------|--------|----------------|
+| **Eleva** | Marca-mãe / grupo | Eleva |
+| **Eleva Locker** | Smart lockers B2B | Eleva Locker |
+| **Eleva Cam** | Câmeras ao vivo em pontos turísticos + mídia IoT | Eleva Cam |
+
+**Projeto deste hub (Lauro Müller / Serra do Rio do Rastro): Eleva Cam.**
+
+Padrões:
+- Marca: **Eleva Cam**
+- Domínio/handle: `elevacam`
+- Código/repo futuro: `eleva-cam` / `ElevaCam`
+- Não escrever “Elevacam” em textos oficiais (salvo domínio)
 
 ---
 
 ## 1. Checklist de proteção da marca
 
-### 1.1 Domínios (fazer primeiro — esta semana)
+### 1.1 Domínios — Eleva Cam (P0 desta semana)
+
+| Prioridade | Domínio | Ação | Status |
+|------------|---------|------|--------|
+| P0 | `elevacam.com.br` | Registrar no Registro.br | ☐ |
+| P0 | `elevacam.com` | Registrar | ☐ |
+| P1 | `elevacam.it` | Expansão UE / Itália | ☐ |
+| P2 | `eleva-cam.com` | Defensivo | ☐ |
+| P2 | `elevacam.net` | Defensivo | ☐ |
+
+**Checagem rápida (2026-08-06):** `elevacam.com` e `elevacam.com.br` sem DNS + RDAP 404 → **aparentam disponíveis**.  
+Não há produto/site ativo “Eleva Cam” no segmento de webcam turística. Atenção fonética: existe “Eleve Cam” (MG, outro setor) e “Elevac” (elevadores) — grafia diferente; o composto **Eleva Cam** segue registrável, com pesquisa pePI no dia do protocolo.
+
+**E-mails Eleva Cam:**
+- `contato@elevacam.com.br`
+- `comercial@elevacam.com.br`
+- `parcerias@elevacam.com.br`
+
+### 1.1b Domínios — Eleva Locker (paralelo)
 
 | Prioridade | Domínio | Ação | Status |
 |------------|---------|------|--------|
 | P0 | `elevalocker.com.br` | Registrar no Registro.br | ☐ |
-| P0 | `elevalocker.com` | Registrar (Namecheap / Cloudflare / Registro.br parceiro) | ☐ |
-| P1 | `elevalocker.it` | Registrar (NIC.it / registrar IT) — expansão UE | ☐ |
-| P2 | `eleva-locker.com` | Defensivo | ☐ |
-| P2 | `elevalocker.net` | Defensivo | ☐ |
+| P0 | `elevalocker.com` | Registrar | ☐ |
+| P1 | `elevalocker.it` | Expansão UE | ☐ |
+| P2 | `eleva-locker.com` / `elevalocker.net` | Defensivo | ☐ |
 
-**E-mails profissionais após domínio:**
+**E-mails Eleva Locker:**
 - `contato@elevalocker.com.br`
 - `comercial@elevalocker.com.br`
 - `suporte@elevalocker.com.br`
 
-**DNS recomendado:** Cloudflare (DNS + CDN + proteção básica).
+**DNS recomendado (ambas):** Cloudflare.
 
 ---
 
-### 1.2 Redes sociais (mesmo dia dos domínios)
+### 1.2 Redes sociais
+
+#### Eleva Cam (projeto ativo — Serra)
+
+| Canal | Handle sugerido | Status |
+|-------|-----------------|--------|
+| YouTube | `@ElevaCam` (canal 24/7 da Serra) | ☐ |
+| Instagram | `@elevacam` | ☐ |
+| Facebook | Eleva Cam | ☐ |
+| TikTok | `@elevacam` (timelapse/neve) | ☐ |
+| WhatsApp Business | reservas kitnets / parcerias turismo | ☐ |
+
+#### Eleva Locker (produto B2B)
 
 | Canal | Handle sugerido | Status |
 |-------|-----------------|--------|
 | Instagram | `@elevalocker` | ☐ |
 | YouTube | `@ElevaLocker` | ☐ |
 | LinkedIn | Empresa Eleva Locker | ☐ |
-| Facebook | Eleva Locker | ☐ |
-| TikTok | `@elevalocker` (opcional) | ☐ |
-| WhatsApp Business | número comercial + catálogo | ☐ |
+| WhatsApp Business | comercial locker | ☐ |
 
 ---
 
 ### 1.3 Marca no INPI (Brasil)
 
-**Tipo:** marca mista (nome + logo) **e**, se possível, nominativa “ELEVA LOCKER”.
+Registrar **duas marcas** (podem ser pedidos separados):
 
-**Classes Nice sugeridas:**
+#### A) ELEVA CAM (prioridade do hub turístico)
+
+**Tipo:** nominativa + mista (logo).
 
 | Classe | Cobertura | Por quê |
 |--------|-----------|---------|
-| **9** | Sistemas eletrônicos, IoT, software embarcado, câmeras, controle de acesso | Core técnico do produto |
+| **9** | Câmeras, sistemas de transmissão, IoT, software de streaming | Core técnico |
+| **38** | Telecomunicação / transmissão de áudio e vídeo | YouTube/live 24/7 |
+| **35** | Publicidade, promoção de destinos, divulgação comercial | Patrocínios / parcerias |
+| **42** | Plataforma web, SaaS de câmeras ao vivo | Site + rede multi-destino |
+| **43** (se hospedagem no mesmo CNPJ/marca) | Hospedagem temporária | Só se Eleva Cam também vender as kitnets |
+
+Se as kitnets tiverem marca própria (“Eleva Stay” ou nome local), a classe 43 fica na marca de hospedagem — **Eleva Cam** fica pura de mídia/câmeras.
+
+#### B) ELEVA LOCKER
+
+**Tipo:** nominativa + mista.
+
+| Classe | Cobertura | Por quê |
+|--------|-----------|---------|
+| **9** | Sistemas eletrônicos, IoT, software embarcado, controle de acesso | Core técnico |
 | **20** | Armários, móveis metálicos, compartimentos | Hardware físico |
 | **39** | Armazenamento, logística de encomendas, entrega | Serviço operacional |
 | **42** | Software como serviço (SaaS), plataforma web, API | Sistema Flask / cloud |
@@ -93,9 +152,8 @@ Atualizado: 2026-08-06
 | Política de marca (como escrever: Eleva Locker, não ElevaLocker em textos oficiais — definir padrão) | ☐ |
 
 **Padrão sugerido de escrita:**
-- Marca: **Eleva Locker**
-- Domínio/handle: `elevalocker`
-- Código/repo: `eleva-locker` / `ElevaLocker`
+- **Eleva Cam** / `elevacam` / `eleva-cam`
+- **Eleva Locker** / `elevalocker` / `eleva-locker`
 
 ---
 
@@ -429,11 +487,15 @@ YouTube vira motor; o site captura o lead.
 
 ---
 
-## 6. Câmeras em pontos turísticos — Serra do Rio do Rastro (Lauro Müller/SC)
+## 6. Eleva Cam — Serra do Rio do Rastro (Lauro Müller/SC)
+
+**Nome do projeto: Eleva Cam**  
+Primeiro ponto: câmera ao vivo da Serra do Rio do Rastro a partir do prédio em Lauro Müller/SC.  
+Escalável depois para outros destinos turísticos sob a mesma marca.
 
 ### 6.1 O que muda com o novo contexto
 
-Você está construindo um **prédio de 4 andares** com vista bonita para a Serra do Rio do Rastro. A proposta é usar isso (e depois outros pontos turísticos) para transmitir ao vivo no YouTube e no site.
+Você está construindo um **prédio de 4 andares** com vista bonita para a Serra do Rio do Rastro. A proposta da **Eleva Cam** é usar isso (e depois outros pontos turísticos) para transmitir ao vivo no YouTube e no site.
 
 Isso **não é** a ideia frágil de stream do locker. É o modelo clássico e comprovado de **webcam turística / clima ao vivo**, usado por hotéis, prefeituras e destinos no Brasil (ex.: Clima ao Vivo / Destino:On, resorts, parques).
 
@@ -484,16 +546,18 @@ Prédio 4 andares (Lauro Müller)
              └─ Funil para outros produtos (locker, solar, segurança)
 ```
 
-#### Três arquiteturas de marca (escolha uma)
+#### Arquitetura de marca — **DECIDIDO: Eleva Cam**
 
-| Opção | Como funciona | Quando usar |
-|-------|---------------|-------------|
-| **A. Marca destino** | Site `serradoriodorastro...` / “Lauro Müller Ao Vivo” | Máximo SEO turismo |
-| **B. Marca Eleva View / Eleva Cam** | Submarca de mídia/turismo | Se quiser escalar vários pontos turísticos |
-| **C. Soft brand Eleva Locker** | Rodapé “tecnologia Eleva” | Só se quiser amarrar ao locker; menos ideal na 1ª dobra |
+| Camada | Nome | Função |
+|--------|------|--------|
+| Mídia / webcams | **Eleva Cam** | Rede de câmeras ao vivo em pontos turísticos |
+| 1º ponto | Eleva Cam — Serra do Rio do Rastro (Lauro Müller) | Canal 24/7 + site |
+| Produto B2B | **Eleva Locker** | Smart lockers (site separado) |
+| Hospedagem (opcional) | Nome próprio ou “Eleva Stay” | Kitnets do 3º piso |
+| Soft credit | “Tecnologia Eleva” | Rodapé técnico |
 
-**Recomendação:** **Opção B** (submarca de câmeras/turismo) + menção técnica Eleva.  
-O locker continua com site próprio. A webcam puxa público de viagem; o locker puxa B2B. Misturar na mesma home enfraquece os dois.
+SEO do destino continua forte com título/overlay:  
+**“Serra do Rio do Rastro Ao Vivo | Eleva Cam — Lauro Müller/SC”**
 
 ### 6.5 Por que o prédio de 4 andares é um ativo estratégico
 
@@ -598,8 +662,8 @@ Não coloque a webcam da serra como hero do site do locker. Use como **prova de 
 
 #### Escala (pontos turísticos)
 9. ☐ 2ª câmera (outro mirante / outro atrativo da região)  
-10. ☐ Rede “Eleva Cam / Eleva View” multi-destino  
-11. ☐ Pacote comercial para pousadas e prefeituras (“sua cidade ao vivo”)
+10. ☐ Rede **Eleva Cam** multi-destino (2º ponto turístico)  
+11. ☐ Pacote comercial para pousadas e prefeituras (“sua cidade ao vivo — Eleva Cam”)
 
 ### 6.11 Avaliação final desta versão da ideia
 
@@ -758,16 +822,16 @@ Não é orçamento fechado — é lógica de decisão:
 
 Prioridade de investimento na fachada: **janelas/sacadas para a serra > luxo interno**. A vista é o produto.
 
-### 6.18 Decisão de marca com esse mix
+### 6.18 Decisão de marca com esse mix — Eleva Cam
 
 Com hospedagem no 3º e casa no 4º:
 
-1. **Canal/site da webcam** → nome turístico (Serra / Lauro Müller Ao Vivo)  
-2. **Reserva dos quartos/kitnets** → marca de hospedagem (leve, ex. “Eleva Stay” / nome local)  
+1. **Canal/site da webcam** → **Eleva Cam** (título: Serra do Rio do Rastro Ao Vivo)  
+2. **Reserva das kitnets** → marca de hospedagem (leve, ex. “Eleva Stay” / nome local) ou CTA no site Eleva Cam  
 3. **Eleva Locker + serviços técnicos** → marca B2B no 2º piso  
-4. **Casa no 4º** → fora de qualquer comunicação pública (endereço fino, plantas internas, rotina familiar)
+4. **Casa no 4º** → fora de qualquer comunicação pública
 
-Quatro usos, uma infraestrutura. A câmera é o alto-falante do destino e da hospedagem — **não da vida pessoal**.
+Quatro usos, uma infraestrutura. **Eleva Cam** é o alto-falante do destino e da hospedagem — **não da vida pessoal**.
 
 ### 6.19 Checklist específico “casa no 4º”
 
