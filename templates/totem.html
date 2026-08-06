@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <title>ELEVA LOCKER — Totem</title>
+    <link rel="icon" href="{{ url_for('static', filename='icons/icon.svg') }}" type="image/svg+xml">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/totem.css') }}">
+    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+</head>
+<body>
+
+<div class="totem" data-armario-id="{{ armario.id if armario else '' }}" data-max-portas="{{ max_portas }}">
+
+    <section id="tela-inicio" class="tela tela-ativa">
+        <div class="totem-logo">
+            <i class="fa-solid fa-box"></i>
+            <h1>ELEVA LOCKER</h1>
+            {% if armario %}
+            <p class="totem-local"><i class="fa-solid fa-location-dot"></i> {{ armario.nome }}</p>
+            {% elif armarios %}
+            <select id="selArmario" class="totem-select" onchange="if(this.value) location.href='/totem/'+this.value">
+                <option value="">Selecione o armário</option>
+                {% for a in armarios %}
+                <option value="{{ a.id }}">{{ a.nome }}</option>
+                {% endfor %}
+            </select>
+            {% endif %}
+        </div>
+
+        <button type="button" class="btn-totem btn-principal" onclick="irRetirar()" {% if not armario and armarios %}disabled{% endif %}>
+            <i class="fa-solid fa-hand-holding-box"></i>
+            Retirar encomenda
+        </button>
+
+        <p class="totem-dica">Código enviado no seu WhatsApp</p>
+
+        {% if ajuda_telefone %}
+        <button type="button" class="btn-ajuda" onclick="mostrarAjuda()">
+            <i class="fa-solid fa-circle-question"></i> Preciso de ajuda
+        </button>
+        {% endif %}
+
+        <div class="totem-footer">ELEVA LOCKER © 2026</div>
+    </section>
+
+    <section id="tela-retirar" class="tela">
+        <button type="button" class="btn-voltar" onclick="irInicio()"><i class="fa-solid fa-arrow-left"></i> Voltar</button>
+        <h2 class="tela-titulo">Digite o código</h2>
+        <p class="tela-sub">6 dígitos recebidos no WhatsApp</p>
+
+        <div class="codigo-display" id="display">_ _ _ _ _ _</div>
+
+        <div class="teclado">
+            <button type="button" class="tecla" onclick="digitar('1')">1</button>
+            <button type="button" class="tecla" onclick="digitar('2')">2</button>
+            <button type="button" class="tecla" onclick="digitar('3')">3</button>
+            <button type="button" class="tecla" onclick="digitar('4')">4</button>
+            <button type="button" class="tecla" onclick="digitar('5')">5</button>
+            <button type="button" class="tecla" onclick="digitar('6')">6</button>
+            <button type="button" class="tecla" onclick="digitar('7')">7</button>
+            <button type="button" class="tecla" onclick="digitar('8')">8</button>
+            <button type="button" class="tecla" onclick="digitar('9')">9</button>
+            <button type="button" class="tecla tecla-limpar" onclick="limpar()"><i class="fa-solid fa-delete-left"></i></button>
+            <button type="button" class="tecla" onclick="digitar('0')">0</button>
+            <button type="button" class="tecla" onclick="backspace()"><i class="fa-solid fa-backspace"></i></button>
+        </div>
+
+        <div class="resultado erro" id="erro-retirar"></div>
+    </section>
+
+    <section id="tela-sucesso" class="tela">
+        <div class="sucesso-icon anim-pulse"><i class="fa-solid fa-circle-check"></i></div>
+        <h2 class="tela-titulo">Porta aberta!</h2>
+        <p class="tela-sub" id="sucesso-cliente"></p>
+
+        <div class="porta-box">
+            <span class="porta-label">Retire em</span>
+            <span class="porta-numero" id="sucesso-porta">—</span>
+        </div>
+
+        <div class="mapa-portas" id="mapa-portas"></div>
+
+        <p class="totem-dica">Feche a porta ao terminar</p>
+        <p class="contagem">Voltando em <span id="segundos">15</span>s</p>
+    </section>
+
+</div>
+
+{% if ajuda_telefone %}
+<div class="ajuda-overlay" id="ajuda-overlay" onclick="fecharAjuda()">
+    <div class="ajuda-box" onclick="event.stopPropagation()">
+        <h3>Precisa de ajuda?</h3>
+        <p>Não recebeu o código no WhatsApp?</p>
+        <p class="ajuda-tel"><i class="fa-solid fa-phone"></i> {{ ajuda_telefone }}</p>
+        <p class="totem-dica">Fale com a portaria ou síndico</p>
+        <button type="button" class="btn-totem btn-principal" onclick="fecharAjuda()">Entendi</button>
+    </div>
+</div>
+{% endif %}
+
+<script>
+const ROOT = document.querySelector(".totem");
+const ARMARIO_ID = ROOT.dataset.armarioId || "";
+const MAX_PORTAS = parseInt(ROOT.dataset.maxPortas || "8", 10);
+let codigo = "";
+let idleTimer = null;
+let contagemTimer = null;
+const IDLE_MS = 60000;
+
+function mostrarTela(id){
+    document.querySelectorAll(".tela").forEach(t => t.classList.remove("tela-ativa"));
+    document.getElementById(id).classList.add("tela-ativa");
+    resetIdle();
+}
+
+function irInicio(){
+    limpar();
+    document.getElementById("erro-retirar").classList.remove("visivel");
+    if(contagemTimer) clearInterval(contagemTimer);
+    mostrarTela("tela-inicio");
+}
+
+function irRetirar(){
+    mostrarTela("tela-retirar");
+    limpar();
+}
+
+function mostrarAjuda(){
+    document.getElementById("ajuda-overlay").classList.add("ativa");
+}
+
+function fecharAjuda(){
+    document.getElementById("ajuda-overlay").classList.remove("ativa");
+}
+
+function resetIdle(){
+    if(idleTimer) clearTimeout(idleTimer);
+    idleTimer = setTimeout(irInicio, IDLE_MS);
+}
+
+function beepSucesso(){
+    try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const o = ctx.createOscillator();
+        const g = ctx.createGain();
+        o.connect(g); g.connect(ctx.destination);
+        o.frequency.value = 880;
+        g.gain.value = 0.08;
+        o.start();
+        o.stop(ctx.currentTime + 0.15);
+    } catch(e) {}
+}
+
+function renderMapaPortas(numeroAtivo){
+    const mapa = document.getElementById("mapa-portas");
+    mapa.innerHTML = "";
+    for(let i = 1; i <= MAX_PORTAS; i++){
+        const d = document.createElement("div");
+        d.className = "porta-celula" + (i === numeroAtivo ? " ativa" : "");
+        d.textContent = i;
+        mapa.appendChild(d);
+    }
+}
+
+function atualizarDisplay(){
+    document.getElementById("display").textContent =
+        codigo.padEnd(6, "_").split("").join(" ");
+}
+
+function digitar(n){
+    if(codigo.length >= 6) return;
+    codigo += n;
+    atualizarDisplay();
+    document.getElementById("erro-retirar").classList.remove("visivel");
+    if(codigo.length === 6) setTimeout(confirmar, 250);
+}
+
+function limpar(){ codigo = ""; atualizarDisplay(); }
+function backspace(){ codigo = codigo.slice(0, -1); atualizarDisplay(); }
+
+function mostrarErro(msg){
+    const el = document.getElementById("erro-retirar");
+    el.textContent = msg;
+    el.classList.add("visivel");
+}
+
+function irSucesso(data){
+    const num = parseInt(data.compartimento, 10);
+    document.getElementById("sucesso-cliente").textContent = data.cliente ? "Olá, " + data.cliente : "";
+    document.getElementById("sucesso-porta").textContent = data.compartimento || "—";
+    renderMapaPortas(num);
+    beepSucesso();
+    mostrarTela("tela-sucesso");
+
+    let s = 15;
+    document.getElementById("segundos").textContent = s;
+    if(contagemTimer) clearInterval(contagemTimer);
+    contagemTimer = setInterval(() => {
+        s--;
+        document.getElementById("segundos").textContent = s;
+        if(s <= 0) irInicio();
+    }, 1000);
+}
+
+function confirmar(){
+    if(codigo.length !== 6){
+        mostrarErro("Digite os 6 dígitos.");
+        return;
+    }
+
+    let body = "codigo=" + encodeURIComponent(codigo);
+    if(ARMARIO_ID) body += "&armario_id=" + encodeURIComponent(ARMARIO_ID);
+
+    fetch("/totem/retirar", {
+        method: "POST",
+        headers: {"Content-Type": "application/x-www-form-urlencoded"},
+        body: body
+    })
+    .then(async r => {
+        const data = await r.json();
+        if(!r.ok && r.status === 429){
+            mostrarErro(data.mensagem || "Aguarde e tente novamente.");
+            codigo = ""; atualizarDisplay();
+            return;
+        }
+        if(data.sucesso) irSucesso(data);
+        else {
+            mostrarErro(data.mensagem || "Código inválido.");
+            codigo = ""; atualizarDisplay();
+        }
+    })
+    .catch(() => mostrarErro("Sem conexão com o servidor."));
+}
+
+document.addEventListener("keydown", e => {
+    if(!document.getElementById("tela-retirar").classList.contains("tela-ativa")) return;
+    if(e.key >= "0" && e.key <= "9") digitar(e.key);
+    if(e.key === "Backspace") backspace();
+    if(e.key === "Enter") confirmar();
+    if(e.key === "Escape") irInicio();
+});
+
+document.addEventListener("click", resetIdle);
+document.addEventListener("touchstart", resetIdle);
+resetIdle();
+
+if(ARMARIO_ID && !document.querySelector(".totem-select")){
+    document.body.requestFullscreen && document.documentElement.addEventListener("dblclick", () => {
+        if(!document.fullscreenElement) document.documentElement.requestFullscreen().catch(()=>{});
+    });
+}
+</script>
+
+</body>
+</html>
