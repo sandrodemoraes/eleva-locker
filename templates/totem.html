@@ -8,7 +8,7 @@
     <title>ELEVA LOCKER — Totem</title>
     <link rel="icon" href="{{ url_for('static', filename='icons/icon.svg') }}" type="image/svg+xml">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/totem.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/totem.css') }}?v={{ totem_versao|default('2') }}">
     <link rel="manifest" href="{% if armario_id %}{{ url_for('totem.manifest_armario', armario_id=armario_id) }}{% else %}{{ url_for('static', filename='manifest.json') }}{% endif %}">
 </head>
 <body>
@@ -51,7 +51,7 @@
         </button>
         {% endif %}
 
-        <div class="totem-footer">ELEVA LOCKER © 2026</div>
+        <div class="totem-footer">ELEVA LOCKER © 2026 · Totem v2</div>
     </section>
 
     <section id="tela-retirar" class="tela">

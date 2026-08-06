@@ -1,7 +1,11 @@
-from flask import Blueprint, render_template, request, jsonify, Response
+from pathlib import Path
+
+from flask import Blueprint, render_template, request, jsonify, Response, make_response
 import json
 
 import config
+
+TOTEM_VERSAO = "2.1.0"
 from middleware.rate_limit import rate_limit
 from services.encomenda_service import EncomendaService
 from services.armario_service import ArmarioService
@@ -10,6 +14,24 @@ from services.qrcode_service import QrcodeService
 from services.totem_auth_service import autorizar_deposito_totem, deposito_totem_habilitado
 
 totem_bp = Blueprint("totem", __name__)
+
+
+def _totem_template_info():
+    path = Path(__file__).resolve().parent.parent / "templates" / "totem.html"
+    texto = path.read_text(encoding="utf-8") if path.exists() else ""
+    return {
+        "versao": TOTEM_VERSAO,
+        "deposito": "Depositar encomenda" in texto,
+        "home_botoes": "Retirar encomenda" in texto,
+        "layout_antigo": "Abrir compartimento" in texto or "Totem de retirada" in texto,
+    }
+
+
+@totem_bp.route("/totem/versao")
+def versao():
+    info = _totem_template_info()
+    info["ok"] = info["deposito"] and info["home_botoes"] and not info["layout_antigo"]
+    return jsonify(info)
 
 
 @totem_bp.route("/totem")
@@ -24,7 +46,7 @@ def index(armario_id=None):
         except ValueError:
             armario = None
 
-    return render_template(
+    resp = make_response(render_template(
         "totem.html",
         armario=armario,
         armarios=ArmarioService.listar_ativos() if not armario else None,
@@ -34,7 +56,11 @@ def index(armario_id=None):
         deposito_habilitado=deposito_totem_habilitado(),
         whatsapp_ativo=config.NOTIF_WHATSAPP_ATIVO,
         usa_pin_deposito=bool(config.TOTEM_DEPOSITO_PIN),
-    )
+        totem_versao=TOTEM_VERSAO,
+    ))
+    resp.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+    resp.headers["Pragma"] = "no-cache"
+    return resp
 
 
 @totem_bp.route("/totem/<int:armario_id>/manifest.json")
