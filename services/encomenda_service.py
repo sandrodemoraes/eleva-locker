@@ -9,7 +9,6 @@ from services.esp32_service import Esp32Service
 from services.notificacao_service import NotificacaoService
 from services.limite_plano_service import LimitePlanoService
 from services.esp32_sync_service import Esp32SyncService
-from services.totem_destinatario_service import TotemDestinatarioService
 from middleware.operador_scope import operador_acessa_armario
 
 
@@ -201,15 +200,8 @@ class EncomendaService:
                 "compartimento": encomenda["compartimento_numero"],
                 "cliente": encomenda["cliente"],
                 "ja_notificado": True,
+                "notificacoes": [],
             }
-
-        if config.TOTEM_DEPOSITO_SOMENTE_CADASTRADO:
-            armario_id = comp["armario"] if comp else None
-            TotemDestinatarioService.resolver_cadastrado(
-                encomenda["cliente"],
-                encomenda["telefone"],
-                armario_id,
-            )
 
         notificacoes = NotificacaoService.notificar_encomenda_chegou(
             encomenda_id=encomenda_id,

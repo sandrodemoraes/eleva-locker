@@ -5,7 +5,7 @@ import json
 
 import config
 
-TOTEM_VERSAO = "2.3.6"
+TOTEM_VERSAO = "2.3.7"
 from middleware.rate_limit import rate_limit
 from services.encomenda_service import EncomendaService
 from services.armario_service import ArmarioService
@@ -307,8 +307,11 @@ def depositar():
             telefone = morador["telefone"]
             if morador.get("email"):
                 email_morador = morador["email"]
+            morador_usuario_id = morador["id"]
         except ValueError as erro:
             return jsonify({"sucesso": False, "mensagem": str(erro)}), 400
+    else:
+        morador_usuario_id = None
 
     try:
         aguardar_fechamento = str(dados.get("aguardar_fechamento", "1")).lower() in ("1", "true", "sim", "yes")
@@ -331,6 +334,7 @@ def depositar():
             "compartimento_id": resultado["compartimento_id"],
             "tamanho": (comp["tamanho"] or "M").upper(),
             "cliente": cliente,
+            "usuario_id": morador_usuario_id,
             "modo": "deposito",
             "aguardar_fechamento": aguardar_fechamento,
         })
@@ -363,12 +367,26 @@ def concluir_deposito():
             operador=f"Totem ({operador})",
         )
 
+        whatsapp_ok = any(
+            n.get("canal") == "whatsapp" and n.get("sucesso")
+            for n in (resultado.get("notificacoes") or [])
+        )
+        if resultado.get("ja_notificado"):
+            msg = "Depósito já estava concluído."
+        elif whatsapp_ok:
+            msg = "Depósito concluído! Morador notificado por WhatsApp."
+        elif config.NOTIF_WHATSAPP_ATIVO:
+            msg = "Depósito concluído, mas WhatsApp não foi enviado. Verifique o telefone."
+        else:
+            msg = "Depósito concluído! Morador notificado."
+
         return jsonify({
             "sucesso": True,
-            "mensagem": "Depósito concluído! Morador notificado.",
+            "mensagem": msg,
             "encomenda_id": resultado["id"],
             "compartimento": resultado["compartimento"],
             "cliente": resultado["cliente"],
+            "whatsapp_enviado": whatsapp_ok,
             "modo": "deposito",
         })
 
