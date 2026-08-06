@@ -19,7 +19,7 @@ texto = TOTEM.read_text(encoding="utf-8")
 checks = {
     "Depositar encomenda (botao)": "Depositar encomenda" in texto,
     "Tela inicio (Retirar encomenda)": "Retirar encomenda" in texto,
-    "Versao antiga (teclado direto)": "Abrir compartimento" in texto,
+    "Versao antiga (home teclado)": "Digite o código de retirada" in texto,
     "Versao antiga (footer retirada)": "Totem de retirada" in texto,
 }
 
@@ -31,7 +31,7 @@ for nome, ok in checks.items():
     print(f"  [{status}] {nome}")
 
 print()
-if checks["Depositar encomenda (botao)"] and not checks["Versao antiga (teclado direto)"]:
+if checks["Depositar encomenda (botao)"] and not checks["Versao antiga (home teclado)"]:
     print("Totem NOVO — reinicie: python app.py")
     print("URL: http://192.168.16.130:15000/totem/3")
 else:

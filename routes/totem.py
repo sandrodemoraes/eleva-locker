@@ -5,7 +5,7 @@ import json
 
 import config
 
-TOTEM_VERSAO = "2.3.3"
+TOTEM_VERSAO = "2.3.4"
 from middleware.rate_limit import rate_limit
 from services.encomenda_service import EncomendaService
 from services.armario_service import ArmarioService
@@ -24,7 +24,11 @@ def _totem_template_info():
         "versao": TOTEM_VERSAO,
         "deposito": "Depositar encomenda" in texto,
         "home_botoes": "Retirar encomenda" in texto,
-        "layout_antigo": "Abrir compartimento" in texto or "Totem de retirada" in texto,
+        "layout_antigo": (
+            "Digite o código de retirada" in texto
+            or "Totem de retirada" in texto
+            or ("Selecione o armário" in texto and "Retirar encomenda" not in texto)
+        ),
     }
 
 

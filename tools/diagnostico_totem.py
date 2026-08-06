@@ -34,7 +34,10 @@ def arquivo_info():
     return {
         "deposito_pin": "tela-deposito-pin" in t,
         "home_botoes": "Retirar encomenda" in t,
-        "layout_antigo": "Abrir compartimento" in t,
+        "layout_antigo": (
+            "Digite o código de retirada" in t
+            or "Totem de retirada" in t
+        ),
     }
 
 
