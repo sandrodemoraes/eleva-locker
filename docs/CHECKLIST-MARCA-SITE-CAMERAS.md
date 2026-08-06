@@ -620,22 +620,25 @@ O Eleva Locker continua como produto B2B. A webcam da serra vira **mídia e vitr
 | **Térreo** | Garagem + depósito + oficina de trabalhos manuais |
 | **2º piso** | Escritório |
 | **3º piso** | Em estudo: **~6 kitnets ou quartos para alugar** |
+| **4º piso** | **Residência da família (casa do Sandro)** |
 | **Vista** | **Frente do prédio inteiro** para a Serra do Rio do Rastro |
 
-Isso fecha o modelo: **sede operacional + renda + mídia turística**.
+Isso fecha o modelo: **sede operacional + renda + mídia turística + moradia no topo**.
 
 ### 6.13 Leitura estratégica desse programa
 
-O prédio deixa de ser “só obra com vista bonita” e vira um **hub de 3 caixas**:
+O prédio vira um **hub de 4 caixas**:
 
 ```
 Térreo  → operação (oficina, estoque, veículos, montagem de lockers/solar/CFTV)
 2º      → comando (escritório Eleva / comercial / técnico)
 3º      → receita recorrente (kitnets/quartos) + motivo para o hóspede olhar a cam
-Cam     → ímã digital que alimenta o 3º piso e a marca regional
+4º      → casa da família (privacidade máxima)
+Cam     → ímã digital na fachada/cobertura, sem invadir o 4º
 ```
 
-**Veredito do mix:** excelente. Oficina + escritório sozinhos não monetizam a vista; com 6 unidades de hospedagem, a webcam passa a ter ROI direto (ocupação).
+**Veredito do mix:** excelente e clássico em cidade turística — “morar em cima, alugar o meio, trabalhar embaixo”.  
+Com a casa no 4º, a regra nº 1 passa a ser: **hóspede sobe até o 3º; o 4º é território privado.**
 
 #### Kitnets vs quartos — recomendação
 
@@ -662,23 +665,44 @@ Para turismo da Serra, **diária curta** (1–3 noites) costuma pagar melhor que
 
 Não é bloqueio; é item de projeto para não reformar depois.
 
-### 6.14 Onde colocar a câmera com “vista na frente toda”
+### 6.14 Onde colocar a câmera com “vista na frente toda” + casa no 4º
 
-Como a vista é da fachada principal:
+Como a vista é da fachada principal e o **4º é residência**:
 
 | Posição | Avaliação |
 |---------|-----------|
-| **Peitoril/cobertura da fachada frente (melhor)** | Enquadra a serra sem mostrar oficina/garagem; limpo para YouTube |
-| Lateral do 3º piso | Só se a frente tiver interferência (poste, fio, telhado vizinho) |
-| Dentro de kitnet | **Não** para stream 24/7 — privacidade do hóspede |
-| Térreo | Ruim — ângulo baixo, carros, movimento da oficina |
+| **Platibanda/cobertura da fachada frente, apontada só para a serra (melhor)** | Stream limpo; não filma sacada/área íntima do 4º |
+| Mast curto na laje da cobertura | Bom ângulo; acesso técnico pelo 4º sem passar área íntima (prever escotilha/área de serviço) |
+| Lateral do 3º piso | Alternativa se a cobertura interferir na privacidade da casa |
+| Sacada da casa (4º) | **Evitar** como ponto permanente — mistura vida privada + manutenção chata |
+| Dentro de kitnet / sala da casa | **Não** |
+| Térreo | Ruim — ângulo baixo, carros, oficina |
 
 **Setup ideal:**
-- 1 câmera **fixa wide** na cobertura/platibanda da frente → stream 24/7
-- 1 **PTZ** ao lado → enquadramentos especiais (neblina, neve, zoom nas curvas da serra)
-- Cabos descem para rack no **2º piso (escritório)** ou nicho técnico no térreo com VLAN isolada
+- 1 câmera **fixa wide** na platibanda/cobertura da frente → stream 24/7  
+- 1 **PTZ** ao lado → neblina, neve, zoom na serra  
+- Cabos → rack no **2º piso (escritório)**  
+- Zona de manutenção da cam na cobertura com acesso pela **área de serviço do 4º**, não pela sala/quarto
 
-**Regra:** a câmera filma a **serra**, não a vida interna do prédio. Hóspede do 3º não pode aparecer no zoom.
+**Regras de privacidade (casa + hóspedes):**
+1. Câmera pública filma **só a serra/horizonte** — nunca para dentro do prédio  
+2. PTZ com preset travado / limite de giro (privacy mask) para não varrer sacadas do 3º/4º  
+3. CFTV de segurança (garagem, oficina, hall, escada) é **rede privada**, outro perfil, sem YouTube  
+4. Interfone/CFTV do 4º separado do acesso dos hóspedes  
+
+### 6.14.1 Circulação e segurança com casa no topo
+
+| Item | Recomendação |
+|------|--------------|
+| Acesso hóspedes | Térreo → 3º apenas (escada/elevador com chave/tag até o 3º) |
+| Acesso família | Tag/biometria também no 4º; hóspede **sem** credencial do 4º |
+| Escada única | Porta corta-fogo + fechadura eletrônica no patamar do 4º |
+| Se houver elevador | Andar 4 liberado só para tags da família |
+| Entregas | Locker / portaria no térreo — entregador não sobe |
+| Ruído oficina | Isolamento laje térreo↔2º; horários de trabalho definidos |
+| Ruído hóspedes | Isolamento 3º↔4º (piso flutuante / manta acústica na laje do 4º) |
+
+Morar acima de kitnet só funciona bem com **controle de acesso rígido** e **acústica**. Isso é projeto, não detalhe depois.
 
 ### 6.15 Sinergias que quase ninguém faz — e você pode
 
@@ -715,19 +739,33 @@ Prioridade de investimento na fachada: **janelas/sacadas para a serra > luxo int
 
 ### 6.18 Decisão de marca com esse mix
 
-Com hospedagem no 3º:
+Com hospedagem no 3º e casa no 4º:
 
 1. **Canal/site da webcam** → nome turístico (Serra / Lauro Müller Ao Vivo)  
-2. **Reserva dos quartos/kitnets** → marca de hospedagem (pode ser leve, ex. “Eleva Stay” / nome local)  
+2. **Reserva dos quartos/kitnets** → marca de hospedagem (leve, ex. “Eleva Stay” / nome local)  
 3. **Eleva Locker + serviços técnicos** → marca B2B no 2º piso  
+4. **Casa no 4º** → fora de qualquer comunicação pública (endereço fino, plantas internas, rotina familiar)
 
-Três frentes, uma infraestrutura. A câmera é o alto-falante das três.
+Quatro usos, uma infraestrutura. A câmera é o alto-falante do destino e da hospedagem — **não da vida pessoal**.
 
-### 6.19 Perguntas que ainda fecham o projeto
+### 6.19 Checklist específico “casa no 4º”
+
+- [ ] Porta/fechadura eletrônica no patamar do 4º  
+- [ ] Tags: família / escritório / hóspede (perfis diferentes)  
+- [ ] Isolamento acústico laje 3º→4º  
+- [ ] Privacy mask na PTZ pública  
+- [ ] CFTV privada ≠ webcam YouTube  
+- [ ] Medidores: pelo menos separar carga do 3º (hóspedes) da casa  
+- [ ] Área de serviço/cobertura para manter câmera sem cruzar sala  
+- [ ] Não anunciar “moradia do proprietário no último piso” em marketing
+
+### 6.20 Perguntas que ainda fecham o projeto
 
 1. Já tem previsão de link de internet (fibra) na obra? Qual upload real?  
 2. Quer parceria oficial com a prefeitura desde o dia 1?  
 3. No 3º piso: diária turística, mensal, ou os dois?  
 4. As 6 unidades terão banheiro privativo cada uma?  
 5. Prefere marca turística própria ou submarca Eleva para escalar outros pontos?  
-6. Há restrição de gabarito/platibanda para mast curto na cobertura?
+6. Há restrição de gabarito/platibanda para mast curto na cobertura?  
+7. Haverá elevador ou só escada?  
+8. No 4º: terraço/área externa usável pela família na frente (vista)?
