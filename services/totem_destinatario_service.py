@@ -8,7 +8,7 @@ class TotemDestinatarioService:
     @staticmethod
     def buscar(termo, armario_id=None, limit=12):
         termo = (termo or "").strip()
-        if len(termo) < 2:
+        if len(termo) < 1:
             return []
 
         like = f"%{termo}%"
