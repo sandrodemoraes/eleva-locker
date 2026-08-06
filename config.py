@@ -75,6 +75,12 @@ TOTEM_RATE_JANELA = int(os.getenv("TOTEM_RATE_JANELA", "300"))
 TOTEM_AJUDA_TELEFONE = os.getenv("TOTEM_AJUDA_TELEFONE", "")
 TOTEM_DEPOSITO_PIN = os.getenv("TOTEM_DEPOSITO_PIN", "")
 TOTEM_ARMARIO_ID = os.getenv("TOTEM_ARMARIO_ID", "").strip()
+_sem_pin_env = os.getenv("TOTEM_DEPOSITO_SEM_PIN", "").strip()
+if _sem_pin_env:
+    TOTEM_DEPOSITO_SEM_PIN = _sem_pin_env == "1"
+else:
+    # Totem fixo no armário: sem PIN (acesso físico já restringe)
+    TOTEM_DEPOSITO_SEM_PIN = bool(TOTEM_ARMARIO_ID)
 
 # Database — sqlite (dev) | postgresql (produção)
 DATABASE_URL = os.getenv("DATABASE_URL", "")

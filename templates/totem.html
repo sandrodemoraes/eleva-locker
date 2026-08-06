@@ -121,7 +121,7 @@
 
     <!-- Depósito — escolher porta + morador -->
     <section id="tela-deposito" class="tela tela-scroll">
-        <button type="button" class="btn-voltar" onclick="irDepositoAuth()"><i class="fa-solid fa-arrow-left"></i> Voltar</button>
+        <button type="button" class="btn-voltar" onclick="irDepositoVoltar()"><i class="fa-solid fa-arrow-left"></i> Voltar</button>
         <h2 class="tela-titulo">Escolha a porta</h2>
         <p class="tela-sub">Toque no compartimento livre</p>
 
@@ -197,6 +197,7 @@ const ROOT = document.querySelector(".totem");
 const ARMARIO_ID = ROOT.dataset.armarioId || "";
 const MAX_PORTAS = parseInt(ROOT.dataset.maxPortas || "8", 10);
 const USA_PIN = {{ 'true' if usa_pin_deposito else 'false' }};
+const SEM_PIN = {{ 'true' if deposito_sem_pin else 'false' }};
 let codigo = "";
 let pinDeposito = "";
 let authDeposito = {};
@@ -231,7 +232,22 @@ function irDepositoAuth(){
     depositoPendente = {};
     document.getElementById("erro-deposito-pin").classList.remove("visivel");
     document.getElementById("erro-deposito-auth").classList.remove("visivel");
+    if(SEM_PIN){
+        carregarCompartimentosLivres("erro-deposito");
+        return;
+    }
     if(USA_PIN){
+        atualizarPinDisplay();
+        mostrarTela("tela-deposito-pin");
+    } else {
+        mostrarTela("tela-deposito-auth");
+    }
+}
+
+function irDepositoVoltar(){
+    if(SEM_PIN) irInicio();
+    else if(USA_PIN){
+        pinDeposito = "";
         atualizarPinDisplay();
         mostrarTela("tela-deposito-pin");
     } else {

@@ -5,7 +5,7 @@ import json
 
 import config
 
-TOTEM_VERSAO = "2.2.1"
+TOTEM_VERSAO = "2.2.2"
 from middleware.rate_limit import rate_limit
 from services.encomenda_service import EncomendaService
 from services.armario_service import ArmarioService
@@ -62,7 +62,8 @@ def index(armario_id=None):
         armario_id=armario_id,
         deposito_habilitado=deposito_totem_habilitado(),
         whatsapp_ativo=config.NOTIF_WHATSAPP_ATIVO,
-        usa_pin_deposito=bool(config.TOTEM_DEPOSITO_PIN),
+        usa_pin_deposito=bool(config.TOTEM_DEPOSITO_PIN) and not config.TOTEM_DEPOSITO_SEM_PIN,
+        deposito_sem_pin=config.TOTEM_DEPOSITO_SEM_PIN,
         totem_versao=TOTEM_VERSAO,
     ))
     resp.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
@@ -180,6 +181,8 @@ def _dados_form():
 
 
 def _auth_deposito(dados):
+    if config.TOTEM_DEPOSITO_SEM_PIN:
+        return "Totem"
     return autorizar_deposito_totem({
         "pin": dados.get("pin"),
         "email": dados.get("operador_email"),
