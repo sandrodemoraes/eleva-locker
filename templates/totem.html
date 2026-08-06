@@ -119,22 +119,39 @@
         <div class="resultado erro" id="erro-deposito-auth"></div>
     </section>
 
-    <!-- Depósito — escolher porta + morador -->
+    <!-- Depósito — tamanho + morador -->
     <section id="tela-deposito" class="tela tela-scroll">
         <button type="button" class="btn-voltar" onclick="irDepositoVoltar()"><i class="fa-solid fa-arrow-left"></i> Voltar</button>
-        <h2 class="tela-titulo">Escolha a porta</h2>
-        <p class="tela-sub">Toque no compartimento livre</p>
+        <h2 class="tela-titulo">Tamanho da encomenda</h2>
+        <p class="tela-sub">Toque no tamanho — abrimos a 1ª porta livre</p>
+
+        <div class="tamanho-botoes" id="tamanho-botoes">
+            <button type="button" class="btn-tamanho" data-tam="P" onclick="selecionarTamanho('P')">
+                <span class="tam-letra">P</span><span class="tam-info">Pequeno</span><span class="tam-qtd"></span>
+            </button>
+            <button type="button" class="btn-tamanho" data-tam="M" onclick="selecionarTamanho('M')">
+                <span class="tam-letra">M</span><span class="tam-info">Médio</span><span class="tam-qtd"></span>
+            </button>
+            <button type="button" class="btn-tamanho" data-tam="G" onclick="selecionarTamanho('G')">
+                <span class="tam-letra">G</span><span class="tam-info">Grande</span><span class="tam-qtd"></span>
+            </button>
+            <button type="button" class="btn-tamanho" data-tam="GG" onclick="selecionarTamanho('GG')">
+                <span class="tam-letra">GG</span><span class="tam-info">Extra</span><span class="tam-qtd"></span>
+            </button>
+        </div>
 
         <div class="mapa-portas mapa-selecao" id="mapa-livres"></div>
         <input type="hidden" id="dep-compartimento" value="">
+        <input type="hidden" id="dep-tamanho" value="">
 
         <div class="form-totem form-compacto">
             <label>Destinatário *</label>
-            <input type="text" id="dep-cliente" placeholder="Nome do morador" class="input-totem">
+            <input type="text" id="dep-cliente" placeholder="Nome do morador" class="input-totem" oninput="atualizarBtnDeposito()">
             <label>Telefone {% if whatsapp_ativo %}*{% endif %}</label>
-            <input type="tel" id="dep-telefone" placeholder="(48) 99999-9999" class="input-totem">
+            <input type="tel" id="dep-telefone" placeholder="(48) 99999-9999" class="input-totem" oninput="atualizarBtnDeposito()">
+            <p class="porta-auto-msg" id="porta-auto-msg"></p>
             <button type="button" class="btn-totem btn-principal btn-depositar" onclick="confirmarDeposito()" disabled id="btn-abrir-porta">
-                <i class="fa-solid fa-lock-open"></i> Abrir porta selecionada
+                <i class="fa-solid fa-lock-open"></i> Abrir compartimento
             </button>
         </div>
         <p class="totem-dica">O código vai só para o WhatsApp após fechar a porta</p>
@@ -150,6 +167,7 @@
         <div class="porta-box">
             <span class="porta-label">Coloque em</span>
             <span class="porta-numero" id="aguardando-porta">—</span>
+            <span class="porta-tam-grande" id="aguardando-tamanho"></span>
         </div>
 
         <p class="totem-dica destaque">Coloque a encomenda e <strong>feche a porta</strong></p>
@@ -202,6 +220,8 @@ let codigo = "";
 let pinDeposito = "";
 let authDeposito = {};
 let compartimentosLivres = [];
+let mapaCompartimentos = [];
+let tamanhoSelecionado = "";
 let depositoPendente = {};
 let idleTimer = null;
 let contagemTimer = null;
@@ -308,13 +328,19 @@ function carregarCompartimentosLivres(erroId){
     .then(r => r.json().then(d => ({ok: r.ok, d})))
     .then(({ok, d}) => {
         if(!ok){ throw new Error(d.erro || "Não autorizado."); }
-        compartimentosLivres = d;
-        renderMapaLivres();
+        compartimentosLivres = d.livres || d;
+        mapaCompartimentos = d.mapa || compartimentosLivres;
+        if(Array.isArray(d) && !d.livres){ compartimentosLivres = d; mapaCompartimentos = d; }
+        tamanhoSelecionado = "";
+        document.getElementById("dep-tamanho").value = "";
         document.getElementById("dep-compartimento").value = "";
         document.getElementById("dep-cliente").value = "";
         document.getElementById("dep-telefone").value = "";
-        document.getElementById("btn-abrir-porta").disabled = true;
+        document.getElementById("porta-auto-msg").textContent = "";
+        atualizarContagemTamanhos();
+        renderMapaLivres();
         document.getElementById("erro-deposito").classList.remove("visivel");
+        atualizarBtnDeposito();
         mostrarTela("tela-deposito");
     })
     .catch(e => {
@@ -326,47 +352,97 @@ function carregarCompartimentosLivres(erroId){
     });
 }
 
-function renderMapaLivres(){
-    const mapa = document.getElementById("mapa-livres");
-    mapa.innerHTML = "";
-    if(!compartimentosLivres.length){
-        mapa.innerHTML = '<p class="totem-dica">Nenhum compartimento livre.</p>';
+function normalizarTam(t){ return (t || "M").toUpperCase(); }
+
+function livresDoTamanho(tam){
+    return compartimentosLivres.filter(c => normalizarTam(c.tamanho) === tam);
+}
+
+function atualizarContagemTamanhos(){
+    ["P","M","G","GG"].forEach(tam => {
+        const btn = document.querySelector(`.btn-tamanho[data-tam="${tam}"]`);
+        if(!btn) return;
+        const qtd = livresDoTamanho(tam).length;
+        const el = btn.querySelector(".tam-qtd");
+        if(el) el.textContent = qtd ? `${qtd} livre${qtd > 1 ? "s" : ""}` : "ocupado";
+        btn.disabled = qtd === 0;
+        btn.classList.toggle("sem-livre", qtd === 0);
+    });
+}
+
+function selecionarTamanho(tam){
+    const livres = livresDoTamanho(tam);
+    if(!livres.length){
+        mostrarErroDeposito(`Nenhum compartimento ${tam} livre.`);
         return;
     }
-    const livresPorNumero = {};
-    compartimentosLivres.forEach(c => { livresPorNumero[c.numero] = c; });
+    tamanhoSelecionado = tam;
+    document.getElementById("dep-tamanho").value = tam;
+    document.querySelectorAll(".btn-tamanho").forEach(b => {
+        b.classList.toggle("ativo", b.dataset.tam === tam);
+    });
+    autoAtribuirPorta(tam);
+    document.getElementById("erro-deposito").classList.remove("visivel");
+    atualizarBtnDeposito();
+}
+
+function autoAtribuirPorta(tam){
+    const livres = livresDoTamanho(tam);
+    if(!livres.length){
+        document.getElementById("dep-compartimento").value = "";
+        document.getElementById("porta-auto-msg").textContent = "";
+        renderMapaLivres();
+        return;
+    }
+    const escolhido = livres.sort((a,b) => a.numero - b.numero)[0];
+    document.getElementById("dep-compartimento").value = escolhido.id;
+    document.getElementById("porta-auto-msg").textContent =
+        `Porta #${escolhido.numero} (${tam}) será aberta automaticamente`;
+    renderMapaLivres(escolhido.numero);
+}
+
+function atualizarBtnDeposito(){
+    const cliente = document.getElementById("dep-cliente").value.trim();
+    const temPorta = !!document.getElementById("dep-compartimento").value;
+    const temTam = !!tamanhoSelecionado;
+    document.getElementById("btn-abrir-porta").disabled = !(cliente && temPorta && temTam);
+}
+
+function renderMapaLivres(numeroAtivo){
+    const mapa = document.getElementById("mapa-livres");
+    mapa.innerHTML = "";
+    const porNumero = {};
+    (mapaCompartimentos.length ? mapaCompartimentos : compartimentosLivres).forEach(c => {
+        porNumero[c.numero] = c;
+    });
     for(let i = 1; i <= MAX_PORTAS; i++){
-        const c = livresPorNumero[i];
-        const d = document.createElement("button");
-        d.type = "button";
-        d.className = "porta-celula" + (c ? " livre" : " ocupada");
+        const c = porNumero[i];
+        const d = document.createElement("div");
+        const tam = c ? normalizarTam(c.tamanho) : "";
+        const livre = c && (c.livre !== false);
+        d.className = "porta-celula" + (livre ? " livre" : " ocupada");
+        if(numeroAtivo && i === numeroAtivo) d.classList.add("ativa");
         d.dataset.numero = String(i);
         if(c){
-            d.innerHTML = `<span class="porta-num">${i}</span><span class="porta-tam">${c.tamanho || "M"}</span>`;
-            d.title = `#${c.numero} — ${c.tamanho || "M"}`;
-            d.onclick = () => selecionarPorta(c.id, c.numero);
+            d.innerHTML = `<span class="porta-num">${i}</span><span class="porta-tam">${tam}</span>`;
         } else {
             d.textContent = "—";
         }
-        d.disabled = !c;
         mapa.appendChild(d);
     }
-}
-
-function selecionarPorta(id, numero){
-    document.getElementById("dep-compartimento").value = id;
-    document.getElementById("btn-abrir-porta").disabled = false;
-    document.querySelectorAll("#mapa-livres .porta-celula").forEach(el => {
-        el.classList.toggle("ativa", el.dataset.numero === String(numero));
-    });
 }
 
 function confirmarDeposito(){
     const cliente = document.getElementById("dep-cliente").value.trim();
     const telefone = document.getElementById("dep-telefone").value.trim();
     const compartimento_id = document.getElementById("dep-compartimento").value;
+    const tamanho = document.getElementById("dep-tamanho").value;
+    if(!tamanho){
+        mostrarErroDeposito("Selecione o tamanho P, M, G ou GG.");
+        return;
+    }
     if(!compartimento_id){
-        mostrarErroDeposito("Selecione um compartimento livre.");
+        mostrarErroDeposito(`Nenhum compartimento ${tamanho} livre.`);
         return;
     }
     if(!cliente){
@@ -374,7 +450,7 @@ function confirmarDeposito(){
         return;
     }
     const body = Object.assign({}, authPayload(), {
-        cliente, telefone, compartimento_id,
+        cliente, telefone, compartimento_id, tamanho,
         aguardar_fechamento: "1",
     });
     fetch("/totem/depositar", {
@@ -396,6 +472,7 @@ function confirmarDeposito(){
 
 function irAguardandoPorta(data){
     document.getElementById("aguardando-porta").textContent = data.compartimento || "—";
+    document.getElementById("aguardando-tamanho").textContent = data.tamanho ? `Tamanho ${data.tamanho}` : "";
     document.getElementById("aguardando-cliente").textContent = data.cliente ? "Para: " + data.cliente : "";
     document.getElementById("erro-aguardando").classList.remove("visivel");
     mostrarTela("tela-deposito-aguardando");

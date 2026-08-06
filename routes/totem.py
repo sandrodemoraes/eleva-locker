@@ -5,7 +5,7 @@ import json
 
 import config
 
-TOTEM_VERSAO = "2.2.3"
+TOTEM_VERSAO = "2.3.0"
 from middleware.rate_limit import rate_limit
 from services.encomenda_service import EncomendaService
 from services.armario_service import ArmarioService
@@ -205,11 +205,23 @@ def compartimentos_livres_totem():
         return jsonify({"erro": "Armário inválido."}), 400
 
     livres = CompartimentoService.listar_livres(armario_id)
+    todos = CompartimentoService.listar(armario_id)
 
-    return jsonify([
-        {"id": c["id"], "numero": c["numero"], "tamanho": c["tamanho"] or "M"}
-        for c in livres
-    ])
+    return jsonify({
+        "livres": [
+            {"id": c["id"], "numero": c["numero"], "tamanho": (c["tamanho"] or "M").upper()}
+            for c in livres
+        ],
+        "mapa": [
+            {
+                "id": c["id"],
+                "numero": c["numero"],
+                "tamanho": (c["tamanho"] or "M").upper(),
+                "livre": c["status"] == "livre",
+            }
+            for c in sorted(todos, key=lambda x: x["numero"])
+        ],
+    })
 
 
 @totem_bp.route("/totem/depositar", methods=["POST"])
@@ -224,9 +236,28 @@ def depositar():
 
     try:
         armario_id = int(dados.get("armario_id"))
-        compartimento_id = int(dados.get("compartimento_id"))
+        compartimento_id = dados.get("compartimento_id")
+        tamanho_pedido = (dados.get("tamanho") or "").strip().upper()
     except (TypeError, ValueError):
         return jsonify({"sucesso": False, "mensagem": "Dados inválidos."}), 400
+
+    if not compartimento_id and tamanho_pedido:
+        livres = CompartimentoService.listar_livres(armario_id)
+        candidatos = [
+            c for c in livres
+            if (c["tamanho"] or "M").upper() == tamanho_pedido
+        ]
+        if not candidatos:
+            return jsonify({
+                "sucesso": False,
+                "mensagem": f"Nenhum compartimento {tamanho_pedido} livre.",
+            }), 400
+        compartimento_id = candidatos[0]["id"]
+
+    try:
+        compartimento_id = int(compartimento_id)
+    except (TypeError, ValueError):
+        return jsonify({"sucesso": False, "mensagem": "Selecione o tamanho ou compartimento."}), 400
 
     comp = CompartimentoService.buscar_por_id(compartimento_id)
     if int(comp["armario"]) != armario_id:
@@ -251,6 +282,7 @@ def depositar():
             "encomenda_id": resultado["id"],
             "compartimento": resultado["compartimento"],
             "compartimento_id": resultado["compartimento_id"],
+            "tamanho": (comp["tamanho"] or "M").upper(),
             "cliente": dados.get("cliente", ""),
             "modo": "deposito",
             "aguardar_fechamento": aguardar_fechamento,
