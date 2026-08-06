@@ -18,15 +18,19 @@ from parar_servidor import parar_app_py, parar_docker_web, parar_porta  # noqa: 
 
 
 def run(cmd, check=False, capture=False):
-    show = " ".join(cmd) if isinstance(cmd, list) else cmd
+    show = cmd if isinstance(cmd, str) else " ".join(cmd)
     print(f">>> {show}")
-    return subprocess.run(
-        cmd,
-        cwd=ROOT,
-        text=True,
-        check=check,
-        capture_output=capture,
-    )
+    try:
+        return subprocess.run(
+            cmd,
+            cwd=ROOT,
+            text=True,
+            check=check,
+            capture_output=capture,
+        )
+    except FileNotFoundError:
+        print("    ERRO: comando nao encontrado.")
+        return subprocess.CompletedProcess(cmd, 127, "", "nao encontrado")
 
 
 def parar_servidor():
