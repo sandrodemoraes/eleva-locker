@@ -5,7 +5,7 @@ import json
 
 import config
 
-TOTEM_VERSAO = "2.3.2"
+TOTEM_VERSAO = "2.3.3"
 from middleware.rate_limit import rate_limit
 from services.encomenda_service import EncomendaService
 from services.armario_service import ArmarioService
@@ -128,15 +128,18 @@ def retirar():
             "cliente": resultado["cliente"],
             "compartimento": resultado["compartimento"],
             "armario": resultado["armario"],
+            "porta_aberta": resultado.get("porta_aberta", True),
+            "aviso": resultado["esp32"].get("mensagem") if not resultado.get("porta_aberta") else "",
         })
 
     except ValueError as erro:
 
         return jsonify({"sucesso": False, "mensagem": str(erro)}), 400
 
-    except Exception:
-
-        return jsonify({"sucesso": False, "mensagem": "Erro interno."}), 500
+    except Exception as erro:
+        import traceback
+        traceback.print_exc()
+        return jsonify({"sucesso": False, "mensagem": "Erro interno. Tente de novo ou fale com a portaria."}), 500
 
 
 @totem_bp.route("/totem/scan", methods=["POST"])

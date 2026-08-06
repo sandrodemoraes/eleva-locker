@@ -654,10 +654,18 @@ function digitar(n){
 function limpar(){ codigo = ""; atualizarDisplay(); }
 function backspace(){ codigo = codigo.slice(0, -1); atualizarDisplay(); }
 
+let erroRetirarTimer = null;
+
 function mostrarErro(msg){
     const el = document.getElementById("erro-retirar");
     el.textContent = msg;
     el.classList.add("visivel");
+    if(erroRetirarTimer) clearTimeout(erroRetirarTimer);
+    erroRetirarTimer = setTimeout(() => {
+        el.classList.remove("visivel");
+        codigo = "";
+        atualizarDisplay();
+    }, 8000);
 }
 
 function irSucesso(data){
@@ -706,13 +714,21 @@ function confirmar(){
             codigo = ""; atualizarDisplay();
             return;
         }
-        if(data.sucesso) irSucesso(data);
+        if(data.sucesso){
+            if(data.aviso){
+                data.mensagem = data.aviso;
+            }
+            irSucesso(data);
+        }
         else {
             mostrarErro(data.mensagem || "Código inválido.");
-            codigo = ""; atualizarDisplay();
         }
     })
-    .catch(() => mostrarErro("Sem conexão com o servidor."));
+    .catch(() => {
+        mostrarErro("Sem conexão com o servidor.");
+        codigo = "";
+        atualizarDisplay();
+    });
 }
 
 document.addEventListener("keydown", e => {

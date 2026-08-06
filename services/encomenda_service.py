@@ -201,10 +201,15 @@ class EncomendaService:
         if not encomenda:
             raise ValueError("Código inválido ou encomenda já retirada.")
 
-        if encomenda.get("expira_em"):
-            expira = datetime.strptime(encomenda["expira_em"], "%Y-%m-%d %H:%M:%S")
-            if datetime.now() > expira:
-                raise ValueError("Código expirado. Peça reenvio da notificação à portaria.")
+        expira_em = encomenda["expira_em"] if encomenda["expira_em"] else None
+        if expira_em:
+            try:
+                expira = datetime.strptime(str(expira_em)[:19], "%Y-%m-%d %H:%M:%S")
+                if datetime.now() > expira:
+                    raise ValueError("Código expirado. Peça reenvio da notificação à portaria.")
+            except ValueError as erro:
+                if "expirado" in str(erro).lower():
+                    raise
 
         comp = CompartimentoRepository.buscar_por_id(encomenda["compartimento"])
         if not comp or not operador_acessa_armario(comp["armario"]):
@@ -224,9 +229,19 @@ class EncomendaService:
             f"Retirada encomenda #{encomenda['id']} - código {codigo} - {encomenda['cliente']}",
         )
 
-        abertura = Esp32Service.abrir_compartimento(encomenda["compartimento"], operador)
+        abertura = {"sucesso": False, "mensagem": "Porta não acionada."}
+        try:
+            abertura = Esp32Service.abrir_compartimento(encomenda["compartimento"], operador)
+        except Exception:
+            abertura = {
+                "sucesso": False,
+                "mensagem": "Retirada OK, mas falha ao abrir a porta. Peça ajuda na portaria.",
+            }
 
-        Esp32SyncService.incrementar_por_compartimento(encomenda["compartimento"])
+        try:
+            Esp32SyncService.incrementar_por_compartimento(encomenda["compartimento"])
+        except Exception:
+            pass
 
         return {
             "id": encomenda["id"],
@@ -234,6 +249,7 @@ class EncomendaService:
             "compartimento": encomenda["compartimento_numero"],
             "armario": encomenda["armario_nome"],
             "esp32": abertura,
+            "porta_aberta": abertura.get("sucesso") if isinstance(abertura, dict) else False,
         }
 
     @staticmethod

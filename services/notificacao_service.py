@@ -480,9 +480,9 @@ class NotificacaoService:
             telefone=encomenda["telefone"],
             email=encomenda["email"],
             armario=encomenda["armario_nome"] or "Armário",
-            armario_id=encomenda.get("compartimento_armario"),
+            armario_id=encomenda["compartimento_armario"] if encomenda["compartimento_armario"] else None,
             compartimento=encomenda["compartimento_numero"] or "—",
-            expira_em=encomenda.get("expira_em"),
+            expira_em=encomenda["expira_em"] if encomenda["expira_em"] else None,
         )
 
     @staticmethod
