@@ -20,12 +20,12 @@
             <i class="fa-solid fa-box"></i>
             <h1>ELEVA LOCKER</h1>
             {% if armario %}
-            <p class="totem-local"><i class="fa-solid fa-location-dot"></i> {{ armario.nome }}</p>
+            <p class="totem-local"><i class="fa-solid fa-location-dot"></i> {{ armario['nome'] }}</p>
             {% elif armarios %}
             <select id="selArmario" class="totem-select" onchange="if(this.value) location.href='/totem/'+this.value">
                 <option value="">Selecione o armário</option>
                 {% for a in armarios %}
-                <option value="{{ a.id }}">{{ a.nome }}</option>
+                <option value="{{ a['id'] }}">{{ a['nome'] }}</option>
                 {% endfor %}
             </select>
             {% endif %}
