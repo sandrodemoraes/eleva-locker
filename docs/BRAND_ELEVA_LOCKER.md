@@ -86,85 +86,116 @@ Fontes: [Sinners Projects](https://sinnersprojects.com/the-ai-sameness-trap-why-
 
 ---
 
-## 4. Paleta recomendada — **Eleva Atlântico**
+## 3.1 Análise da logo atual (PDF recebido)
 
-Proposta para substituir gradualmente o navy `#0f3d75` + mint `#6ee7b7` atual.
+A identidade existente da **Eleva Soluções Tecnológicas** já é sólida e **não parece genérica de IA**. Elementos a preservar:
 
-### 4.1 Cores principais (locked core)
+| Elemento | Descrição | Por que funciona |
+|----------|-----------|------------------|
+| **Símbolo** | Dois planos inclinados (losangos/paralelogramos) sobrepostos, cantos arredondados | Cria **losango branco** no centro = elevação, convergência, portal — metáfora única |
+| **Wordmark** | `eleva` em **minúsculas**, bold, sans arredondada | Humanizado, moderno, distante de corporativo gritante |
+| **Subline** | `SOLUÇÕES TECNOLÓGICAS` — caps, tracking largo | Alinha com largura do wordmark; tom institucional |
+| **Cor** | Verde floresta único (monocromático) | Diferencia de 90% do proptech azul; remete a crescimento, confiança, sustentabilidade (Energia Solar) |
 
-| Nome | HEX | Pantone aprox. | Uso |
-|------|-----|----------------|-----|
-| **Atlântico Profundo** | `#0C2F52` | 7463 C | Navbar, sidebar, títulos, totem header |
-| **Eleva Cobre** | `#C17F3A` | 7563 C | Acento logo, CTAs secundários, detalhe hardware |
-| **Porta Aberta** | `#157A6E` | 7726 C | Sucesso, abrir compartimento, confirmação |
-| **Branco Navegação** | `#FFFFFF` | — | Texto sobre fundo escuro, logo negativa |
-
-### 4.2 Cores de suporte
+**Cor extraída da logo (aproximação vetorial):**
 
 | Nome | HEX | Uso |
 |------|-----|-----|
-| **Horizonte** | `#1E4A7A` | Hover botões, links |
-| **Neblina** | `#E8EDF3` | Fundo app (substituir `#eef2f7`) |
+| **Verde Eleva** | `#134736` | Logo, navbar, primária |
+| **Verde Profundo** | `#0F3D31` | Sombra do símbolo, hover |
+| **Verde Vivo** | `#1A6B54` | Submarca LOCKER, botões secundários |
+| **Verde Claro** | `#2D8A6E` | Sucesso, compartimento aberto |
+| **Musgo Neblina** | `#E8F2EE` | Fundo do painel |
+
+> **Nota:** para produção final, confirme o HEX exato com amostra do PDF no Illustrator/Figma (conta-gotas). Valores acima são aproximação fiel ao verde floresta escuro do arquivo.
+
+**Tipografia provável:** família arredondada tipo **Nunito**, **Varela Round** ou **M PLUS Rounded** — reforça o “eleva” amigável.
+
+**Decisão de direção:** evoluir a logo existente → submarca **eleva locker**, **não** substituir por paleta azul+cobre (conceitos A/B/C eram exploração pré-PDF).
+
+---
+
+## 4. Paleta oficial — **Eleva Verde** (alinhada à logo mãe)
+
+Substituir gradualmente o navy `#0f3d75` + mint `#6ee7b7` do painel atual.
+
+### 4.1 Cores principais (locked core)
+
+| Nome | HEX | Uso |
+|------|-----|-----|
+| **Verde Eleva** | `#134736` | Navbar, sidebar, totem header, logo |
+| **Verde Profundo** | `#0F3D31` | Hover, sombra símbolo |
+| **Verde Vivo** | `#1A6B54` | Links, botões secundários, subline LOCKER |
+| **Branco** | `#FFFFFF` | Texto sobre verde, losango negativo |
+| **Musgo Neblina** | `#E8F2EE` | Fundo app |
+
+### 4.2 Cores funcionais (UI)
+
+| Nome | HEX | Uso |
+|------|-----|-----|
+| **Porta Aberta** | `#2D8A6E` | Sucesso, abrir compartimento, depósito OK |
 | **Grafite** | `#1A2332` | Texto corpo |
 | **Concreto** | `#94A3B8` | Labels, placeholders |
-| **Alerta** | `#C0392B` | Excluir, erro, offline crítico |
-| **Aguardando** | `#D4A017` | Encomenda pendente (não competir com InPost) |
+| **Alerta** | `#C0392B` | Excluir, erro, offline |
+| **Aguardando** | `#D4A017` | Encomenda pendente |
+| **Âmbar Eleva** *(opcional)* | `#C8943A` | Destaque hardware / adesivo armário — complementa verde sem competir |
 
-### 4.3 Proporção de uso (regra 60-30-10)
+### 4.3 Proporção 60-30-10
 
 ```
-60% — Atlântico + Branco + Neblina (base calma, confiança)
-30% — Horizonte + Grafite (UI, tabelas, texto)
-10% — Cobre + Porta Aberta (logo, CTAs, estados positivos)
+60% — Verde Eleva + Branco + Musgo Neblina
+30% — Grafite + Verde Vivo (UI)
+10% — Porta Aberta + Âmbar (estados e acentos)
 ```
 
-### 4.4 Por que Cobre?
+### 4.4 Por que verde funciona no segmento
 
-- Referência **metal do armário** e instalação física (ELEVA Energia Solar)
-- Calor humano para **condomínio residencial** (BBZ usa acolhimento + azul)
-- Diferenciação: concorrentes = azul puro ou amarelo InPost
-- Evita o par **navy + mint** típico de templates IA
+- **Confiança + crescimento** — alternativa ao azul saturado de administradoras
+- **Coerência** — mesma família visual da Eleva Soluções e Energia Solar
+- **Reconhecimento** — símbolo de losangos já é distintivo; não jogar fora
+- **Condomínio** — verde escuro passa solidez; verde claro passa “ok / liberado”
 
-### 4.5 Mapeamento do sistema atual → novo
+### 4.5 Mapeamento painel atual → Eleva Verde
 
-| Atual | Novo sugerido |
-|-------|---------------|
-| `#0f3d75` navbar/botões | `#0C2F52` |
-| `#005ecb` links | `#1E4A7A` |
-| `#2a9d8f` btn-success | `#157A6E` |
-| `#6ee7b7` ícone totem | `#C17F3A` ou `#157A6E` (contexto) |
-| `#eef2f7` background | `#E8EDF3` |
+| Atual | Novo |
+|-------|------|
+| `#0f3d75` navbar | `#134736` |
+| `#005ecb` links | `#1A6B54` |
+| `#2a9d8f` btn-success | `#2D8A6E` |
+| `#6ee7b7` ícone | símbolo eleva verde/branco |
+| `#eef2f7` background | `#E8F2EE` |
 
 ---
 
 ## 5. Tipografia
 
-| Uso | Fonte recomendada | Alternativa free |
-|-----|-------------------|------------------|
-| Logo / títulos | **DM Sans** SemiBold (geométrica, amigável) | **Plus Jakarta Sans** |
-| UI / tabelas | **IBM Plex Sans** (técnica mas legível) | **Source Sans 3** |
-| Totem / códigos | **IBM Plex Mono** | **JetBrains Mono** |
+| Uso | Fonte | Alternativa |
+|-----|-------|-------------|
+| Logo `eleva` | **Nunito** Bold ou **Varela Round** | Quicksand |
+| Subline / UI | **IBM Plex Sans** | Source Sans 3 |
+| Totem / códigos | **IBM Plex Mono** | JetBrains Mono |
 
-**Evitar:** Inter puro como única fonte (parece dashboard genérico).
-
-**Logo wordmark:** caixa alta `ELEVA` + peso forte; `LOCKER` ou “Soluções Tecnológicas” em peso regular, tracking +4%.
+**Regra submarca:** manter `eleva` minúsculo; produto em caps espaçado: `LOCKER` (como `SOLUÇÕES TECNOLÓGICAS`).
 
 ---
 
-## 6. Direção de logo (3 conceitos iniciais)
+## 6. Arquivos de logo (pós-análise PDF)
 
-Arquivos em `static/brand/`:
+| Arquivo | Conteúdo |
+|---------|----------|
+| `logo-eleva-parent.svg` | Logo mãe completa (símbolo + eleva + subline) |
+| `logo-eleva-symbol.svg` | Símbolo isolado (favicon base) |
+| `logo-eleva-locker.svg` | Submarca produto (símbolo + eleva + LOCKER) |
+| `logo-eleva-locker-icon.svg` | Ícone app/totem (símbolo em fundo verde) |
+| `logo-concept-a/b/c.svg` | Explorações pré-PDF (referência histórica) |
 
-| Arquivo | Ideia | Quando usar |
-|---------|-------|-------------|
-| `logo-concept-a-grid.svg` | Grade de compartimentos com porta aberta + degrau ascendente | Ícone app, favicon, ESP |
-| `logo-concept-b-monogram.svg` | Monograma **E** modular (3 faixas = prateleiras) | Assinatura compacta |
-| `logo-concept-c-wordmark.svg` | Wordmark ELEVA + linha cobre | Navbar, documentos, totem |
+**Hierarquia de marca**
 
-**Próximo passo crítico:** analisar o PDF **Logo Eleva Soluções Tecnológicas** que você usa hoje para:
-- Preservar elementos reconhecíveis (evolução, não ruptura)
-- Extrair cores exatas se já houver manual
-- Definir hierarquia Eleva (mãe) × Locker (produto)
+```
+Eleva Soluções Tecnológicas  ←  empresa (verde, soluções tecnológicas)
+        └── eleva locker     ←  produto (mesmo símbolo + LOCKER)
+                └── totem / painel / armário físico
+```
 
 ---
 
@@ -172,9 +203,9 @@ Arquivos em `static/brand/`:
 
 | Superfície | Direção |
 |------------|---------|
-| **Painel admin** | Navbar Atlântico + logo wordmark; botões primários Horizonte; sucesso Porta Aberta |
-| **Totem tablet** | Fundo escuro ou claro; botões grandes; acento Cobre no “Depositar”; evitar gradientes |
-| **Armário físico** | Vinil: Atlântico + logo branca; compartimentos prata RAL 9006 (padrão Luxer) |
+| **Painel admin** | Navbar `#134736` + logo `eleva locker`; botões `#1A6B54`; sucesso `#2D8A6E` |
+| **Totem tablet** | Fundo claro Musgo Neblina ou verde escuro; símbolo grande; botões touch |
+| **Armário físico** | Vinil verde Eleva + logo branca; portas RAL 9006 prata |
 | **WhatsApp / SMS** | Só texto + emoji mínimo; assinatura “ELEVA LOCKER” |
 | **Pitch / proposta** | Fotos reais do hub Lauro Müller > renders IA |
 
@@ -183,15 +214,15 @@ Arquivos em `static/brand/`:
 ## 8. Checklist antes de fechar a logo final
 
 - [ ] Legível em 32×32 px (favicon)?
-- [ ] Funciona em branco sobre `#0C2F52` e escuro sobre branco?
+- [ ] Funciona em branco sobre `#134736` e verde sobre branco?
 - [ ] Diferente de InPost (amarelo), Correios (amarelo/azul), Amazon Locker (laranja)?
 - [ ] Consulta INPI / busca marca “Eleva” + “Locker” na classe 9/42?
 - [ ] Aprovada em **totem**, **navbar** e **adesivo armário**?
-- [ ] PDF original da Eleva Soluções incorporado ou evoluído?
+- [x] PDF original da Eleva Soluções analisado — evolução em submarca locker
 
 ---
 
-## 9. Referências consultadas
+*Versão 1.1 — logo PDF analisada; paleta Eleva Verde + submarca locker.*
 
 - [GEL Proximity — Brand Identity Last Mile](https://gelproximity.com/en/brand-identity-in-the-last-mile/)
 - [InPost UK — Dragon Rouge](https://www.dragonrouge.com/work/inpost-uk/)
