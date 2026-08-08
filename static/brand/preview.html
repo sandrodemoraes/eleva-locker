@@ -8,7 +8,6 @@
   <style>
     :root {
       --verde: #134736;
-      --verde-deep: #0F3D31;
       --verde-vivo: #1A6B54;
       --verde-claro: #2D8A6E;
       --musgo: #E8F2EE;
@@ -29,30 +28,52 @@
     .swatch div { height: 56px; border-radius: 10px; margin-bottom: 6px; border: 1px solid rgba(0,0,0,.06); }
     .swatch span { font-size: .75rem; font-weight: 600; }
     .swatch code { display: block; font-size: .7rem; color: #64748b; }
-    .demo-nav { background: var(--verde); color: #fff; padding: 16px 24px; border-radius: 12px; display: flex; align-items: center; gap: 16px; margin-top: 12px; }
-    .demo-nav img { height: 48px; }
-    .btn { display: inline-block; padding: 10px 18px; border-radius: 8px; font-weight: 600; font-size: 14px; margin: 4px; border: none; }
-    .btn-primary { background: var(--verde-vivo); color: #fff; }
-    .btn-success { background: var(--verde-claro); color: #fff; }
+    .cta-box {
+      background: var(--musgo);
+      border-radius: 12px;
+      padding: 20px 24px;
+      margin-bottom: 16px;
+    }
+    .cta-box a {
+      color: var(--verde-vivo);
+      font-weight: 600;
+      font-size: 1.05rem;
+    }
     .note { background: #fffbeb; border-left: 4px solid #D4A017; padding: 12px 16px; border-radius: 8px; font-size: .9rem; margin-top: 16px; }
   </style>
 </head>
 <body>
   <h1>eleva locker — Identidade visual</h1>
-  <p class="sub">Baseada na logo <strong>Eleva Soluções Tecnológicas</strong> (verde floresta + símbolo losango)</p>
+  <p class="sub">Projeto only — nada alterado no sistema operacional</p>
 
   <section>
-    <h2>Logo mãe × submarca produto</h2>
+    <h2>Comparar submarca (principal)</h2>
+    <div class="cta-box">
+      Abrir comparação completa:
+      <a href="comparar-submarca.html">comparar-submarca.html</a>
+      <p style="margin-top:8px;font-size:.9rem;color:#64748b">Navbar, totem e proposta — Opção A vs Opção B</p>
+    </div>
+    <div class="grid">
+      <div class="card">
+        <img src="logo-eleva-locker.svg" alt="eleva LOCKER">
+        <strong>Opção A — eleva + LOCKER</strong>
+        <p>Institucional, alinhada à logo mãe</p>
+      </div>
+      <div class="card">
+        <img src="logo-eleva-locker-lowercase.svg" alt="eleva locker">
+        <strong>Opção B — eleva locker</strong>
+        <p>Integrada, moderna, uma linha só</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Logo mãe × ícone</h2>
     <div class="grid">
       <div class="card">
         <img src="logo-eleva-parent.svg" alt="Eleva Soluções Tecnológicas">
         <strong>Empresa-mãe</strong>
-        <p>Símbolo + eleva + SOLUÇÕES TECNOLÓGICAS</p>
-      </div>
-      <div class="card">
-        <img src="logo-eleva-locker.svg" alt="eleva locker">
-        <strong>Produto</strong>
-        <p>Mesmo símbolo + eleva + LOCKER</p>
+        <p>SOLUÇÕES TECNOLÓGICAS</p>
       </div>
       <div class="card">
         <img src="logo-eleva-locker-icon.svg" alt="Ícone" style="max-width:120px">
@@ -60,7 +81,7 @@
         <p>Símbolo em fundo verde</p>
       </div>
     </div>
-    <p class="note">Vetores são aproximação do PDF — confirme HEX e curvas no Illustrator antes de produção final.</p>
+    <p class="note">Vetores são aproximação do PDF — confirme HEX no Illustrator antes da produção final.</p>
   </section>
 
   <section>
@@ -72,21 +93,6 @@
       <div class="swatch"><div style="background:#2D8A6E"></div><span>Porta Aberta</span><code>#2D8A6E</code></div>
       <div class="swatch"><div style="background:#E8F2EE"></div><span>Musgo</span><code>#E8F2EE</code></div>
     </div>
-  </section>
-
-  <section>
-    <h2>Simulação navbar (painel admin)</h2>
-    <div class="demo-nav">
-      <img src="logo-eleva-symbol.svg" alt="" style="background:#fff;border-radius:8px;padding:4px">
-      <div>
-        <div style="font-family:'Nunito';font-weight:700;font-size:1.2rem">eleva locker</div>
-        <div style="font-size:.8rem;opacity:.9">Sistema Administrativo</div>
-      </div>
-    </div>
-    <p style="margin-top:16px">
-      <span class="btn btn-primary">Primário</span>
-      <span class="btn btn-success">Abrir / Sucesso</span>
-    </p>
   </section>
 </body>
 </html>

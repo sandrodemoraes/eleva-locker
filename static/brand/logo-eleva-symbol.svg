@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" fill="none" role="img" aria-label="Símbolo eleva">
   <!-- Dois planos inclinados com cantos arredondados — losango branco no centro -->
   <rect width="96" height="96" rx="16" fill="#FFFFFF"/>
-  <g transform="translate(48 48)">
+  <g transform="translate(48, 48)">
     <path d="M-28 -6 L-6 -28 L22 -28 L0 -6 Z" fill="#134736" stroke-linejoin="round"/>
     <path d="M-28 -6 L-6 16 L22 16 L0 -6 Z" fill="#134736" stroke-linejoin="round"/>
     <path d="M-8 -6 L14 -28 L42 -28 L20 -6 Z" fill="#0F3D31" stroke-linejoin="round"/>
