@@ -63,16 +63,16 @@
                 <td>{{ c.rele or '—' }}</td>
                 <td>{{ c.esp32_id or '—' }}</td>
                 <td><span class="badge badge-{{ c.status }}">{{ c.status }}</span></td>
-                <td>
+                <td class="acoes-cell">
                     {% if c.rele and c.esp32_id %}
-                    <form method="POST" action="/esp32/abrir/{{ c.id }}" style="display:inline">
+                    <form method="POST" action="/esp32/abrir/{{ c.id }}">
                         <button type="submit" class="btn btn-sm btn-success" title="Abrir via ESP32"><i class="fa-solid fa-lock-open"></i></button>
                     </form>
                     {% endif %}
                     <button class="btn btn-sm" onclick="editarComp({{ c.id }}, {{ c.armario }}, {{ c.numero }}, '{{ c.tamanho or 'M' }}', '{{ c.rele or '' }}', '{{ c.esp32_id or '' }}', '{{ c.gpio or '' }}', '{{ c.status }}')">
                         <i class="fa-solid fa-pen"></i>
                     </button>
-                    <form method="POST" action="/compartimentos/excluir/{{ c.id }}" style="display:inline" onsubmit="return confirm('Excluir compartimento #{{ c.numero }}?')">
+                    <form method="POST" action="/compartimentos/excluir/{{ c.id }}" onsubmit="return confirm('Excluir compartimento #{{ c.numero }}?')">
                         <button type="submit" class="btn btn-sm btn-danger"><i class="fa-solid fa-trash"></i></button>
                     </form>
                 </td>

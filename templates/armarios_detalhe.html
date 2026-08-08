@@ -69,14 +69,14 @@
                 <td>{{ e.ip or '—' }}:{{ e.porta or 80 }}</td>
                 <td><span class="badge badge-{{ e.status }}">{{ e.status }}</span></td>
                 <td><span class="token-box">{{ e.token }}</span></td>
-                <td>
-                    <form method="POST" action="{{ url_for('esp32.testar', esp32_id=e.id) }}" style="display:inline">
+                <td class="acoes-cell">
+                    <form method="POST" action="{{ url_for('esp32.testar', esp32_id=e.id) }}">
                         <input type="hidden" name="redirect" value="/armarios/{{ armario.id }}">
                         <button type="submit" class="btn btn-sm" title="Testar"><i class="fa-solid fa-wifi"></i></button>
                     </form>
                     {% if perfil == 'Administrador' %}
                     <button class="btn btn-sm" onclick="editarEsp({{ e.id }}, '{{ e.nome | replace("'", "\\'") }}', '{{ e.ip or '' }}', '{{ e.mac or '' }}', {{ e.porta or 80 }}, '{{ e.status }}', '{{ e.token or '' }}')"><i class="fa-solid fa-pen"></i></button>
-                    <form method="POST" action="/armarios/{{ armario.id }}/esp32/excluir/{{ e.id }}" style="display:inline" onsubmit="return confirm('Remover ESP?')">
+                    <form method="POST" action="/armarios/{{ armario.id }}/esp32/excluir/{{ e.id }}" onsubmit="return confirm('Remover ESP?')">
                         <button type="submit" class="btn btn-sm btn-danger"><i class="fa-solid fa-trash"></i></button>
                     </form>
                     {% endif %}
@@ -150,9 +150,9 @@
                 <td>{{ u.email }}</td>
                 <td>{{ u.perfil }}</td>
                 <td>{{ 'Ativo' if u.status else 'Inativo' }}</td>
-                <td>
+                <td class="acoes-cell">
                     {% if perfil == 'Administrador' %}
-                    <form method="POST" action="/armarios/{{ armario.id }}/usuarios/excluir/{{ u.id }}" style="display:inline" onsubmit="return confirm('Excluir usuário?')">
+                    <form method="POST" action="/armarios/{{ armario.id }}/usuarios/excluir/{{ u.id }}" onsubmit="return confirm('Excluir usuário?')">
                         <button type="submit" class="btn btn-sm btn-danger"><i class="fa-solid fa-trash"></i></button>
                     </form>
                     {% endif %}

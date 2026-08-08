@@ -53,7 +53,7 @@
                 <td>{{ a.max_portas or 16 }}</td>
                 <td>{{ a.compartimentos_ocupados or 0 }}/{{ a.total_compartimentos or 0 }}</td>
                 <td><span class="badge badge-{{ a.status }}">{{ a.status }}</span></td>
-                <td>
+                <td class="acoes-cell">
                     <a href="/armarios/{{ a.id }}" class="btn btn-sm btn-success" title="Gerenciar"><i class="fa-solid fa-gear"></i></a>
                     {% if perfil == 'Administrador' %}
                     <button type="button" class="btn btn-sm btn-editar-armario"
@@ -67,7 +67,7 @@
                         data-max-portas="{{ a.max_portas or 16 }}">
                         <i class="fa-solid fa-pen"></i>
                     </button>
-                    <form method="POST" action="/armarios/excluir/{{ a.id }}" style="display:inline" onsubmit="return confirm('Excluir este armário?')">
+                    <form method="POST" action="/armarios/excluir/{{ a.id }}" onsubmit="return confirm('Excluir este armário?')">
                         <button type="submit" class="btn btn-sm btn-danger"><i class="fa-solid fa-trash"></i></button>
                     </form>
                     {% endif %}

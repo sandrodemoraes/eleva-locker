@@ -75,12 +75,12 @@
                 <td>{{ e.data_retirada or '—' }}</td>
                 <td><span class="badge badge-{{ e.status }}">{{ e.status }}</span></td>
                 <td>{{ e.notificado_em or '—' }}</td>
-                <td>
+                <td class="acoes-cell">
                     {% if perfil == 'Administrador' %}
                     <a href="/encomendas/qrcode/{{ e.id }}" class="btn btn-sm" title="QR Code" target="_blank"><i class="fa-solid fa-qrcode"></i></a>
                     {% endif %}
                     {% if e.status == 'aguardando_retirada' %}
-                    <form method="POST" action="/encomendas/reenviar/{{ e.id }}" style="display:inline">
+                    <form method="POST" action="/encomendas/reenviar/{{ e.id }}">
                         <button type="submit" class="btn btn-sm" title="Reenviar notificação"><i class="fa-solid fa-bell"></i></button>
                     </form>
                     {% endif %}
