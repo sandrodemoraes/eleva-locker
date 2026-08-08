@@ -635,7 +635,8 @@
 
         <form
             method="POST"
-            action="/usuarios/novo">
+            action="/usuarios/novo"
+            id="formNovoUsuario">
 
             <div class="linha">
 
@@ -943,7 +944,21 @@ function processarFlashModais(){
     }
 }
 
-document.addEventListener("DOMContentLoaded", processarFlashModais);
+document.addEventListener("DOMContentLoaded", function(){
+    processarFlashModais();
+    var formNovo = document.getElementById("formNovoUsuario");
+    if(formNovo){
+        formNovo.addEventListener("submit", function(){
+            limparAlertaModal(document.getElementById("alertNovoUsuario"));
+        });
+    }
+    var formEditar = document.getElementById("formEditar");
+    if(formEditar){
+        formEditar.addEventListener("submit", function(){
+            limparAlertaModal(document.getElementById("alertEditarUsuario"));
+        });
+    }
+});
 
 function abrirModal(){
     limparAlertaModal(document.getElementById("alertNovoUsuario"));
