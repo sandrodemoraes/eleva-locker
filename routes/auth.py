@@ -49,8 +49,14 @@ def login():
         conn.close()
 
         session["usuario"] = usuario["nome"]
+        session["nome"] = usuario["nome"]
         session["perfil"] = usuario["perfil"]
         session["usuario_id"] = usuario["id"]
+        session["armario_id"] = usuario["armario_id"] if usuario["armario_id"] else None
+        session["site_id"] = 1
+
+        if usuario["perfil"] == "Operador" and usuario["armario_id"]:
+            return redirect(f"/armarios/{usuario['armario_id']}")
 
         return redirect("/dashboard")
 
