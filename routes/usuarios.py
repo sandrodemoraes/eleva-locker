@@ -62,10 +62,12 @@ def novo_usuario():
     except ValueError as erro:
 
         flash(str(erro), "warning")
+        return redirect("/usuarios?modal=novo")
 
     except Exception:
 
         flash("Erro interno ao cadastrar usuário.", "danger")
+        return redirect("/usuarios?modal=novo")
 
     return redirect("/usuarios")
 
@@ -92,10 +94,12 @@ def editar_usuario(usuario_id):
     except ValueError as erro:
 
         flash(str(erro), "warning")
+        return redirect(f"/usuarios?modal=editar&id={usuario_id}")
 
     except Exception:
 
         flash("Erro interno ao atualizar o usuário.", "danger")
+        return redirect(f"/usuarios?modal=editar&id={usuario_id}")
 
     return redirect("/usuarios")
 

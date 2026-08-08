@@ -273,6 +273,15 @@
         .alert-success{background:#d4edda;color:#155724;}
         .alert-warning{background:#fff3cd;color:#856404;}
         .alert-danger{background:#f8d7da;color:#721c24;}
+        .alert-modal{
+            margin-bottom:16px;
+            padding:12px 14px;
+            border-radius:8px;
+            font-size:14px;
+            line-height:1.4;
+        }
+        .alert-modal.alert-warning{background:#fff3cd;color:#856404;border:1px solid #ffecb5;}
+        .alert-modal.alert-danger{background:#f8d7da;color:#721c24;border:1px solid #f5c6cb;}
 
         .rodape{
 
@@ -622,6 +631,8 @@
 
         </h2>
 
+        <div id="alertNovoUsuario" class="alert-modal" style="display:none" role="alert"></div>
+
         <form
             method="POST"
             action="/usuarios/novo">
@@ -656,11 +667,13 @@
 
                 <div class="campo">
 
-                    <label>Telefone</label>
+                    <label>Telefone *</label>
 
                     <input
-                        type="text"
-                        name="telefone">
+                        type="tel"
+                        name="telefone"
+                        placeholder="(48) 99999-9999"
+                        required>
 
                 </div>
 
@@ -777,6 +790,8 @@
 
         <h2>Editar Usuário</h2>
 
+        <div id="alertEditarUsuario" class="alert-modal" style="display:none" role="alert"></div>
+
         <form method="POST" id="formEditar" action="">
 
             <div class="linha">
@@ -792,8 +807,8 @@
                     <input type="email" name="email" id="editEmail" required>
                 </div>
                 <div class="campo">
-                    <label>Telefone</label>
-                    <input type="text" name="telefone" id="editTelefone">
+                    <label>Telefone *</label>
+                    <input type="tel" name="telefone" id="editTelefone" placeholder="(48) 99999-9999" required>
                 </div>
             </div>
 
@@ -883,16 +898,64 @@ function toggleArmarioEditar(){
     linha.style.display = (perfil === "Operador") ? "flex" : "none";
 }
 
+function mostrarAlertaModal(el, texto, tipo){
+    if(!el) return;
+    el.textContent = texto;
+    el.className = "alert-modal alert-" + (tipo || "warning");
+    el.style.display = "block";
+}
+
+function limparAlertaModal(el){
+    if(!el) return;
+    el.style.display = "none";
+    el.textContent = "";
+}
+
+function processarFlashModais(){
+    var params = new URLSearchParams(window.location.search);
+    var modalParam = params.get("modal");
+    var alerts = document.querySelectorAll(".alert.alert-warning, .alert.alert-danger, .alert.alert-success");
+    var msg = "";
+    var tipo = "warning";
+    alerts.forEach(function(a){
+        if(a.closest(".alert-modal")) return;
+        if(!msg && (a.classList.contains("alert-warning") || a.classList.contains("alert-danger"))){
+            msg = a.textContent.trim();
+            if(a.classList.contains("alert-danger")) tipo = "danger";
+            a.style.display = "none";
+        }
+    });
+    if(!msg) return;
+
+    if(modalParam === "novo"){
+        mostrarAlertaModal(document.getElementById("alertNovoUsuario"), msg, tipo);
+        document.getElementById("modalUsuario").style.display = "flex";
+    } else if(modalParam === "editar"){
+        var id = params.get("id");
+        mostrarAlertaModal(document.getElementById("alertEditarUsuario"), msg, tipo);
+        if(id){
+            var btn = document.querySelector('.editar[data-id="' + id + '"]');
+            if(btn) btn.click();
+            else document.getElementById("modalEditar").style.display = "flex";
+        } else {
+            document.getElementById("modalEditar").style.display = "flex";
+        }
+    }
+}
+
+document.addEventListener("DOMContentLoaded", processarFlashModais);
+
 function abrirModal(){
-
+    limparAlertaModal(document.getElementById("alertNovoUsuario"));
     document.getElementById("modalUsuario").style.display="flex";
-
 }
 
 function fecharModal(){
-
     document.getElementById("modalUsuario").style.display="none";
-
+    limparAlertaModal(document.getElementById("alertNovoUsuario"));
+    if(window.history.replaceState){
+        window.history.replaceState({}, "", "/usuarios");
+    }
 }
 
 // Fecha clicando fora do modal
@@ -959,6 +1022,10 @@ document.querySelectorAll(".editar").forEach(function(botao){
 
 function fecharModalEditar(){
     document.getElementById("modalEditar").style.display = "none";
+    limparAlertaModal(document.getElementById("alertEditarUsuario"));
+    if(window.history.replaceState){
+        window.history.replaceState({}, "", "/usuarios");
+    }
 }
 
 // Alterar senha

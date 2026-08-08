@@ -1,4 +1,12 @@
 from repositories.base_repository import BaseRepository
+import re
+
+
+def _digits_telefone(telefone):
+    nums = re.sub(r"\D", "", telefone or "")
+    if nums.startswith("55") and len(nums) > 11:
+        nums = nums[2:]
+    return nums
 
 
 class UsuarioRepository:
@@ -51,6 +59,40 @@ class UsuarioRepository:
                 FROM usuarios
                 WHERE email = ?
             """, (email,)).fetchone()
+
+    @staticmethod
+    def buscar_por_telefone(telefone, excluir_id=None):
+        alvo = _digits_telefone(telefone)
+        if not alvo:
+            return None
+
+        with BaseRepository.get_connection() as conn:
+            rows = conn.execute("""
+                SELECT * FROM usuarios
+                WHERE telefone IS NOT NULL AND TRIM(telefone) != ''
+            """).fetchall()
+
+        for row in rows:
+            if excluir_id and row["id"] == excluir_id:
+                continue
+            if _digits_telefone(row["telefone"]) == alvo:
+                return row
+        return None
+
+    @staticmethod
+    def buscar_por_nome(nome, excluir_id=None):
+        nome = (nome or "").strip()
+        if not nome:
+            return None
+
+        sql = "SELECT * FROM usuarios WHERE LOWER(TRIM(nome)) = LOWER(?)"
+        params = [nome]
+        if excluir_id is not None:
+            sql += " AND id != ?"
+            params.append(excluir_id)
+
+        with BaseRepository.get_connection() as conn:
+            return conn.execute(sql, tuple(params)).fetchone()
 
     @staticmethod
     def criar(nome, email, telefone, senha, perfil, status, armario_id=None):
