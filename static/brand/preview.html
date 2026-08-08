@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ELEVA LOCKER — Preview identidade</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --atlantico: #0C2F52;
+      --cobre: #C17F3A;
+      --porta: #157A6E;
+      --horizonte: #1E4A7A;
+      --neblina: #E8EDF3;
+      --grafite: #1A2332;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'IBM Plex Sans', sans-serif; background: var(--neblina); color: var(--grafite); padding: 32px; }
+    h1 { font-family: 'DM Sans', sans-serif; color: var(--atlantico); margin-bottom: 8px; }
+    .sub { color: #64748b; margin-bottom: 32px; }
+    section { background: #fff; border-radius: 16px; padding: 28px; margin-bottom: 24px; box-shadow: 0 4px 20px rgba(12,47,82,.08); }
+    h2 { font-family: 'DM Sans', sans-serif; font-size: 1.1rem; color: var(--atlantico); margin-bottom: 16px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
+    .card { text-align: center; padding: 20px; border-radius: 12px; background: var(--neblina); }
+    .card img { max-width: 120px; height: auto; margin-bottom: 12px; }
+    .card p { font-size: .85rem; color: #64748b; }
+    .swatches { display: flex; flex-wrap: wrap; gap: 12px; }
+    .swatch { width: 100px; text-align: center; }
+    .swatch div { height: 56px; border-radius: 10px; margin-bottom: 6px; border: 1px solid rgba(0,0,0,.06); }
+    .swatch span { font-size: .75rem; font-weight: 600; }
+    .swatch code { display: block; font-size: .7rem; color: #64748b; }
+    .demo-nav { background: var(--atlantico); color: #fff; padding: 16px 24px; border-radius: 12px; display: flex; align-items: center; gap: 16px; margin-top: 12px; }
+    .demo-nav img { height: 40px; }
+    .btn { display: inline-block; padding: 10px 18px; border-radius: 8px; font-weight: 600; font-size: 14px; margin: 4px; border: none; cursor: default; }
+    .btn-primary { background: var(--horizonte); color: #fff; }
+    .btn-success { background: var(--porta); color: #fff; }
+    .btn-accent { background: var(--cobre); color: #fff; }
+  </style>
+</head>
+<body>
+  <h1>ELEVA LOCKER — Identidade visual</h1>
+  <p class="sub">Paleta <strong>Eleva Atlântico</strong> + 3 conceitos iniciais (vetor, não IA generativa)</p>
+
+  <section>
+    <h2>Paleta de cores</h2>
+    <div class="swatches">
+      <div class="swatch"><div style="background:#0C2F52"></div><span>Atlântico</span><code>#0C2F52</code></div>
+      <div class="swatch"><div style="background:#C17F3A"></div><span>Cobre</span><code>#C17F3A</code></div>
+      <div class="swatch"><div style="background:#157A6E"></div><span>Porta Aberta</span><code>#157A6E</code></div>
+      <div class="swatch"><div style="background:#1E4A7A"></div><span>Horizonte</span><code>#1E4A7A</code></div>
+      <div class="swatch"><div style="background:#E8EDF3"></div><span>Neblina</span><code>#E8EDF3</code></div>
+      <div class="swatch"><div style="background:#1A2332"></div><span>Grafite</span><code>#1A2332</code></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Conceitos de logo</h2>
+    <div class="grid">
+      <div class="card">
+        <img src="logo-concept-a-grid.svg" alt="Conceito A">
+        <strong>A — Grade + elevação</strong>
+        <p>Compartimentos, porta aberta (cobre), linha ascendente</p>
+      </div>
+      <div class="card">
+        <img src="logo-concept-b-monogram.svg" alt="Conceito B">
+        <strong>B — Monograma E</strong>
+        <p>Prateleiras modulares, slot cobre assimétrico</p>
+      </div>
+      <div class="card">
+        <img src="logo-concept-c-wordmark.svg" alt="Conceito C" style="max-width:100%">
+        <strong>C — Wordmark</strong>
+        <p>Navbar, propostas, totem header</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Simulação navbar</h2>
+    <div class="demo-nav">
+      <img src="logo-concept-a-grid.svg" alt="">
+      <div>
+        <div style="font-family:'DM Sans';font-weight:700;font-size:1.25rem">ELEVA LOCKER</div>
+        <div style="font-size:.8rem;opacity:.85">Sistema Administrativo</div>
+      </div>
+    </div>
+    <p style="margin-top:16px">
+      <span class="btn btn-primary">Primário</span>
+      <span class="btn btn-success">Abrir / Sucesso</span>
+      <span class="btn btn-accent">Destaque Cobre</span>
+    </p>
+  </section>
+</body>
+</html>
