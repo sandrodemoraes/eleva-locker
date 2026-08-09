@@ -54,9 +54,11 @@
         <p class="totem-dica">Morador: código no WhatsApp · Portaria: depositar acima</p>
 
         {% if ajuda_telefone %}
-        <button type="button" class="btn-ajuda" onclick="mostrarAjuda()">
-            <i class="fa-solid fa-circle-question"></i> Preciso de ajuda
-        </button>
+        <div class="totem-ajuda-wrap">
+            <button type="button" class="btn-totem btn-ajuda" onclick="mostrarAjuda()">
+                <i class="fa-solid fa-circle-question"></i> Preciso de ajuda
+            </button>
+        </div>
         {% endif %}
 
         <div class="totem-footer">ELEVA LOCKER © 2026 · Totem v2</div>
