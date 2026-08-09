@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <title>ELEVA LOCKER — Totem</title>
+    <link rel="icon" href="{{ url_for('static', filename='icons/icon.svg') }}" type="image/svg+xml">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/totem.css') }}?v={{ totem_versao|default('2') }}">
+    <link rel="manifest" href="{% if armario_id %}{{ url_for('totem.manifest_armario', armario_id=armario_id) }}{% else %}{{ url_for('static', filename='manifest.json') }}{% endif %}">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+</head>
+<body>
+
+<div class="totem-badge">v{{ totem_versao|default('2') }}</div>
+
+<div class="totem" data-armario-id="{{ armario['id'] if armario else '' }}" data-max-portas="{{ max_portas }}">
+
+    <section id="tela-inicio" class="tela tela-ativa">
+        <div class="totem-logo">
+            <i class="fa-solid fa-box"></i>
+            <h1>ELEVA LOCKER</h1>
+            {% if armario %}
+            <p class="totem-local"><i class="fa-solid fa-location-dot"></i> {{ armario['nome'] }}</p>
+            {% elif armarios %}
+            <select id="selArmario" class="totem-select" onchange="if(this.value) location.href='/totem/'+this.value">
+                <option value="">Selecione o armário</option>
+                {% for a in armarios %}
+                <option value="{{ a['id'] }}">{{ a['nome'] }}</option>
+                {% endfor %}
+            </select>
+            {% else %}
+            <p class="totem-dica">Armário não configurado — defina TOTEM_ARMARIO_ID no .env</p>
+            {% endif %}
+        </div>
+
+        <button type="button" class="btn-totem btn-principal" onclick="irRetirar()" {% if not armario and armarios %}disabled{% endif %}>
+            <i class="fa-solid fa-hand-holding-box"></i>
+            Retirar encomenda
+        </button>
+
+        {% if deposito_habilitado and armario %}
+        <button type="button" class="btn-totem btn-secundario" onclick="irDepositoAuth()">
+            <i class="fa-solid fa-box-open"></i>
+            Depositar encomenda
+        </button>
+        {% endif %}
+
+        <p class="totem-dica">Morador: código no WhatsApp · Portaria: depositar acima</p>
+
+        {% if ajuda_telefone %}
+        <button type="button" class="btn-ajuda" onclick="mostrarAjuda()">
+            <i class="fa-solid fa-circle-question"></i> Preciso de ajuda
+        </button>
+        {% endif %}
+
+        <div class="totem-footer">ELEVA LOCKER © 2026 · Totem v2</div>
+    </section>
+
+    <section id="tela-retirar" class="tela">
+        <button type="button" class="btn-voltar" onclick="irInicio()"><i class="fa-solid fa-arrow-left"></i> Voltar</button>
+        <h2 class="tela-titulo">Digite o código</h2>
+        <p class="tela-sub">6 dígitos recebidos no WhatsApp</p>
+
+        <div class="codigo-display" id="display">_ _ _ _ _ _</div>
+
+        <div class="teclado">
+            <button type="button" class="tecla" onclick="digitar('1')">1</button>
+            <button type="button" class="tecla" onclick="digitar('2')">2</button>
+            <button type="button" class="tecla" onclick="digitar('3')">3</button>
+            <button type="button" class="tecla" onclick="digitar('4')">4</button>
+            <button type="button" class="tecla" onclick="digitar('5')">5</button>
+            <button type="button" class="tecla" onclick="digitar('6')">6</button>
+            <button type="button" class="tecla" onclick="digitar('7')">7</button>
+            <button type="button" class="tecla" onclick="digitar('8')">8</button>
+            <button type="button" class="tecla" onclick="digitar('9')">9</button>
+            <button type="button" class="tecla tecla-limpar" onclick="limpar()"><i class="fa-solid fa-delete-left"></i></button>
+            <button type="button" class="tecla" onclick="digitar('0')">0</button>
+            <button type="button" class="tecla" onclick="backspace()"><i class="fa-solid fa-backspace"></i></button>
+        </div>
+
+        <div class="resultado erro" id="erro-retirar"></div>
+    </section>
+
+    <!-- Depósito — PIN portaria (teclado) -->
+    <section id="tela-deposito-pin" class="tela">
+        <button type="button" class="btn-voltar" onclick="irInicio()"><i class="fa-solid fa-arrow-left"></i> Voltar</button>
+        <h2 class="tela-titulo">Depositar encomenda</h2>
+        <p class="tela-sub">PIN da portaria</p>
+        <div class="codigo-display" id="pin-display">_ _ _ _</div>
+        <div class="teclado">
+            <button type="button" class="tecla" onclick="digitarPin('1')">1</button>
+            <button type="button" class="tecla" onclick="digitarPin('2')">2</button>
+            <button type="button" class="tecla" onclick="digitarPin('3')">3</button>
+            <button type="button" class="tecla" onclick="digitarPin('4')">4</button>
+            <button type="button" class="tecla" onclick="digitarPin('5')">5</button>
+            <button type="button" class="tecla" onclick="digitarPin('6')">6</button>
+            <button type="button" class="tecla" onclick="digitarPin('7')">7</button>
+            <button type="button" class="tecla" onclick="digitarPin('8')">8</button>
+            <button type="button" class="tecla" onclick="digitarPin('9')">9</button>
+            <button type="button" class="tecla tecla-limpar" onclick="limparPin()"><i class="fa-solid fa-delete-left"></i></button>
+            <button type="button" class="tecla" onclick="digitarPin('0')">0</button>
+            <button type="button" class="tecla" onclick="backspacePin()"><i class="fa-solid fa-backspace"></i></button>
+        </div>
+        <div class="resultado erro" id="erro-deposito-pin"></div>
+    </section>
+
+    <!-- Depósito — login operador (fallback sem PIN) -->
+    <section id="tela-deposito-auth" class="tela tela-scroll">
+        <button type="button" class="btn-voltar" onclick="irInicio()"><i class="fa-solid fa-arrow-left"></i> Voltar</button>
+        <h2 class="tela-titulo">Depositar encomenda</h2>
+        <p class="tela-sub">Login do operador</p>
+        <div class="form-totem">
+            <label>E-mail operador</label>
+            <input type="email" id="dep-operador-email" placeholder="portaria@..." class="input-totem" autocomplete="username">
+            <label>Senha</label>
+            <input type="password" id="dep-operador-senha" placeholder="••••••" class="input-totem" autocomplete="current-password">
+            <button type="button" class="btn-totem btn-principal" onclick="continuarDepositoLogin()">Continuar</button>
+        </div>
+        <div class="resultado erro" id="erro-deposito-auth"></div>
+    </section>
+
+    <!-- Depósito — tamanho + morador -->
+    <section id="tela-deposito" class="tela tela-scroll">
+        <button type="button" class="btn-voltar" onclick="irDepositoVoltar()"><i class="fa-solid fa-arrow-left"></i> Voltar</button>
+        <h2 class="tela-titulo">Tamanho da encomenda</h2>
+        <p class="tela-sub">Toque no tamanho — abrimos a 1ª porta livre</p>
+
+        <div class="tamanho-botoes" id="tamanho-botoes">
+            <button type="button" class="btn-tamanho" data-tam="P" onclick="selecionarTamanho('P')">
+                <span class="tam-letra">P</span><span class="tam-info">Pequeno</span><span class="tam-qtd"></span>
+            </button>
+            <button type="button" class="btn-tamanho" data-tam="M" onclick="selecionarTamanho('M')">
+                <span class="tam-letra">M</span><span class="tam-info">Médio</span><span class="tam-qtd"></span>
+            </button>
+            <button type="button" class="btn-tamanho" data-tam="G" onclick="selecionarTamanho('G')">
+                <span class="tam-letra">G</span><span class="tam-info">Grande</span><span class="tam-qtd"></span>
+            </button>
+            <button type="button" class="btn-tamanho" data-tam="GG" onclick="selecionarTamanho('GG')">
+                <span class="tam-letra">GG</span><span class="tam-info">Extra</span><span class="tam-qtd"></span>
+            </button>
+        </div>
+
+        <div class="mapa-portas mapa-selecao" id="mapa-livres"></div>
+        <input type="hidden" id="dep-compartimento" value="">
+        <input type="hidden" id="dep-tamanho" value="">
+
+        <div class="form-totem form-compacto">
+            <label>Destinatário *</label>
+            <div class="autocomplete-wrap">
+                <input type="text" id="dep-cliente" placeholder="Busque morador cadastrado" class="input-totem"
+                       autocomplete="off" oninput="onClienteInput()" onfocus="onClienteInput()" onblur="fecharSugestoesAtraso()">
+                <input type="hidden" id="dep-usuario-id" value="">
+                <div class="autocomplete-list" id="dep-sugestoes"></div>
+            </div>
+            <p class="totem-dica" id="dep-cadastro-dica">Selecione um morador cadastrado na lista</p>
+            <label>Telefone {% if whatsapp_ativo %}*{% endif %}</label>
+            <input type="tel" id="dep-telefone" placeholder="(48) 99999-9999" class="input-totem" oninput="atualizarBtnDeposito()">
+            <p class="porta-auto-msg" id="porta-auto-msg"></p>
+            <button type="button" class="btn-totem btn-principal btn-depositar" onclick="confirmarDeposito()" disabled id="btn-abrir-porta">
+                <i class="fa-solid fa-lock-open"></i> Abrir porta
+            </button>
+        </div>
+        <p class="totem-dica">O código vai só para o WhatsApp após fechar a porta</p>
+        <div class="resultado erro" id="erro-deposito"></div>
+    </section>
+
+    <!-- Depósito — aguardando fechar porta -->
+    <section id="tela-deposito-aguardando" class="tela">
+        <div class="sucesso-icon anim-pulse porta-aberta-icon"><i class="fa-solid fa-door-open"></i></div>
+        <h2 class="tela-titulo">Porta aberta</h2>
+        <p class="tela-sub" id="aguardando-cliente"></p>
+
+        <div class="porta-box">
+            <span class="porta-label">Coloque em</span>
+            <span class="porta-numero" id="aguardando-porta">—</span>
+            <span class="porta-tam-grande" id="aguardando-tamanho"></span>
+        </div>
+
+        <p class="totem-dica destaque">Coloque a encomenda e <strong>feche a porta</strong></p>
+
+        <button type="button" class="btn-totem btn-principal" onclick="concluirDeposito()">
+            <i class="fa-solid fa-door-closed"></i> Porta fechada — concluir
+        </button>
+        <p class="totem-dica" id="sensor-aviso">Feche a porta — o sistema detecta automaticamente</p>
+        <div class="resultado erro" id="erro-aguardando"></div>
+    </section>
+
+    <section id="tela-sucesso" class="tela">
+        <div class="sucesso-icon anim-pulse"><i class="fa-solid fa-circle-check"></i></div>
+        <h2 class="tela-titulo" id="sucesso-titulo">Porta aberta!</h2>
+        <p class="tela-sub" id="sucesso-cliente"></p>
+        <p class="tela-sub" id="sucesso-msg"></p>
+
+        <div class="porta-box">
+            <span class="porta-label" id="sucesso-label">Retire em</span>
+            <span class="porta-numero" id="sucesso-porta">—</span>
+        </div>
+
+        <div class="mapa-portas" id="mapa-portas"></div>
+
+        <p class="totem-dica" id="sucesso-dica">Feche a porta ao terminar</p>
+        <p class="contagem">Voltando em <span id="segundos">15</span>s</p>
+    </section>
+
+</div>
+
+{% if ajuda_telefone %}
+<div class="ajuda-overlay" id="ajuda-overlay" onclick="fecharAjuda()">
+    <div class="ajuda-box" onclick="event.stopPropagation()">
+        <h3>Precisa de ajuda?</h3>
+        <p>Não recebeu o código no WhatsApp?</p>
+        <p class="ajuda-tel"><i class="fa-solid fa-phone"></i> {{ ajuda_telefone }}</p>
+        <p class="totem-dica">Fale com a portaria ou síndico</p>
+        <button type="button" class="btn-totem btn-principal" onclick="fecharAjuda()">Entendi</button>
+    </div>
+</div>
+{% endif %}
+
+<script>
+const ROOT = document.querySelector(".totem");
+const ARMARIO_ID = ROOT.dataset.armarioId || "";
+const MAX_PORTAS = parseInt(ROOT.dataset.maxPortas || "8", 10);
+const USA_PIN = {{ 'true' if usa_pin_deposito else 'false' }};
+const SEM_PIN = {{ 'true' if deposito_sem_pin else 'false' }};
+const SOMENTE_CADASTRADO = {{ 'true' if deposito_somente_cadastrado else 'false' }};
+let codigo = "";
+let pinDeposito = "";
+let authDeposito = {};
+let compartimentosLivres = [];
+let mapaCompartimentos = [];
+let tamanhoSelecionado = "";
+let depositoPendente = {};
+let idleTimer = null;
+let contagemTimer = null;
+let pollPortaTimer = null;
+let sugestoesTimer = null;
+let fecharSugestoesTimer = null;
+let moradorSelecionado = null;
+const IDLE_MS = 60000;
+const PIN_TAMANHO = 4;
+
+function mostrarTela(id){
+    document.querySelectorAll(".tela").forEach(t => t.classList.remove("tela-ativa"));
+    document.getElementById(id).classList.add("tela-ativa");
+    resetIdle();
+}
+
+function irInicio(){
+    limpar();
+    limparPin();
+    pararPollDeposito();
+    depositoPendente = {};
+    document.getElementById("erro-retirar").classList.remove("visivel");
+    if(contagemTimer) clearInterval(contagemTimer);
+    mostrarTela("tela-inicio");
+}
+
+function irDepositoAuth(){
+    authDeposito = {};
+    pinDeposito = "";
+    compartimentosLivres = [];
+    pararPollDeposito();
+    depositoPendente = {};
+    document.getElementById("erro-deposito-pin").classList.remove("visivel");
+    document.getElementById("erro-deposito-auth").classList.remove("visivel");
+    if(SEM_PIN){
+        carregarCompartimentosLivres("erro-deposito");
+        return;
+    }
+    if(USA_PIN){
+        atualizarPinDisplay();
+        mostrarTela("tela-deposito-pin");
+    } else {
+        mostrarTela("tela-deposito-auth");
+    }
+}
+
+function irDepositoVoltar(){
+    pararPollDeposito();
+    if(SEM_PIN) irInicio();
+    else if(USA_PIN){
+        pinDeposito = "";
+        atualizarPinDisplay();
+        mostrarTela("tela-deposito-pin");
+    } else {
+        mostrarTela("tela-deposito-auth");
+    }
+}
+
+function authPayload(){
+    const p = { armario_id: ARMARIO_ID };
+    if(authDeposito.pin) p.pin = authDeposito.pin;
+    if(authDeposito.operador_email) p.operador_email = authDeposito.operador_email;
+    if(authDeposito.operador_senha) p.operador_senha = authDeposito.operador_senha;
+    return p;
+}
+
+function atualizarPinDisplay(){
+    const el = document.getElementById("pin-display");
+    if(!el) return;
+    el.textContent = pinDeposito.padEnd(PIN_TAMANHO, "_").split("").join(" ");
+}
+
+function digitarPin(n){
+    if(pinDeposito.length >= PIN_TAMANHO) return;
+    pinDeposito += n;
+    atualizarPinDisplay();
+    document.getElementById("erro-deposito-pin").classList.remove("visivel");
+    if(pinDeposito.length === PIN_TAMANHO) setTimeout(validarPinDeposito, 200);
+}
+
+function limparPin(){ pinDeposito = ""; atualizarPinDisplay(); }
+function backspacePin(){ pinDeposito = pinDeposito.slice(0, -1); atualizarPinDisplay(); }
+
+function validarPinDeposito(){
+    authDeposito = { pin: pinDeposito };
+    carregarCompartimentosLivres("erro-deposito-pin");
+}
+
+function continuarDepositoLogin(){
+    authDeposito = {
+        operador_email: document.getElementById("dep-operador-email").value.trim(),
+        operador_senha: document.getElementById("dep-operador-senha").value,
+    };
+    if(!authDeposito.operador_email || !authDeposito.operador_senha){
+        const el = document.getElementById("erro-deposito-auth");
+        el.textContent = "Informe e-mail e senha do operador.";
+        el.classList.add("visivel");
+        return;
+    }
+    carregarCompartimentosLivres("erro-deposito-auth");
+}
+
+function carregarCompartimentosLivres(erroId){
+    fetch("/totem/compartimentos-livres", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(authPayload())
+    })
+    .then(r => r.json().then(d => ({ok: r.ok, d})))
+    .then(({ok, d}) => {
+        if(!ok){ throw new Error(d.erro || "Não autorizado."); }
+        compartimentosLivres = d.livres || d;
+        mapaCompartimentos = d.mapa || compartimentosLivres;
+        if(Array.isArray(d) && !d.livres){ compartimentosLivres = d; mapaCompartimentos = d; }
+        tamanhoSelecionado = "";
+        document.getElementById("dep-tamanho").value = "";
+        document.getElementById("dep-compartimento").value = "";
+        document.getElementById("dep-cliente").value = "";
+        document.getElementById("dep-telefone").value = "";
+        document.getElementById("dep-usuario-id").value = "";
+        moradorSelecionado = null;
+        document.getElementById("porta-auto-msg").textContent = "";
+        atualizarContagemTamanhos();
+        renderMapaLivres();
+        document.getElementById("erro-deposito").classList.remove("visivel");
+        atualizarBtnDeposito();
+        mostrarTela("tela-deposito");
+    })
+    .catch(e => {
+        const el = document.getElementById(erroId);
+        el.textContent = e.message || "Erro de autenticação.";
+        el.classList.add("visivel");
+        pinDeposito = "";
+        atualizarPinDisplay();
+    });
+}
+
+function normalizarTam(t){ return (t || "M").toUpperCase(); }
+
+function livresDoTamanho(tam){
+    return compartimentosLivres.filter(c => normalizarTam(c.tamanho) === tam);
+}
+
+function atualizarContagemTamanhos(){
+    ["P","M","G","GG"].forEach(tam => {
+        const btn = document.querySelector(`.btn-tamanho[data-tam="${tam}"]`);
+        if(!btn) return;
+        const qtd = livresDoTamanho(tam).length;
+        const el = btn.querySelector(".tam-qtd");
+        if(el) el.textContent = qtd ? `${qtd} livre${qtd > 1 ? "s" : ""}` : "ocupado";
+        btn.disabled = qtd === 0;
+        btn.classList.toggle("sem-livre", qtd === 0);
+    });
+}
+
+function selecionarTamanho(tam){
+    const livres = livresDoTamanho(tam);
+    if(!livres.length){
+        mostrarErroDeposito(`Nenhum compartimento ${tam} livre.`);
+        return;
+    }
+    tamanhoSelecionado = tam;
+    document.getElementById("dep-tamanho").value = tam;
+    document.querySelectorAll(".btn-tamanho").forEach(b => {
+        b.classList.toggle("ativo", b.dataset.tam === tam);
+    });
+    autoAtribuirPorta(tam);
+    document.getElementById("erro-deposito").classList.remove("visivel");
+    atualizarBtnDeposito();
+}
+
+function autoAtribuirPorta(tam){
+    const livres = livresDoTamanho(tam);
+    if(!livres.length){
+        document.getElementById("dep-compartimento").value = "";
+        document.getElementById("porta-auto-msg").textContent = "";
+        renderMapaLivres();
+        return;
+    }
+    const escolhido = livres.sort((a,b) => a.numero - b.numero)[0];
+    document.getElementById("dep-compartimento").value = escolhido.id;
+    document.getElementById("porta-auto-msg").textContent =
+        `Porta #${escolhido.numero} (${tam}) será aberta automaticamente`;
+    renderMapaLivres(escolhido.numero);
+}
+
+function atualizarBtnDeposito(){
+    const cliente = document.getElementById("dep-cliente").value.trim();
+    const temPorta = !!document.getElementById("dep-compartimento").value;
+    const temTam = !!tamanhoSelecionado;
+    const moradorOk = !SOMENTE_CADASTRADO || !!moradorSelecionado;
+    document.getElementById("btn-abrir-porta").disabled = !(cliente && temPorta && temTam && moradorOk);
+}
+
+function onClienteInput(){
+    moradorSelecionado = null;
+    document.getElementById("dep-usuario-id").value = "";
+    atualizarBtnDeposito();
+    const q = document.getElementById("dep-cliente").value.trim();
+    if(sugestoesTimer) clearTimeout(sugestoesTimer);
+    if(!q.length){
+        fecharSugestoes();
+        return;
+    }
+    sugestoesTimer = setTimeout(() => buscarDestinatarios(q), 220);
+}
+
+function buscarDestinatarios(q){
+    let url = "/totem/destinatarios?q=" + encodeURIComponent(q);
+    if(ARMARIO_ID) url += "&armario_id=" + encodeURIComponent(ARMARIO_ID);
+    fetch(url)
+    .then(r => r.json())
+    .then(lista => renderSugestoes(lista || []))
+    .catch(() => fecharSugestoes());
+}
+
+function renderSugestoes(lista){
+    const box = document.getElementById("dep-sugestoes");
+    const input = document.getElementById("dep-cliente");
+    box.innerHTML = "";
+    if(!lista.length){
+        if(SOMENTE_CADASTRADO && input.value.trim().length >= 2){
+            const vazio = document.createElement("div");
+            vazio.className = "autocomplete-vazio";
+            vazio.textContent = "Nenhum morador cadastrado com esse nome";
+            box.appendChild(vazio);
+            const r = input.getBoundingClientRect();
+            box.style.left = r.left + "px";
+            box.style.top = (r.bottom + 4) + "px";
+            box.style.width = r.width + "px";
+            box.classList.add("aberta");
+        } else {
+            box.classList.remove("aberta");
+        }
+        return;
+    }
+    lista.forEach(item => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "autocomplete-item";
+        const tel = item.telefone ? item.telefone : "sem telefone";
+        btn.innerHTML = `<span class="ac-nome">${item.nome}</span><span class="ac-tel">${tel}</span>`;
+        btn.onmousedown = (e) => {
+            e.preventDefault();
+            selecionarDestinatario(item);
+        };
+        box.appendChild(btn);
+    });
+    const r = input.getBoundingClientRect();
+    box.style.left = r.left + "px";
+    box.style.top = (r.bottom + 4) + "px";
+    box.style.width = r.width + "px";
+    box.classList.add("aberta");
+}
+
+function selecionarDestinatario(item){
+    document.getElementById("dep-cliente").value = item.nome;
+    document.getElementById("dep-usuario-id").value = item.id || "";
+    moradorSelecionado = item;
+    if(item.telefone){
+        document.getElementById("dep-telefone").value = item.telefone;
+    }
+    fecharSugestoes();
+    atualizarBtnDeposito();
+}
+
+function fecharSugestoes(){
+    const box = document.getElementById("dep-sugestoes");
+    if(box) box.classList.remove("aberta");
+}
+
+function fecharSugestoesAtraso(){
+    if(fecharSugestoesTimer) clearTimeout(fecharSugestoesTimer);
+    fecharSugestoesTimer = setTimeout(fecharSugestoes, 200);
+}
+
+function renderMapaLivres(numeroAtivo){
+    const mapa = document.getElementById("mapa-livres");
+    mapa.innerHTML = "";
+    const porNumero = {};
+    (mapaCompartimentos.length ? mapaCompartimentos : compartimentosLivres).forEach(c => {
+        porNumero[c.numero] = c;
+    });
+    for(let i = 1; i <= MAX_PORTAS; i++){
+        const c = porNumero[i];
+        const d = document.createElement("div");
+        const tam = c ? normalizarTam(c.tamanho) : "";
+        const livre = c && (c.livre !== false);
+        d.className = "porta-celula" + (livre ? " livre" : " ocupada");
+        if(numeroAtivo && i === numeroAtivo) d.classList.add("ativa");
+        d.dataset.numero = String(i);
+        if(c){
+            d.innerHTML = `<span class="porta-num">${i}</span><span class="porta-tam">${tam}</span>`;
+        } else {
+            d.textContent = "—";
+        }
+        mapa.appendChild(d);
+    }
+}
+
+function pararPollDeposito(){
+    if(pollPortaTimer){
+        clearInterval(pollPortaTimer);
+        pollPortaTimer = null;
+    }
+}
+
+function confirmarDeposito(){
+    pararPollDeposito();
+    const cliente = document.getElementById("dep-cliente").value.trim();
+    const telefone = document.getElementById("dep-telefone").value.trim();
+    const compartimento_id = document.getElementById("dep-compartimento").value;
+    const tamanho = document.getElementById("dep-tamanho").value;
+    if(!tamanho){
+        mostrarErroDeposito("Selecione o tamanho P, M, G ou GG.");
+        return;
+    }
+    if(!compartimento_id){
+        mostrarErroDeposito(`Nenhum compartimento ${tamanho} livre.`);
+        return;
+    }
+    if(!cliente){
+        mostrarErroDeposito("Informe o destinatário.");
+        return;
+    }
+    if(SOMENTE_CADASTRADO && !moradorSelecionado){
+        mostrarErroDeposito("Selecione um morador cadastrado na lista.");
+        return;
+    }
+    if(SOMENTE_CADASTRADO && moradorSelecionado){
+        const uid = document.getElementById("dep-usuario-id").value;
+        if(!uid || String(moradorSelecionado.id || "") !== String(uid)){
+            mostrarErroDeposito("Selecione novamente o morador na lista.");
+            return;
+        }
+        if(cliente.toLowerCase() !== (moradorSelecionado.nome || "").toLowerCase()){
+            mostrarErroDeposito("Nome alterado — selecione o morador na lista.");
+            return;
+        }
+    }
+    const body = Object.assign({}, authPayload(), {
+        cliente, telefone, compartimento_id, tamanho,
+        usuario_id: document.getElementById("dep-usuario-id").value || "",
+        aguardar_fechamento: "1",
+    });
+    fetch("/totem/depositar", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(body)
+    })
+    .then(r => r.json().then(d => ({ok: r.ok, d})))
+    .then(({ok, d}) => {
+        if(ok && d.sucesso){
+            depositoPendente = d;
+            irAguardandoPorta(d);
+        } else {
+            mostrarErroDeposito(d.mensagem || "Erro ao depositar.");
+        }
+    })
+    .catch(() => mostrarErroDeposito("Sem conexão com o servidor."));
+}
+
+function irAguardandoPorta(data){
+    document.getElementById("aguardando-porta").textContent = data.compartimento || "—";
+    document.getElementById("aguardando-tamanho").textContent = data.tamanho ? `Tamanho ${data.tamanho}` : "";
+    document.getElementById("aguardando-cliente").textContent = data.cliente ? "Para: " + data.cliente : "";
+    document.getElementById("erro-aguardando").classList.remove("visivel");
+    mostrarTela("tela-deposito-aguardando");
+    if(pollPortaTimer) clearInterval(pollPortaTimer);
+    pollPortaTimer = setInterval(verificarPortaFechada, 2000);
+}
+
+function verificarPortaFechada(){
+    if(!depositoPendente.compartimento_id) return;
+    fetch("/totem/porta/" + depositoPendente.compartimento_id + "/status")
+    .then(r => r.json())
+    .then(d => {
+        const aviso = document.getElementById("sensor-aviso");
+        if(aviso){
+            if(d.sensor){
+                aviso.textContent = d.fechada
+                    ? "Porta fechada detectada — concluindo..."
+                    : "Feche a porta para concluir o depósito";
+            } else {
+                aviso.textContent = "Sensor indisponível — use o botão abaixo";
+            }
+        }
+        if(d.sensor && d.fechada) concluirDeposito(true);
+    })
+    .catch(() => {});
+}
+
+function concluirDeposito(auto){
+    if(!depositoPendente.encomenda_id){
+        const el = document.getElementById("erro-aguardando");
+        if(el){
+            el.textContent = "Depósito inválido — recomece o fluxo.";
+            el.classList.add("visivel");
+        }
+        return;
+    }
+    pararPollDeposito();
+    const body = Object.assign({}, authPayload(), {
+        encomenda_id: depositoPendente.encomenda_id,
+    });
+    fetch("/totem/depositar/concluir", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(body)
+    })
+    .then(r => r.json().then(d => ({ok: r.ok, d})))
+    .then(({ok, d}) => {
+        if(ok && d.sucesso){
+            irSucesso(Object.assign({}, d, {modo: "deposito", mensagem: d.mensagem}));
+        } else {
+            const el = document.getElementById("erro-aguardando");
+            el.textContent = d.mensagem || "Erro ao concluir.";
+            el.classList.add("visivel");
+            if(!auto) pollPortaTimer = setInterval(verificarPortaFechada, 2000);
+        }
+    })
+    .catch(() => {
+        const el = document.getElementById("erro-aguardando");
+        el.textContent = "Sem conexão com o servidor.";
+        el.classList.add("visivel");
+    });
+}
+
+function mostrarErroDeposito(msg){
+    const el = document.getElementById("erro-deposito");
+    el.textContent = msg;
+    el.classList.add("visivel");
+}
+
+function irRetirar(){
+    mostrarTela("tela-retirar");
+    limpar();
+}
+
+function mostrarAjuda(){
+    document.getElementById("ajuda-overlay").classList.add("ativa");
+}
+
+function fecharAjuda(){
+    document.getElementById("ajuda-overlay").classList.remove("ativa");
+}
+
+function resetIdle(){
+    if(idleTimer) clearTimeout(idleTimer);
+    idleTimer = setTimeout(irInicio, IDLE_MS);
+}
+
+function beepSucesso(){
+    try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const o = ctx.createOscillator();
+        const g = ctx.createGain();
+        o.connect(g); g.connect(ctx.destination);
+        o.frequency.value = 880;
+        g.gain.value = 0.08;
+        o.start();
+        o.stop(ctx.currentTime + 0.15);
+    } catch(e) {}
+}
+
+function renderMapaPortas(numeroAtivo){
+    const mapa = document.getElementById("mapa-portas");
+    mapa.innerHTML = "";
+    for(let i = 1; i <= MAX_PORTAS; i++){
+        const d = document.createElement("div");
+        d.className = "porta-celula" + (i === numeroAtivo ? " ativa" : "");
+        d.textContent = i;
+        mapa.appendChild(d);
+    }
+}
+
+function atualizarDisplay(){
+    document.getElementById("display").textContent =
+        codigo.padEnd(6, "_").split("").join(" ");
+}
+
+function digitar(n){
+    if(codigo.length >= 6) return;
+    codigo += n;
+    atualizarDisplay();
+    document.getElementById("erro-retirar").classList.remove("visivel");
+    if(codigo.length === 6) setTimeout(confirmar, 250);
+}
+
+function limpar(){ codigo = ""; atualizarDisplay(); }
+function backspace(){ codigo = codigo.slice(0, -1); atualizarDisplay(); }
+
+let erroRetirarTimer = null;
+
+function mostrarErro(msg){
+    const el = document.getElementById("erro-retirar");
+    el.textContent = msg;
+    el.classList.add("visivel");
+    if(erroRetirarTimer) clearTimeout(erroRetirarTimer);
+    erroRetirarTimer = setTimeout(() => {
+        el.classList.remove("visivel");
+        codigo = "";
+        atualizarDisplay();
+    }, 8000);
+}
+
+function irSucesso(data){
+    const num = parseInt(data.compartimento, 10);
+    const deposito = data.modo === "deposito";
+    document.getElementById("sucesso-titulo").textContent = deposito ? "Depósito concluído!" : "Porta aberta!";
+    document.getElementById("sucesso-label").textContent = deposito ? "Compartimento" : "Retire em";
+    document.getElementById("sucesso-cliente").textContent = data.cliente ? (deposito ? "Para: " + data.cliente : "Olá, " + data.cliente) : "";
+    document.getElementById("sucesso-msg").textContent = deposito ? (data.mensagem || "Morador notificado por WhatsApp.") : "";
+    document.getElementById("sucesso-porta").textContent = data.compartimento || "—";
+    document.getElementById("sucesso-dica").textContent = deposito
+        ? "Encomenda registrada com sucesso"
+        : "Feche a porta ao terminar";
+    renderMapaPortas(num);
+    beepSucesso();
+    mostrarTela("tela-sucesso");
+
+    let s = 15;
+    document.getElementById("segundos").textContent = s;
+    if(contagemTimer) clearInterval(contagemTimer);
+    contagemTimer = setInterval(() => {
+        s--;
+        document.getElementById("segundos").textContent = s;
+        if(s <= 0) irInicio();
+    }, 1000);
+}
+
+function confirmar(){
+    if(codigo.length !== 6){
+        mostrarErro("Digite os 6 dígitos.");
+        return;
+    }
+
+    let body = "codigo=" + encodeURIComponent(codigo);
+    if(ARMARIO_ID) body += "&armario_id=" + encodeURIComponent(ARMARIO_ID);
+
+    fetch("/totem/retirar", {
+        method: "POST",
+        headers: {"Content-Type": "application/x-www-form-urlencoded"},
+        body: body
+    })
+    .then(async r => {
+        const data = await r.json();
+        if(!r.ok && r.status === 429){
+            mostrarErro(data.mensagem || "Aguarde e tente novamente.");
+            codigo = ""; atualizarDisplay();
+            return;
+        }
+        if(data.sucesso){
+            if(data.aviso){
+                data.mensagem = data.aviso;
+            }
+            irSucesso(data);
+        }
+        else {
+            mostrarErro(data.mensagem || "Código inválido.");
+        }
+    })
+    .catch(() => {
+        mostrarErro("Sem conexão com o servidor.");
+        codigo = "";
+        atualizarDisplay();
+    });
+}
+
+document.addEventListener("keydown", e => {
+    if(document.getElementById("tela-retirar").classList.contains("tela-ativa")){
+        if(e.key >= "0" && e.key <= "9") digitar(e.key);
+        if(e.key === "Backspace") backspace();
+        if(e.key === "Enter") confirmar();
+        if(e.key === "Escape") irInicio();
+        return;
+    }
+    if(document.getElementById("tela-deposito-pin").classList.contains("tela-ativa")){
+        if(e.key >= "0" && e.key <= "9") digitarPin(e.key);
+        if(e.key === "Backspace") backspacePin();
+        if(e.key === "Escape") irInicio();
+    }
+});
+
+document.addEventListener("click", resetIdle);
+document.addEventListener("touchstart", resetIdle);
+resetIdle();
+
+if(ARMARIO_ID && !document.querySelector(".totem-select")){
+    document.body.requestFullscreen && document.documentElement.addEventListener("dblclick", () => {
+        if(!document.fullscreenElement) document.documentElement.requestFullscreen().catch(()=>{});
+    });
+}
+</script>
+
+</body>
+</html>

@@ -33,7 +33,8 @@
         </header>
 
         <!-- Sidebar -->
-        <aside class="sidebar-container">
+        <div class="sidebar-overlay" id="sidebarOverlay"></div>
+        <aside class="sidebar-container" id="sidebarContainer">
             {% include 'layout/sidebar.html' %}
         </aside>
 
@@ -49,6 +50,26 @@
 
     <!-- JQuery -->
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+    <script>
+    (function(){
+        var btn = document.getElementById('btnMenuMobile');
+        var sidebar = document.getElementById('sidebarContainer');
+        var overlay = document.getElementById('sidebarOverlay');
+        if(!btn || !sidebar) return;
+
+        function abrir(){ sidebar.classList.add('open'); overlay.classList.add('open'); }
+        function fechar(){ sidebar.classList.remove('open'); overlay.classList.remove('open'); }
+
+        btn.addEventListener('click', function(){
+            sidebar.classList.contains('open') ? fechar() : abrir();
+        });
+        overlay.addEventListener('click', fechar);
+        sidebar.querySelectorAll('a').forEach(function(a){
+            a.addEventListener('click', fechar);
+        });
+    })();
+    </script>
 
     <!-- Scripts específicos -->
     {% block scripts %}
