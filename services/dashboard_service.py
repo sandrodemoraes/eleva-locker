@@ -1,3 +1,4 @@
+from db.connection import get_engine
 from repositories.usuario_repository import UsuarioRepository
 from repositories.armario_repository import ArmarioRepository
 from repositories.compartimento_repository import CompartimentoRepository
@@ -15,9 +16,13 @@ class DashboardService:
         site_id = get_site_id()
         Esp32Repository.marcar_offline_expirados()
 
+        armarios = ArmarioRepository.contar(site_id)
+        armarios_global = ArmarioRepository.contar(None)
+
         return {
             "usuarios": len(UsuarioRepository.listar()),
-            "armarios": ArmarioRepository.contar(site_id),
+            "armarios": armarios,
+            "armarios_global": armarios_global,
             "compartimentos": CompartimentoRepository.contar(site_id),
             "encomendas": EncomendaRepository.contar(site_id=site_id),
             "encomendas_pendentes": EncomendaRepository.contar_pendentes(site_id),
@@ -25,4 +30,5 @@ class DashboardService:
             "esp32_total": Esp32Repository.contar(site_id),
             "notificacoes_hoje": NotificacaoRepository.contar_hoje(),
             "site_id": site_id,
+            "db_engine": get_engine(),
         }

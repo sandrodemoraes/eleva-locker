@@ -8,7 +8,25 @@
 
 <p style="color:#666; margin-top:10px;">
     Painel Administrativo do ELEVA LOCKER
+    <span style="font-size:12px;margin-left:8px;padding:2px 8px;border-radius:6px;background:#eee;">
+        Banco: {{ stats.db_engine|upper }}
+    </span>
 </p>
+
+{% if stats.armarios == 0 and stats.armarios_global > 0 and stats.site_id %}
+<div style="margin:12px 0;padding:12px 16px;border-radius:8px;background:#fff3cd;border:1px solid #ffc107;color:#664d03;">
+    Filtro de site ativo: existem {{ stats.armarios_global }} armário(s) no banco, mas nenhum neste site.
+    Selecione <strong>Todos os sites</strong> no menu superior ou rode <code>tools\consertar_bancada.bat</code>.
+</div>
+{% elif stats.armarios == 0 and stats.db_engine == 'postgresql' %}
+<div style="margin:12px 0;padding:12px 16px;border-radius:8px;background:#f8d7da;border:1px solid #f5c2c7;color:#842029;">
+    PostgreSQL ativo — na bancada use SQLite. Rode <code>tools\consertar_bancada.bat</code> e reinicie o servidor.
+</div>
+{% elif stats.armarios == 0 %}
+<div style="margin:12px 0;padding:12px 16px;border-radius:8px;background:#f8d7da;border:1px solid #f5c2c7;color:#842029;">
+    Nenhum armário no banco. Rode <code>tools\consertar_bancada.bat</code> na pasta <code>C:\ElevaLocker</code>.
+</div>
+{% endif %}
 
 <div class="cards">
 

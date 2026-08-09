@@ -31,6 +31,10 @@ echo   Ctrl+C para parar o servidor
 echo ============================================================
 echo.
 
+REM Bancada: SQLite obrigatorio (nao usar Postgres do Docker)
+set ELEVA_BANCADA=1
+set DATABASE_URL=
+
 %PYTHON% app.py
 
 pause
