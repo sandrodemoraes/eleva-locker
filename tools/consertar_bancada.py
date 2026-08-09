@@ -156,6 +156,9 @@ def main():
         return 1
     limpar()
     token()
+    print("\n[6b] Moradores (autocomplete totem)...")
+    run([sys.executable, "tools/restaurar_moradores.py"])
+
     if not verificar_banco():
         return 1
 

@@ -263,6 +263,9 @@ def main():
     if not args.sem_limpar:
         limpar_teste()
 
+    print("\n[6c] Moradores (autocomplete totem)...")
+    run([sys.executable, "tools/restaurar_moradores.py"])
+
     if args.no_restart:
         print("\n    Servidor NÃO reiniciado (--no-restart).")
         print("    Depois: python app.py")
