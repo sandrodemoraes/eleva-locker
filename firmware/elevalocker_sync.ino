@@ -46,6 +46,9 @@ const int SENSOR_GPIO[] = {32, 33, 12, 13, 14, 15, 26, 4};
 const int SENSOR_GPIO_LEN = 8;
 const int RELAY_GPIO_LEN  = 8;
 
+// Placa BESTER 8ch: muitas usam LOW=ligado. Se relé não clica, mude para true e regrave.
+const bool RELE_ATIVO_LOW = true;
+
 // ============ INTERNOS ============
 
 WebServer server(HTTP_PORT);
@@ -147,10 +150,18 @@ int gpioDoRele(int rele, int gpioServidor) {
   return -1;
 }
 
+int nivelReleLigado() {
+  return RELE_ATIVO_LOW ? LOW : HIGH;
+}
+
+int nivelReleDesligado() {
+  return RELE_ATIVO_LOW ? HIGH : LOW;
+}
+
 void iniciarRele(int gpio, unsigned long duracaoMs) {
   if (gpio < 0) return;
   pinMode(gpio, OUTPUT);
-  digitalWrite(gpio, HIGH);
+  digitalWrite(gpio, nivelReleLigado());
   gpioAtivo = gpio;
   releAte = millis() + duracaoMs;
   Serial.printf("Relé GPIO%d ON por %lums\n", gpio, duracaoMs);
@@ -158,7 +169,7 @@ void iniciarRele(int gpio, unsigned long duracaoMs) {
 
 void atualizarRele() {
   if (gpioAtivo >= 0 && millis() >= releAte) {
-    digitalWrite(gpioAtivo, LOW);
+    digitalWrite(gpioAtivo, nivelReleDesligado());
     Serial.printf("Relé GPIO%d OFF\n", gpioAtivo);
     gpioAtivo = -1;
     releAtivo = -1;
@@ -212,7 +223,7 @@ void iniciarRelesSaida() {
   for (int i = 0; i < RELAY_GPIO_LEN; i++) {
     int g = GPIO_BASE[i];
     pinMode(g, OUTPUT);
-    digitalWrite(g, LOW);
+    digitalWrite(g, nivelReleDesligado());
   }
 }
 
