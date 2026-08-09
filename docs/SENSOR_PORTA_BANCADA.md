@@ -1,5 +1,7 @@
 # Sensor de porta — 8 compartimentos (BESTER 8ch)
 
+> **Diagrama visual:** [esp32-8portas-pinout.svg](diagramas/esp32-8portas-pinout.svg) · [Abrir no navegador](diagramas/esp32-8portas-pinout.html)
+
 > Fechadura 12 V com **2 fios de sensor** (NC).  
 > **Porta fechada** = fios em curto → GPIO **LOW**  
 > **Porta aberta** = fios abertos → GPIO **HIGH** (`INPUT_PULLUP`)

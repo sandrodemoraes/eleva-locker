@@ -1,0 +1,174 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 720" font-family="'Segoe UI', Arial, sans-serif">
+  <defs>
+    <linearGradient id="espGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#2d3748"/>
+      <stop offset="100%" stop-color="#1a202c"/>
+    </linearGradient>
+    <filter id="shadow" x="-2%" y="-2%" width="104%" height="104%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.25"/>
+    </filter>
+  </defs>
+
+  <!-- TÌtulo -->
+  <text x="460" y="36" text-anchor="middle" font-size="22" font-weight="700" fill="#134736">ELEVA LOCKER  ESP32 + Placa BESTER 8ch</text>
+  <text x="460" y="58" text-anchor="middle" font-size="13" fill="#64748b">Mapa lÛgico: Porta í RelÈ í GPIO saÌda | Sensor í GPIO entrada</text>
+
+  <!-- Placa ESP32 -->
+  <g filter="url(#shadow)">
+    <rect x="310" y="90" width="300" height="420" rx="12" fill="url(#espGrad)" stroke="#4a5568" stroke-width="2"/>
+    <rect x="370" y="110" width="180" height="28" rx="4" fill="#718096"/>
+    <text x="460" y="129" text-anchor="middle" font-size="11" font-weight="600" fill="#fff">ESP32 DevKit</text>
+    <text x="460" y="165" text-anchor="middle" font-size="10" fill="#a0aec0">WiFi ∑ USB ∑ 3.3V logic</text>
+    <!-- Chip decorativo -->
+    <rect x="395" y="190" width="130" height="130" rx="6" fill="#4a5568" stroke="#718096"/>
+    <text x="460" y="258" text-anchor="middle" font-size="11" fill="#cbd5e0">ESP32</text>
+    <text x="460" y="400" text-anchor="middle" font-size="9" fill="#718096">GPIO 25  N√O USAR</text>
+    <text x="460" y="475" text-anchor="middle" font-size="10" fill="#68d391">GND comum ê sensores + fonte 12V ()</text>
+  </g>
+
+  <!-- Pinos esquerda (saÌdas relÈ) -->
+  <g font-size="10">
+    <!-- Porta 1 -->
+    <line x1="310" y1="130" x2="180" y2="130" stroke="#2563eb" stroke-width="2"/>
+    <circle cx="310" cy="130" r="5" fill="#2563eb"/>
+    <rect x="20" y="115" width="155" height="30" rx="6" fill="#dbeafe" stroke="#2563eb"/>
+    <text x="97" y="128" text-anchor="middle" font-weight="700" fill="#1e40af">PORTA 1 ∑ P</text>
+    <text x="97" y="140" text-anchor="middle" fill="#1e3a8a">RelÈ R1 í GPIO 16</text>
+
+    <!-- Porta 2 -->
+    <line x1="310" y1="170" x2="180" y2="170" stroke="#2563eb" stroke-width="2"/>
+    <circle cx="310" cy="170" r="5" fill="#2563eb"/>
+    <rect x="20" y="155" width="155" height="30" rx="6" fill="#dbeafe" stroke="#2563eb"/>
+    <text x="97" y="168" text-anchor="middle" font-weight="700" fill="#1e40af">PORTA 2 ∑ P</text>
+    <text x="97" y="180" text-anchor="middle" fill="#1e3a8a">RelÈ R2 í GPIO 17</text>
+
+    <!-- Porta 3 -->
+    <line x1="310" y1="210" x2="180" y2="210" stroke="#2563eb" stroke-width="2"/>
+    <circle cx="310" cy="210" r="5" fill="#2563eb"/>
+    <rect x="20" y="195" width="155" height="30" rx="6" fill="#dbeafe" stroke="#2563eb"/>
+    <text x="97" y="208" text-anchor="middle" font-weight="700" fill="#1e40af">PORTA 3 ∑ M</text>
+    <text x="97" y="220" text-anchor="middle" fill="#1e3a8a">RelÈ R3 í GPIO 18</text>
+
+    <!-- Porta 4 -->
+    <line x1="310" y1="250" x2="180" y2="250" stroke="#2563eb" stroke-width="2"/>
+    <circle cx="310" cy="250" r="5" fill="#2563eb"/>
+    <rect x="20" y="235" width="155" height="30" rx="6" fill="#dbeafe" stroke="#2563eb"/>
+    <text x="97" y="248" text-anchor="middle" font-weight="700" fill="#1e40af">PORTA 4 ∑ P</text>
+    <text x="97" y="260" text-anchor="middle" fill="#1e3a8a">RelÈ R4 í GPIO 19</text>
+
+    <!-- Porta 5 -->
+    <line x1="310" y1="310" x2="180" y2="310" stroke="#2563eb" stroke-width="2"/>
+    <circle cx="310" cy="310" r="5" fill="#2563eb"/>
+    <rect x="20" y="295" width="155" height="30" rx="6" fill="#dbeafe" stroke="#2563eb"/>
+    <text x="97" y="308" text-anchor="middle" font-weight="700" fill="#1e40af">PORTA 5 ∑ M</text>
+    <text x="97" y="320" text-anchor="middle" fill="#1e3a8a">RelÈ R5 í GPIO 21</text>
+
+    <!-- Porta 6 -->
+    <line x1="310" y1="350" x2="180" y2="350" stroke="#2563eb" stroke-width="2"/>
+    <circle cx="310" cy="350" r="5" fill="#2563eb"/>
+    <rect x="20" y="335" width="155" height="30" rx="6" fill="#dbeafe" stroke="#2563eb"/>
+    <text x="97" y="348" text-anchor="middle" font-weight="700" fill="#1e40af">PORTA 6 ∑ M</text>
+    <text x="97" y="360" text-anchor="middle" fill="#1e3a8a">RelÈ R6 í GPIO 22</text>
+
+    <!-- Porta 7 -->
+    <line x1="310" y1="390" x2="180" y2="390" stroke="#2563eb" stroke-width="2"/>
+    <circle cx="310" cy="390" r="5" fill="#2563eb"/>
+    <rect x="20" y="375" width="155" height="30" rx="6" fill="#dbeafe" stroke="#2563eb"/>
+    <text x="97" y="388" text-anchor="middle" font-weight="700" fill="#1e40af">PORTA 7 ∑ G</text>
+    <text x="97" y="400" text-anchor="middle" fill="#1e3a8a">RelÈ R7 í GPIO 23</text>
+
+    <!-- Porta 8 -->
+    <line x1="310" y1="430" x2="180" y2="430" stroke="#2563eb" stroke-width="2"/>
+    <circle cx="310" cy="430" r="5" fill="#2563eb"/>
+    <rect x="20" y="415" width="155" height="30" rx="6" fill="#dbeafe" stroke="#2563eb"/>
+    <text x="97" y="428" text-anchor="middle" font-weight="700" fill="#1e40af">PORTA 8 ∑ GG</text>
+    <text x="97" y="440" text-anchor="middle" fill="#1e3a8a">RelÈ R8 í GPIO 27</text>
+  </g>
+
+  <!-- Pinos direita (entradas sensor) -->
+  <g font-size="10">
+    <!-- Sensor 1 -->
+    <line x1="610" y1="130" x2="740" y2="130" stroke="#059669" stroke-width="2"/>
+    <circle cx="610" cy="130" r="5" fill="#059669"/>
+    <rect x="745" y="115" width="165" height="30" rx="6" fill="#d1fae5" stroke="#059669"/>
+    <text x="827" y="128" text-anchor="middle" font-weight="700" fill="#065f46">SENSOR S1</text>
+    <text x="827" y="140" text-anchor="middle" fill="#047857">GPIO 32 í GND</text>
+
+    <!-- Sensor 2 -->
+    <line x1="610" y1="170" x2="740" y2="170" stroke="#059669" stroke-width="2"/>
+    <circle cx="610" cy="170" r="5" fill="#059669"/>
+    <rect x="745" y="155" width="165" height="30" rx="6" fill="#d1fae5" stroke="#059669"/>
+    <text x="827" y="168" text-anchor="middle" font-weight="700" fill="#065f46">SENSOR S2</text>
+    <text x="827" y="180" text-anchor="middle" fill="#047857">GPIO 33 í GND</text>
+
+    <!-- Sensor 3 -->
+    <line x1="610" y1="210" x2="740" y2="210" stroke="#059669" stroke-width="2"/>
+    <circle cx="610" cy="210" r="5" fill="#059669"/>
+    <rect x="745" y="195" width="165" height="30" rx="6" fill="#d1fae5" stroke="#059669"/>
+    <text x="827" y="208" text-anchor="middle" font-weight="700" fill="#065f46">SENSOR S3</text>
+    <text x="827" y="220" text-anchor="middle" fill="#047857">GPIO 12 í GND</text>
+
+    <!-- Sensor 4 -->
+    <line x1="610" y1="250" x2="740" y2="250" stroke="#059669" stroke-width="2"/>
+    <circle cx="610" cy="250" r="5" fill="#059669"/>
+    <rect x="745" y="235" width="165" height="30" rx="6" fill="#d1fae5" stroke="#059669"/>
+    <text x="827" y="248" text-anchor="middle" font-weight="700" fill="#065f46">SENSOR S4</text>
+    <text x="827" y="260" text-anchor="middle" fill="#047857">GPIO 13 í GND</text>
+
+    <!-- Sensor 5 -->
+    <line x1="610" y1="310" x2="740" y2="310" stroke="#059669" stroke-width="2"/>
+    <circle cx="610" cy="310" r="5" fill="#059669"/>
+    <rect x="745" y="295" width="165" height="30" rx="6" fill="#d1fae5" stroke="#059669"/>
+    <text x="827" y="308" text-anchor="middle" font-weight="700" fill="#065f46">SENSOR S5</text>
+    <text x="827" y="320" text-anchor="middle" fill="#047857">GPIO 14 í GND</text>
+
+    <!-- Sensor 6 -->
+    <line x1="610" y1="350" x2="740" y2="350" stroke="#059669" stroke-width="2"/>
+    <circle cx="610" cy="350" r="5" fill="#059669"/>
+    <rect x="745" y="335" width="165" height="30" rx="6" fill="#d1fae5" stroke="#059669"/>
+    <text x="827" y="348" text-anchor="middle" font-weight="700" fill="#065f46">SENSOR S6</text>
+    <text x="827" y="360" text-anchor="middle" fill="#047857">GPIO 15 í GND</text>
+
+    <!-- Sensor 7 -->
+    <line x1="610" y1="390" x2="740" y2="390" stroke="#059669" stroke-width="2"/>
+    <circle cx="610" cy="390" r="5" fill="#059669"/>
+    <rect x="745" y="375" width="165" height="30" rx="6" fill="#d1fae5" stroke="#059669"/>
+    <text x="827" y="388" text-anchor="middle" font-weight="700" fill="#065f46">SENSOR S7</text>
+    <text x="827" y="400" text-anchor="middle" fill="#047857">GPIO 26 í GND</text>
+
+    <!-- Sensor 8 -->
+    <line x1="610" y1="430" x2="740" y2="430" stroke="#059669" stroke-width="2"/>
+    <circle cx="610" cy="430" r="5" fill="#059669"/>
+    <rect x="745" y="415" width="165" height="30" rx="6" fill="#d1fae5" stroke="#059669"/>
+    <text x="827" y="428" text-anchor="middle" font-weight="700" fill="#065f46">SENSOR S8</text>
+    <text x="827" y="440" text-anchor="middle" fill="#047857">GPIO 4 í GND</text>
+  </g>
+
+  <!-- Placa BESTER -->
+  <g filter="url(#shadow)">
+    <rect x="120" y="520" width="680" height="90" rx="10" fill="#edf2f7" stroke="#cbd5e0" stroke-width="2"/>
+    <text x="460" y="545" text-anchor="middle" font-size="14" font-weight="700" fill="#2d3748">PLACA REL…S BESTER 8 CANAIS</text>
+    <text x="460" y="565" text-anchor="middle" font-size="11" fill="#4a5568">Entrada: IN1&IN8 ê GPIO 16,17,18,19,21,22,23,27</text>
+    <text x="460" y="583" text-anchor="middle" font-size="11" fill="#4a5568">SaÌda: COM/NO í Fechadura 12V (vermelho + preto) ∑ Fonte 12V 5A+</text>
+    <text x="460" y="601" text-anchor="middle" font-size="10" fill="#718096">Sensores (amarelo/preto ou 2 fios) ligam direto na ESP32  N√O passam pela placa de relÈs</text>
+  </g>
+
+  <!-- Legenda fechadura -->
+  <g>
+    <rect x="120" y="630" width="330" height="75" rx="8" fill="#fffbeb" stroke="#d97706"/>
+    <text x="285" y="652" text-anchor="middle" font-size="12" font-weight="700" fill="#92400e">FECHADURA 12V (cada porta)</text>
+    <text x="285" y="670" text-anchor="middle" font-size="10" fill="#78350f">Vermelho + Preto í RelÈ (12V comutado)</text>
+    <text x="285" y="686" text-anchor="middle" font-size="10" fill="#78350f">Sensor 2 fios í GPIO + GND (NC: fechada=curto)</text>
+  </g>
+
+  <!-- Legenda lÛgica -->
+  <g>
+    <rect x="470" y="630" width="330" height="75" rx="8" fill="#ecfdf5" stroke="#059669"/>
+    <text x="635" y="652" text-anchor="middle" font-size="12" font-weight="700" fill="#065f46">L”GICA SENSOR (INPUT_PULLUP)</text>
+    <text x="635" y="670" text-anchor="middle" font-size="10" fill="#047857">Porta FECHADA í GPIO LOW (fios em curto)</text>
+    <text x="635" y="686" text-anchor="middle" font-size="10" fill="#047857">Porta ABERTA í GPIO HIGH (fios abertos)</text>
+  </g>
+
+  <!-- Tamanhos bancada Matriz -->
+  <text x="460" y="718" text-anchor="middle" font-size="9" fill="#94a3b8">Matriz ELEVA: #14 P ∑ #56 M ∑ #7 G ∑ #8 GG ∑ Firmware elevalocker_sync.ino</text>
+</svg>
