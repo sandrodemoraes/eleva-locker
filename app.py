@@ -34,6 +34,13 @@ app.secret_key = SECRET_KEY
 
 criar_banco()
 
+from db.connection import get_engine
+
+_engine = get_engine()
+print(f"Banco: {_engine.upper()}" + (" (bancada SQLite)" if _engine == "sqlite" else ""))
+if _engine == "postgresql" and os.getenv("ELEVA_BANCADA", "").strip() not in ("1", "true", "yes"):
+    print("⚠ AVISO: PostgreSQL ativo — na bancada defina ELEVA_BANCADA=1 no .env")
+
 if os.getenv("SKIP_BACKUP") != "1":
     try:
         BackupService.criar_backup(forcar=True)

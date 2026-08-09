@@ -123,6 +123,8 @@ class PostgresCursor:
 
 
 def get_engine():
+    if os.getenv("ELEVA_BANCADA", "").strip().lower() in ("1", "true", "yes"):
+        return "sqlite"
     if config.DATABASE_URL and config.DATABASE_URL.startswith("postgres"):
         return "postgresql"
     return "sqlite"

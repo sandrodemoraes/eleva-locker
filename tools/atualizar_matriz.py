@@ -30,8 +30,12 @@ import urllib.request
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(ROOT / "tools"))
 sys.path.insert(0, str(ROOT))
-os.environ.setdefault("SKIP_BACKUP", "1")
+
+from env_bancada import aplicar_bancada_processo, env_subprocess, garantir_bancada_env
+
+aplicar_bancada_processo()
 
 BRANCH_PADRAO = "cursor/fix-retirada-rele-c05c"
 IP_ESP_PADRAO = "192.168.16.162"
@@ -45,6 +49,7 @@ FIRMWARE_DST = ROOT / "firmware" / "elevalocker_sync" / "elevalocker_sync.ino"
 def run(cmd, **kwargs):
     show = cmd if isinstance(cmd, str) else " ".join(str(c) for c in cmd)
     print(f">>> {show}")
+    kwargs.setdefault("env", env_subprocess())
     return subprocess.run(cmd, cwd=ROOT, text=True, **kwargs)
 
 
@@ -155,10 +160,13 @@ def alinhar_token(token, url_servidor):
 
 def reiniciar():
     print("\n[7] Reiniciando servidor...")
-    env = os.environ.copy()
+    env = env_subprocess()
     env.pop("SKIP_BACKUP", None)
     if sys.platform == "win32":
-        cmd = f'start "ELEVA LOCKER" cmd /k "cd /d {ROOT} && python app.py"'
+        cmd = (
+            f'start "ELEVA LOCKER" cmd /k "cd /d {ROOT} && '
+            f'set ELEVA_BANCADA=1 && set DATABASE_URL= && python app.py"'
+        )
         subprocess.Popen(cmd, shell=True, cwd=ROOT, env=env)
         print("    Nova janela: python app.py")
     else:
@@ -234,6 +242,9 @@ def main():
 
     parar()
 
+    print("\n[2b] Modo bancada (SQLite único)...")
+    garantir_bancada_env()
+
     if not backup_obrigatorio():
         return 1
 
@@ -245,6 +256,9 @@ def main():
 
     if not setup_oficial(args.ip_esp):
         print("    AVISO: setup_oficial falhou — verifique acima")
+
+    print("\n[5b] Totem + TOTEM_ARMARIO_ID...")
+    run([sys.executable, "tools/corrigir_totem_armario.py", "--sem-setup"])
 
     if not args.sem_limpar:
         limpar_teste()

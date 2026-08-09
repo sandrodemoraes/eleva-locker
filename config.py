@@ -85,8 +85,13 @@ else:
 
 TOTEM_DEPOSITO_SOMENTE_CADASTRADO = os.getenv("TOTEM_DEPOSITO_SOMENTE_CADASTRADO", "1") == "1"
 
-# Database — sqlite (dev) | postgresql (produção)
+# Bancada local — força SQLite mesmo se DATABASE_URL existir no .env
+ELEVA_BANCADA = os.getenv("ELEVA_BANCADA", "").strip().lower() in ("1", "true", "yes")
+
+# Database — sqlite (dev/bancada) | postgresql (produção)
 DATABASE_URL = os.getenv("DATABASE_URL", "")
+if ELEVA_BANCADA:
+    DATABASE_URL = ""
 DB_ENGINE = os.getenv("DB_ENGINE", "sqlite")
 PAGAMENTO_MODO = os.getenv("PAGAMENTO_MODO", "console")
 PAGAMENTO_API_URL = os.getenv("PAGAMENTO_API_URL", "")

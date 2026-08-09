@@ -19,6 +19,9 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 os.environ.setdefault("SKIP_BACKUP", "1")
+from env_bancada import aplicar_bancada_processo, garantir_bancada_env
+
+aplicar_bancada_processo()
 
 NOME_ARMARIO = "ELEVA Locker Matriz"
 ENV_PATH = ROOT / ".env"
@@ -158,10 +161,7 @@ def main():
     print("  CORRIGIR TOTEM — armário + .env + banco")
     print("=" * 60)
 
-    if args.fix_sqlite:
-        remover_database_url_env()
-        # Forçar recarga dotenv
-        os.environ.pop("DATABASE_URL", None)
+    garantir_bancada_env()
 
     engine = mostrar_banco()
 
