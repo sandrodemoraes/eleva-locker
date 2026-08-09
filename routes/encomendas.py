@@ -110,10 +110,15 @@ def retirar():
             operador=session.get("usuario"),
         )
 
-        flash(
-            f"Retirada confirmada! {resultado['cliente']} — compartimento {resultado['compartimento']}",
-            "success",
+        msg = (
+            f"Retirada confirmada! {resultado['cliente']} — "
+            f"compartimento {resultado['compartimento']}"
         )
+        if not resultado.get("porta_aberta"):
+            aviso = resultado.get("esp32", {}).get("mensagem", "porta não abriu")
+            flash(f"{msg} — ATENÇÃO: {aviso}", "warning")
+        else:
+            flash(msg, "success")
 
     except ValueError as erro:
         flash(str(erro), "warning")

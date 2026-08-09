@@ -742,14 +742,19 @@ function mostrarErro(msg){
 function irSucesso(data){
     const num = parseInt(data.compartimento, 10);
     const deposito = data.modo === "deposito";
-    document.getElementById("sucesso-titulo").textContent = deposito ? "Depósito concluído!" : "Porta aberta!";
+    const portaFalhou = !deposito && data.porta_aberta === false;
+    document.getElementById("sucesso-titulo").textContent = deposito
+        ? "Depósito concluído!"
+        : (portaFalhou ? "Retirada OK — porta não abriu" : "Porta aberta!");
     document.getElementById("sucesso-label").textContent = deposito ? "Compartimento" : "Retire em";
     document.getElementById("sucesso-cliente").textContent = data.cliente ? (deposito ? "Para: " + data.cliente : "Olá, " + data.cliente) : "";
-    document.getElementById("sucesso-msg").textContent = deposito ? (data.mensagem || "Morador notificado por WhatsApp.") : "";
+    document.getElementById("sucesso-msg").textContent = deposito
+        ? (data.mensagem || "Morador notificado por WhatsApp.")
+        : (portaFalhou ? (data.mensagem || "Peça ajuda na portaria ou abra manualmente.") : "");
     document.getElementById("sucesso-porta").textContent = data.compartimento || "—";
     document.getElementById("sucesso-dica").textContent = deposito
         ? "Encomenda registrada com sucesso"
-        : "Feche a porta ao terminar";
+        : (portaFalhou ? "Use o botão Abrir no painel ou abra a porta manualmente" : "Feche a porta ao terminar");
     renderMapaPortas(num);
     beepSucesso();
     mostrarTela("tela-sucesso");
@@ -786,7 +791,7 @@ function confirmar(){
             return;
         }
         if(data.sucesso){
-            if(data.aviso){
+            if(data.porta_aberta === false && data.aviso){
                 data.mensagem = data.aviso;
             }
             irSucesso(data);

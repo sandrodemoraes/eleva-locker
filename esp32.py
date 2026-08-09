@@ -51,6 +51,28 @@ class Esp32Client:
                     "dados": dados,
                 }
 
+        except urllib.error.HTTPError as erro:
+
+            corpo = ""
+            try:
+                corpo = erro.read().decode("utf-8", errors="replace")
+            except Exception:
+                pass
+
+            if erro.code == 403:
+                return {
+                    "sucesso": False,
+                    "mensagem": "Token ESP32 rejeitado — alinhe token do banco com o firmware.",
+                    "http": erro.code,
+                    "dados": corpo,
+                }
+
+            return {
+                "sucesso": False,
+                "mensagem": f"ESP32 respondeu HTTP {erro.code}: {corpo or erro.reason}",
+                "http": erro.code,
+            }
+
         except urllib.error.URLError as erro:
 
             return {
