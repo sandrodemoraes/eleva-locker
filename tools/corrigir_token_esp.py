@@ -54,10 +54,18 @@ def main():
     args = parser.parse_args()
 
     token = args.token.strip()
-    db_path = Path(__file__).resolve().parent.parent / "database" / "elevalocker.db"
-    print(f"Banco: {db_path}")
-
+    from db.connection import get_engine
     from repositories.base_repository import BaseRepository
+
+    engine = get_engine()
+    if engine == "postgresql":
+        import config
+        print(f"Banco: PostgreSQL ({config.DATABASE_URL.split('@')[-1] if config.DATABASE_URL else '?'})")
+    else:
+        from pathlib import Path
+        db_path = Path(__file__).resolve().parent.parent / "database" / "elevalocker.db"
+        print(f"Banco: SQLite ({db_path})")
+
     with BaseRepository.get_connection() as conn:
         esp = conn.execute(
             "SELECT * FROM esp32 WHERE nome = ? LIMIT 1",
@@ -99,7 +107,10 @@ def main():
         print("\n✅ Servidor aceitou o token. Reinicie a ESP ou aguarde sync.")
         return 0
 
-    print("\n❌ Servidor ainda rejeita. Reinicie py app.py após git pull.")
+    print("\n❌ Servidor ainda rejeita — processo na 15000 usa OUTRO banco ou código velho.")
+    print("   Rode: python tools/parar_servidor.py")
+    print("   Confira .env: DATABASE_URL (Postgres) vs sem DATABASE_URL (SQLite)")
+    print("   Depois: python app.py")
     return 1
 
 
