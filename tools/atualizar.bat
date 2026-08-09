@@ -15,8 +15,8 @@ if not defined PYTHON (
 )
 
 echo.
-echo  ELEVA LOCKER — Atualizar Matriz (git + firmware + setup + reinicio)
-echo  Um clique — evita erros de token, banco e firmware antigo
+echo  ELEVA LOCKER — Atualizar Matriz (backup + git + setup + reinicio)
+echo  Backup OBRIGATORIO antes de qualquer alteracao — aborta se falhar
 echo  ==================================================================
 echo.
 

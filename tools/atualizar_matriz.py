@@ -3,8 +3,8 @@
 Atualização simplificada — instalação oficial ELEVA Locker Matriz (8 portas).
 
 Faz em sequência:
-  1. Verificação rápida (opcional)
-  2. Para servidor na 15000
+  1. Para servidor na 15000
+  2. Backup OBRIGATÓRIO (banco + .env) — aborta se falhar
   3. git pull
   4. Sincroniza firmware na pasta Arduino
   5. setup_oficial (armário + ESP + 8 compartimentos)
@@ -65,8 +65,21 @@ def parar():
     parar_porta()
 
 
+def backup_obrigatorio():
+    print("\n[2] Backup OBRIGATÓRIO (banco + .env)...")
+    print("    Se falhar, a atualização é ABORTADA.")
+    r = run([sys.executable, "tools/backup_obrigatorio.py"])
+    if r.returncode != 0:
+        print("\n" + "!" * 60)
+        print("  ATUALIZAÇÃO CANCELADA — backup não concluído.")
+        print("  Corrija e rode: tools\\backup_obrigatorio.bat")
+        print("!" * 60)
+        return False
+    return True
+
+
 def git_pull(branch):
-    print(f"\n[2] Git pull ({branch})...")
+    print(f"\n[3] Git pull ({branch})...")
     run(["git", "fetch", "origin", branch], check=False)
     atual = run(["git", "rev-parse", "--abbrev-ref", "HEAD"], capture_output=True)
     if (atual.stdout or "").strip() != branch:
@@ -82,7 +95,7 @@ def git_pull(branch):
 
 
 def sincronizar_firmware():
-    print("\n[3] Sincronizando firmware Arduino...")
+    print("\n[4] Sincronizando firmware Arduino...")
     if not FIRMWARE_SRC.exists():
         print(f"    ERRO: {FIRMWARE_SRC} não encontrado")
         return False
@@ -96,7 +109,7 @@ def sincronizar_firmware():
 
 
 def setup_oficial(ip_esp):
-    print(f"\n[4] Setup oficial (ESP {ip_esp})...")
+    print(f"\n[5] Setup oficial (ESP {ip_esp})...")
     return run([
         sys.executable, "tools/setup_oficial.py",
         "--ip-esp", ip_esp, "--portas", "8",
@@ -104,12 +117,12 @@ def setup_oficial(ip_esp):
 
 
 def limpar_teste():
-    print("\n[5] Removendo ESP/armário de teste duplicados...")
+    print("\n[6] Removendo ESP/armário de teste duplicados...")
     return run([sys.executable, "tools/limpar_bancada_teste.py"]).returncode == 0
 
 
 def alinhar_token(token, url_servidor):
-    print("\n[7] Token ESP no banco...")
+    print("\n[8] Token ESP no banco...")
     return run([
         sys.executable, "tools/corrigir_token_esp.py",
         "--token", token,
@@ -119,13 +132,15 @@ def alinhar_token(token, url_servidor):
 
 
 def reiniciar():
-    print("\n[6] Reiniciando servidor...")
+    print("\n[7] Reiniciando servidor...")
+    env = os.environ.copy()
+    env.pop("SKIP_BACKUP", None)
     if sys.platform == "win32":
         cmd = f'start "ELEVA LOCKER" cmd /k "cd /d {ROOT} && python app.py"'
-        subprocess.Popen(cmd, shell=True, cwd=ROOT)
+        subprocess.Popen(cmd, shell=True, cwd=ROOT, env=env)
         print("    Nova janela: python app.py")
     else:
-        subprocess.Popen([sys.executable, "app.py"], cwd=ROOT)
+        subprocess.Popen([sys.executable, "app.py"], cwd=ROOT, env=env)
     return True
 
 
@@ -148,6 +163,7 @@ def imprimir_resumo(token):
     print("  ATUALIZAÇÃO MATRIZ — concluída")
     print("=" * 60)
     print(f"""
+  Backup:   backups\\backup_01 (+ D:\\ElevaLockerBackup se D: existir)
   Painel:   http://192.168.16.130:15000/armarios/3
   Totem:    http://192.168.16.130:15000/totem/3
   Bancada:  http://192.168.16.130:15000/esp32/bancada
@@ -188,11 +204,16 @@ def main():
         return 0 if verificar(args.token) else 1
 
     if args.so_firmware:
+        if not backup_obrigatorio():
+            return 1
         ok_fw = sincronizar_firmware()
         verificar(args.token)
         return 0 if ok_fw else 1
 
     parar()
+
+    if not backup_obrigatorio():
+        return 1
 
     if not args.no_git and not git_pull(args.branch):
         return 1
@@ -218,7 +239,7 @@ def main():
     if aguardar_api():
         alinhar_token(args.token, args.url)
 
-    print("\n[8] Verificação final...")
+    print("\n[9] Verificação final...")
     verificar(args.token)
     imprimir_resumo(args.token)
     return 0

@@ -1,6 +1,6 @@
 @echo off
-title ELEVA LOCKER - Atualizar Matriz (1 clique)
-color 0A
+title ELEVA LOCKER - Backup Disco D
+color 0E
 cd /d "%~dp0.."
 
 set "PYTHON="
@@ -15,12 +15,13 @@ if not defined PYTHON (
 )
 
 echo.
-echo  ATUALIZAR MATRIZ — backup + git + firmware + setup + reinicio
-echo  Backup OBRIGATORIO — aborta se falhar
-echo  =====================================================
+echo  BACKUP DISCO D: — rotativo + espelho projeto
+echo  =============================================
 echo.
 
-%PYTHON% tools\atualizar_matriz.py %*
+%PYTHON% tools\backup_disco_d.py %*
+set "RC=%ERRORLEVEL%"
 
 echo.
 pause
+exit /b %RC%

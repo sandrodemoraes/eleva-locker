@@ -10,6 +10,7 @@
 | Situação | Comando |
 |----------|---------|
 | Atualizar tudo (git + banco + reinício) | `tools\atualizar_matriz.bat` |
+| **Backup manual (antes de mexer)** | `tools\backup_obrigatorio.bat` |
 | Só conferir se está OK | `tools\verificar_matriz.bat` |
 | Parar servidor | `tools\parar_servidor.bat` |
 | Diagnóstico rápido | `python tools\diagnostico_bancada.py` |
@@ -41,13 +42,17 @@ tools\atualizar_matriz.bat
 Isso faz automaticamente:
 
 1. Para o servidor na porta 15000  
-2. `git pull` da branch estável  
-3. Copia firmware para pasta Arduino  
-4. `setup_oficial` — armário Matriz + 8 compartimentos  
-5. Remove ESP/armário **Bancada Teste** duplicados  
-6. Reinicia `app.py`  
-7. Alinha token ESP no banco  
-8. Verificação final (`verificar_matriz`)
+2. **Backup OBRIGATÓRIO** — banco + `.env` (aborta se falhar)  
+3. Backup no **D:** se o disco existir  
+4. `git pull` da branch estável  
+5. Copia firmware para pasta Arduino  
+6. `setup_oficial` — armário Matriz + 8 compartimentos  
+7. Remove ESP/armário **Bancada Teste** duplicados  
+8. Reinicia `app.py`  
+9. Alinha token ESP no banco  
+10. Verificação final (`verificar_matriz`)
+
+> **Margem de erro zero:** se o backup falhar, **nada** é alterado depois disso.
 
 ---
 
@@ -84,11 +89,15 @@ TOTEM_DEPOSITO_PIN=2026
 
 ---
 
-## Parar / diagnosticar
+## Parar / diagnosticar / backup
 
 ```cmd
+tools\backup_obrigatorio.bat
 tools\parar_servidor.bat
 tools\qual_servidor.bat
 tools\verificar_matriz.bat
+tools\backup_disco_d.bat
 python tools\diagnostico_bancada.py --token SEU_TOKEN
 ```
+
+Restaurar backup: painel → **Configurações → Restaurar backup #1**
