@@ -153,6 +153,16 @@ def main():
     resultado = Esp32PortasService.sincronizar_compartimentos(esp_id, max_portas)
     print(f"  Compartimentos: {resultado['criados']} criados, {resultado['atualizados']} atualizados")
 
+    with BaseRepository.get_connection() as conn:
+        revinc = conn.execute("""
+            UPDATE usuarios SET armario_id = ?
+            WHERE perfil = 'Usuário' AND status = 1
+              AND (armario_id IS NULL OR armario_id != ?)
+        """, (armario_id, armario_id)).rowcount
+        conn.commit()
+    if revinc:
+        print(f"  Moradores revinculados ao armário: {revinc}")
+
     print("\n" + "=" * 60)
     print("INSTALAÇÃO OFICIAL CONFIGURADA")
     print("=" * 60)

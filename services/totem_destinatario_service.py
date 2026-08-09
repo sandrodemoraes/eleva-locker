@@ -13,7 +13,14 @@ class TotemDestinatarioService:
     def _filtro_armario(armario_id):
         if armario_id is None:
             return "", ()
-        return "AND (u.armario_id IS NULL OR u.armario_id = ?)", (armario_id,)
+        # NULL, mesmo armário, ou armário apagado (id órfão) — morador continua no autocomplete
+        return """
+            AND (
+                u.armario_id IS NULL
+                OR u.armario_id = ?
+                OR u.armario_id NOT IN (SELECT id FROM armarios)
+            )
+        """, (armario_id,)
 
     @staticmethod
     def _digits(telefone):

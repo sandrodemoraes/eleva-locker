@@ -116,9 +116,15 @@ def editar(armario_id):
 def excluir(armario_id):
 
     try:
-        ArmarioService.excluir(armario_id)
+        moradores = ArmarioService.excluir(armario_id)
         LogService.registrar(None, session.get("usuario"), f"Armário #{armario_id} excluído")
-        flash("Armário excluído.", "success")
+        msg = "Armário excluído."
+        if moradores:
+            msg += (
+                f" {moradores} morador(es)/desvinculado(s) — NÃO apagados. "
+                "Revincule em Usuários ou rode tools\\restaurar_moradores.bat"
+            )
+        flash(msg, "success")
     except ValueError as erro:
         flash(str(erro), "warning")
     except Exception:

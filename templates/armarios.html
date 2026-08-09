@@ -67,7 +67,7 @@
                         data-max-portas="{{ a.max_portas or 16 }}">
                         <i class="fa-solid fa-pen"></i>
                     </button>
-                    <form method="POST" action="/armarios/excluir/{{ a.id }}" onsubmit="return confirm('Excluir este armário?')">
+                    <form method="POST" action="/armarios/excluir/{{ a.id }}" onsubmit="return confirm('Excluir armário {{ a.nome }}?\n\nMoradores NÃO são apagados — ficam desvinculados.\nEncomendas ativas bloqueiam a exclusão.')">
                         <button type="submit" class="btn btn-sm btn-danger"><i class="fa-solid fa-trash"></i></button>
                     </form>
                     {% endif %}

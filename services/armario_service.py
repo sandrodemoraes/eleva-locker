@@ -113,7 +113,44 @@ class ArmarioService:
 
         ArmarioService.buscar_por_id(armario_id)
 
-        ArmarioRepository.excluir(armario_id)
+        from repositories.base_repository import BaseRepository
+
+        with BaseRepository.get_connection() as conn:
+            pendentes = conn.execute("""
+                SELECT COUNT(*) AS n FROM encomendas e
+                JOIN compartimentos c ON c.id = e.compartimento
+                WHERE c.armario = ? AND e.status != 'retirada'
+            """, (armario_id,)).fetchone()["n"]
+
+            if pendentes:
+                raise ValueError(
+                    f"Armário tem {pendentes} encomenda(s) ativa(s). "
+                    "Retire ou cancele antes de excluir."
+                )
+
+            moradores = conn.execute("""
+                SELECT COUNT(*) AS n FROM usuarios WHERE armario_id = ?
+            """, (armario_id,)).fetchone()["n"]
+
+            conn.execute(
+                "UPDATE usuarios SET armario_id = NULL WHERE armario_id = ?",
+                (armario_id,),
+            )
+            conn.execute(
+                "DELETE FROM compartimentos WHERE armario = ?",
+                (armario_id,),
+            )
+            conn.execute(
+                "DELETE FROM esp32 WHERE armario = ?",
+                (armario_id,),
+            )
+            conn.execute(
+                "DELETE FROM armarios WHERE id = ?",
+                (armario_id,),
+            )
+            conn.commit()
+
+        return moradores
 
     @staticmethod
     def contar():
