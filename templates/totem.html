@@ -213,11 +213,21 @@
 {% if ajuda_telefone %}
 <div class="ajuda-overlay" id="ajuda-overlay" onclick="fecharAjuda()">
     <div class="ajuda-box" onclick="event.stopPropagation()">
+        <button type="button" class="ajuda-fechar-x" onclick="fecharAjuda()" aria-label="Fechar">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+        <div class="ajuda-icon"><i class="fa-solid fa-headset"></i></div>
         <h3>Precisa de ajuda?</h3>
-        <p>Não recebeu o código no WhatsApp?</p>
-        <p class="ajuda-tel"><i class="fa-solid fa-phone"></i> {{ ajuda_telefone }}</p>
-        <p class="totem-dica">Fale com a portaria ou síndico</p>
-        <button type="button" class="btn-totem btn-principal" onclick="fecharAjuda()">Entendi</button>
+        <p class="ajuda-lead">Código no WhatsApp, porta que não abriu ou outra dúvida — fale com a portaria.</p>
+        {% if ajuda_telefone_link %}
+        <a href="{{ ajuda_telefone_link }}" class="ajuda-tel-link">
+            <i class="fa-solid fa-phone"></i>
+            <span>{{ ajuda_telefone_fmt }}</span>
+        </a>
+        {% else %}
+        <p class="ajuda-tel-link"><i class="fa-solid fa-phone"></i> {{ ajuda_telefone_fmt }}</p>
+        {% endif %}
+        <button type="button" class="btn-ajuda-fechar" onclick="fecharAjuda()">Entendi</button>
     </div>
 </div>
 {% endif %}

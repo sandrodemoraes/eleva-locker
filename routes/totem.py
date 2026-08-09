@@ -1,4 +1,5 @@
 from pathlib import Path
+import re
 
 from flask import Blueprint, render_template, request, jsonify, Response, make_response, redirect
 import json
@@ -16,6 +17,19 @@ from services.totem_auth_service import autorizar_deposito_totem, deposito_totem
 from services.totem_destinatario_service import TotemDestinatarioService
 
 totem_bp = Blueprint("totem", __name__)
+
+
+def _formatar_telefone_ajuda(telefone):
+    """Exibição (48) 99999-9999 e link tel: para o modal de ajuda."""
+    digits = re.sub(r"\D", "", telefone or "")
+    if len(digits) == 11:
+        exibicao = f"({digits[:2]}) {digits[2:7]}-{digits[7:]}"
+    elif len(digits) == 10:
+        exibicao = f"({digits[:2]}) {digits[2:6]}-{digits[6:]}"
+    else:
+        exibicao = (telefone or "").strip()
+    link = f"tel:+55{digits}" if digits else ""
+    return exibicao, link
 
 
 def _totem_template_info():
@@ -60,13 +74,18 @@ def index(armario_id=None):
     if not armario and not config.TOTEM_ARMARIO_ID:
         armarios_lista = ArmarioService.listar_ativos()
 
+    ajuda_tel = (config.TOTEM_AJUDA_TELEFONE or "").strip()
+    ajuda_tel_fmt, ajuda_tel_link = _formatar_telefone_ajuda(ajuda_tel)
+
     resp = make_response(render_template(
         "totem.html",
         armario=armario,
         armarios=armarios_lista,
         armario_inexistente=armario_inexistente,
         max_portas=(armario["max_portas"] or 8) if armario else 8,
-        ajuda_telefone=config.TOTEM_AJUDA_TELEFONE,
+        ajuda_telefone=ajuda_tel,
+        ajuda_telefone_fmt=ajuda_tel_fmt,
+        ajuda_telefone_link=ajuda_tel_link,
         armario_id=armario_id,
         deposito_habilitado=deposito_totem_habilitado(),
         whatsapp_ativo=config.NOTIF_WHATSAPP_ATIVO,
