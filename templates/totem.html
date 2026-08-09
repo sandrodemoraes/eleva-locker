@@ -185,7 +185,7 @@
         <button type="button" class="btn-totem btn-principal" onclick="concluirDeposito()">
             <i class="fa-solid fa-door-closed"></i> Porta fechada — concluir
         </button>
-        <p class="totem-dica" id="sensor-aviso">Sensor de porta em breve (automático)</p>
+        <p class="totem-dica" id="sensor-aviso">Feche a porta — o sistema detecta automaticamente</p>
         <div class="resultado erro" id="erro-aguardando"></div>
     </section>
 
@@ -610,6 +610,16 @@ function verificarPortaFechada(){
     fetch("/totem/porta/" + depositoPendente.compartimento_id + "/status")
     .then(r => r.json())
     .then(d => {
+        const aviso = document.getElementById("sensor-aviso");
+        if(aviso){
+            if(d.sensor){
+                aviso.textContent = d.fechada
+                    ? "Porta fechada detectada — concluindo..."
+                    : "Feche a porta para concluir o depósito";
+            } else {
+                aviso.textContent = "Sensor indisponível — use o botão abaixo";
+            }
+        }
         if(d.sensor && d.fechada) concluirDeposito(true);
     })
     .catch(() => {});

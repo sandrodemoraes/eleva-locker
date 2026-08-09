@@ -91,3 +91,92 @@ class Esp32Client:
         except Exception as erro:
 
             return {"sucesso": False, "mensagem": str(erro)}
+
+    @staticmethod
+    def ler_sensor(ip, rele, token=None, porta=80):
+
+        if not ip:
+            return {"sucesso": False, "mensagem": "ESP32 sem IP configurado."}
+
+        if not rele:
+            return {"sucesso": False, "mensagem": "Relé não informado."}
+
+        if config.ESP32_MODO_SIMULACAO:
+            return {
+                "sucesso": True,
+                "simulado": True,
+                "sensor": True,
+                "fechada": True,
+                "aberta": False,
+                "rele": rele,
+            }
+
+        token = token or config.ESP32_TOKEN
+        url = f"http://{ip}:{porta}/sensor/{rele}?token={token}"
+
+        try:
+
+            req = urllib.request.Request(url, method="GET")
+
+            with urllib.request.urlopen(req, timeout=config.ESP32_HTTP_TIMEOUT) as resp:
+
+                dados = json.loads(resp.read().decode("utf-8"))
+
+                return {
+                    "sucesso": True,
+                    "sensor": bool(dados.get("sensor", True)),
+                    "fechada": bool(dados.get("fechada", False)),
+                    "aberta": bool(dados.get("aberta", not dados.get("fechada", False))),
+                    "rele": dados.get("rele", rele),
+                    "gpio": dados.get("gpio"),
+                    "dados": dados,
+                }
+
+        except urllib.error.URLError as erro:
+
+            return {
+                "sucesso": False,
+                "mensagem": f"ESP32 inacessível: {erro.reason}",
+            }
+
+        except Exception as erro:
+
+            return {
+                "sucesso": False,
+                "mensagem": f"Erro ao ler sensor: {erro}",
+            }
+
+    @staticmethod
+    def ler_sensores(ip, token=None, porta=80):
+
+        if not ip:
+            return {"sucesso": False, "mensagem": "ESP32 sem IP configurado."}
+
+        if config.ESP32_MODO_SIMULACAO:
+            portas = [
+                {"rele": r, "fechada": True, "aberta": False}
+                for r in range(1, 9)
+            ]
+            return {"sucesso": True, "simulado": True, "sensor": True, "portas": portas}
+
+        token = token or config.ESP32_TOKEN
+        url = f"http://{ip}:{porta}/sensores?token={token}"
+
+        try:
+
+            req = urllib.request.Request(url, method="GET")
+
+            with urllib.request.urlopen(req, timeout=config.ESP32_HTTP_TIMEOUT) as resp:
+
+                dados = json.loads(resp.read().decode("utf-8"))
+
+                return {
+                    "sucesso": True,
+                    "sensor": bool(dados.get("sensor", True)),
+                    "portas": dados.get("portas", []),
+                    "dados": dados,
+                }
+
+        except Exception as erro:
+
+            return {"sucesso": False, "mensagem": str(erro)}

@@ -187,6 +187,62 @@ class Esp32Service:
         return resultado
 
     @staticmethod
+    def ler_sensor_compartimento(compartimento_id):
+
+        compartimento = CompartimentoRepository.buscar_por_id(compartimento_id)
+
+        if not compartimento:
+            raise ValueError("Compartimento não encontrado.")
+
+        rele = compartimento["rele"]
+
+        if not rele:
+            return {
+                "sucesso": False,
+                "sensor": False,
+                "mensagem": "Compartimento sem relé.",
+            }
+
+        esp32_id = compartimento["esp32_id"]
+
+        if not esp32_id:
+            return {
+                "sucesso": False,
+                "sensor": False,
+                "mensagem": "Compartimento sem ESP32 vinculado.",
+            }
+
+        esp = Esp32Repository.buscar_por_id(esp32_id)
+
+        if not esp or not esp["ip"]:
+            return {
+                "sucesso": False,
+                "sensor": False,
+                "mensagem": "ESP32 offline ou sem IP.",
+            }
+
+        porta = esp["porta"] if "porta" in esp.keys() and esp["porta"] else 80
+
+        return Esp32Client.ler_sensor(
+            ip=esp["ip"],
+            rele=rele,
+            token=esp["token"],
+            porta=porta,
+        )
+
+    @staticmethod
+    def ler_sensores_esp(esp32_id):
+
+        esp = Esp32Service.buscar_por_id(esp32_id)
+        porta = esp["porta"] if "porta" in esp.keys() and esp["porta"] else 80
+
+        return Esp32Client.ler_sensores(
+            ip=esp["ip"],
+            token=esp["token"],
+            porta=porta,
+        )
+
+    @staticmethod
     def listar_codigos_ativos(armario_id=None):
 
         from repositories.encomenda_repository import EncomendaRepository

@@ -1,147 +1,134 @@
-# Sensor de porta — bancada (compartimento 1)
+# Sensor de porta — 8 compartimentos (BESTER 8ch)
 
-> Fechadura eletromagnética 12 V com **2 fios de sensor**.  
-> Comportamento confirmado pelo usuário:
-
-| Estado da porta | Sensor (2 fios) | Leitura lógica |
-|-----------------|-----------------|----------------|
-| **Fechada** | Curto (continuidade) | Porta fechada |
-| **Aberta** | Aberto (sem continuidade) | Porta aberta |
-
-Tipo: **NC em repouso com porta fechada** (switch fecha quando a porta trava).
+> Fechadura 12 V com **2 fios de sensor** (NC).  
+> **Porta fechada** = fios em curto → GPIO **LOW**  
+> **Porta aberta** = fios abertos → GPIO **HIGH** (`INPUT_PULLUP`)
 
 ---
 
-## Fiação
+## Mapa GPIO — relé × sensor
 
-### Fechadura (4 fios no total)
+| Porta | Relé (12 V) | GPIO relé | GPIO sensor |
+|-------|-------------|-----------|-------------|
+| 1 | 1 | 16 | **32** |
+| 2 | 2 | 17 | **33** |
+| 3 | 3 | 18 | **12** |
+| 4 | 4 | 19 | **13** |
+| 5 | 5 | 21 | **14** |
+| 6 | 6 | 22 | **15** |
+| 7 | 7 | 23 | **26** |
+| 8 | 8 | 27 | **4** |
 
-| Fios | Função | Ligação |
-|------|--------|---------|
-| Vermelho + preto | Solenoide 12 V | Placa relés BESTER (relé 1 / GPIO 16) |
-| Amarelo + preto *(ou 2 fios do sensor)* | Sensor porta | GPIO input ESP32 |
+**Não usar GPIO 25.**
 
-### Sensor → ESP32
+### Fiação de cada fechadura
 
-```
-Fio sensor A  ──► GPIO 32
-Fio sensor B  ──► GND ESP32
-```
+| Fios | Ligação |
+|------|---------|
+| Vermelho + preto | Placa relés (mesmo relé da porta) |
+| Sensor (2 fios) | GPIO sensor da porta → **GND** comum |
 
-- Modo: `INPUT_PULLUP` (pull-up interno ~45 kΩ)
-- **Porta fechada** → fios em curto → GPIO lido **LOW**
-- **Porta aberta** → fios abertos → pull-up → GPIO lido **HIGH**
-
-### GND comum
-
-A **fonte 12 V (−)** e o **GND da ESP32** devem estar no mesmo referencial.
+**GND** da fonte 12 V = **GND** da ESP32.
 
 ---
 
-## Lógica no firmware
+## Firmware (v2.4+)
 
-```cpp
-#define SENSOR_GPIO_PORTA_1  32
+Gravar: `firmware/elevalocker_sync.ino`
 
-pinMode(SENSOR_GPIO_PORTA_1, INPUT_PULLUP);
-
-bool portaFechada() {
-  return digitalRead(SENSOR_GPIO_PORTA_1) == LOW;
-}
-
-bool portaAberta() {
-  return digitalRead(SENSOR_GPIO_PORTA_1) == HIGH;
-}
-```
-
-Endpoint previsto:
+Endpoints:
 
 ```
-GET /sensor/1?token=SEU_TOKEN
+GET /sensor/1?token=...     → uma porta
+GET /sensores?token=...     → todas as 8
 ```
 
 Resposta:
 
 ```json
-{
-  "rele": 1,
-  "fechada": true,
-  "aberta": false,
-  "sensor": true
-}
+{"rele":1,"gpio":32,"fechada":true,"aberta":false,"sensor":true}
+```
+
+Painel local ESP: `http://IP_ESP/` mostra **Porta: FECHADA/ABERTA** por compartimento.
+
+---
+
+## Servidor + totem (v2.4.0)
+
+```
+GET /totem/porta/{compartimento_id}/status
+→ consulta ESP /sensor/{rele}
+→ fechada:true → totem conclui depósito + WhatsApp
 ```
 
 ---
 
-## Mapa GPIO (placa BESTER 8ch)
+## Teste na bancada
 
-| Compartimento | Relé (saída) | Sensor (entrada) — bancada |
-|---------------|--------------|----------------------------|
-| 1 | GPIO 16 | **GPIO 32** (teste) |
-| 2 | GPIO 17 | GPIO 33 *(futuro)* |
-| 3 | GPIO 18 | GPIO 34 *(futuro)* |
-| … | … | … |
+### 1. Gravar firmware
 
-**Não usar GPIO 25.**
+Arduino IDE → ESP32 → `elevalocker_sync.ino` → Upload
 
-GPIO 34–39 são input-only (sem pull-up interno forte) — preferir **32, 33** para sensores com pull-up externo se necessário.
+### 2. Testar sensores pelo PC
 
----
-
-## Teste na bancada (checklist)
-
-### 1. Multímetro (sem ESP)
-
-- [ ] Porta fechada → continuidade entre os 2 fios do sensor
-- [ ] Porta aberta → **sem** continuidade
-
-### 2. Só ESP + sensor (relé desligado)
-
-- [ ] Serial Monitor: fechada = `LOW`, aberta = `HIGH`
-- [ ] Debounce: ler 3× com 50 ms entre leituras (evitar ruído)
-
-### 3. Relé + fechadura
-
-- [ ] `GET /abrir/1` → solenoide destrava
-- [ ] Sensor muda para aberta (HIGH)
-- [ ] Fechar porta → sensor volta fechada (LOW)
-
-### 4. Totem (depósito)
-
-- [ ] Depositar → compartimento 1 abre
-- [ ] Tela “Porta aberta”
-- [ ] Fechar fisicamente → em ~2 s totem conclui **sem botão**
-- [ ] WhatsApp enviado
-
----
-
-## Fluxo software (já previsto no totem v2)
-
-```
-Totem deposita → abre relé
-       ↓
-Poll GET /totem/porta/{id}/status  (a cada 2 s)
-       ↓
-Servidor consulta ESP GET /sensor/{rele}
-       ↓
-fechada == true  →  POST concluir depósito  →  WhatsApp
+```cmd
+cd C:\ElevaLocker
+python tools/testar_sensores.py --esp 192.168.16.162 --token SEU_TOKEN
 ```
 
-Hoje o endpoint do servidor retorna stub (`sensor: false`). Implementação: firmware `/sensor/1` + Flask consultando ESP.
+Uma porta:
+
+```cmd
+python tools/testar_sensores.py --esp 192.168.16.162 --token SEU_TOKEN --rele 1
+```
+
+Via banco (compartimento id):
+
+```cmd
+python tools/testar_sensores.py --compartimento 5
+```
+
+### 3. Testar no navegador
+
+```
+http://192.168.16.162/sensor/1?token=SEU_TOKEN
+http://192.168.16.162/sensores?token=SEU_TOKEN
+http://192.168.16.162/?token=SEU_TOKEN
+```
+
+### 4. Testar totem
+
+1. Depositar → porta abre  
+2. Fechar fisicamente → totem detecta em ~2 s  
+3. WhatsApp automático  
+
+### 5. Simulador (sem hardware)
+
+```cmd
+python tools/esp32_simulator.py 8080
+python tools/testar_sensores.py --esp 127.0.0.1 --token eleva-esp32-token-2026
+```
+
+Simular fechar porta 1: `http://127.0.0.1:8080/sensor/1/fechar?token=eleva-esp32-token-2026`
 
 ---
 
-## Segurança
+## Checklist instalação (8 portas)
 
-- **Nunca** ligar 12 V / 24 V do solenoide nos GPIO da ESP
-- Sensor é **contato seco** — OK direto no GPIO + GND
-- Cabo do sensor longe dos fios de potência do relé (ruído)
+- [ ] 8 fechaduras 12 V fioadas (verm/preto nos relés)
+- [ ] 8 pares sensor → GPIO 32,33,12,13,14,15,26,4 + GND
+- [ ] Multímetro: fechada=curto, aberta=aberto (cada porta)
+- [ ] Firmware gravado
+- [ ] `/sensores` mostra 8 portas corretas
+- [ ] Totem depósito + fechar → WhatsApp OK
 
 ---
 
-## Próximo passo no código
+## Problemas comuns
 
-1. Firmware: leitura GPIO 32 + endpoint `/sensor/{rele}`
-2. `esp32.py`: método `ler_sensor(ip, rele)`
-3. `routes/totem.py`: `status_porta` com dado real
-4. Teste bancada compartimento 1
+| Sintoma | Causa provável |
+|---------|----------------|
+| Sempre ABERTA | Sensor não conectado ou fio solto (pull-up = HIGH) |
+| Sempre FECHADA | Curto permanente no GPIO |
+| Totem não conclui | ESP sem IP / token errado / firmware antigo |
+| GPIO 4 instável | Usar cabo curto; evitar ruído dos relés |

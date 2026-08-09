@@ -5,11 +5,12 @@ import json
 
 import config
 
-TOTEM_VERSAO = "2.3.7"
+TOTEM_VERSAO = "2.4.0"
 from middleware.rate_limit import rate_limit
 from services.encomenda_service import EncomendaService
 from services.armario_service import ArmarioService
 from services.compartimento_service import CompartimentoService
+from services.esp32_service import Esp32Service
 from services.qrcode_service import QrcodeService
 from services.totem_auth_service import autorizar_deposito_totem, deposito_totem_habilitado
 from services.totem_destinatario_service import TotemDestinatarioService
@@ -399,14 +400,28 @@ def concluir_deposito():
 
 @totem_bp.route("/totem/porta/<int:compartimento_id>/status")
 def status_porta(compartimento_id):
-    """Status da porta — sensor ESP32 (fase 2); hoje retorna aberta."""
+    """Status da porta via sensor ESP32 (NC: fechada=curto=LOW)."""
     try:
         comp = CompartimentoService.buscar_por_id(compartimento_id)
+        resultado = Esp32Service.ler_sensor_compartimento(compartimento_id)
+
+        if not resultado.get("sucesso"):
+            return jsonify({
+                "compartimento_id": compartimento_id,
+                "numero": comp["numero"],
+                "fechada": False,
+                "aberta": True,
+                "sensor": False,
+                "mensagem": resultado.get("mensagem", "Sensor indisponível."),
+            })
+
         return jsonify({
             "compartimento_id": compartimento_id,
             "numero": comp["numero"],
-            "fechada": False,
-            "sensor": False,
+            "rele": comp["rele"],
+            "fechada": bool(resultado.get("fechada", False)),
+            "aberta": bool(resultado.get("aberta", not resultado.get("fechada", False))),
+            "sensor": bool(resultado.get("sensor", True)),
         })
     except ValueError:
         return jsonify({"erro": "Compartimento não encontrado."}), 404
