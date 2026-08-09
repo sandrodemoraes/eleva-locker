@@ -80,14 +80,36 @@ def backup_obrigatorio():
 
 def git_pull(branch):
     print(f"\n[3] Git pull ({branch})...")
+
+    # Preserva .ino local (WiFi/token) antes de qualquer operação git
+    ino_local = FIRMWARE_DST
+    ino_bak = ROOT / "backups" / "_pre_update_firmware.ino"
+    if ino_local.exists():
+        ino_bak.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(ino_local, ino_bak)
+        print(f"    Cópia segurança firmware → {ino_bak.relative_to(ROOT)}")
+
     run(["git", "fetch", "origin", branch], check=False)
     atual = run(["git", "rev-parse", "--abbrev-ref", "HEAD"], capture_output=True)
     if (atual.stdout or "").strip() != branch:
         run(["git", "checkout", branch], check=False)
+
     r = run(["git", "pull", "origin", branch], capture_output=True)
     if r.returncode != 0:
-        print((r.stderr or r.stdout or "git pull falhou").strip())
-        return False
+        saida = (r.stderr or r.stdout or "").strip()
+        print(saida)
+        if "would be overwritten by merge" in saida or "Your local changes" in saida:
+            print("\n    Alterações locais detectadas — guardando com git stash...")
+            run(["git", "stash", "push", "-m", "eleva-pre-atualizar-matriz"], check=False)
+            r = run(["git", "pull", "origin", branch], capture_output=True)
+            if r.returncode != 0:
+                print((r.stderr or r.stdout or "git pull falhou após stash").strip())
+                return False
+            print("    Pull OK após stash.")
+            print("    WiFi/token do .ino antigo: backups\\_pre_update_firmware.ino")
+        else:
+            return False
+
     r = run(["git", "log", "-1", "--oneline"], capture_output=True)
     if r.stdout:
         print(f"    {r.stdout.strip()}")

@@ -13,6 +13,7 @@ Uso:
 """
 import argparse
 import os
+import shutil
 import sys
 from pathlib import Path
 
@@ -57,6 +58,13 @@ def backup_disco_d():
     return True
 
 
+def backup_firmware_ino(destino):
+    ino = ROOT / "firmware" / "elevalocker_sync" / "elevalocker_sync.ino"
+    if ino.exists():
+        shutil.copy2(ino, destino / "elevalocker_sync.ino.bak")
+        print(f"    OK  firmware → elevalocker_sync.ino.bak")
+
+
 def main():
     parser = argparse.ArgumentParser(description="Backup obrigatório ELEVA LOCKER")
     parser.add_argument("--sem-disco-d", action="store_true", help="Só backup local")
@@ -79,6 +87,8 @@ def main():
         print("  FALHA — atualização BLOQUEADA (sem backup válido)")
         print("=" * 60)
         return 1
+
+    backup_firmware_ino(ROOT / "backups" / "backup_01")
 
     if not args.sem_disco_d and not backup_disco_d():
         print("\n" + "=" * 60)
