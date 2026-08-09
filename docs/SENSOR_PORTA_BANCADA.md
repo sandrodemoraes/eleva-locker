@@ -69,7 +69,9 @@ GET /totem/porta/{compartimento_id}/status
 
 ### 1. Gravar firmware
 
-Arduino IDE → ESP32 → `elevalocker_sync.ino` → Upload
+Arduino IDE → ESP32 → abrir **`firmware/elevalocker_sync/elevalocker_sync.ino`** (pasta exigida pelo Arduino) → Upload
+
+> Não abra só `firmware/elevalocker_sync.ino` solto na raiz — use sempre a pasta `elevalocker_sync/`.
 
 ### 2. Testar sensores pelo PC
 

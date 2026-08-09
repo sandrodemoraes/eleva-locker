@@ -35,12 +35,16 @@ const int HTTP_PORT       = 80;
 const int MIN_PORTAS      = 8;
 const int MAX_PORTAS      = 64;
 
-// GPIO padrão (ciclo) — servidor pode enviar gpio por compartimento
 const int GPIO_BASE[] = {
   16, 17, 18, 19, 21, 22, 23, 27,
   26, 32, 33, 12, 13, 14, 15
 };
 const int GPIO_BASE_LEN = 15;
+
+// Sensores de porta (NC: fechada=curto=LOW, aberta=aberto=HIGH) — 1 GPIO por relé 1..8
+const int SENSOR_GPIO[] = {32, 33, 12, 13, 14, 15, 26, 4};
+const int SENSOR_GPIO_LEN = 8;
+const int RELAY_GPIO_LEN  = 8;
 
 // ============ INTERNOS ============
 
@@ -129,7 +133,6 @@ void carregarCacheNvs() {
   }
   prefs.end();
 
-  // Cache antigo só guardava contagem — descarta se números inválidos
   if (totalCache > 0 && cache[0].numero <= 0) {
     totalCache = 0;
   }
@@ -174,6 +177,43 @@ void acionarPorRele(int rele, unsigned long duracaoMs) {
   int g = gpioDoRele(rele, -1);
   iniciarRele(g, duracaoMs);
   releAtivo = rele;
+}
+
+// ============ SENSOR DE PORTA (NC — fechada=LOW, aberta=HIGH) ============
+
+int gpioDoSensor(int rele) {
+  if (rele >= 1 && rele <= SENSOR_GPIO_LEN)
+    return SENSOR_GPIO[rele - 1];
+  return -1;
+}
+
+bool lerPortaFechada(int rele) {
+  int gpio = gpioDoSensor(rele);
+  if (gpio < 0) return false;
+  int lows = 0;
+  for (int i = 0; i < 3; i++) {
+    if (digitalRead(gpio) == LOW) lows++;
+    delay(5);
+  }
+  return lows >= 2;
+}
+
+bool lerPortaAberta(int rele) {
+  return !lerPortaFechada(rele);
+}
+
+void iniciarSensores() {
+  for (int i = 0; i < SENSOR_GPIO_LEN; i++) {
+    pinMode(SENSOR_GPIO[i], INPUT_PULLUP);
+  }
+}
+
+void iniciarRelesSaida() {
+  for (int i = 0; i < RELAY_GPIO_LEN; i++) {
+    int g = GPIO_BASE[i];
+    pinMode(g, OUTPUT);
+    digitalWrite(g, LOW);
+  }
 }
 
 // ============ FILA DE EVENTOS OFFLINE ============
@@ -425,6 +465,46 @@ void rotaAbrir() {
   server.send(200, "application/json", "{\"sucesso\":true,\"rele\":" + String(rele) + "}");
 }
 
+void rotaSensor() {
+  if (!tokenValido()) {
+    server.send(403, "application/json", "{\"erro\":\"token invalido\"}");
+    return;
+  }
+  String path = server.uri();
+  int rele = path.substring(path.lastIndexOf('/') + 1).toInt();
+  int gpio = gpioDoSensor(rele);
+  if (gpio < 0) {
+    server.send(404, "application/json", "{\"erro\":\"rele invalido\"}");
+    return;
+  }
+  bool fechada = lerPortaFechada(rele);
+  bool aberta = !fechada;
+  String json = "{\"rele\":" + String(rele) +
+                ",\"gpio\":" + String(gpio) +
+                ",\"fechada\":" + String(fechada ? "true" : "false") +
+                ",\"aberta\":" + String(aberta ? "true" : "false") +
+                ",\"sensor\":true}";
+  server.send(200, "application/json", json);
+}
+
+void rotaSensoresTodos() {
+  if (!tokenValido()) {
+    server.send(403, "application/json", "{\"erro\":\"token invalido\"}");
+    return;
+  }
+  String json = "{\"sensor\":true,\"portas\":[";
+  for (int r = 1; r <= SENSOR_GPIO_LEN; r++) {
+    if (r > 1) json += ",";
+    bool fechada = lerPortaFechada(r);
+    json += "{\"rele\":" + String(r) +
+            ",\"gpio\":" + String(gpioDoSensor(r)) +
+            ",\"fechada\":" + String(fechada ? "true" : "false") +
+            ",\"aberta\":" + String(fechada ? "false" : "true") + "}";
+  }
+  json += "]}";
+  server.send(200, "application/json", json);
+}
+
 void rotaRetirarLocal() {
   if (!server.hasArg("plain") && server.args() == 0) {
     server.send(400, "application/json", "{\"sucesso\":false}");
@@ -503,6 +583,14 @@ void rotaPainel() {
         cache[i].rele, ESP32_TOKEN);
       server.sendContent(buf);
     }
+    if (cache[i].rele > 0 && cache[i].rele <= SENSOR_GPIO_LEN) {
+      bool fechada = lerPortaFechada(cache[i].rele);
+      snprintf(buf, sizeof(buf),
+        "<div style='font-size:.65rem;margin-top:4px;color:%s'>Porta: %s</div>",
+        fechada ? "#155724" : "#856404",
+        fechada ? "FECHADA" : "ABERTA");
+      server.sendContent(buf);
+    }
     server.sendContent("</div>");
   }
   server.sendContent("</div>");
@@ -537,11 +625,8 @@ void conectarWiFi() {
 void setup() {
   Serial.begin(115200);
 
-  for (int i = 0; i < MAX_PORTAS; i++) {
-    int g = GPIO_BASE[i % GPIO_BASE_LEN];
-    pinMode(g, OUTPUT);
-    digitalWrite(g, LOW);
-  }
+  iniciarRelesSaida();
+  iniciarSensores();
 
   carregarCacheNvs();
 
@@ -553,11 +638,14 @@ void setup() {
   }
 
   server.on("/status", HTTP_GET, rotaStatus);
+  server.on("/sensores", HTTP_GET, rotaSensoresTodos);
   server.on("/", HTTP_GET, rotaPainel);
   server.on("/retirar", HTTP_POST, rotaRetirarLocal);
   server.onNotFound([]() {
     if (server.uri().startsWith("/abrir/")) {
       rotaAbrir();
+    } else if (server.uri().startsWith("/sensor/")) {
+      rotaSensor();
     } else {
       server.send(404, "text/plain", "Not found");
     }
