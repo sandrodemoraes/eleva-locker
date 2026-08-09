@@ -20,7 +20,6 @@ from database import criar_banco
 
 criar_banco()
 
-from pathlib import Path
 from repositories.esp32_repository import Esp32Repository
 
 NOME_ESP = "ESP Matriz 8ch"

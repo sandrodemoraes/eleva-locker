@@ -12,7 +12,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 TOTEM_URL = "http://127.0.0.1:15000/totem/versao"
-BRANCH_TOTEM = "cursor/totem-seguro-c05c"
+BRANCH_TOTEM = "cursor/fix-retirada-rele-c05c"
 
 sys.path.insert(0, str(ROOT / "tools"))
 from parar_servidor import parar_app_py, parar_docker_web, parar_porta  # noqa: E402

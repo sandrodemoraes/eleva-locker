@@ -1,5 +1,5 @@
 @echo off
-title ELEVA LOCKER - Atualizar (Matriz)
+title ELEVA LOCKER - Atualizar Matriz (1 clique)
 color 0A
 cd /d "%~dp0.."
 
@@ -9,15 +9,14 @@ if not defined PYTHON where python >nul 2>&1 && set "PYTHON=python"
 if not defined PYTHON where python3 >nul 2>&1 && set "PYTHON=python3"
 
 if not defined PYTHON (
-    echo ERRO: Python nao encontrado no PATH.
+    echo ERRO: Python nao encontrado.
     pause
     exit /b 1
 )
 
 echo.
-echo  ELEVA LOCKER — Atualizar Matriz (git + firmware + setup + reinicio)
-echo  Um clique — evita erros de token, banco e firmware antigo
-echo  ==================================================================
+echo  ATUALIZAR MATRIZ — git + firmware + setup + reinicio
+echo  =====================================================
 echo.
 
 %PYTHON% tools\atualizar_matriz.py %*

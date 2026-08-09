@@ -49,19 +49,31 @@ def main():
             SELECT c.numero, c.tamanho, c.rele, c.gpio, c.esp32_id, a.nome AS armario
             FROM compartimentos c
             JOIN armarios a ON a.id = c.armario
-            WHERE a.nome = 'Bancada Teste'
-            ORDER BY c.numero
+            WHERE a.nome IN ('ELEVA Locker Matriz', 'Bancada Teste')
+            ORDER BY a.nome, c.numero
         """).fetchall()
 
-        print(f"\nCompartimentos Bancada Teste: {len(comps)}")
-        for c in comps:
+        matriz = [c for c in comps if c["armario"] == "ELEVA Locker Matriz"]
+        bancada = [c for c in comps if c["armario"] == "Bancada Teste"]
+
+        print(f"\nCompartimentos ELEVA Locker Matriz: {len(matriz)}")
+        for c in matriz[:8]:
             print(f"  #{c['numero']} | {c['tamanho'] or 'M'} | relé {c['rele']} | esp32_id={c['esp32_id']}")
+
+        if bancada:
+            print(f"\nCompartimentos Bancada Teste (remover): {len(bancada)}")
+            for c in bancada:
+                print(f"  #{c['numero']} | {c['tamanho'] or 'M'} | relé {c['rele']} | esp32_id={c['esp32_id']}")
+            print("  → Rode: py tools/limpar_bancada_teste.py")
 
     print("\n" + "=" * 60)
     print("URLs:")
-    print("  Painel armário: http://192.168.16.130:15000/armarios")
-    print("  Totem ESP:   http://192.168.16.162/")
-    print("  Teste relé:  http://192.168.16.162/abrir/1?token=TOKEN&duracao=3")
+    print("  Painel Matriz: http://192.168.16.130:15000/armarios/3")
+    print("  Totem:         http://192.168.16.130:15000/totem/3")
+    print("  Teste relés:   http://192.168.16.130:15000/esp32/bancada")
+    print("  ESP local:     http://192.168.16.162/?token=TOKEN")
+    print("\nAtualizar: tools\\atualizar_matriz.bat")
+    print("Verificar: tools\\verificar_matriz.bat")
     print("=" * 60)
 
 

@@ -48,15 +48,34 @@ Header: `X-ESP32-Token: {token}`
 |--------|------|--------|
 | GET | `/abrir/{rele}?token=&duracao=3` | Acionar relé |
 | GET | `/status?token=` | Teste conexão |
+| GET | `/sensor/{rele}?token=` | Sensor porta (fechada/aberta) |
+| GET | `/sensores?token=` | Todas as 8 portas |
 | POST | `/retirar` | Totem local `{codigo}` |
+
+Ver mapa GPIO sensores: `docs/SENSOR_PORTA_BANCADA.md`
+
+## Atualização na bancada
+
+**Um comando:** `tools\atualizar_matriz.bat` (ou `tools\atualizar.bat` — mesmo fluxo)
+
+Guia completo: `docs/ATUALIZAR_MATRIZ.md`
+
+Verificar instalação: `tools\verificar_matriz.bat`
 
 ## Firmware
 
-Arquivo: `firmware/elevalocker_sync.ino`
+Abra no Arduino IDE:
+
+```
+firmware/elevalocker_sync/elevalocker_sync.ino
+```
+
+Detalhes: `firmware/README.md`
 
 1. Instalar **ArduinoJson 6.x**
 2. Editar `WIFI_SSID`, `WIFI_PASSWORD`, `SERVIDOR_URL`, `ESP32_TOKEN`
-3. Gravar na ESP32
+3. Conferir `RELE_ATIVO_LOW = true` (placa BESTER)
+4. Gravar na ESP32
 
 ## Teste sem hardware
 
@@ -64,8 +83,11 @@ Arquivo: `firmware/elevalocker_sync.ino`
 # Terminal 1
 python app.py
 
-# Terminal 2 — simulador (só /abrir e /status)
+# Terminal 2 — simulador (/abrir, /status, /sensor)
 python tools/esp32_simulator.py 8080
+
+# Testar sensores
+python tools/testar_sensores.py --esp 127.0.0.1 --token eleva-esp32-token-2026
 ```
 
 Cadastre ESP com IP `127.0.0.1`, porta `8080`.
