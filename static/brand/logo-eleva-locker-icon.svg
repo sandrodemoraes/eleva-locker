@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" fill="none" role="img" aria-label="eleva locker app icon">
+  <!-- Favicon / totem: símbolo em fundo verde -->
+  <rect width="192" height="192" rx="36" fill="#134736"/>
+  <g transform="translate(48, 48)">
+    <path d="M8 48 L36 8 L84 8 L56 48 Z" fill="#1A6B54"/>
+    <path d="M8 48 L36 88 L84 88 L56 48 Z" fill="#1A6B54"/>
+    <path d="M32 48 L60 8 L96 8 L68 48 Z" fill="#0F3D31"/>
+    <path d="M32 48 L60 88 L96 88 L68 48 Z" fill="#0F3D31"/>
+    <rect x="44" y="40" width="16" height="24" rx="2" fill="#134736"/>
+  </g>
+</svg>
