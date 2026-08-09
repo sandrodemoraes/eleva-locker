@@ -32,8 +32,10 @@
                 <option value="{{ a['id'] }}">{{ a['nome'] }}</option>
                 {% endfor %}
             </select>
+            {% elif armario_inexistente %}
+            <p class="totem-dica">Armário #{{ armario_id }} não existe no banco — rode:<br><code>tools\corrigir_totem_armario.bat</code></p>
             {% else %}
-            <p class="totem-dica">Armário não configurado — defina TOTEM_ARMARIO_ID no .env</p>
+            <p class="totem-dica">Armário não configurado — rode <code>tools\corrigir_totem_armario.bat</code> ou defina TOTEM_ARMARIO_ID no .env</p>
             {% endif %}
         </div>
 

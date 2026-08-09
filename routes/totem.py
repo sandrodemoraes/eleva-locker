@@ -56,6 +56,7 @@ def index(armario_id=None):
             armario = None
 
     armarios_lista = None
+    armario_inexistente = bool(armario_id and not armario)
     if not armario and not config.TOTEM_ARMARIO_ID:
         armarios_lista = ArmarioService.listar_ativos()
 
@@ -63,6 +64,7 @@ def index(armario_id=None):
         "totem.html",
         armario=armario,
         armarios=armarios_lista,
+        armario_inexistente=armario_inexistente,
         max_portas=(armario["max_portas"] or 8) if armario else 8,
         ajuda_telefone=config.TOTEM_AJUDA_TELEFONE,
         armario_id=armario_id,
