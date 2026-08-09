@@ -704,7 +704,7 @@
 
                 <div class="campo">
 
-                    <label>Armário (Operador)</label>
+                    <label>Armário (Operador / Morador)</label>
 
                     <select name="armario_id" id="novoArmario">
                         <option value="">Todos os armários</option>
@@ -817,7 +817,7 @@
 
             <div class="linha" id="linhaArmarioEditar" style="display:none">
                 <div class="campo">
-                    <label>Armário (Operador)</label>
+                    <label>Armário (Operador / Morador)</label>
                     <select name="armario_id" id="editArmario">
                         <option value="">Todos os armários</option>
                         {% for a in armarios %}
@@ -874,13 +874,13 @@
 function toggleArmarioNovo(){
     var linha = document.getElementById("linhaArmarioNovo");
     var perfil = document.getElementById("novoPerfil").value;
-    linha.style.display = (perfil === "Operador") ? "flex" : "none";
+    linha.style.display = (perfil === "Operador" || perfil === "Usuário") ? "flex" : "none";
 }
 
 function toggleArmarioEditar(){
     var linha = document.getElementById("linhaArmarioEditar");
     var perfil = document.getElementById("editPerfil").value;
-    linha.style.display = (perfil === "Operador") ? "flex" : "none";
+    linha.style.display = (perfil === "Operador" || perfil === "Usuário") ? "flex" : "none";
 }
 
 function abrirModal(){
