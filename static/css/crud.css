@@ -53,6 +53,23 @@
     font-size:13px;
 }
 
+/* Botões de ação em tabelas — separados, não emendados */
+.acoes-cell{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    align-items:center;
+}
+
+.acoes-cell .btn{
+    margin:0;
+}
+
+.acoes-cell form{
+    display:inline-flex;
+    margin:0;
+}
+
 .alert{
     padding:14px 18px;
     border-radius:8px;

@@ -60,15 +60,15 @@
                     </span>
                 </td>
                 <td>{{ d.ultimo_heartbeat or '—' }}</td>
-                <td>
-                    <form method="POST" action="/esp32/testar/{{ d.id }}" style="display:inline">
+                <td class="acoes-cell">
+                    <form method="POST" action="/esp32/testar/{{ d.id }}">
                         <button type="submit" class="btn btn-sm" title="Testar conexão"><i class="fa-solid fa-wifi"></i></button>
                     </form>
                     {% if perfil == 'Administrador' %}
                     <button class="btn btn-sm" onclick="editarEsp({{ d.id }}, '{{ d.nome | replace("'", "\\'") }}', '{{ d.ip or '' }}', '{{ d.mac or '' }}', {{ d.armario or 'null' }}, {{ d.porta or 80 }}, '{{ d.status }}', '{{ d.token or '' }}', {{ d.max_portas or 16 }})">
                         <i class="fa-solid fa-pen"></i>
                     </button>
-                    <form method="POST" action="/esp32/excluir/{{ d.id }}" style="display:inline" onsubmit="return confirm('Excluir ESP32?')">
+                    <form method="POST" action="/esp32/excluir/{{ d.id }}" onsubmit="return confirm('Excluir ESP32?')">
                         <button type="submit" class="btn btn-sm btn-danger"><i class="fa-solid fa-trash"></i></button>
                     </form>
                     {% endif %}
