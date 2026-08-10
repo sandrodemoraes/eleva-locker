@@ -255,6 +255,41 @@ class NotificacaoService:
         raise ValueError(f"Resposta inesperada da Evolution: {type(dados).__name__}")
 
     @staticmethod
+    def _variantes_numero_br(numero):
+        """Tenta formatos alternativos (9º dígito BR) — contorna bug da Evolution v2.3."""
+        limpo = re.sub(r"\D", "", numero or "")
+        if not limpo.startswith("55"):
+            return [limpo] if limpo else []
+        local = limpo[2:]
+        variantes = []
+        for cand in (limpo,):
+            if cand not in variantes:
+                variantes.append(cand)
+        if len(local) == 11 and local[2] == "9":
+            sem_nono = "55" + local[:2] + local[3:]
+            if sem_nono not in variantes:
+                variantes.append(sem_nono)
+        elif len(local) == 10 and local[2] in "6789":
+            com_nono = "55" + local[:2] + "9" + local[2:]
+            if com_nono not in variantes:
+                variantes.append(com_nono)
+        return variantes
+
+    @staticmethod
+    def _numeros_equivalentes_br(a, b):
+        da = re.sub(r"\D", "", a or "")
+        db = re.sub(r"\D", "", b or "")
+        if da == db:
+            return True
+        if da.startswith("55") and db.startswith("55"):
+            la, lb = da[2:], db[2:]
+            if len(la) == 11 and len(lb) == 10 and la[2] == "9" and la[:2] + la[3:] == lb:
+                return True
+            if len(lb) == 11 and len(la) == 10 and lb[2] == "9" and lb[:2] + lb[3:] == la:
+                return True
+        return da[-10:] == db[-10:]
+
+    @staticmethod
     def _validar_resposta_evolution(dados, numero_destino):
         item = NotificacaoService._item_resposta_evolution(dados)
 
@@ -276,20 +311,15 @@ class NotificacaoService:
         if jid and numero_destino:
             dest = re.sub(r"\D", "", jid.split("@")[0])
             esperado = re.sub(r"\D", "", numero_destino)
-            if dest and esperado and len(dest) >= 10 and len(esperado) >= 10:
-                if dest[-10:] != esperado[-10:] and dest != esperado:
-                    raise ValueError(
-                        f"Evolution enviou para {dest}, esperado {esperado}"
-                    )
+            if dest and esperado and not NotificacaoService._numeros_equivalentes_br(dest, esperado):
+                raise ValueError(
+                    f"Evolution enviou para {dest}, esperado {esperado}"
+                )
 
         return item
 
     @staticmethod
-    def _enviar_whatsapp_evolution(numero, mensagem):
-        status = NotificacaoService.status_whatsapp()
-        if not status["pronto"]:
-            raise ValueError(status["mensagem"] or "WhatsApp não está pronto.")
-
+    def _enviar_whatsapp_evolution_um(numero, mensagem):
         url = (
             f"{config.WHATSAPP_API_URL.rstrip('/')}/message/sendText/"
             f"{config.WHATSAPP_INSTANCIA}"
@@ -313,7 +343,21 @@ class NotificacaoService:
             dados = json.loads(resp.read().decode("utf-8"))
 
         item = NotificacaoService._validar_resposta_evolution(dados, numero)
-        return {"raw": dados, "item": item, "status": item.get("status")}
+        return {"raw": dados, "item": item, "status": item.get("status"), "numero_usado": numero}
+
+    @staticmethod
+    def _enviar_whatsapp_evolution(numero, mensagem):
+        status = NotificacaoService.status_whatsapp()
+        if not status["pronto"]:
+            raise ValueError(status["mensagem"] or "WhatsApp não está pronto.")
+
+        ultimo_erro = None
+        for candidato in NotificacaoService._variantes_numero_br(numero):
+            try:
+                return NotificacaoService._enviar_whatsapp_evolution_um(candidato, mensagem)
+            except ValueError as erro:
+                ultimo_erro = str(erro)
+        raise ValueError(ultimo_erro or "Falha ao enviar WhatsApp.")
 
     @staticmethod
     def _enviar_whatsapp_meta(numero, mensagem):
