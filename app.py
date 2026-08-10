@@ -1,5 +1,21 @@
-from flask import Flask
 import os
+import sys
+from pathlib import Path
+
+# Bancada: força SQLite ANTES de importar config (evita 0 armários após reinício)
+_ROOT = Path(__file__).resolve().parent
+_env_path = _ROOT / ".env"
+if _env_path.exists():
+    for _linha in _env_path.read_text(encoding="utf-8").splitlines():
+        _t = _linha.strip().lower()
+        if _t.startswith("eleva_bancada=") and _t.split("=", 1)[1].strip().split()[0] in (
+            "1", "true", "yes",
+        ):
+            os.environ["ELEVA_BANCADA"] = "1"
+            os.environ.pop("DATABASE_URL", None)
+            break
+
+from flask import Flask
 
 from database import criar_banco
 from services.backup.backup_service import BackupService
@@ -38,8 +54,24 @@ from db.connection import get_engine
 
 _engine = get_engine()
 print(f"Banco: {_engine.upper()}" + (" (bancada SQLite)" if _engine == "sqlite" else ""))
-if _engine == "postgresql" and os.getenv("ELEVA_BANCADA", "").strip() not in ("1", "true", "yes"):
-    print("⚠ AVISO: PostgreSQL ativo — na bancada defina ELEVA_BANCADA=1 no .env")
+if _engine == "postgresql":
+    print("=" * 50)
+    print("  ERRO: PostgreSQL ativo na bancada!")
+    print("  Feche este servidor e rode: tools\\consertar_bancada.bat")
+    print("  Ou inicie sempre com: tools\\iniciar_tudo.bat")
+    print("=" * 50)
+elif _engine == "sqlite":
+    try:
+        from repositories.base_repository import BaseRepository
+        with BaseRepository.get_connection() as _conn:
+            _n = _conn.execute("SELECT COUNT(*) AS n FROM armarios").fetchone()["n"]
+        if _n == 0:
+            print("=" * 50)
+            print("  AVISO: SQLite OK mas 0 armários no banco.")
+            print("  Rode: tools\\consertar_bancada.bat")
+            print("=" * 50)
+    except Exception:
+        pass
 
 if os.getenv("SKIP_BACKUP") != "1":
     try:
