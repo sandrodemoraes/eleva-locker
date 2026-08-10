@@ -1,10 +1,12 @@
 /* Totem v2 — tablet 7" paisagem (800×480+) */
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800&display=swap');
+
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 
 html,body{
     height:100%;
-    font-family:"Segoe UI",system-ui,sans-serif;
-    background:linear-gradient(160deg,#0f3d75 0%,#1a5fae 45%,#2563eb 100%);
+    font-family:"Nunito","Segoe UI",system-ui,sans-serif;
+    background:linear-gradient(160deg,#0f3d31 0%,#134736 45%,#1a6b54 100%);
     color:#fff;
     overflow:hidden;
     user-select:none;
@@ -36,9 +38,19 @@ html,body{
     opacity:.95;
 }
 
+.totem-logo-img{
+    width:72px;
+    height:72px;
+    border-radius:18px;
+    margin-bottom:14px;
+    box-shadow:0 8px 24px rgba(0,0,0,.25);
+}
+
 .totem-logo h1{
     font-size:clamp(28px,6vw,42px);
-    font-weight:700;
+    font-weight:800;
+    letter-spacing:-0.02em;
+    text-transform:lowercase;
 }
 
 .totem-local{
@@ -322,7 +334,7 @@ html,body{
 
 .mapa-selecao .porta-celula.livre.ativa{
     background:#6ee7b7;
-    color:#0f3d75;
+    color:#134736;
     border-color:#6ee7b7;
     transform:scale(1.08);
     box-shadow:0 0 16px rgba(110,231,183,.5);
@@ -377,13 +389,13 @@ html,body{
 
 .btn-tamanho.ativo{
     background:#6ee7b7;
-    color:#0f3d75;
+    color:#134736;
     border-color:#6ee7b7;
     transform:scale(1.05);
     box-shadow:0 0 16px rgba(110,231,183,.45);
 }
 
-.btn-tamanho.ativo .tam-qtd{color:#0f3d75;}
+.btn-tamanho.ativo .tam-qtd{color:#134736;}
 
 .btn-tamanho.sem-livre,
 .btn-tamanho:disabled{
@@ -472,7 +484,7 @@ html,body{
 
 .ac-tel{
     font-size:14px;
-    color:#0f3d75;
+    color:#134736;
     white-space:nowrap;
 }
 
@@ -486,7 +498,7 @@ html,body{
 
 .porta-celula.ativa{
     background:#6ee7b7;
-    color:#0f3d75;
+    color:#134736;
     border-color:#6ee7b7;
     opacity:1;
     transform:scale(1.08);
@@ -591,7 +603,7 @@ html,body{
     margin:0 auto 12px;
     border-radius:50%;
     background:#e8f4fc;
-    color:#0f3d75;
+    color:#134736;
     display:flex;
     align-items:center;
     justify-content:center;
@@ -601,7 +613,7 @@ html,body{
 .ajuda-box h3{
     margin-bottom:8px;
     font-size:20px;
-    color:#0f3d75;
+    color:#134736;
 }
 
 .ajuda-lead{
@@ -618,7 +630,7 @@ html,body{
     gap:10px;
     font-size:20px;
     font-weight:700;
-    color:#0f3d75;
+    color:#134736;
     text-decoration:none;
     background:#f0f7ff;
     border:2px solid #c7dff5;

@@ -4,44 +4,50 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ELEVA LOCKER</title>
-
+    <title>ELEVA LOCKER — Entrar</title>
+    <link rel="icon" href="{{ url_for('static', filename='brand/logo-eleva-locker-icon.svg') }}" type="image/svg+xml">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/eleva-theme.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 
-<body>
+<body class="login-page">
 
-    <div class="login-box">
+    <div class="login-wrapper">
 
-        <h1>ELEVA LOCKER</h1>
+        <div class="login-box">
 
-        <p>Sistema Inteligente de Armários</p>
+            <div class="login-brand">
+                <img src="{{ url_for('static', filename='brand/logo-eleva-locker-icon.svg') }}" alt="ELEVA LOCKER">
+                <h1>eleva locker</h1>
+                <p>Sistema inteligente de armários</p>
+            </div>
 
-        {% if erro %}
-        <p style="color:red; font-weight:bold;">
-            {{ erro }}
-        </p>
-        {% endif %}
+            {% if erro %}
+            <p class="login-erro">{{ erro }}</p>
+            {% endif %}
 
-        <form action="/login" method="POST">
+            <form action="/login" method="POST">
 
-            <input
-                type="email"
-                name="email"
-                placeholder="E-mail"
-                required>
+                <div class="login-field">
+                    <label for="email">E-mail</label>
+                    <input type="email" id="email" name="email" placeholder="seu@email.com" required>
+                </div>
 
-            <input
-                type="password"
-                name="senha"
-                placeholder="Senha"
-                required>
+                <div class="login-field">
+                    <label for="senha">Senha</label>
+                    <input type="password" id="senha" name="senha" placeholder="••••••••" required>
+                </div>
 
-            <button type="submit">
-                Entrar
-            </button>
+                <button type="submit">Entrar</button>
 
-        </form>
+            </form>
+
+        </div>
+
+        <p class="login-footer">Eleva Soluções Tecnológicas</p>
 
     </div>
 

@@ -13,7 +13,7 @@
 }
 
 .btn{
-    background:#0f3d75;
+    background:var(--eleva-verde);
     color:#fff;
     border:none;
     border-radius:8px;
@@ -29,7 +29,7 @@
 }
 
 .btn:hover{
-    background:#2563eb;
+    background:var(--eleva-verde-vivo);
 }
 
 .btn-danger{
@@ -101,8 +101,8 @@ th,td{
 }
 
 th{
-    background:#f8fafc;
-    color:#0f3d75;
+    background:var(--eleva-musgo);
+    color:var(--eleva-verde);
     font-weight:600;
 }
 
@@ -151,7 +151,7 @@ tr:hover{
 }
 
 .modal h2{
-    color:#0f3d75;
+    color:var(--eleva-verde);
     margin-bottom:20px;
 }
 
@@ -171,9 +171,19 @@ tr:hover{
 .form-group textarea{
     width:100%;
     padding:10px 12px;
-    border:1px solid #ddd;
-    border-radius:8px;
+    border:2px solid var(--eleva-borda);
+    border-radius:var(--eleva-raio-sm);
     font-size:14px;
+    font-family:inherit;
+    transition:var(--eleva-transicao);
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus{
+    outline:none;
+    border-color:var(--eleva-verde-vivo);
+    box-shadow:0 0 0 3px rgba(26,107,84,.12);
 }
 
 .form-actions{
@@ -195,7 +205,7 @@ tr:hover{
 }
 
 .codigo-box{
-    background:#0f3d75;
+    background:var(--eleva-verde);
     color:#fff;
     font-size:36px;
     font-weight:bold;

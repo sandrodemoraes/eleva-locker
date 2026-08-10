@@ -6,24 +6,22 @@
 
 <h1>Bem-vindo, {{ usuario }}</h1>
 
-<p style="color:#666; margin-top:10px;">
-    Painel Administrativo do ELEVA LOCKER
-    <span style="font-size:12px;margin-left:8px;padding:2px 8px;border-radius:6px;background:#eee;">
-        Banco: {{ stats.db_engine|upper }}
-    </span>
+<p class="content-subtitle">
+    Painel administrativo do ELEVA LOCKER
+    <span class="badge-db">{{ stats.db_engine|upper }}</span>
 </p>
 
 {% if stats.armarios == 0 and stats.armarios_global > 0 and stats.site_id %}
-<div style="margin:12px 0;padding:12px 16px;border-radius:8px;background:#fff3cd;border:1px solid #ffc107;color:#664d03;">
+<div class="alert-inline alert-inline-warning">
     Filtro de site ativo: existem {{ stats.armarios_global }} armário(s) no banco, mas nenhum neste site.
     Selecione <strong>Todos os sites</strong> no menu superior ou rode <code>tools\consertar_bancada.bat</code>.
 </div>
 {% elif stats.armarios == 0 and stats.db_engine == 'postgresql' %}
-<div style="margin:12px 0;padding:12px 16px;border-radius:8px;background:#f8d7da;border:1px solid #f5c2c7;color:#842029;">
+<div class="alert-inline alert-inline-danger">
     PostgreSQL ativo — na bancada use SQLite. Rode <code>tools\consertar_bancada.bat</code> e reinicie o servidor.
 </div>
 {% elif stats.armarios == 0 %}
-<div style="margin:12px 0;padding:12px 16px;border-radius:8px;background:#f8d7da;border:1px solid #f5c2c7;color:#842029;">
+<div class="alert-inline alert-inline-danger">
     Nenhum armário no banco. Rode <code>tools\consertar_bancada.bat</code> na pasta <code>C:\ElevaLocker</code>.
 </div>
 {% endif %}
@@ -32,6 +30,7 @@
 
     <a href="{{ url_for('usuarios.usuarios') }}" class="card-link">
     <div class="card">
+        <div class="card-icon"><i class="fa-solid fa-users"></i></div>
         <div class="numero">{{ stats.usuarios }}</div>
         <div class="titulo-card">Usuários</div>
     </div>
@@ -39,6 +38,7 @@
 
     <a href="{{ url_for('armarios.listar') }}" class="card-link">
     <div class="card">
+        <div class="card-icon"><i class="fa-solid fa-box"></i></div>
         <div class="numero">{{ stats.armarios }}</div>
         <div class="titulo-card">Armários</div>
     </div>
@@ -46,6 +46,7 @@
 
     <a href="{{ url_for('compartimentos.listar') }}" class="card-link">
     <div class="card">
+        <div class="card-icon"><i class="fa-solid fa-table-cells"></i></div>
         <div class="numero">{{ stats.compartimentos }}</div>
         <div class="titulo-card">Compartimentos</div>
     </div>
@@ -53,6 +54,7 @@
 
     <a href="{{ url_for('encomendas.listar') }}" class="card-link">
     <div class="card">
+        <div class="card-icon"><i class="fa-solid fa-box-open"></i></div>
         <div class="numero">{{ stats.encomendas_pendentes }}</div>
         <div class="titulo-card">Encomendas pendentes</div>
     </div>
@@ -60,6 +62,7 @@
 
     <a href="{{ url_for('armarios.listar') }}" class="card-link">
     <div class="card">
+        <div class="card-icon"><i class="fa-solid fa-microchip"></i></div>
         <div class="numero">{{ stats.esp32_online }}/{{ stats.esp32_total }}</div>
         <div class="titulo-card">ESP32 online</div>
     </div>
@@ -93,22 +96,22 @@
     {% if encomendas_recentes %}
     <br>
     <h2>Encomendas recentes</h2>
-    <table style="width:100%;margin-top:15px;border-collapse:collapse;">
+    <table class="painel-table">
         <thead>
-            <tr style="text-align:left;border-bottom:2px solid #eee;">
-                <th style="padding:8px;">Código</th>
-                <th style="padding:8px;">Destinatário</th>
-                <th style="padding:8px;">Armário</th>
-                <th style="padding:8px;">Status</th>
+            <tr>
+                <th>Código</th>
+                <th>Destinatário</th>
+                <th>Armário</th>
+                <th>Status</th>
             </tr>
         </thead>
         <tbody>
             {% for e in encomendas_recentes %}
-            <tr style="border-bottom:1px solid #eee;">
-                <td style="padding:8px;"><strong>{{ e.codigo }}</strong></td>
-                <td style="padding:8px;">{{ e.cliente }}</td>
-                <td style="padding:8px;">{{ e.armario_nome or '—' }}</td>
-                <td style="padding:8px;">{{ e.status }}</td>
+            <tr>
+                <td><strong>{{ e.codigo }}</strong></td>
+                <td>{{ e.cliente }}</td>
+                <td>{{ e.armario_nome or '—' }}</td>
+                <td>{{ e.status }}</td>
             </tr>
             {% endfor %}
         </tbody>

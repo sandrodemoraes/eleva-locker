@@ -6,16 +6,11 @@
             <i class="fa-solid fa-bars"></i>
         </button>
 
-        <div class="logo-icon">
-            <i class="fa-solid fa-box"></i>
-        </div>
+        <img class="logo-img" src="{{ url_for('static', filename='brand/logo-eleva-locker-icon.svg') }}" alt="ELEVA LOCKER">
 
         <div class="logo-text">
-
-            <h2>ELEVA LOCKER</h2>
-
+            <h2>eleva locker</h2>
             <span>Sistema Administrativo</span>
-
         </div>
 
     </div>
@@ -23,8 +18,8 @@
     <div class="topo-direita">
 
         {% if session.usuario_id and sites is defined %}
-        <form method="POST" action="{{ url_for('sites.selecionar') }}" class="site-selector" style="margin-right:15px;">
-            <select name="site_id" onchange="this.form.submit()" style="padding:6px 10px;border-radius:8px;border:1px solid #ddd;">
+        <form method="POST" action="{{ url_for('sites.selecionar') }}" class="site-selector">
+            <select name="site_id" onchange="this.form.submit()">
                 <option value="" {% if not site_atual %}selected{% endif %}>Todos os sites</option>
                 {% for s in sites %}
                 <option value="{{ s.id }}" {% if site_atual == s.id %}selected{% endif %}>{{ s.nome }}</option>
@@ -33,40 +28,29 @@
         </form>
         {% endif %}
 
-        <button class="btn-icon">
-
+        <button class="btn-icon" type="button" title="Notificações">
             <i class="fa-solid fa-bell"></i>
-
         </button>
 
-        <button class="btn-icon">
-
+        <button class="btn-icon" type="button" title="Configurações">
             <i class="fa-solid fa-gear"></i>
-
         </button>
 
         <div class="usuario">
 
             <div class="avatar">
-
                 <i class="fa-solid fa-user"></i>
-
             </div>
 
             <div>
-
                 <strong>
-
                     {% if session.nome %}
                         {{ session.nome }}
                     {% else %}
                         Administrador
                     {% endif %}
-
                 </strong>
-
                 <small>Administrador</small>
-
             </div>
 
         </div>
