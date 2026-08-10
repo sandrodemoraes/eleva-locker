@@ -186,10 +186,11 @@
 
         <p class="totem-dica destaque">Coloque a encomenda e <strong>feche a porta</strong></p>
 
-        <button type="button" class="btn-totem btn-principal" onclick="concluirDeposito()">
-            <i class="fa-solid fa-door-closed"></i> Porta fechada — concluir
+        <button type="button" class="btn-totem btn-principal btn-concluir-porta" id="btn-concluir-porta" onclick="concluirDeposito()">
+            <i class="fa-solid fa-door-closed"></i> Porta fechada — concluir e enviar WhatsApp
         </button>
-        <p class="totem-dica" id="sensor-aviso">Feche a porta — o sistema detecta automaticamente</p>
+        <p class="totem-dica destaque" id="sensor-status">Aguardando sensor...</p>
+        <p class="totem-dica" id="sensor-aviso">Feche a porta. Se não detectar sozinho, toque no botão acima.</p>
         <div class="resultado erro" id="erro-aguardando"></div>
     </section>
 
@@ -254,13 +255,19 @@ let pollPortaTimer = null;
 let sugestoesTimer = null;
 let fecharSugestoesTimer = null;
 let moradorSelecionado = null;
+let concluindoDeposito = false;
 const IDLE_MS = 60000;
 const PIN_TAMANHO = 4;
 
 function mostrarTela(id){
     document.querySelectorAll(".tela").forEach(t => t.classList.remove("tela-ativa"));
     document.getElementById(id).classList.add("tela-ativa");
-    resetIdle();
+    if(id === "tela-deposito-aguardando"){
+        if(idleTimer) clearTimeout(idleTimer);
+        idleTimer = null;
+    } else {
+        resetIdle();
+    }
 }
 
 function irInicio(){
@@ -610,36 +617,66 @@ function confirmarDeposito(){
 }
 
 function irAguardandoPorta(data){
+    concluindoDeposito = false;
     document.getElementById("aguardando-porta").textContent = data.compartimento || "—";
     document.getElementById("aguardando-tamanho").textContent = data.tamanho ? `Tamanho ${data.tamanho}` : "";
     document.getElementById("aguardando-cliente").textContent = data.cliente ? "Para: " + data.cliente : "";
     document.getElementById("erro-aguardando").classList.remove("visivel");
+    const st = document.getElementById("sensor-status");
+    if(st) st.textContent = "Aguardando sensor...";
+    const btn = document.getElementById("btn-concluir-porta");
+    if(btn) btn.classList.remove("btn-pulse");
     mostrarTela("tela-deposito-aguardando");
     if(pollPortaTimer) clearInterval(pollPortaTimer);
+    verificarPortaFechada();
     pollPortaTimer = setInterval(verificarPortaFechada, 2000);
 }
 
 function verificarPortaFechada(){
-    if(!depositoPendente.compartimento_id) return;
+    if(!depositoPendente.compartimento_id || concluindoDeposito) return;
     fetch("/totem/porta/" + depositoPendente.compartimento_id + "/status")
-    .then(r => r.json())
-    .then(d => {
+    .then(r => r.json().then(d => ({ok: r.ok, d})))
+    .then(({ok, d}) => {
         const aviso = document.getElementById("sensor-aviso");
-        if(aviso){
-            if(d.sensor){
-                aviso.textContent = d.fechada
-                    ? "Porta fechada detectada — concluindo..."
-                    : "Feche a porta para concluir o depósito";
-            } else {
-                aviso.textContent = "Sensor indisponível — use o botão abaixo";
+        const status = document.getElementById("sensor-status");
+        const btn = document.getElementById("btn-concluir-porta");
+        if(!ok || d.erro){
+            if(status) status.textContent = "Sensor offline — use o botão verde";
+            if(aviso) aviso.textContent = d.erro || d.mensagem || "Sem resposta da ESP32";
+            if(btn) btn.classList.add("btn-pulse");
+            return;
+        }
+        if(d.sensor){
+            if(status){
+                status.textContent = d.fechada
+                    ? "Porta FECHADA — concluindo..."
+                    : "Porta ABERTA — feche para concluir";
             }
+            if(aviso){
+                aviso.textContent = d.fechada
+                    ? "Enviando código por WhatsApp..."
+                    : "Feche a porta ou toque no botão verde abaixo";
+            }
+            if(btn) btn.classList.toggle("btn-pulse", !d.fechada);
+        } else {
+            if(status) status.textContent = "Sensor não configurado nesta porta";
+            if(aviso) aviso.textContent = "Toque em «Porta fechada — concluir» após fechar";
+            if(btn) btn.classList.add("btn-pulse");
         }
         if(d.sensor && d.fechada) concluirDeposito(true);
     })
-    .catch(() => {});
+    .catch(() => {
+        const status = document.getElementById("sensor-status");
+        const aviso = document.getElementById("sensor-aviso");
+        const btn = document.getElementById("btn-concluir-porta");
+        if(status) status.textContent = "Sem conexão com ESP32";
+        if(aviso) aviso.textContent = "Toque no botão verde após fechar a porta";
+        if(btn) btn.classList.add("btn-pulse");
+    });
 }
 
 function concluirDeposito(auto){
+    if(concluindoDeposito) return;
     if(!depositoPendente.encomenda_id){
         const el = document.getElementById("erro-aguardando");
         if(el){
@@ -648,7 +685,10 @@ function concluirDeposito(auto){
         }
         return;
     }
+    concluindoDeposito = true;
     pararPollDeposito();
+    const st = document.getElementById("sensor-status");
+    if(st) st.textContent = "Concluindo depósito...";
     const body = Object.assign({}, authPayload(), {
         encomenda_id: depositoPendente.encomenda_id,
     });
@@ -662,16 +702,21 @@ function concluirDeposito(auto){
         if(ok && d.sucesso){
             irSucesso(Object.assign({}, d, {modo: "deposito", mensagem: d.mensagem}));
         } else {
+            concluindoDeposito = false;
             const el = document.getElementById("erro-aguardando");
             el.textContent = d.mensagem || "Erro ao concluir.";
             el.classList.add("visivel");
-            if(!auto) pollPortaTimer = setInterval(verificarPortaFechada, 2000);
+            if(st) st.textContent = "Falhou — tente o botão de novo";
+            pollPortaTimer = setInterval(verificarPortaFechada, 2000);
         }
     })
     .catch(() => {
+        concluindoDeposito = false;
         const el = document.getElementById("erro-aguardando");
         el.textContent = "Sem conexão com o servidor.";
         el.classList.add("visivel");
+        if(st) st.textContent = "Sem conexão — tente de novo";
+        pollPortaTimer = setInterval(verificarPortaFechada, 2000);
     });
 }
 
@@ -695,6 +740,8 @@ function fecharAjuda(){
 }
 
 function resetIdle(){
+    const aguardando = document.getElementById("tela-deposito-aguardando").classList.contains("tela-ativa");
+    if(aguardando) return;
     if(idleTimer) clearTimeout(idleTimer);
     idleTimer = setTimeout(irInicio, IDLE_MS);
 }
