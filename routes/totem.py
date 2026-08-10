@@ -6,7 +6,7 @@ import json
 
 import config
 
-TOTEM_VERSAO = "2.4.1"
+TOTEM_VERSAO = "2.4.2"
 from middleware.rate_limit import rate_limit
 from services.encomenda_service import EncomendaService
 from services.armario_service import ArmarioService
@@ -390,15 +390,28 @@ def concluir_deposito():
         )
 
         whatsapp_ok = any(
-            n.get("canal") == "whatsapp" and n.get("sucesso")
+            n.get("canal") == "whatsapp"
+            and n.get("sucesso")
+            and not n.get("simulado")
             for n in (resultado.get("notificacoes") or [])
+        )
+        whatsapp_erro = next(
+            (
+                n.get("mensagem") or n.get("detalhe")
+                for n in (resultado.get("notificacoes") or [])
+                if n.get("canal") == "whatsapp" and not n.get("sucesso")
+            ),
+            None,
         )
         if resultado.get("ja_notificado"):
             msg = "Depósito já estava concluído."
         elif whatsapp_ok:
             msg = "Depósito concluído! Morador notificado por WhatsApp."
         elif config.NOTIF_WHATSAPP_ATIVO:
-            msg = "Depósito concluído, mas WhatsApp não foi enviado. Verifique o telefone."
+            msg = (
+                "Depósito concluído, mas WhatsApp não foi enviado. "
+                + (whatsapp_erro or "Verifique o telefone no cadastro.")
+            )
         else:
             msg = "Depósito concluído! Morador notificado."
 
@@ -409,6 +422,7 @@ def concluir_deposito():
             "compartimento": resultado["compartimento"],
             "cliente": resultado["cliente"],
             "whatsapp_enviado": whatsapp_ok,
+            "whatsapp_erro": whatsapp_erro,
             "modo": "deposito",
         })
 

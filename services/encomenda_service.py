@@ -195,13 +195,17 @@ class EncomendaService:
             raise ValueError("Sem permissão para este armário.")
 
         if encomenda["notificado_em"]:
-            return {
-                "id": encomenda_id,
-                "compartimento": encomenda["compartimento_numero"],
-                "cliente": encomenda["cliente"],
-                "ja_notificado": True,
-                "notificacoes": [],
-            }
+            from repositories.notificacao_repository import NotificacaoRepository
+
+            ultimo_wa = NotificacaoRepository.ultimo_whatsapp_encomenda(encomenda_id)
+            if ultimo_wa and ultimo_wa["status"] == "enviado":
+                return {
+                    "id": encomenda_id,
+                    "compartimento": encomenda["compartimento_numero"],
+                    "cliente": encomenda["cliente"],
+                    "ja_notificado": True,
+                    "notificacoes": [],
+                }
 
         notificacoes = NotificacaoService.notificar_encomenda_chegou(
             encomenda_id=encomenda_id,

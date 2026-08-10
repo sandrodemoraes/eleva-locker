@@ -245,6 +245,46 @@ class NotificacaoService:
         return str(erro)
 
     @staticmethod
+    def _item_resposta_evolution(dados):
+        if isinstance(dados, list):
+            if not dados:
+                raise ValueError("Evolution API retornou lista vazia.")
+            return dados[0]
+        if isinstance(dados, dict):
+            return dados
+        raise ValueError(f"Resposta inesperada da Evolution: {type(dados).__name__}")
+
+    @staticmethod
+    def _validar_resposta_evolution(dados, numero_destino):
+        item = NotificacaoService._item_resposta_evolution(dados)
+
+        if item.get("error"):
+            raise ValueError(str(item["error"]))
+
+        erro = item.get("message")
+        if isinstance(erro, str) and any(
+            palavra in erro.lower()
+            for palavra in ("error", "invalid", "not found", "exist", "fail")
+        ):
+            raise ValueError(erro)
+
+        status = str(item.get("status") or "").upper()
+        if status in ("ERROR", "FAILED"):
+            raise ValueError(item.get("message") or f"Status {status}")
+
+        jid = (item.get("key") or {}).get("remoteJid") or ""
+        if jid and numero_destino:
+            dest = re.sub(r"\D", "", jid.split("@")[0])
+            esperado = re.sub(r"\D", "", numero_destino)
+            if dest and esperado and len(dest) >= 10 and len(esperado) >= 10:
+                if dest[-10:] != esperado[-10:] and dest != esperado:
+                    raise ValueError(
+                        f"Evolution enviou para {dest}, esperado {esperado}"
+                    )
+
+        return item
+
+    @staticmethod
     def _enviar_whatsapp_evolution(numero, mensagem):
         status = NotificacaoService.status_whatsapp()
         if not status["pronto"]:
@@ -272,16 +312,8 @@ class NotificacaoService:
         with urllib.request.urlopen(req, timeout=15) as resp:
             dados = json.loads(resp.read().decode("utf-8"))
 
-        if isinstance(dados, dict):
-            erro = dados.get("error") or dados.get("message")
-            if isinstance(erro, list) and erro:
-                erro = erro[0]
-            if dados.get("status") in (400, 404, 500) or (
-                isinstance(erro, str) and "exist" in erro.lower()
-            ):
-                raise ValueError(str(erro))
-
-        return dados
+        item = NotificacaoService._validar_resposta_evolution(dados, numero)
+        return {"raw": dados, "item": item, "status": item.get("status")}
 
     @staticmethod
     def _enviar_whatsapp_meta(numero, mensagem):
@@ -324,10 +356,18 @@ class NotificacaoService:
                 else:
                     dados = NotificacaoService._enviar_whatsapp_evolution(numero, mensagem)
 
+                detalhe = ""
+                if isinstance(dados, dict):
+                    detalhe = str(dados.get("status") or "")
+                    item = dados.get("item") or {}
+                    jid = (item.get("key") or {}).get("remoteJid")
+                    if jid:
+                        detalhe = (detalhe + " → " + jid).strip(" →")
                 return {
                     "sucesso": True,
                     "mensagem": "WhatsApp enviado.",
                     "dados": dados,
+                    "detalhe": detalhe,
                     "tentativa": tentativa,
                 }
 
@@ -434,7 +474,7 @@ class NotificacaoService:
             NotificacaoService._registrar(
                 encomenda_id, "whatsapp", telefone, mensagem_whatsapp,
                 "enviado" if r["sucesso"] else "erro",
-                r.get("mensagem"),
+                r.get("detalhe") or r.get("mensagem"),
             )
             resultados.append({"canal": "whatsapp", **r})
 
@@ -457,9 +497,18 @@ class NotificacaoService:
                 "canal": "console",
                 "sucesso": True,
                 "mensagem": "Notificação registrada no console.",
+                "simulado": True,
             })
 
-        EncomendaRepository.marcar_notificado(encomenda_id)
+        whatsapp_ok = any(
+            r.get("canal") == "whatsapp" and r.get("sucesso") and not r.get("simulado")
+            for r in resultados
+        )
+        precisa_whatsapp = config.NOTIF_WHATSAPP_ATIVO and bool(telefone)
+
+        if whatsapp_ok or not precisa_whatsapp:
+            if any(r.get("sucesso") for r in resultados):
+                EncomendaRepository.marcar_notificado(encomenda_id)
 
         return resultados
 

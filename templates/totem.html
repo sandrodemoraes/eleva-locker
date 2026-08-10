@@ -199,6 +199,7 @@
         <h2 class="tela-titulo" id="sucesso-titulo">Porta aberta!</h2>
         <p class="tela-sub" id="sucesso-cliente"></p>
         <p class="tela-sub" id="sucesso-msg"></p>
+        <p class="tela-sub totem-alerta-wa" id="sucesso-wa-alerta" style="display:none;color:#ffc107;font-weight:600;"></p>
 
         <div class="porta-box">
             <span class="porta-label" id="sucesso-label">Retire em</span>
@@ -810,8 +811,20 @@ function irSucesso(data){
     document.getElementById("sucesso-label").textContent = deposito ? "Compartimento" : "Retire em";
     document.getElementById("sucesso-cliente").textContent = data.cliente ? (deposito ? "Para: " + data.cliente : "Olá, " + data.cliente) : "";
     document.getElementById("sucesso-msg").textContent = deposito
-        ? (data.mensagem || "Morador notificado por WhatsApp.")
+        ? (data.mensagem || "")
         : (portaFalhou ? (data.mensagem || "Peça ajuda na portaria ou abra manualmente.") : "");
+    const waAlerta = document.getElementById("sucesso-wa-alerta");
+    if(waAlerta){
+        if(deposito && data.whatsapp_enviado === false){
+            waAlerta.style.display = "block";
+            waAlerta.textContent = data.whatsapp_erro
+                ? ("WhatsApp não enviado: " + data.whatsapp_erro)
+                : "WhatsApp não enviado — avise a portaria ou reenvie pelo painel.";
+        } else {
+            waAlerta.style.display = "none";
+            waAlerta.textContent = "";
+        }
+    }
     document.getElementById("sucesso-porta").textContent = data.compartimento || "—";
     document.getElementById("sucesso-dica").textContent = deposito
         ? "Encomenda registrada com sucesso"
