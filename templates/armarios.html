@@ -46,7 +46,7 @@
             {% for a in armarios %}
             <tr>
                 <td>{{ a.id }}</td>
-                <td><a href="/armarios/{{ a.id }}" style="font-weight:bold;color:#005ecb;text-decoration:none">{{ a.nome }}</a></td>
+                <td><a href="/armarios/{{ a.id }}" class="link-primary">{{ a.nome }}</a></td>
                 <td>{{ a.empresa_nome or '—' }}</td>
                 <td>{{ a.endereco or '—' }}</td>
                 <td>{{ a.cidade or '' }}{% if a.estado %}/{{ a.estado }}{% endif %}</td>
