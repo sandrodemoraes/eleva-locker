@@ -83,7 +83,8 @@ a {
     font-weight: 800;
     color: var(--eleva-branco);
     margin: 0;
-    letter-spacing: -0.02em;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
 }
 
 .logo-text span {
