@@ -2,14 +2,16 @@
 """
 Remove admin padrão (admin@elevalocker.com / 123456) e garante admin principal.
 
-Não altera a senha do admin principal — só perfil/status.
+Opcional: alterar senha do admin principal.
 
 Uso:
   python tools/limpar_admin_padrao.py
-  python tools/limpar_admin_padrao.py --admin sandro.demoraes@gmail.com
-  python tools/limpar_admin_padrao.py --remover-outros-admins
+  python tools/limpar_admin_padrao.py --alterar-senha
+  python tools/limpar_admin_padrao.py --senha "MinhaSenhaForte123" --confirmar "MinhaSenhaForte123"
+  python tools/limpar_admin_padrao.py --remover-outros-admins --alterar-senha
 """
 import argparse
+import getpass
 import sys
 from pathlib import Path
 
@@ -18,11 +20,39 @@ sys.path.insert(0, str(ROOT / "tools"))
 sys.path.insert(0, str(ROOT))
 
 from env_bancada import aplicar_bancada_processo
+from werkzeug.security import generate_password_hash
 
 aplicar_bancada_processo()
 
 EMAIL_PADRAO_REMOVER = "admin@elevalocker.com"
 ADMIN_PRINCIPAL_PADRAO = "sandro.demoraes@gmail.com"
+SENHA_MIN = 8
+
+
+def _resolver_nova_senha(args):
+    if args.senha:
+        if not args.confirmar:
+            print("ERRO: use --confirmar com a mesma senha de --senha.")
+            return None
+        if args.senha != args.confirmar:
+            print("ERRO: senha e confirmação não conferem.")
+            return None
+        nova = args.senha
+    elif args.alterar_senha:
+        print(f"\n  Nova senha para {args.admin.strip().lower()} (mínimo {SENHA_MIN} caracteres)")
+        nova = getpass.getpass("  Digite a nova senha: ")
+        conf = getpass.getpass("  Confirme a nova senha: ")
+        if nova != conf:
+            print("ERRO: senhas não conferem.")
+            return None
+    else:
+        return None
+
+    if len(nova) < SENHA_MIN:
+        print(f"ERRO: senha deve ter pelo menos {SENHA_MIN} caracteres.")
+        return None
+
+    return nova
 
 
 def main():
@@ -37,11 +67,25 @@ def main():
         action="store_true",
         help="Remove outros Administradores além do principal",
     )
+    parser.add_argument(
+        "--alterar-senha",
+        action="store_true",
+        help="Pede nova senha no terminal (não aparece na tela)",
+    )
+    parser.add_argument("--senha", help="Nova senha (use com --confirmar)")
+    parser.add_argument("--confirmar", help="Confirmação da nova senha")
     args = parser.parse_args()
+
+    if args.senha and not args.alterar_senha:
+        args.alterar_senha = True
 
     admin_email = args.admin.strip().lower()
     if not admin_email:
         print("ERRO: informe --admin com e-mail válido.")
+        return 1
+
+    nova_senha = _resolver_nova_senha(args)
+    if args.alterar_senha and nova_senha is None:
         return 1
 
     from repositories.base_repository import BaseRepository
@@ -76,7 +120,15 @@ def main():
             """,
             (principal["id"],),
         )
-        print(f"  Admin principal: {admin_email} (senha NÃO alterada)")
+
+        if nova_senha:
+            conn.execute(
+                "UPDATE usuarios SET senha = ? WHERE id = ?",
+                (generate_password_hash(nova_senha), principal["id"]),
+            )
+            print(f"  Admin principal: {admin_email} (senha ATUALIZADA)")
+        else:
+            print(f"  Admin principal: {admin_email} (senha NÃO alterada)")
 
         if args.remover_outros_admins:
             outros = conn.execute(
@@ -113,11 +165,17 @@ def main():
     """
         + admin_email
         + """
-
+"""
+    )
+    if nova_senha:
+        print("  Use a NOVA senha que você acabou de definir.\n")
+    else:
+        print(
+            """
   O admin padrão admin@elevalocker.com / 123456 não volta se já existir
   outro usuário no banco (após atualizar o código).
 """
-    )
+        )
     return 0
 
 

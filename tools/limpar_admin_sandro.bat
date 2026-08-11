@@ -1,5 +1,5 @@
 @echo off
-title ELEVA LOCKER - Limpar admin padrao
+title ELEVA LOCKER - Admin Sandro + nova senha
 color 0E
 cd /d "%~dp0.."
 
@@ -15,13 +15,13 @@ if not defined PYTHON (
 )
 
 echo.
-echo  Remove admin@elevalocker.com (123456)
+echo  Remove admin@elevalocker.com
 echo  Mantem sandro.demoraes@gmail.com como Administrador
-echo  Para TROCAR SENHA use: tools\limpar_admin_sandro.bat
-echo  =============================================
+echo  Voce vai digitar a NOVA SENHA (nao aparece na tela)
+echo  ====================================================
 echo.
 
-%PYTHON% tools\limpar_admin_padrao.py %*
+%PYTHON% tools\limpar_admin_padrao.py --alterar-senha %*
 set "RC=%ERRORLEVEL%"
 
 echo.
