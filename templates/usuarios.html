@@ -257,6 +257,23 @@
 
         }
 
+        .btn-link{
+            background:none;
+            border:none;
+            cursor:pointer;
+            padding:0;
+            font-size:15px;
+        }
+
+        .alert{
+            padding:12px 16px;
+            border-radius:8px;
+            margin-bottom:20px;
+        }
+        .alert-success{background:#d4edda;color:#155724;}
+        .alert-warning{background:#fff3cd;color:#856404;}
+        .alert-danger{background:#f8d7da;color:#721c24;}
+
         .rodape{
 
             margin-top:20px;
@@ -435,6 +452,10 @@
             <h1>Usuários</h1>
 
             <p>Gerenciamento de usuários do sistema</p>
+            <p style="color:#666;font-size:14px;margin-top:6px">
+                Operador <strong>sem armário</strong> = todos os armários.
+                Para síndico de um condomínio, cadastre em <strong>Armários → abrir armário → Usuários</strong>.
+            </p>
 
         </div>
 
@@ -447,6 +468,12 @@
         </button>
 
     </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for category, message in messages %}
+            <div class="alert alert-{{ category }}">{{ message }}</div>
+        {% endfor %}
+    {% endwith %}
 
     <div class="card">
 
@@ -479,6 +506,8 @@
 
                     <th>Perfil</th>
 
+                    <th>Armário</th>
+
                     <th>Status</th>
 
                     <th>Ações</th>
@@ -500,6 +529,18 @@
                     <td>{{ usuario.email }}</td>
 
                     <td>{{ usuario.perfil }}</td>
+
+                    <td>
+                        {% if usuario.perfil == 'Operador' %}
+                            {% if usuario.armario_id %}
+                                {{ usuario.armario_nome or ('#' ~ usuario.armario_id) }}
+                            {% else %}
+                                Todos
+                            {% endif %}
+                        {% else %}
+                            —
+                        {% endif %}
+                    </td>
 
                     <td>
 
@@ -525,23 +566,27 @@
 
                     <td class="acoes">
 
-                        <a href="#" class="editar">
-
+                        <a href="#" class="editar" data-id="{{ usuario.id }}"
+                           data-nome="{{ usuario.nome }}"
+                           data-email="{{ usuario.email }}"
+                           data-telefone="{{ usuario.telefone or '' }}"
+                           data-perfil="{{ usuario.perfil }}"
+                           data-armario-id="{{ usuario.armario_id or '' }}"
+                           data-status="{{ usuario.status }}">
                             <i class="fa-solid fa-pen"></i>
-
                         </a>
 
-                        <a href="#" class="senha">
-
+                        <a href="#" class="senha" data-id="{{ usuario.id }}"
+                           data-nome="{{ usuario.nome }}">
                             <i class="fa-solid fa-key"></i>
-
                         </a>
 
-                        <a href="#" class="excluir">
-
-                            <i class="fa-solid fa-trash"></i>
-
-                        </a>
+                        <form method="POST" action="/usuarios/excluir/{{ usuario.id }}"
+                              class="form-excluir" style="display:inline">
+                            <button type="submit" class="btn-link excluir" title="Excluir">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </form>
 
                     </td>
 
@@ -627,7 +672,7 @@
 
                     <label>Perfil</label>
 
-                    <select name="perfil">
+                    <select name="perfil" id="novoPerfil" onchange="toggleArmarioNovo()">
 
                         <option>Administrador</option>
 
@@ -649,6 +694,23 @@
 
                         <option value="0">Inativo</option>
 
+                    </select>
+
+                </div>
+
+            </div>
+
+            <div class="linha" id="linhaArmarioNovo" style="display:none">
+
+                <div class="campo">
+
+                    <label>Armário (Operador / Morador)</label>
+
+                    <select name="armario_id" id="novoArmario">
+                        <option value="">Todos os armários</option>
+                        {% for a in armarios %}
+                        <option value="{{ a.id }}">{{ a.nome }}</option>
+                        {% endfor %}
                     </select>
 
                 </div>
@@ -706,7 +768,120 @@
 
     </div>
 
-</div><script>
+</div>
+
+<!-- Modal Editar -->
+<div class="modal" id="modalEditar">
+
+    <div class="modal-conteudo">
+
+        <h2>Editar Usuário</h2>
+
+        <form method="POST" id="formEditar" action="">
+
+            <div class="linha">
+                <div class="campo">
+                    <label>Nome</label>
+                    <input type="text" name="nome" id="editNome" required>
+                </div>
+            </div>
+
+            <div class="linha">
+                <div class="campo">
+                    <label>E-mail</label>
+                    <input type="email" name="email" id="editEmail" required>
+                </div>
+                <div class="campo">
+                    <label>Telefone</label>
+                    <input type="text" name="telefone" id="editTelefone">
+                </div>
+            </div>
+
+            <div class="linha">
+                <div class="campo">
+                    <label>Perfil</label>
+                    <select name="perfil" id="editPerfil" onchange="toggleArmarioEditar()">
+                        <option>Administrador</option>
+                        <option>Operador</option>
+                        <option>Usuário</option>
+                    </select>
+                </div>
+                <div class="campo">
+                    <label>Status</label>
+                    <select name="status" id="editStatus">
+                        <option value="1">Ativo</option>
+                        <option value="0">Inativo</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="linha" id="linhaArmarioEditar" style="display:none">
+                <div class="campo">
+                    <label>Armário (Operador / Morador)</label>
+                    <select name="armario_id" id="editArmario">
+                        <option value="">Todos os armários</option>
+                        {% for a in armarios %}
+                        <option value="{{ a.id }}">{{ a.nome }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <div class="botoes-modal">
+                <button type="button" class="btn btn-cancelar" onclick="fecharModalEditar()">Cancelar</button>
+                <button type="submit" class="btn btn-salvar">Salvar Alterações</button>
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+<!-- Modal Senha -->
+<div class="modal" id="modalSenha">
+
+    <div class="modal-conteudo">
+
+        <h2>Alterar Senha — <span id="senhaNome"></span></h2>
+
+        <form method="POST" id="formSenha" action="">
+
+            <div class="linha">
+                <div class="campo">
+                    <label>Nova Senha</label>
+                    <input type="password" name="senha" required minlength="4">
+                </div>
+                <div class="campo">
+                    <label>Confirmar Senha</label>
+                    <input type="password" name="confirmar" required minlength="4">
+                </div>
+            </div>
+
+            <div class="botoes-modal">
+                <button type="button" class="btn btn-cancelar" onclick="fecharModalSenha()">Cancelar</button>
+                <button type="submit" class="btn btn-salvar">Alterar Senha</button>
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+<script>
+
+function toggleArmarioNovo(){
+    var linha = document.getElementById("linhaArmarioNovo");
+    var perfil = document.getElementById("novoPerfil").value;
+    linha.style.display = (perfil === "Operador" || perfil === "Usuário") ? "flex" : "none";
+}
+
+function toggleArmarioEditar(){
+    var linha = document.getElementById("linhaArmarioEditar");
+    var perfil = document.getElementById("editPerfil").value;
+    linha.style.display = (perfil === "Operador" || perfil === "Usuário") ? "flex" : "none";
+}
 
 function abrirModal(){
 
@@ -758,44 +933,77 @@ document.getElementById("pesquisa").addEventListener("keyup", function(){
 
 });
 
-// Confirma exclusão
-document.querySelectorAll(".excluir").forEach(function(botao){
+// Editar usuário
+document.querySelectorAll(".editar").forEach(function(botao){
 
-    botao.addEventListener("click",function(e){
+    botao.addEventListener("click", function(e){
 
         e.preventDefault();
 
-        if(confirm("Deseja realmente excluir este usuário?")){
+        document.getElementById("formEditar").action =
+            "/usuarios/editar/" + botao.dataset.id;
 
-            alert("Função será implementada no próximo passo.");
+        document.getElementById("editNome").value = botao.dataset.nome;
+        document.getElementById("editEmail").value = botao.dataset.email;
+        document.getElementById("editTelefone").value = botao.dataset.telefone;
+        document.getElementById("editPerfil").value = botao.dataset.perfil;
+        document.getElementById("editStatus").value = botao.dataset.status;
+        document.getElementById("editArmario").value = botao.dataset.armarioId || "";
+        toggleArmarioEditar();
 
+        document.getElementById("modalEditar").style.display = "flex";
+
+    });
+
+});
+
+function fecharModalEditar(){
+    document.getElementById("modalEditar").style.display = "none";
+}
+
+// Alterar senha
+document.querySelectorAll(".senha").forEach(function(botao){
+
+    botao.addEventListener("click", function(e){
+
+        e.preventDefault();
+
+        document.getElementById("formSenha").action =
+            "/usuarios/senha/" + botao.dataset.id;
+
+        document.getElementById("senhaNome").textContent = botao.dataset.nome;
+
+        document.getElementById("modalSenha").style.display = "flex";
+
+    });
+
+});
+
+function fecharModalSenha(){
+    document.getElementById("modalSenha").style.display = "none";
+}
+
+// Excluir usuário
+document.querySelectorAll(".form-excluir").forEach(function(form){
+
+    form.addEventListener("submit", function(e){
+
+        if(!confirm("Deseja realmente excluir este usuário?")){
+            e.preventDefault();
         }
 
     });
 
 });
 
-// Alterar senha
-document.querySelectorAll(".senha").forEach(function(botao){
+// Fechar modais clicando fora
+["modalUsuario", "modalEditar", "modalSenha"].forEach(function(id){
 
-    botao.addEventListener("click",function(e){
+    document.getElementById(id).addEventListener("click", function(e){
 
-        e.preventDefault();
-
-        alert("Alteração de senha será implementada.");
-
-    });
-
-});
-
-// Editar usuário
-document.querySelectorAll(".editar").forEach(function(botao){
-
-    botao.addEventListener("click",function(e){
-
-        e.preventDefault();
-
-        alert("Edição de usuário será implementada.");
+        if(e.target === this){
+            this.style.display = "none";
+        }
 
     });
 

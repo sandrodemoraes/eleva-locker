@@ -1,0 +1,207 @@
+{% extends "layout/base.html" %}
+
+{% block title %}Sites / Franquias | ELEVA LOCKER{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/crud.css') }}">
+{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+    <div>
+        <h1>Sites / Franquias</h1>
+        <p>Gerencie unidades multi-site e chaves de API para integrações</p>
+    </div>
+    <button class="btn" onclick="abrirModal('modalNovoSite')">
+        <i class="fa-solid fa-plus"></i> Novo Site
+    </button>
+</div>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% for category, message in messages %}
+        <div class="alert alert-{{ category }}">{{ message }}</div>
+    {% endfor %}
+{% endwith %}
+
+<div class="table-box">
+    <h2>Sites cadastrados</h2>
+    {% if sites %}
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nome</th>
+                <th>Código</th>
+                <th>Cidade/UF</th>
+                <th>Armários</th>
+                <th>Empresas</th>
+                <th>Status</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for s in sites %}
+            <tr>
+                <td>{{ s.id }}</td>
+                <td><strong>{{ s.nome }}</strong></td>
+                <td><code>{{ s.codigo }}</code></td>
+                <td>{{ s.cidade or '' }}{% if s.estado %}/{{ s.estado }}{% endif %}</td>
+                <td>{{ s.total_armarios or 0 }}</td>
+                <td>{{ s.total_empresas or 0 }}</td>
+                <td>{{ 'Ativo' if s.status else 'Inativo' }}</td>
+                <td>
+                    <button class="btn btn-sm" onclick="editarSite({{ s.id }}, '{{ s.nome | replace("'", "\\'") }}', '{{ s.codigo }}', '{{ s.endereco or '' }}', '{{ s.cidade or '' }}', '{{ s.estado or '' }}', {{ s.status }})">
+                        <i class="fa-solid fa-pen"></i>
+                    </button>
+                    {% if s.id != 1 %}
+                    <form method="POST" action="/sites/excluir/{{ s.id }}" style="display:inline" onsubmit="return confirm('Excluir site?')">
+                        <button type="submit" class="btn btn-sm btn-danger"><i class="fa-solid fa-trash"></i></button>
+                    </form>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state"><p>Nenhum site cadastrado.</p></div>
+    {% endif %}
+</div>
+
+<br>
+
+<div class="table-box">
+    <div class="page-header" style="margin-bottom:15px;">
+        <h2>Chaves de API (integrações e-commerce)</h2>
+        <button class="btn" onclick="abrirModal('modalNovaKey')">
+            <i class="fa-solid fa-key"></i> Nova Chave
+        </button>
+    </div>
+    <p style="color:#666;margin-bottom:15px;">Use o header <code>X-API-Key</code> nas requisições para <code>/api/v1/*</code></p>
+    {% if api_keys %}
+    <table>
+        <thead>
+            <tr>
+                <th>Nome</th>
+                <th>Site</th>
+                <th>Permissão</th>
+                <th>Chave (prefixo)</th>
+                <th>Status</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for k in api_keys %}
+            <tr>
+                <td>{{ k.nome }}</td>
+                <td>{{ k.site_nome or 'Global' }}</td>
+                <td>{{ k.permissoes }}</td>
+                <td><code>{{ k.chave[:12] }}...</code></td>
+                <td>{{ 'Ativa' if k.ativo else 'Inativa' }}</td>
+                <td>
+                    <form method="POST" action="/sites/api-key/toggle/{{ k.id }}" style="display:inline">
+                        <input type="hidden" name="ativo" value="{{ 0 if k.ativo else 1 }}">
+                        <button type="submit" class="btn btn-sm">{{ 'Desativar' if k.ativo else 'Ativar' }}</button>
+                    </form>
+                    <form method="POST" action="/sites/api-key/excluir/{{ k.id }}" style="display:inline" onsubmit="return confirm('Remover chave?')">
+                        <button type="submit" class="btn btn-sm btn-danger"><i class="fa-solid fa-trash"></i></button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state"><p>Nenhuma chave de API criada.</p></div>
+    {% endif %}
+</div>
+
+<!-- Modal Novo Site -->
+<div class="modal-overlay" id="modalNovoSite">
+    <div class="modal">
+        <h2>Novo Site</h2>
+        <form method="POST" action="/sites/novo">
+            <div class="form-group"><label>Nome *</label><input type="text" name="nome" required></div>
+            <div class="form-group"><label>Código *</label><input type="text" name="codigo" placeholder="ex: sp-centro"></div>
+            <div class="form-group"><label>Endereço</label><input type="text" name="endereco"></div>
+            <div class="form-group"><label>Cidade</label><input type="text" name="cidade"></div>
+            <div class="form-group"><label>UF</label><input type="text" name="estado" maxlength="2"></div>
+            <div class="form-group"><label>Status</label><select name="status"><option value="1">Ativo</option><option value="0">Inativo</option></select></div>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-secondary" onclick="fecharModal('modalNovoSite')">Cancelar</button>
+                <button type="submit" class="btn">Salvar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal Editar Site -->
+<div class="modal-overlay" id="modalEditarSite">
+    <div class="modal">
+        <h2>Editar Site</h2>
+        <form method="POST" id="formEditarSite">
+            <div class="form-group"><label>Nome *</label><input type="text" name="nome" id="editNome" required></div>
+            <div class="form-group"><label>Código *</label><input type="text" name="codigo" id="editCodigo"></div>
+            <div class="form-group"><label>Endereço</label><input type="text" name="endereco" id="editEndereco"></div>
+            <div class="form-group"><label>Cidade</label><input type="text" name="cidade" id="editCidade"></div>
+            <div class="form-group"><label>UF</label><input type="text" name="estado" id="editEstado" maxlength="2"></div>
+            <div class="form-group"><label>Status</label><select name="status" id="editStatus"><option value="1">Ativo</option><option value="0">Inativo</option></select></div>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-secondary" onclick="fecharModal('modalEditarSite')">Cancelar</button>
+                <button type="submit" class="btn">Salvar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal Nova API Key -->
+<div class="modal-overlay" id="modalNovaKey">
+    <div class="modal">
+        <h2>Nova Chave de API</h2>
+        <form method="POST" action="/sites/api-key/nova">
+            <div class="form-group"><label>Nome *</label><input type="text" name="nome" required placeholder="Ex: Integração Shopee"></div>
+            <div class="form-group">
+                <label>Site</label>
+                <select name="site_id">
+                    <option value="">Global (todos)</option>
+                    {% for s in sites %}<option value="{{ s.id }}">{{ s.nome }}</option>{% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Permissão</label>
+                <select name="permissoes">
+                    <option value="read">Leitura</option>
+                    <option value="write">Leitura + Escrita</option>
+                    <option value="admin">Admin</option>
+                </select>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-secondary" onclick="fecharModal('modalNovaKey')">Cancelar</button>
+                <button type="submit" class="btn">Gerar Chave</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+function abrirModal(id){ document.getElementById(id).classList.add('active'); }
+function fecharModal(id){ document.getElementById(id).classList.remove('active'); }
+function editarSite(id, nome, codigo, endereco, cidade, estado, status){
+    document.getElementById('formEditarSite').action = '/sites/editar/' + id;
+    document.getElementById('editNome').value = nome;
+    document.getElementById('editCodigo').value = codigo;
+    document.getElementById('editEndereco').value = endereco;
+    document.getElementById('editCidade').value = cidade;
+    document.getElementById('editEstado').value = estado;
+    document.getElementById('editStatus').value = status;
+    abrirModal('modalEditarSite');
+}
+document.querySelectorAll('.modal-overlay').forEach(function(el){
+    el.addEventListener('click', function(e){ if(e.target === el) fecharModal(el.id); });
+});
+</script>
+{% endblock %}

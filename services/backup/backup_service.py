@@ -2,54 +2,121 @@ import os
 import shutil
 from pathlib import Path
 
+import config
 from services.backup.hash_service import HashService
 
 
 class BackupService:
 
-    MAX_BACKUPS = 5
-
-    HASH_FILE = "backups/ultimo.hash"
-
     PASTAS = [
         "database",
         "uploads",
         "config",
-        "logs"
+        "logs",
     ]
 
     ARQUIVOS = [
-        "PROJETO.md"
+        "PROJETO.md",
+        ".env",
     ]
 
     @staticmethod
-    def criar_backup():
+    def _raiz():
+        return Path(__file__).resolve().parents[2]
+
+    @staticmethod
+    def _backup_root():
+        caminho = Path(config.BACKUP_DIR)
+        if not caminho.is_absolute():
+            caminho = BackupService._raiz() / caminho
+        return caminho
+
+    @staticmethod
+    def _hash_file():
+        return BackupService._backup_root() / "ultimo.hash"
+
+    @staticmethod
+    def _destino_backup(numero):
+        return BackupService._backup_root() / f"backup_{numero:02d}"
+
+    @staticmethod
+    def listar():
+
+        backups = []
+        max_backups = config.BACKUP_MAX
+
+        for i in range(1, max_backups + 1):
+
+            caminho = BackupService._destino_backup(i)
+
+            if caminho.exists():
+
+                db = caminho / "database" / "elevalocker.db"
+                tamanho = sum(
+                    f.stat().st_size
+                    for f in caminho.rglob("*")
+                    if f.is_file()
+                )
+
+                backups.append({
+                    "numero": i,
+                    "caminho": str(caminho),
+                    "tem_banco": db.exists(),
+                    "tamanho_kb": round(tamanho / 1024, 1),
+                })
+
+        return backups
+
+    @staticmethod
+    def validar_backup(destino=None):
+        """Valida backup_01 — banco + .env obrigatórios."""
+        destino = Path(destino) if destino else BackupService._destino_backup(1)
+
+        if not destino.exists():
+            return False, f"Pasta não existe: {destino}"
+
+        db = destino / "database" / "elevalocker.db"
+        if not db.exists():
+            return False, "database/elevalocker.db ausente no backup"
+        if db.stat().st_size < 512:
+            return False, f"Banco vazio ou corrompido ({db.stat().st_size} bytes)"
+
+        env = destino / ".env"
+        if not env.exists():
+            return False, ".env ausente no backup — configuração não protegida"
+        if env.stat().st_size < 10:
+            return False, ".env vazio no backup"
+
+        return True, str(destino)
+
+    @staticmethod
+    def criar_backup(forcar=False):
 
         try:
 
-            raiz = Path(__file__).resolve().parents[2]
+            raiz = BackupService._raiz()
+            root = BackupService._backup_root()
 
-            os.makedirs("backups", exist_ok=True)
+            os.makedirs(root, exist_ok=True)
 
             hash_atual = HashService.gerar_hash(raiz)
+            hash_file = BackupService._hash_file()
 
-            if os.path.exists(BackupService.HASH_FILE):
+            if not forcar and hash_file.exists():
 
-                with open(BackupService.HASH_FILE, "r", encoding="utf-8") as f:
-                    ultimo_hash = f.read().strip()
+                ultimo_hash = hash_file.read_text(encoding="utf-8").strip()
 
                 if ultimo_hash == hash_atual:
                     print("✔ Nenhuma alteração. Backup ignorado.")
-                    return
+                    return False
 
             BackupService.rotacionar()
 
-            destino = Path("backups") / "backup_01"
+            destino = BackupService._destino_backup(1)
 
             if destino.exists():
                 shutil.rmtree(destino)
 
-            # Copia somente as pastas necessárias
             for pasta in BackupService.PASTAS:
 
                 origem = raiz / pasta
@@ -59,48 +126,100 @@ class BackupService:
                     shutil.copytree(
                         origem,
                         destino / pasta,
-                        dirs_exist_ok=True
+                        dirs_exist_ok=True,
                     )
 
-            # Copia os arquivos importantes
             for arquivo in BackupService.ARQUIVOS:
 
                 origem = raiz / arquivo
 
                 if origem.exists():
 
-                    (destino).mkdir(parents=True, exist_ok=True)
+                    destino.mkdir(parents=True, exist_ok=True)
 
-                    shutil.copy2(
-                        origem,
-                        destino / arquivo
-                    )
+                    shutil.copy2(origem, destino / arquivo)
 
-            with open(BackupService.HASH_FILE, "w", encoding="utf-8") as f:
-                f.write(hash_atual)
+            hash_file.write_text(hash_atual, encoding="utf-8")
 
-            print("✔ Backup criado com sucesso.")
+            print(f"✔ Backup criado em: {destino}")
+            return True
 
         except Exception as erro:
 
             print(f"⚠ Erro ao criar backup: {erro}")
+            return False
+
+    @staticmethod
+    def criar_backup_obrigatorio():
+        """
+        Cria backup e valida integridade.
+        Retorna (True, caminho) ou (False, mensagem_erro).
+        """
+        if not BackupService.criar_backup(forcar=True):
+            destino = BackupService._destino_backup(1)
+            if destino.exists():
+                ok, msg = BackupService.validar_backup(destino)
+                if ok:
+                    return True, msg
+            return False, "Falha ao criar backup (veja erro acima)"
+
+        ok, msg = BackupService.validar_backup()
+        if not ok:
+            return False, msg
+        return True, msg
+
+    @staticmethod
+    def restaurar(numero=1):
+
+        origem = BackupService._destino_backup(numero)
+
+        if not origem.exists():
+            raise FileNotFoundError(f"Backup #{numero} não encontrado.")
+
+        raiz = BackupService._raiz()
+
+        for pasta in BackupService.PASTAS:
+
+            origem_pasta = origem / pasta
+
+            if not origem_pasta.exists():
+                continue
+
+            destino_pasta = raiz / pasta
+
+            if destino_pasta.exists():
+                shutil.rmtree(destino_pasta)
+
+            shutil.copytree(origem_pasta, destino_pasta)
+
+        for arquivo in BackupService.ARQUIVOS:
+
+            origem_arquivo = origem / arquivo
+
+            if origem_arquivo.exists():
+
+                shutil.copy2(origem_arquivo, raiz / arquivo)
+
+        print(f"✔ Backup #{numero} restaurado com sucesso.")
+        return True
 
     @staticmethod
     def rotacionar():
 
-        ultimo = Path(f"backups/backup_{BackupService.MAX_BACKUPS}")
+        max_backups = config.BACKUP_MAX
+        ultimo = BackupService._destino_backup(max_backups)
 
         if ultimo.exists():
             shutil.rmtree(ultimo)
 
-        for i in range(BackupService.MAX_BACKUPS - 1, 0, -1):
+        for i in range(max_backups - 1, 0, -1):
 
-            origem = Path(f"backups/backup_{i}")
-            destino = Path(f"backups/backup_{i + 1}")
+            origem = BackupService._destino_backup(i)
+            destino = BackupService._destino_backup(i + 1)
 
             if origem.exists():
 
                 if destino.exists():
                     shutil.rmtree(destino)
 
-                shutil.move(origem, destino)
+                shutil.move(str(origem), str(destino))
