@@ -334,16 +334,12 @@ def criar_banco():
         ])
 
     # ============================
-    # USUÁRIO ADMINISTRADOR PADRÃO
+    # USUÁRIO ADMINISTRADOR PADRÃO (só na instalação zerada)
     # ============================
-    cursor.execute("""
-    SELECT id FROM usuarios
-    WHERE email = ?
-    """, ("admin@elevalocker.com",))
+    cursor.execute("SELECT COUNT(*) AS n FROM usuarios")
+    total_usuarios = cursor.fetchone()["n"]
 
-    admin = cursor.fetchone()
-
-    if not admin:
+    if total_usuarios == 0:
 
         senha_hash = generate_password_hash("123456")
 
