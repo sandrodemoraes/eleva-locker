@@ -14,9 +14,24 @@ if not defined PYTHON (
     exit /b 1
 )
 
+REM Bancada: SQLite obrigatorio em TODA a sessao (nao so no app.py)
+set ELEVA_BANCADA=1
+set DATABASE_URL=
+
 echo Usando: %PYTHON%
+echo Pasta:   %CD%
 echo.
 
+echo [1/3] Garantindo .env bancada (SQLite)...
+%PYTHON% -c "import sys; sys.path.insert(0,'.'); from tools.env_bancada import garantir_bancada_env; garantir_bancada_env()"
+if errorlevel 1 (
+    echo AVISO: nao foi possivel ajustar .env — verifique C:\ElevaLocker\.env
+)
+
+echo [2/3] Parando servidor antigo (porta 15000)...
+%PYTHON% tools\parar_servidor.py nopause 2>nul
+
+echo [3/3] Docker WhatsApp + servidor...
 %PYTHON% tools\iniciar_tudo.py
 if errorlevel 1 (
     pause
@@ -30,10 +45,6 @@ echo   Mantenha ESTA janela aberta
 echo   Ctrl+C para parar o servidor
 echo ============================================================
 echo.
-
-REM Bancada: SQLite obrigatorio (nao usar Postgres do Docker)
-set ELEVA_BANCADA=1
-set DATABASE_URL=
 
 %PYTHON% app.py
 
