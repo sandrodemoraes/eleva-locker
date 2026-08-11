@@ -23,6 +23,13 @@ def _parse_armario_id(valor):
         return None
 
 
+def _redirect_usuarios():
+    destino = request.form.get("redirect") or "/usuarios"
+    if destino.startswith("/"):
+        return redirect(destino)
+    return redirect("/usuarios")
+
+
 @usuarios_bp.route("/usuarios")
 @login_required
 @perfil_required("Administrador")
@@ -97,7 +104,7 @@ def editar_usuario(usuario_id):
 
         flash("Erro interno ao atualizar o usuário.", "danger")
 
-    return redirect("/usuarios")
+    return _redirect_usuarios()
 
 
 @usuarios_bp.route("/usuarios/excluir/<int:usuario_id>", methods=["POST"])
@@ -145,4 +152,4 @@ def alterar_senha(usuario_id):
 
         flash("Erro interno ao alterar a senha.", "danger")
 
-    return redirect("/usuarios")
+    return _redirect_usuarios()

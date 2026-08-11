@@ -83,9 +83,10 @@
                         <i class="fa-solid fa-pen"></i>
                     </a>
                     <a href="#" class="btn btn-sm btn-warning senha"
+                       title="Alterar senha"
                        data-id="{{ usuario.id }}"
                        data-nome="{{ usuario.nome }}">
-                        <i class="fa-solid fa-key"></i>
+                        <i class="fa-solid fa-key"></i> Senha
                     </a>
                     <form method="POST" action="/usuarios/excluir/{{ usuario.id }}"
                           class="form-excluir" style="display:inline">

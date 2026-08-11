@@ -29,6 +29,27 @@
 <div class="panels">
 
     <div class="table-box">
+        <h2 style="margin-bottom:15px;">Minha conta</h2>
+        <p style="color:#666;margin-bottom:15px;">
+            Altere a senha do usuário logado (<strong>{{ session.get('nome') or session.get('usuario') }}</strong>).
+            Para outros usuários, use <a href="{{ url_for('usuarios.usuarios') }}">Usuários</a>.
+        </p>
+        <form method="POST" action="/configuracoes/minha-senha" style="max-width:420px;">
+            <div class="form-group">
+                <label>Nova senha</label>
+                <input type="password" name="senha" required minlength="4" autocomplete="new-password">
+            </div>
+            <div class="form-group">
+                <label>Confirmar senha</label>
+                <input type="password" name="confirmar" required minlength="4" autocomplete="new-password">
+            </div>
+            <button type="submit" class="btn btn-warning">
+                <i class="fa-solid fa-key"></i> Alterar minha senha
+            </button>
+        </form>
+    </div>
+
+    <div class="table-box">
         <h2 style="color:#0f3d75;margin-bottom:15px;">Backups disponíveis</h2>
         <p style="color:#666;margin-bottom:15px;">
             O sistema mantém até <strong>5 backups</strong> rotativos.

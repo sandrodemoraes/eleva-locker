@@ -4,6 +4,7 @@ from middleware.auth_required import login_required, perfil_required
 from services.esp32_service import Esp32Service
 from services.armario_service import ArmarioService
 from services.backup.backup_service import BackupService
+from services.usuario_service import UsuarioService
 from repositories.compartimento_repository import CompartimentoRepository
 from repositories.esp32_repository import Esp32Repository
 import config
@@ -212,5 +213,30 @@ def restaurar_backup(numero):
         flash(str(erro), "warning")
     except Exception:
         flash("Erro ao restaurar backup.", "danger")
+
+    return redirect("/configuracoes")
+
+
+@esp32_bp.route("/configuracoes/minha-senha", methods=["POST"])
+@login_required
+@perfil_required("Administrador")
+def minha_senha():
+
+    usuario_id = session.get("usuario_id")
+    if not usuario_id:
+        flash("Sessão inválida. Faça login novamente.", "warning")
+        return redirect("/configuracoes")
+
+    try:
+        UsuarioService.alterar_senha(
+            usuario_id=usuario_id,
+            senha=request.form["senha"],
+            confirmar=request.form["confirmar"],
+        )
+        flash("Sua senha foi alterada com sucesso!", "success")
+    except ValueError as erro:
+        flash(str(erro), "warning")
+    except Exception:
+        flash("Erro ao alterar senha.", "danger")
 
     return redirect("/configuracoes")

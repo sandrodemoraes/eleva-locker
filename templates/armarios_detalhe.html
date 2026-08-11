@@ -152,8 +152,14 @@
                 <td>{{ 'Ativo' if u.status else 'Inativo' }}</td>
                 <td class="acoes-cell">
                     {% if perfil == 'Administrador' %}
+                    <button type="button" class="btn btn-sm btn-warning btn-senha-armario"
+                            title="Alterar senha"
+                            data-id="{{ u.id }}"
+                            data-nome="{{ u.nome }}">
+                        <i class="fa-solid fa-key"></i> Senha
+                    </button>
                     <form method="POST" action="/armarios/{{ armario.id }}/usuarios/excluir/{{ u.id }}" onsubmit="return confirm('Excluir usuário?')">
-                        <button type="submit" class="btn btn-sm btn-danger"><i class="fa-solid fa-trash"></i></button>
+                        <button type="submit" class="btn btn-sm btn-danger" title="Excluir"><i class="fa-solid fa-trash"></i></button>
                     </form>
                     {% endif %}
                 </td>
@@ -296,6 +302,30 @@
 </div>
 {% endif %}
 
+<!-- Modal alterar senha (usuários do armário) -->
+<div class="modal-overlay" id="modalSenhaArmario">
+    <div class="modal">
+        <h2>Alterar senha — <span id="senhaArmarioNome"></span></h2>
+        <form method="POST" id="formSenhaArmario" action="">
+            <input type="hidden" name="redirect" value="/armarios/{{ armario.id }}">
+            <div class="grid-2">
+                <div class="form-group">
+                    <label>Nova senha</label>
+                    <input type="password" name="senha" required minlength="4">
+                </div>
+                <div class="form-group">
+                    <label>Confirmar senha</label>
+                    <input type="password" name="confirmar" required minlength="4">
+                </div>
+            </div>
+            <div class="form-actions">
+                <button type="button" class="btn btn-secondary" onclick="fecharModal('modalSenhaArmario')">Cancelar</button>
+                <button type="submit" class="btn btn-success">Alterar senha</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 {% endblock %}
 
 {% block scripts %}
@@ -313,6 +343,18 @@ function editarEsp(id, nome, ip, mac, porta, status, token){
     document.getElementById('esp_token').value = token;
     abrirModal('modalEditarEsp');
 }
+
+document.querySelectorAll('.btn-senha-armario').forEach(function(btn){
+    btn.addEventListener('click', function(){
+        document.getElementById('formSenhaArmario').action = '/usuarios/senha/' + btn.dataset.id;
+        document.getElementById('senhaArmarioNome').textContent = btn.dataset.nome;
+        abrirModal('modalSenhaArmario');
+    });
+});
+
+document.querySelectorAll('.modal-overlay').forEach(function(el){
+    el.addEventListener('click', function(e){ if(e.target === el) el.classList.remove('active'); });
+});
 
 document.addEventListener('DOMContentLoaded', function(){
     var flash = document.getElementById('flash-area');
