@@ -119,68 +119,9 @@ def vincular_matriz(conn, armario_id):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Restaura moradores para totem autocomplete")
-    parser.add_argument("--listar", action="store_true", help="Só lista moradores")
-    args = parser.parse_args()
-
-    from database import criar_banco
-    criar_banco()
-
-    from repositories.base_repository import BaseRepository
-
-    print("=" * 60)
-    print("  RESTAURAR MORADORES — autocomplete totem")
-    print("=" * 60)
-
-    with BaseRepository.get_connection() as conn:
-        armario_id = obter_armario_matriz(conn)
-        if not armario_id:
-            print("\nERRO: nenhum armário no banco. Rode setup_oficial.py")
-            return 1
-
-        print(f"\n  Armário Matriz: id={armario_id}")
-        n_antes = contar_moradores(conn)
-        print(f"  Moradores ativos (Usuário): {n_antes}")
-
-        if args.listar:
-            rows = listar_moradores(conn, armario_id)
-            print(f"\n  Visíveis no totem (armario_id NULL ou {armario_id}): {len(rows)}")
-            for u in rows:
-                print(f"    id={u['id']} | {u['nome']} | tel={u['telefone'] or '—'} | arm={u['armario_id']}")
-            if not rows:
-                print("\n  Nenhum — cadastre em Usuários (perfil Usuário / morador)")
-            return 0
-
-        if n_antes == 0:
-            print("\n[1] Tentando copiar moradores do backup_01...")
-            n = copiar_do_backup(conn, armario_id)
-            print(f"    {n} morador(es) importado(s) do backup")
-        else:
-            print("\n[1] Banco já tem moradores — pulando import backup")
-
-        print(f"\n[2] Vinculando moradores ao armário id={armario_id}...")
-        n_vinc = vincular_matriz(conn, armario_id)
-        print(f"    {n_vinc} usuário(s) atualizado(s)")
-
-        n_depois = contar_moradores(conn)
-        visiveis = listar_moradores(conn, armario_id)
-        print(f"\n  Total moradores: {n_depois}")
-        print(f"  Visíveis no totem /totem/{armario_id}: {len(visiveis)}")
-        for u in visiveis[:10]:
-            print(f"    • {u['nome']} ({u['telefone'] or 'sem tel'})")
-        if len(visiveis) > 10:
-            print(f"    ... +{len(visiveis) - 10}")
-
-    print("\n" + "=" * 60)
-    if not visiveis:
-        print("  AINDA VAZIO — cadastre moradores no painel:")
-        print(f"  http://192.168.16.130:15000/usuarios")
-        print("  Perfil: Usuário | Armário: ELEVA Locker Matriz | Telefone WhatsApp")
-    else:
-        print("  OK — teste autocomplete no totem (Ctrl+F5)")
-        print(f"  http://192.168.16.130:15000/totem/{armario_id}")
-    print("=" * 60)
-    return 0 if visiveis else 1
+    """Delega para restaurar_usuarios_armario (compatibilidade totem)."""
+    import restaurar_usuarios_armario
+    return restaurar_usuarios_armario.main()
 
 
 if __name__ == "__main__":

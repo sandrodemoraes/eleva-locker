@@ -156,8 +156,8 @@ def main():
         return 1
     limpar()
     token()
-    print("\n[6b] Moradores (autocomplete totem)...")
-    run([sys.executable, "tools/restaurar_moradores.py"])
+    print("\n[6b] Usuários do armário (operadores + moradores)...")
+    run([sys.executable, "tools/restaurar_usuarios_armario.py"])
 
     if not verificar_banco():
         return 1

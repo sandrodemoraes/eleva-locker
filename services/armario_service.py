@@ -109,9 +109,12 @@ class ArmarioService:
         return total_removidos
 
     @staticmethod
-    def excluir(armario_id):
+    def excluir(armario_id, migrar_usuarios_para=None):
 
         ArmarioService.buscar_por_id(armario_id)
+
+        if migrar_usuarios_para is not None:
+            ArmarioService.buscar_por_id(migrar_usuarios_para)
 
         from repositories.base_repository import BaseRepository
 
@@ -132,10 +135,16 @@ class ArmarioService:
                 SELECT COUNT(*) AS n FROM usuarios WHERE armario_id = ?
             """, (armario_id,)).fetchone()["n"]
 
-            conn.execute(
-                "UPDATE usuarios SET armario_id = NULL WHERE armario_id = ?",
-                (armario_id,),
-            )
+            if migrar_usuarios_para is not None:
+                conn.execute(
+                    "UPDATE usuarios SET armario_id = ? WHERE armario_id = ?",
+                    (migrar_usuarios_para, armario_id),
+                )
+            else:
+                conn.execute(
+                    "UPDATE usuarios SET armario_id = NULL WHERE armario_id = ?",
+                    (armario_id,),
+                )
             conn.execute(
                 "DELETE FROM compartimentos WHERE armario = ?",
                 (armario_id,),

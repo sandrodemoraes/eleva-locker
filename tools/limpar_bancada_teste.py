@@ -102,6 +102,11 @@ def main():
             (NOME_ARMARIO_TESTE,),
         ).fetchone()
 
+        arm_oficial = conn.execute(
+            "SELECT id FROM armarios WHERE nome = ? LIMIT 1",
+            (NOME_ARMARIO_OFICIAL,),
+        ).fetchone()
+
         if arm_teste:
             restantes = conn.execute(
                 "SELECT COUNT(*) AS n FROM esp32 WHERE armario = ?",
@@ -118,14 +123,28 @@ def main():
                 (arm_teste["id"],),
             ).fetchone()["n"]
 
+            vinculados = conn.execute(
+                "SELECT COUNT(*) AS n FROM usuarios WHERE armario_id = ?",
+                (arm_teste["id"],),
+            ).fetchone()["n"]
+
             if restantes == 0 and enc == 0:
                 print(f"\nArmário '{NOME_ARMARIO_TESTE}' (id={arm_teste['id']}, {comps} compartimentos)")
+                if vinculados and arm_oficial:
+                    print(
+                        f"  {vinculados} usuário(s) serão migrados para "
+                        f"'{NOME_ARMARIO_OFICIAL}' (id={arm_oficial['id']})"
+                    )
                 if args.simular:
                     print("  seria excluído (sem ESP e sem encomendas ativas)")
                 else:
                     try:
-                        ArmarioService.excluir(arm_teste["id"])
-                        print("  excluído")
+                        migrar = arm_oficial["id"] if arm_oficial else None
+                        ArmarioService.excluir(arm_teste["id"], migrar_usuarios_para=migrar)
+                        if migrar and vinculados:
+                            print(f"  excluído — {vinculados} usuário(s) migrados para Matriz")
+                        else:
+                            print("  excluído")
                     except ValueError as erro:
                         print(f"  não excluído: {erro}")
             else:

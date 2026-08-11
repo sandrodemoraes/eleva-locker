@@ -159,9 +159,18 @@ def main():
             WHERE perfil = 'Usuário' AND status = 1
               AND (armario_id IS NULL OR armario_id != ?)
         """, (armario_id, armario_id)).rowcount
+
+        orfaos = conn.execute("""
+            UPDATE usuarios SET armario_id = ?
+            WHERE perfil IN ('Usuário', 'Operador') AND status = 1
+              AND armario_id IS NOT NULL
+              AND armario_id NOT IN (SELECT id FROM armarios)
+        """, (armario_id,)).rowcount
         conn.commit()
     if revinc:
         print(f"  Moradores revinculados ao armário: {revinc}")
+    if orfaos:
+        print(f"  Usuários com armario_id órfão corrigidos: {orfaos}")
 
     print("\n" + "=" * 60)
     print("INSTALAÇÃO OFICIAL CONFIGURADA")
