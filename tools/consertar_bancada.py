@@ -68,7 +68,9 @@ def corrigir_totem():
 
 
 def limpar():
-    print("\n[5] Limpar ESP duplicados...")
+    print("\n[5] Backup vínculos usuários (antes de limpar teste)...")
+    run([sys.executable, "tools/backup_vinculos_usuarios.py"])
+    print("\n[5b] Limpar ESP duplicados...")
     run([sys.executable, "tools/limpar_bancada_teste.py"])
 
 

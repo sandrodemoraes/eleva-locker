@@ -15,8 +15,9 @@ if not defined PYTHON (
 )
 
 echo.
-echo  VISUAL VERDE + consertar bancada (1 clique)
-echo  Para quando subir AZUL ou armario 0
+echo  VISUAL VERDE — so atualiza codigo (nao mexe em usuarios)
+echo  Se armario sumiu: tools\consertar_bancada.bat
+echo  Com consertar:    atualizar_visual_verde.py --com-consertar
 echo  =====================================
 echo.
 

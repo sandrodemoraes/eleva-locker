@@ -116,13 +116,13 @@ def editar(armario_id):
 def excluir(armario_id):
 
     try:
-        moradores = ArmarioService.excluir(armario_id)
+        vinculados = ArmarioService.excluir(armario_id)
         LogService.registrar(None, session.get("usuario"), f"Armário #{armario_id} excluído")
         msg = "Armário excluído."
-        if moradores:
+        if vinculados:
             msg += (
-                f" {moradores} morador(es)/desvinculado(s) — NÃO apagados. "
-                "Revincule em Usuários ou rode tools\\restaurar_moradores.bat"
+                f" {vinculados} usuário(s) migrados automaticamente para outro armário "
+                "(vínculo preservado)."
             )
         flash(msg, "success")
     except ValueError as erro:

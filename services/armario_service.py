@@ -108,13 +108,42 @@ class ArmarioService:
 
         return total_removidos
 
+    NOME_ARMARIO_MIGRACAO = "ELEVA Locker Matriz"
+
     @staticmethod
-    def excluir(armario_id, migrar_usuarios_para=None):
+    def _resolver_destino_migracao(conn, armario_id, migrar_usuarios_para=None):
+        """Define para onde mover usuários ao excluir armário (nunca NULL silencioso)."""
+        if migrar_usuarios_para is not None:
+            return migrar_usuarios_para
+
+        vinculados = conn.execute(
+            "SELECT COUNT(*) AS n FROM usuarios WHERE armario_id = ?",
+            (armario_id,),
+        ).fetchone()["n"]
+        if vinculados == 0:
+            return None
+
+        row = conn.execute(
+            """
+            SELECT id FROM armarios
+            WHERE nome = ? AND id != ?
+            LIMIT 1
+            """,
+            (ArmarioService.NOME_ARMARIO_MIGRACAO, armario_id),
+        ).fetchone()
+        if row:
+            return row["id"]
+
+        row = conn.execute(
+            "SELECT id FROM armarios WHERE id != ? ORDER BY id LIMIT 1",
+            (armario_id,),
+        ).fetchone()
+        return row["id"] if row else None
+
+    @staticmethod
+    def excluir(armario_id, migrar_usuarios_para=None, desvincular_usuarios=False):
 
         ArmarioService.buscar_por_id(armario_id)
-
-        if migrar_usuarios_para is not None:
-            ArmarioService.buscar_por_id(migrar_usuarios_para)
 
         from repositories.base_repository import BaseRepository
 
@@ -131,16 +160,28 @@ class ArmarioService:
                     "Retire ou cancele antes de excluir."
                 )
 
-            moradores = conn.execute("""
+            vinculados = conn.execute("""
                 SELECT COUNT(*) AS n FROM usuarios WHERE armario_id = ?
             """, (armario_id,)).fetchone()["n"]
 
-            if migrar_usuarios_para is not None:
+            destino = ArmarioService._resolver_destino_migracao(
+                conn, armario_id, migrar_usuarios_para
+            )
+
+            if vinculados and destino is None and not desvincular_usuarios:
+                raise ValueError(
+                    f"Armário tem {vinculados} usuário(s) vinculado(s) e não há "
+                    "outro armário para migrar. Cadastre outro armário ou remova "
+                    "os vínculos manualmente antes de excluir."
+                )
+
+            if destino is not None:
+                ArmarioService.buscar_por_id(destino)
                 conn.execute(
                     "UPDATE usuarios SET armario_id = ? WHERE armario_id = ?",
-                    (migrar_usuarios_para, armario_id),
+                    (destino, armario_id),
                 )
-            else:
+            elif vinculados and desvincular_usuarios:
                 conn.execute(
                     "UPDATE usuarios SET armario_id = NULL WHERE armario_id = ?",
                     (armario_id,),
@@ -159,7 +200,7 @@ class ArmarioService:
             )
             conn.commit()
 
-        return moradores
+        return vinculados
 
     @staticmethod
     def contar():
