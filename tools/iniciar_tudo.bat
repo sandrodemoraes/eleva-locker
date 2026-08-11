@@ -56,8 +56,14 @@ if "%PAINEL_URL%"=="" set "PAINEL_URL=http://localhost:15000"
 
 REM Abre navegador apos alguns segundos (servidor sobe em paralelo)
 if /i not "%ELEVA_SEM_NAVEGADOR%"=="1" (
+<<<<<<< HEAD
     echo Abrindo navegador em %PAINEL_URL%/dashboard ...
     start "" cmd /c "timeout /t 6 /nobreak >nul && start \"\" \"%PAINEL_URL%/dashboard\""
+=======
+    set "PAINEL_DASH=%PAINEL_URL%/dashboard"
+    echo Abrindo navegador em %PAINEL_DASH% ...
+    start "" /MIN "%~dp0abrir_navegador_atraso.bat" "%PAINEL_DASH%"
+>>>>>>> cursor/ui-eleva-verde-c05c
 )
 
 %PYTHON% app.py
