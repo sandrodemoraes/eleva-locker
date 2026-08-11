@@ -46,6 +46,20 @@ echo   Ctrl+C para parar o servidor
 echo ============================================================
 echo.
 
+REM URL do painel (.env APP_URL_BASE ou localhost)
+set "PAINEL_URL=http://localhost:15000"
+for /f "usebackq tokens=1,* delims==" %%a in (`findstr /i /b "APP_URL_BASE=" .env 2^>nul`) do (
+    set "PAINEL_URL=%%b"
+)
+set "PAINEL_URL=%PAINEL_URL: =%"
+if "%PAINEL_URL%"=="" set "PAINEL_URL=http://localhost:15000"
+
+REM Abre navegador apos alguns segundos (servidor sobe em paralelo)
+if /i not "%ELEVA_SEM_NAVEGADOR%"=="1" (
+    echo Abrindo navegador em %PAINEL_URL%/dashboard ...
+    start "" cmd /c "timeout /t 6 /nobreak >nul && start \"\" \"%PAINEL_URL%/dashboard\""
+)
+
 %PYTHON% app.py
 
 pause
