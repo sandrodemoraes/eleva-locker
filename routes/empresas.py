@@ -5,6 +5,7 @@ from flask import redirect
 from flask import session
 from flask import jsonify
 
+from middleware.auth_required import login_required
 from services.empresa_service import EmpresaService
 
 empresas_bp = Blueprint("empresas", __name__)
@@ -15,10 +16,8 @@ empresas_bp = Blueprint("empresas", __name__)
 # ==========================
 
 @empresas_bp.route("/empresas")
+@login_required
 def empresas():
-
-    if "usuario" not in session:
-        return redirect("/")
 
     lista = EmpresaService.listar()
 
@@ -35,9 +34,10 @@ def empresas():
 # ==========================
 
 @empresas_bp.route("/empresas/nova", methods=["POST"])
+@login_required
 def nova_empresa():
 
-    if "usuario" not in session:
+    if "usuario_id" not in session:
         return jsonify({
             "sucesso": False,
             "mensagem": "Sessão expirada."
@@ -83,10 +83,8 @@ def nova_empresa():
 # ==========================
 
 @empresas_bp.route("/empresas/editar/<int:id>", methods=["POST"])
+@login_required
 def editar_empresa(id):
-
-    if "usuario" not in session:
-        return redirect("/")
 
     dados = {
 
@@ -118,10 +116,8 @@ def editar_empresa(id):
 # ==========================
 
 @empresas_bp.route("/empresas/excluir/<int:id>", methods=["POST"])
+@login_required
 def excluir_empresa(id):
-
-    if "usuario" not in session:
-        return redirect("/")
 
     EmpresaService.excluir(id)
 
