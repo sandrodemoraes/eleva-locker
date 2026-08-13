@@ -19,6 +19,11 @@ echo.
 echo IMPORTANTE: marque no Docker Desktop:
 echo   Settings - General - Start Docker Desktop when you sign in
 echo.
+echo PC com PIN do Windows?
+echo   Apos reiniciar o PIN bloqueia ate voce entrar.
+echo   Opcao 1 — Login automatico (bancada): docs\INICIO_AUTOMATICO_PIN.md
+echo   Opcao 2 — Tarefa apos login: tools\instalar_inicio_automatico_tarefa.bat
+echo.
 pause
 
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0criar_atalho_startup.ps1"
