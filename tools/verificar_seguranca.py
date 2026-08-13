@@ -78,6 +78,13 @@ def main():
 
     print("\n[Rede / Flask]")
     bancada = (env.get("ELEVA_BANCADA") or "").strip().lower() in ("1", "true", "yes")
+    url = (env.get("APP_URL_BASE") or "").strip()
+    if url.startswith("http://") and "192.168." not in url and "localhost" not in url:
+        print(f"  ⚠ APP_URL_BASE={url} — HTTP público (sem criptografia)")
+        alertas += 1
+    elif url.startswith("https://"):
+        print(f"  ✓ APP_URL_BASE com HTTPS")
+        ok += 1
     debug = env.get("FLASK_DEBUG", "")
     if bancada:
         print("  ✓ ELEVA_BANCADA=1 (SQLite local)")
