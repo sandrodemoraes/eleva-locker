@@ -2,10 +2,18 @@ $ErrorActionPreference = "Stop"
 
 $startup = [Environment]::GetFolderPath("Startup")
 $atalho = Join-Path $startup "ELEVA LOCKER - Iniciar.lnk"
-$workdir = Split-Path $PSScriptRoot -Parent
+
+# Pasta OFICIAL da bancada — evita iniciar clone antigo (azul / 0 armarios)
+$oficial = "C:\ElevaLocker"
+if (Test-Path $oficial) {
+    $workdir = $oficial
+} else {
+    $workdir = Split-Path $PSScriptRoot -Parent
+}
+
 $bat = Join-Path $workdir "iniciar_elevalocker.bat"
 if (-not (Test-Path $bat)) {
-    $bat = Join-Path $PSScriptRoot "iniciar_tudo.bat"
+    $bat = Join-Path $workdir "tools\iniciar_tudo.bat"
 }
 
 $ws = New-Object -ComObject WScript.Shell

@@ -22,16 +22,22 @@ echo Usando: %PYTHON%
 echo Pasta:   %CD%
 echo.
 
-echo [1/3] Garantindo .env bancada (SQLite)...
+echo [1/4] Preparando bancada (SQLite + armarios)...
+%PYTHON% tools\preparar_inicio_bancada.py
+if errorlevel 1 (
+    echo AVISO: preparar_inicio_bancada — veja acima
+)
+
+echo [2/4] Garantindo .env bancada (SQLite)...
 %PYTHON% -c "import sys; sys.path.insert(0,'.'); from tools.env_bancada import garantir_bancada_env; garantir_bancada_env()"
 if errorlevel 1 (
     echo AVISO: nao foi possivel ajustar .env — verifique C:\ElevaLocker\.env
 )
 
-echo [2/3] Parando servidor antigo (porta 15000)...
+echo [3/4] Parando servidor antigo (porta 15000)...
 %PYTHON% tools\parar_servidor.py nopause 2>nul
 
-echo [3/3] Docker WhatsApp + servidor...
+echo [4/4] Docker WhatsApp + servidor...
 %PYTHON% tools\iniciar_tudo.py
 if errorlevel 1 (
     pause
@@ -46,17 +52,20 @@ echo   Ctrl+C para parar o servidor
 echo ============================================================
 echo.
 
-REM URL do painel (.env APP_URL_BASE ou localhost)
-set "PAINEL_URL=http://localhost:15000"
-for /f "usebackq tokens=1,* delims==" %%a in (`findstr /i /b "APP_URL_BASE=" .env 2^>nul`) do (
-    set "PAINEL_URL=%%b"
+REM Bancada: abre IP LOCAL (nao APP_URL_BASE publico — evita azul / 0 armarios)
+set "PAINEL_DASH=http://192.168.16.130:15000/dashboard"
+if /i not "%ELEVA_BANCADA%"=="1" (
+    set "PAINEL_DASH=%PAINEL_URL%/dashboard"
+    for /f "usebackq tokens=1,* delims==" %%a in (`findstr /i /b "APP_URL_BASE=" .env 2^>nul`) do (
+        set "PAINEL_DASH=%%b/dashboard"
+    )
+    set "PAINEL_DASH=%PAINEL_DASH: =%"
 )
-set "PAINEL_URL=%PAINEL_URL: =%"
-if "%PAINEL_URL%"=="" set "PAINEL_URL=http://localhost:15000"
+if "%PAINEL_DASH%"=="" set "PAINEL_DASH=http://localhost:15000/dashboard"
+set "PAINEL_DASH=%PAINEL_DASH:/dashboard/dashboard=/dashboard%"
 
 REM Abre navegador apos alguns segundos (servidor sobe em paralelo)
 if /i not "%ELEVA_SEM_NAVEGADOR%"=="1" (
-    set "PAINEL_DASH=%PAINEL_URL%/dashboard"
     echo Abrindo navegador em %PAINEL_DASH% ...
     start /B "" "%~dp0abrir_navegador_atraso.bat" "%PAINEL_DASH%"
 )
