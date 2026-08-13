@@ -1,118 +1,122 @@
 {% extends "layout/base.html" %}
 
-{% block title %}
-Dashboard | ELEVA LOCKER
-{% endblock %}
-
-{% block styles %}
-<style>
-
-.cards{
-    display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-    gap:20px;
-    margin-top:25px;
-}
-
-.card{
-    background:#ffffff;
-    border-radius:10px;
-    padding:25px;
-    text-align:center;
-    box-shadow:0 4px 15px rgba(0,0,0,.08);
-}
-
-.numero{
-    font-size:42px;
-    font-weight:bold;
-    color:#0f3d75;
-}
-
-.titulo-card{
-    margin-top:12px;
-    color:#666;
-    font-size:18px;
-}
-
-.painel{
-    margin-top:30px;
-    background:#ffffff;
-    border-radius:10px;
-    padding:30px;
-    box-shadow:0 4px 15px rgba(0,0,0,.08);
-}
-
-.painel h2{
-    color:#0f3d75;
-    margin-bottom:20px;
-}
-
-.painel ul{
-    margin-top:15px;
-    margin-left:20px;
-}
-
-.painel li{
-    margin-bottom:8px;
-}
-
-</style>
-{% endblock %}
+{% block title %}Dashboard | ELEVA LOCKER{% endblock %}
 
 {% block content %}
 
 <h1>Bem-vindo, {{ usuario }}</h1>
 
-<p style="color:#666; margin-top:10px;">
-    Painel Administrativo do ELEVA LOCKER
+<p class="content-subtitle">
+    Painel administrativo do ELEVA LOCKER
+    <span class="badge-db">{{ stats.db_engine|upper }}</span>
 </p>
+
+{% if stats.armarios == 0 and stats.armarios_global > 0 and stats.site_id %}
+<div class="alert-inline alert-inline-warning">
+    Filtro de site ativo: existem {{ stats.armarios_global }} armário(s) no banco, mas nenhum neste site.
+    Selecione <strong>Todos os sites</strong> no menu superior ou rode <code>tools\consertar_bancada.bat</code>.
+</div>
+{% elif stats.armarios == 0 and stats.db_engine == 'postgresql' %}
+<div class="alert-inline alert-inline-danger">
+    PostgreSQL ativo — na bancada use SQLite. Rode <code>tools\consertar_bancada.bat</code> e reinicie o servidor.
+</div>
+{% elif stats.armarios == 0 %}
+<div class="alert-inline alert-inline-danger">
+    Nenhum armário no banco. Rode <code>tools\consertar_bancada.bat</code> na pasta <code>C:\ElevaLocker</code>.
+</div>
+{% endif %}
 
 <div class="cards">
 
+    <a href="{{ url_for('usuarios.usuarios') }}" class="card-link">
     <div class="card">
-        <div class="numero">1</div>
+        <div class="card-icon"><i class="fa-solid fa-users"></i></div>
+        <div class="numero">{{ stats.usuarios }}</div>
         <div class="titulo-card">Usuários</div>
     </div>
+    </a>
 
+    <a href="{{ url_for('armarios.listar') }}" class="card-link">
     <div class="card">
-        <div class="numero">0</div>
+        <div class="card-icon"><i class="fa-solid fa-box"></i></div>
+        <div class="numero">{{ stats.armarios }}</div>
         <div class="titulo-card">Armários</div>
     </div>
+    </a>
 
+    <a href="{{ url_for('compartimentos.listar') }}" class="card-link">
     <div class="card">
-        <div class="numero">0</div>
+        <div class="card-icon"><i class="fa-solid fa-table-cells"></i></div>
+        <div class="numero">{{ stats.compartimentos }}</div>
         <div class="titulo-card">Compartimentos</div>
     </div>
+    </a>
 
+    <a href="{{ url_for('encomendas.listar') }}" class="card-link">
     <div class="card">
-        <div class="numero">0</div>
-        <div class="titulo-card">Encomendas</div>
+        <div class="card-icon"><i class="fa-solid fa-box-open"></i></div>
+        <div class="numero">{{ stats.encomendas_pendentes }}</div>
+        <div class="titulo-card">Encomendas pendentes</div>
     </div>
+    </a>
+
+    <a href="{{ url_for('armarios.listar') }}" class="card-link">
+    <div class="card">
+        <div class="card-icon"><i class="fa-solid fa-microchip"></i></div>
+        <div class="numero">{{ stats.esp32_online }}/{{ stats.esp32_total }}</div>
+        <div class="titulo-card">ESP32 online</div>
+    </div>
+    </a>
 
 </div>
 
 <div class="painel">
 
-    <h2>🎉 Sistema funcionando!</h2>
+    <h2>Status do sistema</h2>
 
-    <p>
-        Bem-vindo ao painel administrativo do
-        <strong>ELEVA LOCKER</strong>.
-    </p>
+    <p>Total de encomendas registradas: <strong>{{ stats.encomendas }}</strong></p>
 
     <br>
 
-    <p>Próximos módulos:</p>
+    <h2>Módulos</h2>
 
     <ul>
         <li>✅ Cadastro de Usuários</li>
-        <li>📦 Cadastro de Armários</li>
-        <li>📬 Cadastro de Compartimentos</li>
-        <li>📦 Cadastro de Encomendas</li>
-        <li>🤖 Integração com ESP32</li>
-        <li>📊 Relatórios</li>
-        <li>📱 Aplicativo</li>
+        <li>✅ Cadastro de Empresas</li>
+        <li>✅ Cadastro de Armários</li>
+        <li>✅ Cadastro de Compartimentos</li>
+        <li>✅ Depósito e retirada de Encomendas</li>
+        <li>✅ Logs de auditoria</li>
+        <li>✅ Integração ESP32 (Fase 2)</li>
+        <li>✅ Notificações + QR Code + Totem (Fase 3)</li>
+        <li>✅ Faturamento comercial (Fase 4)</li>
+        <li>✅ Multi-site + API pública + BI (Fase 5)</li>
     </ul>
+
+    {% if encomendas_recentes %}
+    <br>
+    <h2>Encomendas recentes</h2>
+    <table class="painel-table">
+        <thead>
+            <tr>
+                <th>Código</th>
+                <th>Destinatário</th>
+                <th>Armário</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for e in encomendas_recentes %}
+            <tr>
+                <td><strong>{{ e.codigo }}</strong></td>
+                <td>{{ e.cliente }}</td>
+                <td>{{ e.armario_nome or '—' }}</td>
+                <td>{{ e.status }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
 
 </div>
 
