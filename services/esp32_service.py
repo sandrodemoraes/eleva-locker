@@ -8,6 +8,28 @@ from services.log_service import LogService
 class Esp32Service:
 
     @staticmethod
+    def _registrar_falha_comunicacao(esp32_id, resultado):
+        """Marca ESP offline quando HTTP falha (placa desligada ou sem rede)."""
+        if not esp32_id or not isinstance(resultado, dict):
+            return
+        if resultado.get("sucesso"):
+            return
+        msg = (resultado.get("mensagem") or "").lower()
+        if any(
+            x in msg
+            for x in (
+                "inacess",
+                "timed out",
+                "timeout",
+                "connection refused",
+                "no route",
+                "unreachable",
+                "failed to establish",
+            )
+        ):
+            Esp32Repository.marcar_offline(esp32_id)
+
+    @staticmethod
     def listar():
         Esp32Repository.marcar_offline_expirados()
         return Esp32Repository.listar()
@@ -176,6 +198,9 @@ class Esp32Service:
             porta=porta,
         )
 
+        if not resultado.get("sucesso"):
+            Esp32Service._registrar_falha_comunicacao(esp32_id, resultado)
+
         if resultado["sucesso"]:
 
             LogService.registrar(
@@ -218,17 +243,24 @@ class Esp32Service:
             return {
                 "sucesso": False,
                 "sensor": False,
+                "esp32_offline": True,
                 "mensagem": "ESP32 offline ou sem IP.",
             }
 
         porta = esp["porta"] if "porta" in esp.keys() and esp["porta"] else 80
 
-        return Esp32Client.ler_sensor(
+        resultado = Esp32Client.ler_sensor(
             ip=esp["ip"],
             rele=rele,
             token=esp["token"],
             porta=porta,
         )
+
+        if not resultado.get("sucesso"):
+            Esp32Service._registrar_falha_comunicacao(esp32_id, resultado)
+            resultado["esp32_offline"] = True
+
+        return resultado
 
     @staticmethod
     def ler_sensores_esp(esp32_id):
@@ -236,11 +268,16 @@ class Esp32Service:
         esp = Esp32Service.buscar_por_id(esp32_id)
         porta = esp["porta"] if "porta" in esp.keys() and esp["porta"] else 80
 
-        return Esp32Client.ler_sensores(
+        resultado = Esp32Client.ler_sensores(
             ip=esp["ip"],
             token=esp["token"],
             porta=porta,
         )
+
+        if not resultado.get("sucesso"):
+            Esp32Service._registrar_falha_comunicacao(esp32_id, resultado)
+
+        return resultado
 
     @staticmethod
     def listar_codigos_ativos(armario_id=None):
@@ -276,4 +313,11 @@ class Esp32Service:
         esp = Esp32Service.buscar_por_id(esp32_id)
         porta = esp["porta"] if "porta" in esp.keys() and esp["porta"] else 80
 
-        return Esp32Client.status(esp["ip"], porta, esp["token"])
+        resultado = Esp32Client.status(esp["ip"], porta, esp["token"])
+
+        if not resultado.get("sucesso"):
+            Esp32Service._registrar_falha_comunicacao(esp32_id, resultado)
+        elif resultado.get("sucesso"):
+            Esp32Repository.atualizar_heartbeat(esp32_id, esp["ip"])
+
+        return resultado

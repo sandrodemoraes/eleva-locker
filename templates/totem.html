@@ -626,11 +626,21 @@ function irAguardandoPorta(data){
     document.getElementById("aguardando-porta").textContent = data.compartimento || "—";
     document.getElementById("aguardando-tamanho").textContent = data.tamanho ? `Tamanho ${data.tamanho}` : "";
     document.getElementById("aguardando-cliente").textContent = data.cliente ? "Para: " + data.cliente : "";
-    document.getElementById("erro-aguardando").classList.remove("visivel");
+    const erroAg = document.getElementById("erro-aguardando");
+    erroAg.classList.remove("visivel");
+    erroAg.textContent = "";
+    const titulo = document.querySelector("#tela-deposito-aguardando .tela-titulo");
+    if(data.esp32_offline){
+        if(titulo) titulo.textContent = "ESP32 offline";
+        erroAg.textContent = data.esp32_mensagem || "Placa sem resposta — abra a porta manualmente e toque em concluir.";
+        erroAg.classList.add("visivel");
+    } else if(titulo) {
+        titulo.textContent = "Porta aberta";
+    }
     const st = document.getElementById("sensor-status");
-    if(st) st.textContent = "Aguardando sensor...";
+    if(st) st.textContent = data.esp32_offline ? "ESP32 offline — sem sensor" : "Aguardando sensor...";
     const btn = document.getElementById("btn-concluir-porta");
-    if(btn) btn.classList.remove("btn-pulse");
+    if(btn) btn.classList.add("btn-pulse");
     mostrarTela("tela-deposito-aguardando");
     if(pollPortaTimer) clearInterval(pollPortaTimer);
     verificarPortaFechada();
@@ -646,8 +656,14 @@ function verificarPortaFechada(){
         const status = document.getElementById("sensor-status");
         const btn = document.getElementById("btn-concluir-porta");
         if(!ok || d.erro){
-            if(status) status.textContent = "Sensor offline — use o botão verde";
+            if(status) status.textContent = "ESP32 offline — use o botão verde";
             if(aviso) aviso.textContent = d.erro || d.mensagem || "Sem resposta da ESP32";
+            if(btn) btn.classList.add("btn-pulse");
+            return;
+        }
+        if(d.esp32_offline || (d.mensagem && /inacess|offline|timeout/i.test(d.mensagem))){
+            if(status) status.textContent = "ESP32 offline — use o botão verde";
+            if(aviso) aviso.textContent = d.mensagem || "Placa desligada ou sem rede. Toque em concluir após fechar.";
             if(btn) btn.classList.add("btn-pulse");
             return;
         }

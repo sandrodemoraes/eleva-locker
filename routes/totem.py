@@ -350,9 +350,16 @@ def depositar():
             notificar=not aguardar_fechamento,
         )
 
+        abertura = resultado.get("esp32") or {}
+        porta_aberta = bool(abertura.get("sucesso"))
+
         return jsonify({
             "sucesso": True,
-            "mensagem": "Porta aberta. Feche para concluir." if aguardar_fechamento else "Morador notificado por WhatsApp.",
+            "mensagem": "Porta aberta. Feche para concluir." if porta_aberta and aguardar_fechamento else (
+                "ESP32 offline — porta não abriu. Abra manualmente e toque em concluir."
+                if aguardar_fechamento and not porta_aberta
+                else "Morador notificado por WhatsApp."
+            ),
             "encomenda_id": resultado["id"],
             "compartimento": resultado["compartimento"],
             "compartimento_id": resultado["compartimento_id"],
@@ -361,6 +368,9 @@ def depositar():
             "usuario_id": morador_usuario_id,
             "modo": "deposito",
             "aguardar_fechamento": aguardar_fechamento,
+            "porta_aberta": porta_aberta,
+            "esp32_offline": not porta_aberta and not abertura.get("simulado"),
+            "esp32_mensagem": abertura.get("mensagem"),
         })
 
     except ValueError as erro:
@@ -450,7 +460,8 @@ def status_porta(compartimento_id):
                 "fechada": False,
                 "aberta": True,
                 "sensor": False,
-                "mensagem": resultado.get("mensagem", "Sensor indisponível."),
+                "esp32_offline": bool(resultado.get("esp32_offline", True)),
+                "mensagem": resultado.get("mensagem", "ESP32 offline ou inacessível."),
             })
 
         return jsonify({

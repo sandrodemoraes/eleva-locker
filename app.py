@@ -112,6 +112,26 @@ app.register_blueprint(relatorios_bp)
 app.register_blueprint(v1_bp)
 
 
+def _iniciar_watchdog_esp32():
+    """Marca ESP32 offline quando heartbeat expira (a cada 30s)."""
+    import threading
+    import time
+    from repositories.esp32_repository import Esp32Repository
+
+    def _loop():
+        while True:
+            time.sleep(30)
+            try:
+                Esp32Repository.marcar_offline_expirados()
+            except Exception:
+                pass
+
+    threading.Thread(target=_loop, daemon=True, name="esp32-offline-watchdog").start()
+
+
+_iniciar_watchdog_esp32()
+
+
 @app.context_processor
 def inject_site_context():
     from flask import session

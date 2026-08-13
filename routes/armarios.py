@@ -37,6 +37,7 @@ def detalhe(armario_id):
         return redirect(redirect_home())
 
     armario = ArmarioService.buscar_por_id(armario_id)
+    Esp32Repository.marcar_offline_expirados()
     esps = Esp32Repository.listar_por_armario(armario_id)
     compartimentos = CompartimentoService.listar(armario_id)
     usuarios = UsuarioService.listar(armario_id)
