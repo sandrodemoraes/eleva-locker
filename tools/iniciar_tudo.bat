@@ -1,6 +1,17 @@
 @echo off
 title ELEVA LOCKER - Iniciar servicos
 color 0B
+
+REM Atalho antigo na pasta Inicializar? Redireciona para C:\ElevaLocker (verde + armarios)
+set "OFICIAL=C:\ElevaLocker"
+if exist "%OFICIAL%\tools\iniciar_tudo.bat" (
+    if /i not "%~dp0"=="%OFICIAL%\tools\" (
+        cd /d "%OFICIAL%"
+        call "%OFICIAL%\tools\iniciar_tudo.bat"
+        exit /b %ERRORLEVEL%
+    )
+)
+
 cd /d "%~dp0.."
 
 set "PYTHON="

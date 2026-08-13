@@ -35,6 +35,14 @@ echo [3] Recriar atalho Area de Trabalho...
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0criar_atalho_desktop.ps1"
 
 echo.
+echo [4] Atualizar tarefa agendada (apos PIN)...
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0instalar_inicio_automatico_tarefa.ps1"
+
+echo.
+echo [5] Conferir atalhos (Startup vs Desktop)...
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0diagnosticar_inicio_windows.ps1"
+
+echo.
 echo ============================================================
 echo   PRONTO
 echo ============================================================

@@ -1,10 +1,16 @@
 # Tarefa agendada: inicia ELEVA LOCKER após login (útil com PIN — PIN 1x, depois sobe sozinho)
 $ErrorActionPreference = "Stop"
 
-$workdir = Split-Path $PSScriptRoot -Parent
+$oficial = "C:\ElevaLocker"
+if (Test-Path $oficial) {
+    $workdir = $oficial
+} else {
+    $workdir = Split-Path $PSScriptRoot -Parent
+}
+
 $bat = Join-Path $workdir "iniciar_elevalocker.bat"
 if (-not (Test-Path $bat)) {
-    $bat = Join-Path $PSScriptRoot "iniciar_tudo.bat"
+    $bat = Join-Path $workdir "tools\iniciar_tudo.bat"
 }
 if (-not (Test-Path $bat)) {
     Write-Host "ERRO: iniciar_elevalocker.bat nao encontrado em $workdir"
