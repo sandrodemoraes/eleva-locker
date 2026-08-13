@@ -633,12 +633,18 @@ function irAguardandoPorta(data){
     erroAg.classList.remove("visivel");
     erroAg.textContent = "";
     const titulo = document.querySelector("#tela-deposito-aguardando .tela-titulo");
+    const icon = document.querySelector("#tela-deposito-aguardando .porta-aberta-icon");
+    const dica = document.getElementById("aguardando-dica");
     if(data.esp32_offline){
         if(titulo) titulo.textContent = "ESP32 offline";
-        erroAg.textContent = data.esp32_mensagem || "Placa sem resposta — abra a porta manualmente e toque em concluir.";
+        if(icon) icon.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i>';
+        if(dica) dica.innerHTML = "A placa não respondeu — <strong>abra a porta manualmente</strong>, coloque a encomenda e toque em concluir.";
+        erroAg.textContent = data.esp32_mensagem || "ESP32 inacessível — depósito registrado, mas a porta não abriu sozinha.";
         erroAg.classList.add("visivel");
-    } else if(titulo) {
-        titulo.textContent = "Porta aberta";
+    } else {
+        if(titulo) titulo.textContent = "Porta aberta";
+        if(icon) icon.innerHTML = '<i class="fa-solid fa-door-open"></i>';
+        if(dica) dica.innerHTML = "Coloque a encomenda e <strong>feche a porta</strong>";
     }
     const st = document.getElementById("sensor-status");
     if(st) st.textContent = data.esp32_offline ? "ESP32 offline — sem sensor" : "Aguardando sensor...";

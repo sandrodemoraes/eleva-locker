@@ -5,6 +5,23 @@ import json
 import config
 
 
+def _mensagem_erro_esp32(erro):
+    """Mensagem amigável para totem/painel (sem jargão Python)."""
+    texto = str(erro).lower()
+    reason = ""
+    if isinstance(erro, urllib.error.URLError) and erro.reason is not None:
+        reason = str(erro.reason).lower()
+    if "timed out" in texto or "timeout" in reason or "timeout" in texto:
+        return "Placa não respondeu. Verifique se a ESP32 está ligada e no Wi-Fi."
+    if "refused" in reason or "recus" in reason:
+        return "Conexão recusada. Placa desligada ou IP incorreto."
+    if "no route" in reason or "unreachable" in reason:
+        return "Placa inacessível na rede local."
+    if isinstance(erro, urllib.error.URLError):
+        return "ESP32 inacessível na rede."
+    return "Falha ao comunicar com a ESP32."
+
+
 class Esp32Client:
     """
     Cliente HTTP para comunicação com dispositivos ESP32.
@@ -77,14 +94,14 @@ class Esp32Client:
 
             return {
                 "sucesso": False,
-                "mensagem": f"ESP32 inacessível: {erro.reason}",
+                "mensagem": _mensagem_erro_esp32(erro),
             }
 
         except Exception as erro:
 
             return {
                 "sucesso": False,
-                "mensagem": f"Erro ao acionar relé: {erro}",
+                "mensagem": _mensagem_erro_esp32(erro),
             }
 
     @staticmethod
@@ -110,9 +127,19 @@ class Esp32Client:
                     "dados": json.loads(resp.read().decode("utf-8")),
                 }
 
+        except urllib.error.URLError as erro:
+
+            return {
+                "sucesso": False,
+                "mensagem": _mensagem_erro_esp32(erro),
+            }
+
         except Exception as erro:
 
-            return {"sucesso": False, "mensagem": str(erro)}
+            return {
+                "sucesso": False,
+                "mensagem": _mensagem_erro_esp32(erro),
+            }
 
     @staticmethod
     def ler_sensor(ip, rele, token=None, porta=80):
@@ -158,14 +185,14 @@ class Esp32Client:
 
             return {
                 "sucesso": False,
-                "mensagem": f"ESP32 inacessível: {erro.reason}",
+                "mensagem": _mensagem_erro_esp32(erro),
             }
 
         except Exception as erro:
 
             return {
                 "sucesso": False,
-                "mensagem": f"Erro ao ler sensor: {erro}",
+                "mensagem": _mensagem_erro_esp32(erro),
             }
 
     @staticmethod
@@ -201,4 +228,4 @@ class Esp32Client:
 
         except Exception as erro:
 
-            return {"sucesso": False, "mensagem": str(erro)}
+            return {"sucesso": False, "mensagem": _mensagem_erro_esp32(erro)}
