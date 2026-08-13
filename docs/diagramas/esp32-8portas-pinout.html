@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ELEVA LOCKER — Diagrama ESP32 8 portas</title>
+  <style>
+    body { margin: 0; padding: 16px; background: #f1f5f9; font-family: 'Segoe UI', sans-serif; }
+    h1 { text-align: center; color: #134736; font-size: 1.25rem; }
+    p { text-align: center; color: #64748b; margin-bottom: 16px; }
+    .wrap { max-width: 960px; margin: 0 auto; background: #fff; padding: 16px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,.08); }
+    img { width: 100%; height: auto; display: block; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 14px; }
+    th, td { border: 1px solid #e2e8f0; padding: 10px; text-align: center; }
+    th { background: #134736; color: #fff; }
+    tr:nth-child(even) { background: #f8fafc; }
+    .r { color: #1d4ed8; font-weight: 600; }
+    .s { color: #059669; font-weight: 600; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>ESP32 — Mapa lógico 8 portas (relés + sensores)</h1>
+    <p>Imprima ou consulte na bancada · branch <code>cursor/sensor-porta-bancada-c05c</code></p>
+    <img src="esp32-8portas-pinout.svg" alt="Diagrama ESP32 8 portas">
+    <table>
+      <thead>
+        <tr>
+          <th>Porta lógica</th>
+          <th>Tamanho</th>
+          <th>Relé</th>
+          <th>GPIO relé → BESTER IN</th>
+          <th>Sensor</th>
+          <th>GPIO sensor → GND</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>#1</strong></td><td>P</td><td class="r">R1</td><td>GPIO 16</td><td class="s">S1</td><td>GPIO 32</td></tr>
+        <tr><td><strong>#2</strong></td><td>P</td><td class="r">R2</td><td>GPIO 17</td><td class="s">S2</td><td>GPIO 33</td></tr>
+        <tr><td><strong>#3</strong></td><td>M</td><td class="r">R3</td><td>GPIO 18</td><td class="s">S3</td><td>GPIO 12</td></tr>
+        <tr><td><strong>#4</strong></td><td>P</td><td class="r">R4</td><td>GPIO 19</td><td class="s">S4</td><td>GPIO 13</td></tr>
+        <tr><td><strong>#5</strong></td><td>M</td><td class="r">R5</td><td>GPIO 21</td><td class="s">S5</td><td>GPIO 14</td></tr>
+        <tr><td><strong>#6</strong></td><td>M</td><td class="r">R6</td><td>GPIO 22</td><td class="s">S6</td><td>GPIO 15</td></tr>
+        <tr><td><strong>#7</strong></td><td>G</td><td class="r">R7</td><td>GPIO 23</td><td class="s">S7</td><td>GPIO 26</td></tr>
+        <tr><td><strong>#8</strong></td><td>GG</td><td class="r">R8</td><td>GPIO 27</td><td class="s">S8</td><td>GPIO 4</td></tr>
+      </tbody>
+    </table>
+  </div>
+</body>
+</html>

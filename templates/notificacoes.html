@@ -1,0 +1,95 @@
+{% extends "layout/base.html" %}
+
+{% block title %}Notificações | ELEVA LOCKER{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/crud.css') }}">
+{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+    <div>
+        <h1>Notificações</h1>
+        <p>Histórico de SMS, WhatsApp e e-mails enviados</p>
+    </div>
+</div>
+
+<div class="table-box" style="margin-bottom:20px;">
+    <p><strong>Modo atual:</strong> {{ config.NOTIF_MODO }}</p>
+    {% if whatsapp_status %}
+    <p style="margin-top:8px;padding:12px;border-radius:8px;background:{% if whatsapp_status.pronto %}#d4edda{% else %}#fff3cd{% endif %};">
+        <strong>WhatsApp:</strong> {{ whatsapp_status.mensagem }}
+        {% if whatsapp_status.conexao %}
+        <br><small>Instância <code>{{ whatsapp_status.instancia }}</code> — status: {{ whatsapp_status.conexao }}</small>
+        {% endif %}
+        {% if not whatsapp_status.pronto and config.WHATSAPP_API_URL %}
+        <br><a href="{{ config.WHATSAPP_API_URL }}/manager" target="_blank" rel="noopener">Abrir Evolution Manager → escanear QR</a>
+        {% endif %}
+    </p>
+    {% endif %}
+    <p style="margin-top:8px;color:#666;">
+        Canais:
+        E-mail {% if config.NOTIF_EMAIL_ATIVO %}✅{% else %}❌{% endif %} |
+        WhatsApp {% if config.NOTIF_WHATSAPP_ATIVO %}✅{% else %}❌{% endif %}
+        {% if config.NOTIF_WHATSAPP_ATIVO %}
+        ({{ config.WHATSAPP_PROVIDER }}{% if whatsapp_configurado %}, API OK{% else %}, API não configurada{% endif %})
+        {% endif %}
+        |
+        SMS {% if config.NOTIF_SMS_ATIVO %}✅{% else %}❌{% endif %}
+    </p>
+    {% if perfil == 'Administrador' and config.NOTIF_WHATSAPP_ATIVO %}
+    <form method="POST" action="{{ url_for('notificacoes.testar_whatsapp') }}" style="margin-top:16px;display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;">
+        <div class="form-group" style="margin:0;min-width:220px;">
+            <label>Testar WhatsApp</label>
+            <input type="text" name="telefone" required placeholder="11 99999-9999">
+        </div>
+        <button type="submit" class="btn btn-sm">Enviar mensagem de teste</button>
+    </form>
+    {% endif %}
+    <p style="margin-top:8px;color:#888;font-size:13px;">
+        Configure via variáveis de ambiente (NOTIF_MODO, SMTP_*, WHATSAPP_*, SMS_*).
+        Em modo <code>console</code>, mensagens aparecem no terminal do servidor.
+    </p>
+</div>
+
+<div class="table-box">
+    {% if notificacoes %}
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Data</th>
+                <th>Encomenda</th>
+                <th>Canal</th>
+                <th>Destinatário</th>
+                <th>Status</th>
+                <th>Detalhe</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for n in notificacoes %}
+            <tr>
+                <td>{{ n.id }}</td>
+                <td>{{ n.criado_em }}</td>
+                <td>#{{ n.encomenda_id }} — {{ n.encomenda_codigo or '—' }}</td>
+                <td>
+                    {% if n.canal == 'whatsapp' %}💬{% elif n.canal == 'email' %}📧{% elif n.canal == 'sms' %}📱{% else %}🔔{% endif %}
+                    {{ n.canal }}
+                </td>
+                <td>{{ n.destinatario or '—' }}</td>
+                <td><span class="badge badge-{{ 'retirada' if n.status == 'enviado' else 'aguardando_retirada' }}">{{ n.status }}</span></td>
+                <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;">{{ n.detalhe or '—' }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state">
+        <i class="fa-solid fa-bell fa-3x"></i>
+        <p>Nenhuma notificação enviada ainda.</p>
+    </div>
+    {% endif %}
+</div>
+
+{% endblock %}
