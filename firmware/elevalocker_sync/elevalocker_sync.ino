@@ -160,6 +160,10 @@ int nivelReleDesligado() {
 
 void iniciarRele(int gpio, unsigned long duracaoMs) {
   if (gpio < 0) return;
+  // Desliga relé anterior (evita vários acesos ao testar portas no painel)
+  if (gpioAtivo >= 0 && gpioAtivo != gpio) {
+    digitalWrite(gpioAtivo, nivelReleDesligado());
+  }
   pinMode(gpio, OUTPUT);
   digitalWrite(gpio, nivelReleLigado());
   gpioAtivo = gpio;
