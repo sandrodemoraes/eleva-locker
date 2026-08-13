@@ -10,9 +10,15 @@ load_dotenv(_ENV_PATH)
 
 # Flask
 SECRET_KEY = os.getenv("SECRET_KEY", "ElevaLocker2026")
+_DEFAULT_SECRET_KEY = "ElevaLocker2026"
+
+# Rate limit login admin
+LOGIN_RATE_LIMIT = int(os.getenv("LOGIN_RATE_LIMIT", "10"))
+LOGIN_RATE_JANELA = int(os.getenv("LOGIN_RATE_JANELA", "900"))
 
 # ESP32
 ESP32_TOKEN = os.getenv("ESP32_TOKEN", "eleva-esp32-token-2026")
+_DEFAULT_ESP32_TOKEN = "eleva-esp32-token-2026"
 ESP32_RELE_DURACAO = int(os.getenv("ESP32_RELE_DURACAO", "3"))
 ESP32_HEARTBEAT_TIMEOUT = int(os.getenv("ESP32_HEARTBEAT_TIMEOUT", "90"))
 ESP32_HTTP_TIMEOUT = int(os.getenv("ESP32_HTTP_TIMEOUT", "5"))
@@ -88,6 +94,12 @@ TOTEM_DEPOSITO_SOMENTE_CADASTRADO = os.getenv("TOTEM_DEPOSITO_SOMENTE_CADASTRADO
 # Bancada local — força SQLite mesmo se DATABASE_URL existir no .env
 ELEVA_BANCADA = os.getenv("ELEVA_BANCADA", "").strip().lower() in ("1", "true", "yes")
 
+# Debug: ligado na bancada por padrão; desligado em produção (FLASK_DEBUG=0)
+if os.getenv("FLASK_DEBUG", "").strip() != "":
+    FLASK_DEBUG = os.getenv("FLASK_DEBUG", "0") == "1"
+else:
+    FLASK_DEBUG = ELEVA_BANCADA
+
 # Database — sqlite (dev/bancada) | postgresql (produção)
 DATABASE_URL = os.getenv("DATABASE_URL", "")
 if ELEVA_BANCADA:
@@ -101,3 +113,17 @@ PAGAMENTO_DIAS_VENCIMENTO = int(os.getenv("PAGAMENTO_DIAS_VENCIMENTO", "10"))
 
 def gerar_token_esp32():
     return secrets.token_hex(16)
+
+
+def avisar_segredos_padrao():
+    """Avisa no console se SECRET_KEY ou ESP32_TOKEN ainda são os padrões."""
+    avisos = []
+    if SECRET_KEY == _DEFAULT_SECRET_KEY:
+        avisos.append("SECRET_KEY ainda é o padrão — altere no .env em produção")
+    if ESP32_TOKEN == _DEFAULT_ESP32_TOKEN:
+        avisos.append("ESP32_TOKEN ainda é o padrão — alinhe com firmware e .env")
+    if not TOTEM_DEPOSITO_PIN and not TOTEM_DEPOSITO_SEM_PIN:
+        avisos.append("Totem sem PIN de depósito — OK na bancada fixa; use PIN em produção")
+    for msg in avisos:
+        print(f"  ⚠ SEGURANÇA: {msg}")
+    return avisos

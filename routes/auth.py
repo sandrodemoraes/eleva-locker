@@ -3,6 +3,9 @@ from werkzeug.security import check_password_hash
 from database import conectar
 from datetime import datetime
 
+import config
+from middleware.rate_limit import rate_limit_form
+
 auth_bp = Blueprint("auth", __name__)
 
 
@@ -12,10 +15,15 @@ def home():
 
 
 @auth_bp.route("/login", methods=["POST"])
+@rate_limit_form(
+    "login-admin",
+    max_tentativas=config.LOGIN_RATE_LIMIT,
+    janela_seg=config.LOGIN_RATE_JANELA,
+)
 def login():
 
-    email = request.form["email"]
-    senha = request.form["senha"]
+    email = request.form.get("email", "").strip().lower()
+    senha = request.form.get("senha", "")
 
     conn = conectar()
     cursor = conn.cursor()
@@ -48,6 +56,7 @@ def login():
         conn.commit()
         conn.close()
 
+        session.clear()
         session["usuario"] = usuario["nome"]
         session["nome"] = usuario["nome"]
         session["perfil"] = usuario["perfil"]

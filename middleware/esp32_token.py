@@ -22,11 +22,10 @@ def esp32_token_required(f):
         esp = Esp32Service.buscar_por_token(token)
 
         if not esp:
-            print(f"[ESP32] Token rejeitado (len={len(token)}): {token[:12]}...")
+            print(f"[ESP32] Token rejeitado (len={len(token)})")
             return jsonify({
                 "sucesso": False,
                 "mensagem": "Token inválido.",
-                "debug_len": len(token),
             }), 403
 
         request.esp32 = dict(esp)

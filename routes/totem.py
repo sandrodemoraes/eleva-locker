@@ -165,8 +165,9 @@ def retirar():
         return jsonify({"sucesso": False, "mensagem": str(erro)}), 400
 
     except Exception as erro:
-        import traceback
-        traceback.print_exc()
+        if config.FLASK_DEBUG:
+            import traceback
+            traceback.print_exc()
         return jsonify({"sucesso": False, "mensagem": "Erro interno. Tente de novo ou fale com a portaria."}), 500
 
 
@@ -234,6 +235,7 @@ def destinatarios_totem():
 
 
 @totem_bp.route("/totem/compartimentos-livres", methods=["POST"])
+@rate_limit("totem-comp-livres", max_tentativas=30, janela_seg=300)
 def compartimentos_livres_totem():
 
     dados = _dados_form()
@@ -434,6 +436,7 @@ def concluir_deposito():
 
 
 @totem_bp.route("/totem/porta/<int:compartimento_id>/status")
+@rate_limit("totem-porta-status", max_tentativas=120, janela_seg=60)
 def status_porta(compartimento_id):
     """Status da porta via sensor ESP32 (NC: fechada=curto=LOW)."""
     try:

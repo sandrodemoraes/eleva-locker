@@ -45,8 +45,14 @@ from routes.api.v1.public_api import v1_bp
 
 app = Flask(__name__)
 
-from config import SECRET_KEY
+from config import SECRET_KEY, FLASK_DEBUG, avisar_segredos_padrao
 app.secret_key = SECRET_KEY
+app.config.update(
+    SESSION_COOKIE_HTTPONLY=True,
+    SESSION_COOKIE_SAMESITE="Lax",
+    SESSION_COOKIE_SECURE=os.getenv("SESSION_COOKIE_SECURE", "0") == "1",
+    PERMANENT_SESSION_LIFETIME=86400 * 7,
+)
 
 criar_banco()
 
@@ -72,6 +78,10 @@ elif _engine == "sqlite":
             print("=" * 50)
     except Exception:
         pass
+
+_seg = avisar_segredos_padrao()
+if _seg:
+    print("  (tools\\verificar_seguranca.bat — checklist completo)")
 
 if os.getenv("SKIP_BACKUP") != "1":
     try:
@@ -124,6 +134,6 @@ if __name__ == "__main__":
 
     app.run(
         host="0.0.0.0",
-        port=15000,
-        debug=True
+        port=int(os.getenv("PORT", "15000")),
+        debug=FLASK_DEBUG,
     )
