@@ -55,6 +55,7 @@ class EncomendaService:
         transportadora=None,
         observacao=None,
         notificar=True,
+        reverter_se_falhar_abertura=False,
     ):
 
         cliente = cliente.strip()
@@ -112,6 +113,17 @@ class EncomendaService:
         )
 
         abertura = Esp32Service.abrir_compartimento(compartimento_id, operador)
+
+        if (
+            reverter_se_falhar_abertura
+            and not abertura.get("sucesso")
+            and not abertura.get("simulado")
+            and not abertura.get("manual")
+        ):
+            EncomendaService.cancelar_deposito_totem(encomenda_id, operador)
+            raise ValueError(
+                abertura.get("mensagem") or "ESP32 offline — depósito cancelado."
+            )
 
         notificacoes = []
         if notificar:

@@ -615,7 +615,10 @@ function confirmarDeposito(){
             depositoPendente = d;
             irAguardandoPorta(d);
         } else {
-            mostrarErroDeposito(d.mensagem || "Erro ao depositar.");
+            const msg = d.esp32_offline
+                ? (d.mensagem || "ESP32 offline — ligue a placa e tente de novo.")
+                : (d.mensagem || "Erro ao depositar.");
+            mostrarErroDeposito(msg);
         }
     })
     .catch(() => mostrarErroDeposito("Sem conexão com o servidor."));

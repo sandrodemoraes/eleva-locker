@@ -337,6 +337,22 @@ def depositar():
     else:
         morador_usuario_id = None
 
+    ping = Esp32Service.verificar_compartimento(compartimento_id)
+    if not ping.get("online"):
+        if ping.get("manual"):
+            return jsonify({
+                "sucesso": False,
+                "mensagem": ping.get("mensagem", "ESP32 não configurado neste compartimento."),
+            }), 400
+        return jsonify({
+            "sucesso": False,
+            "esp32_offline": True,
+            "mensagem": (
+                "ESP32 offline — depósito bloqueado. "
+                + (ping.get("mensagem") or "Ligue a placa ou verifique o Wi-Fi.")
+            ),
+        }), 503
+
     try:
         aguardar_fechamento = str(dados.get("aguardar_fechamento", "1")).lower() in ("1", "true", "sim", "yes")
         resultado = EncomendaService.depositar(
@@ -348,6 +364,7 @@ def depositar():
             transportadora=dados.get("transportadora", ""),
             observacao=dados.get("observacao", ""),
             notificar=not aguardar_fechamento,
+            reverter_se_falhar_abertura=True,
         )
 
         abertura = resultado.get("esp32") or {}
