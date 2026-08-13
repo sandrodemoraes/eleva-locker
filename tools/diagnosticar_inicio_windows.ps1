@@ -19,7 +19,11 @@ $taskName = "ELEVA LOCKER - Iniciar"
 
 Write-Host ""
 Write-Host "=== Diagnostico inicio Windows ==="
-Write-Host "Pasta oficial: $oficial $(if (Test-Path $oficial) {'(OK)'} else {'(NAO EXISTE)'})"
+if (Test-Path $oficial) {
+    Write-Host "Pasta oficial: $oficial (OK)"
+} else {
+    Write-Host "Pasta oficial: $oficial (NAO EXISTE)"
+}
 Write-Host ""
 
 $st = Ler-Atalho $startup
@@ -28,7 +32,7 @@ if ($st) {
     Write-Host "  cmd $($st.Args)"
     Write-Host "  Iniciar em: $($st.Work)"
     if ($st.Work -ne $oficial) {
-        Write-Host "  AVISO: nao e C:\ElevaLocker — rode reparar_inicio_windows.bat" -ForegroundColor Yellow
+        Write-Host "  AVISO: nao e C:\ElevaLocker - rode reparar_inicio_windows.bat" -ForegroundColor Yellow
     }
 } else {
     Write-Host "  (nenhum atalho ELEVA LOCKER - Iniciar.lnk)"
@@ -55,7 +59,7 @@ if ($t) {
         Write-Host "  AVISO: nao e C:\ElevaLocker" -ForegroundColor Yellow
     }
 } else {
-    Write-Host "  (nao instalada — opcional com PIN)"
+    Write-Host "  (nao instalada - opcional com PIN)"
 }
 
 Write-Host ""

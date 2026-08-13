@@ -1,4 +1,4 @@
-# Tarefa agendada: inicia ELEVA LOCKER após login (útil com PIN — PIN 1x, depois sobe sozinho)
+# Tarefa agendada: inicia ELEVA LOCKER apos login (util com PIN)
 $ErrorActionPreference = "Stop"
 
 $oficial = "C:\ElevaLocker"
@@ -29,13 +29,13 @@ $settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoi
 Register-ScheduledTask -TaskName $taskName -Action $action -Trigger $triggerLogon -Settings $settings -Description "ELEVA LOCKER: app.py + Docker apos login Windows" -Force | Out-Null
 
 Write-Host ""
-Write-Host "OK — Tarefa criada: $taskName"
-Write-Host "  Dispara: ao fazer logon (usuario $env:USERNAME)"
+Write-Host "OK - Tarefa criada: $taskName"
+Write-Host "  Dispara: ao fazer logon (usuario: $env:USERNAME)"
 Write-Host "  Atraso: 45 segundos (rede + Docker)"
 Write-Host "  Comando: cmd /c $bat"
 Write-Host "  Pasta:   $workdir"
 Write-Host ""
-Write-Host "Com PIN: apos reiniciar, digite PIN uma vez — o servidor sobe em ~45s."
+Write-Host "Com PIN: apos reiniciar, digite PIN uma vez - o servidor sobe em ~45s."
 Write-Host "Para subir SEM PIN: veja docs\INICIO_AUTOMATICO_PIN.md (netplwiz)"
 Write-Host ""
 Write-Host "Remover: tools\desinstalar_inicio_automatico_tarefa.bat"
