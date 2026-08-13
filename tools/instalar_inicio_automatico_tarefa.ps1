@@ -19,9 +19,9 @@ if (-not (Test-Path $bat)) {
 
 $taskName = "ELEVA LOCKER - Iniciar"
 $cmd = $env:ComSpec
-$args = "/c `"$bat`""
+$taskArgs = "/c `"$bat`""
 
-$action = New-ScheduledTaskAction -Execute $cmd -Argument $args -WorkingDirectory $workdir
+$action = New-ScheduledTaskAction -Execute $cmd -Argument $taskArgs -WorkingDirectory $workdir
 $triggerLogon = New-ScheduledTaskTrigger -AtLogOn -User $env:USERNAME
 $triggerLogon.Delay = "PT45S"
 $settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -StartWhenAvailable -MultipleInstances IgnoreNew

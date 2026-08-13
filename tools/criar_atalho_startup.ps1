@@ -3,7 +3,7 @@ $ErrorActionPreference = "Stop"
 $startup = [Environment]::GetFolderPath("Startup")
 $atalho = Join-Path $startup "ELEVA LOCKER - Iniciar.lnk"
 
-# Pasta OFICIAL da bancada — evita iniciar clone antigo (azul / 0 armarios)
+# Pasta OFICIAL da bancada - evita iniciar clone antigo (azul / 0 armarios)
 $oficial = "C:\ElevaLocker"
 if (Test-Path $oficial) {
     $workdir = $oficial
