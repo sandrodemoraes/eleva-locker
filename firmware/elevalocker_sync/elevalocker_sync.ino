@@ -158,12 +158,20 @@ int nivelReleDesligado() {
   return RELE_ATIVO_LOW ? HIGH : LOW;
 }
 
+void desligarTodosReles() {
+  for (int i = 0; i < RELAY_GPIO_LEN; i++) {
+    int g = GPIO_BASE[i];
+    pinMode(g, OUTPUT);
+    digitalWrite(g, nivelReleDesligado());
+  }
+  gpioAtivo = -1;
+  releAtivo = -1;
+  releAte = 0;
+}
+
 void iniciarRele(int gpio, unsigned long duracaoMs) {
   if (gpio < 0) return;
-  // Desliga relé anterior (evita vários acesos ao testar portas no painel)
-  if (gpioAtivo >= 0 && gpioAtivo != gpio) {
-    digitalWrite(gpioAtivo, nivelReleDesligado());
-  }
+  desligarTodosReles();
   pinMode(gpio, OUTPUT);
   digitalWrite(gpio, nivelReleLigado());
   gpioAtivo = gpio;
@@ -224,11 +232,16 @@ void iniciarSensores() {
 }
 
 void iniciarRelesSaida() {
-  for (int i = 0; i < RELAY_GPIO_LEN; i++) {
-    int g = GPIO_BASE[i];
-    pinMode(g, OUTPUT);
-    digitalWrite(g, nivelReleDesligado());
+  desligarTodosReles();
+}
+
+void rotaDesligarTodos() {
+  if (!tokenValido()) {
+    server.send(403, "application/json", "{\"erro\":\"token invalido\"}");
+    return;
   }
+  desligarTodosReles();
+  server.send(200, "application/json", "{\"sucesso\":true,\"mensagem\":\"Todos os reles desligados\"}");
 }
 
 // ============ FILA DE EVENTOS OFFLINE ============
