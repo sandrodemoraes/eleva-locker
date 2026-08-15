@@ -6,7 +6,7 @@ import json
 
 import config
 
-TOTEM_VERSAO = "2.4.3"
+TOTEM_VERSAO = "2.4.4"
 from middleware.rate_limit import rate_limit
 from services.encomenda_service import EncomendaService
 from services.armario_service import ArmarioService
@@ -132,6 +132,7 @@ def solicitar_ajuda():
             "sucesso": True,
             "mensagem": resultado["mensagem"],
             "whatsapp_enviado": resultado.get("whatsapp_enviado", False),
+            "whatsapp_erro": resultado.get("whatsapp_erro", ""),
             "duplicado": resultado.get("duplicado", False),
         })
     except ValueError as erro:

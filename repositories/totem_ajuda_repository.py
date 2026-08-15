@@ -94,3 +94,14 @@ class TotemAjudaRepository:
             ))
             conn.commit()
             return conn.total_changes > 0
+
+    @staticmethod
+    def atualizar_whatsapp(pedido_id, enviado, detalhe=None):
+        with BaseRepository.get_connection() as conn:
+            conn.execute("""
+                UPDATE totem_ajuda_pedidos
+                SET whatsapp_enviado = ?,
+                    whatsapp_detalhe = ?
+                WHERE id = ?
+            """, (1 if enviado else 0, detalhe, pedido_id))
+            conn.commit()

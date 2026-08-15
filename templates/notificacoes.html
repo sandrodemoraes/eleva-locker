@@ -46,7 +46,7 @@
                 <td>{{ p.id }}</td>
                 <td>{{ p.criado_em }}</td>
                 <td>{{ p.armario_nome or '—' }}</td>
-                <td>{% if p.whatsapp_enviado %}✅ Enviado{% else %}—{% endif %}</td>
+                <td>{% if p.whatsapp_enviado %}✅ Enviado{% else %}❌ {{ p.whatsapp_detalhe or 'Não enviou' }}{% endif %}</td>
                 <td>
                     <span class="badge badge-{{ 'aguardando_retirada' if p.status == 'pendente' else 'retirada' }}">
                         {{ p.status }}

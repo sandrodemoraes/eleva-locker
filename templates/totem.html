@@ -779,7 +779,10 @@ function mostrarAjuda(){
         if(statusEl){
             if(data.sucesso){
                 statusEl.textContent = data.mensagem || "Portaria avisada!";
-                statusEl.classList.remove("erro");
+                if(data.whatsapp_enviado === false && data.whatsapp_erro){
+                    statusEl.textContent += " (" + data.whatsapp_erro + ")";
+                }
+                statusEl.classList.toggle("erro", data.whatsapp_enviado === false);
             } else {
                 statusEl.textContent = data.mensagem || "Não foi possível avisar agora.";
                 statusEl.classList.add("erro");
