@@ -9,12 +9,17 @@ echo ============================================================
 echo.
 echo  Documento completo: docs\INSTALACAO_SITE.md
 echo.
-echo  RECOMENDACAO: Servidor LOCAL na mesma rede das ESPs (Opcao A)
+echo  OPCOES: A = PC local  |  B+ = MikroTik DENTRO do armario + VPN sede
+echo  PADRAO ESCALA: MikroTik ao lado das ESPs, cabo WAN para internet
 echo.
-echo  --- Rede ---
-echo  [ ] Wi-Fi definido (SSID/senha)
+echo  --- Rede (B+ MikroTik no armario) ---
+echo  [ ] MikroTik montado dentro do armario, teste Wi-Fi porta fechada
+echo  [ ] Wi-Fi ELEVA - LOCKER XXX + IP fixo cada ESP
+echo  [ ] VPN WireGuard sede OK (tunel verde)
+echo  [ ] Cabo WAN do condominio -> MikroTik
+echo.
+echo  --- Rede (A PC local) ---
 echo  [ ] IP fixo PC servidor (ex.: 192.168.1.50)
-echo  [ ] IP fixo cada ESP no roteador
 echo  [ ] Firewall porta 15000 liberada
 echo.
 echo  --- Servidor ---

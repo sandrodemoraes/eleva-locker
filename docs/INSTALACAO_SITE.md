@@ -72,6 +72,64 @@ Só colocar URL pública no firmware **não resolve** — o servidor não conseg
 
 ---
 
+### Opção B+ — Kit MikroTik **dentro do armário** (padrão ELEVA em escala)
+
+MikroTik montado **no interior do armário**, ao lado das ESPs — rede dedicada por unidade, VPN para a sede.
+
+```
+[Internet condomínio] ── cabo Ethernet ──► WAN MikroTik (dentro do armário)
+                                                │
+                    ┌───────────────────────────┼───────────────────────────┐
+                    │  ARMÁRIO                  │                           │
+                    │  MikroTik Wi‑Fi           │                           │
+                    │    ├── ESP M1  .121       │                           │
+                    │    ├── ESP M2  .145       │                           │
+                    │    ├── ESP M3  .146       │                           │
+                    │    └── Tablet totem       │                           │
+                    └───────────────────────────┴───────────────────────────┘
+                                                │
+                                    VPN WireGuard ▼
+                                    Servidor Flask (sede)
+```
+
+| Prós | Contras |
+|------|---------|
+| Rede isolada — não depende do Wi‑Fi do cliente | Depende de internet + VPN para operação remota |
+| Config padrão ELEVA (SSID, IPs, VPN) | Armário metálico pode enfraquecer Wi‑Fi |
+| Sem PC no cliente | Planejamento de subnets por site |
+| Painel centralizado na sede | MikroTik precisa de tomada + cabo WAN no local |
+| Instalação: 1 cabo de rede + energia | |
+
+**Padrão físico:** MikroTik **sempre dentro do armário**, fixado na parede interna, próximo das placas ESP (cabo curto, mesma “caixa” de rede).
+
+**Modelos sugeridos:** hAP ac² / hAP ax² (compacto, 2.4 GHz). Se sinal fraco com porta fechada → antena externa ou furo para antena na chapa.
+
+**Montagem (dicas):**
+
+| Item | Recomendação |
+|------|----------------|
+| Fixação | Parafuso + abraçadeira na chapa interna, **longe** dos relés (vibração/calor) |
+| Wi‑Fi | Testar com **porta fechada** na bancada; ESPs a ≤ 1 m do MikroTik |
+| Energia | Filtro de linha ou nobreak pequeno no armário (opcional) |
+| Cabo WAN | Saída pelo topo ou traseira do armário → switch/roteador do condomínio |
+| Etiqueta | SSID, ID do site, IP VPN, contato suporte ELEVA |
+| Calor | MikroTik tolera ambiente do armário; evitar sol direto na chapa |
+
+**Template de rede por armário (exemplo site #50):**
+
+```
+SSID Wi‑Fi:     ELEVA - LOCKER 050
+Senha:          (única por site)
+LAN ESPs:       192.168.50.121 / .145 / .146  (DHCP estático)
+Subnet VPN:     10.10.50.0/24  (hub-spoke na sede)
+SERVIDOR_URL:   http://192.168.16.130:15000   (firmware ESP)
+Totem:          http://192.168.16.130:15000/totem/<id>
+```
+
+Salvar em `D:\ElevaLocker\Sites\<nome>\rede.txt` + export RouterOS (`.rsc`).
+
+---
+
 ### Opção C — Só URL pública / internet (não recomendado)
 
 ```
@@ -96,10 +154,48 @@ Servidor ──X──► 192.168.x.x ESP  (abrir porta FALHA)
 | **1 armário no local** (condomínio, loja) | **A — Servidor local** |
 | **Bancada / laboratório** (já feito) | **A** — `192.168.16.130` |
 | **Matriz + Bancada na mesma rede** | **A** — mesmo servidor, armários id 2 e 3 |
-| **10+ sites com painel central** | **B — VPN** ou A + sync/relatórios futuros |
-| **ESP em 4G sem Wi‑Fi local** | Repensar hardware ou gateway local |
+| **10+ sites com painel central** | **B+ — MikroTik no armário + VPN** |
+| **Cliente já tem MikroTik / cabo no hall** | **B+** — gateway dentro do armário |
+| **Primeiro cliente / internet instável** | **A — PC local** (bancada) |
+| **ESP em 4G sem cabo no local** | MikroTik LTE ou repensar hardware |
 
-**Padrão sugerido:** Opção **A** em cada instalação — mesmo modelo da bancada que já funciona.
+**Padrão sugerido:**
+
+- **Bancada / 1º cliente:** Opção **A** (PC local) — já validado.
+- **Instalações em campo (escala):** Opção **B+** — **MikroTik sempre dentro do armário**, VPN WireGuard para sede.
+
+---
+
+## Checklist — kit MikroTik no armário (Opção B+)
+
+### Montagem na bancada (antes de ir ao cliente)
+
+- [ ] MikroTik configurado (export `.rsc` salvo no disco D)
+- [ ] WireGuard testado: bancada ↔ sede (túnel verde)
+- [ ] Wi‑Fi `ELEVA - LOCKER XXX` — ESPs conectam com porta do armário **fechada**
+- [ ] IPs reservados: `.121`, `.145`, `.146` (24 portas)
+- [ ] 3 ESPs gravadas: `WIFI_SSID`, `SERVIDOR_URL` (sede), tokens
+- [ ] Totem na mesma Wi‑Fi — `/totem/<id>` via VPN
+- [ ] `validar_portas_bancada.py --amostra` OK
+- [ ] Etiqueta colada no MikroTik + dentro da porta do armário
+
+### No local do cliente
+
+- [ ] Tomada 110/220 V no armário (MikroTik + ESPs + tablet)
+- [ ] Cabo Ethernet do condomínio → porta **WAN** do MikroTik (dentro do armário)
+- [ ] Internet OK (MikroTik pinga sede pela VPN)
+- [ ] Painel sede: ESPs **online** (verde)
+- [ ] Depósito + retirada teste no totem
+
+### Pasta no disco D (por site)
+
+```
+Sites/Locker-050/
+  rede.txt          ← SSID, IPs ESP, subnet VPN, URL servidor
+  tokens.txt        ← token + IP de cada ESP
+  mikrotik.rsc      ← backup config RouterOS
+  fotos/            ← armário fechado, cabo WAN, etiqueta
+```
 
 ---
 
@@ -216,7 +312,8 @@ py tools\corrigir_tokens_bancada.py --listar
 |----------|----------|----------|
 | Há PC Windows no local do armário? | Opção **A** | Levar mini-PC ou Opção **B** |
 | ESP e PC na mesma Wi‑Fi? | Seguir checklist | Ajustar rede primeiro |
-| Cliente exige painel só na sede? | Estudar **VPN (B)** | **A** com acesso remoto ao PC (TeamViewer) |
+| Cliente exige painel só na sede? | **B+ — MikroTik no armário** | **A** + TeamViewer |
+| Vai padronizar vários armários? | **B+ — MikroTik dentro do armário** | **A** no primeiro piloto |
 | Só 1 armário 8 portas? | **A** com 1 ESP | — |
 | 24 portas (3 placas)? | **A** — modelo bancada | — |
 
@@ -224,8 +321,9 @@ py tools\corrigir_tokens_bancada.py --listar
 
 ## Próximo passo sugerido
 
-1. Confirmar **Opção A** para o primeiro cliente fora da bancada.
-2. Montar **kit de instalação** (PC + 3 ESP + roteador dedicado opcional).
-3. Testar em laboratório simulando “rede do cliente” (outro SSID / faixa 192.168.1.x).
+1. **Bancada:** montar **Kit Armário v1** — MikroTik dentro do armário + 3 ESP + totem.
+2. **VPN:** hub WireGuard na sede; testar túnel antes do primeiro cliente.
+3. **Piloto:** 1º cliente com **Opção A** (PC) ou **B+** (MikroTik no armário), conforme cabo/internet no local.
+4. Documentar cada site em `D:\ElevaLocker\Sites\` (`rede.txt`, `mikrotik.rsc`, `tokens.txt`).
 
 Documentos relacionados: [SETUP_OFICIAL.md](SETUP_OFICIAL.md), [ESP32_SYNC.md](ESP32_SYNC.md), [TOTEM_TABLET_KIOSK.md](TOTEM_TABLET_KIOSK.md).
