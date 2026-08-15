@@ -32,8 +32,8 @@
 {% endwith %}
 
 <div class="table-box" style="margin-bottom:20px;">
-    <form method="GET" action="/encomendas">
-        <div class="form-group" style="max-width:300px;margin:0;">
+    <form method="GET" action="/encomendas" class="filtros-encomendas">
+        <div class="form-group filtro-campo">
             <label>Filtrar por status</label>
             <select name="status" onchange="this.form.submit()">
                 <option value="">Todas</option>
@@ -41,6 +41,17 @@
                 <option value="retirada" {% if status_filtro == 'retirada' %}selected{% endif %}>Retiradas</option>
             </select>
         </div>
+        {% if not operador_restrito %}
+        <div class="form-group filtro-campo">
+            <label>Filtrar por armário</label>
+            <select name="armario_id" onchange="this.form.submit()">
+                <option value="">Todos os armários</option>
+                {% for a in armarios %}
+                <option value="{{ a.id }}" {% if armario_filtro == a.id %}selected{% endif %}>{{ a.nome }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        {% endif %}
     </form>
 </div>
 
