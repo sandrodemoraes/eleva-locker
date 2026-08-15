@@ -25,7 +25,7 @@ document.querySelectorAll("a.excluir").forEach(function (botao) {
         formExcluir.action =
             "/empresas/excluir/" + this.dataset.id;
 
-        modalExcluir.style.display = "flex";
+        modalExcluir.classList.add("active");
 
     });
 
@@ -33,7 +33,7 @@ document.querySelectorAll("a.excluir").forEach(function (botao) {
 
 function fecharModalExcluir() {
 
-    modalExcluir.style.display = "none";
+    modalExcluir.classList.remove("active");
 
 }
 
@@ -44,7 +44,7 @@ function fecharModalExcluir() {
 
 function abrirModal() {
 
-    modalEmpresa.style.display = "flex";
+    modalEmpresa.classList.add("active");
 
     formEmpresa.reset();
 
@@ -58,7 +58,7 @@ function abrirModal() {
 
 function fecharModal() {
 
-    modalEmpresa.style.display = "none";
+    modalEmpresa.classList.remove("active");
 
 }
 

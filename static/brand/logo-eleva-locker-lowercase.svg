@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 120" fill="none" role="img" aria-label="eleva locker">
+  <!-- Submarca produto  variante minúscula integrada -->
+  <g transform="translate(8, 12)">
+    <path d="M8 48 L36 8 L68 8 L40 48 Z" fill="#134736"/>
+    <path d="M8 48 L36 88 L68 88 L40 48 Z" fill="#134736"/>
+    <path d="M28 48 L56 8 L88 8 L60 48 Z" fill="#0F3D31"/>
+    <path d="M28 48 L56 88 L88 88 L60 48 Z" fill="#0F3D31"/>
+    <rect x="20" y="36" width="20" height="24" rx="2" fill="#FFFFFF"/>
+  </g>
+  <text x="112" y="68" font-family="'Nunito', 'Varela Round', 'Segoe UI', sans-serif" font-size="46" font-weight="700" fill="#134736">eleva locker</text>
+</svg>
