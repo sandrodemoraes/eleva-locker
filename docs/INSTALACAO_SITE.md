@@ -326,4 +326,4 @@ py tools\corrigir_tokens_bancada.py --listar
 3. **Piloto:** 1º cliente com **Opção A** (PC) ou **B+** (MikroTik no armário), conforme cabo/internet no local.
 4. Documentar cada site em `D:\ElevaLocker\Sites\` (`rede.txt`, `mikrotik.rsc`, `tokens.txt`).
 
-Documentos relacionados: [SETUP_OFICIAL.md](SETUP_OFICIAL.md), [ESP32_SYNC.md](ESP32_SYNC.md), [TOTEM_TABLET_KIOSK.md](TOTEM_TABLET_KIOSK.md).
+Documentos relacionados: [SETUP_OFICIAL.md](SETUP_OFICIAL.md), [ESP32_SYNC.md](ESP32_SYNC.md), [TOTEM_TABLET_KIOSK.md](TOTEM_TABLET_KIOSK.md), [MIKROTIK_VPN_HUB.md](MIKROTIK_VPN_HUB.md) (upgrade ROS 7 + WireGuard hub).
