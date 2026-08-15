@@ -1,0 +1,700 @@
+/* Totem v2 — tablet 7" paisagem (800×480+) */
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800&display=swap');
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+
+html,body{
+    height:100%;
+    font-family:"Nunito","Segoe UI",system-ui,sans-serif;
+    background:linear-gradient(160deg,#0f3d31 0%,#134736 45%,#1a6b54 100%);
+    color:#fff;
+    overflow:hidden;
+    user-select:none;
+    touch-action:manipulation;
+}
+
+.totem{
+    min-height:100vh;
+    position:relative;
+}
+
+.tela{
+    display:none;
+    min-height:100vh;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    padding:24px 20px 48px;
+    text-align:center;
+}
+
+.tela-ativa{
+    display:flex;
+}
+
+.totem-logo i{
+    font-size:52px;
+    margin-bottom:12px;
+    opacity:.95;
+}
+
+.totem-logo-img{
+    width:72px;
+    height:72px;
+    border-radius:18px;
+    margin-bottom:14px;
+    box-shadow:0 8px 24px rgba(0,0,0,.25);
+}
+
+.totem-logo h1{
+    font-size:clamp(28px,6vw,42px);
+    font-weight:800;
+    letter-spacing:0.02em;
+    text-transform:uppercase;
+}
+
+.totem-local{
+    margin-top:10px;
+    font-size:16px;
+    background:rgba(255,255,255,.12);
+    padding:8px 18px;
+    border-radius:24px;
+    display:inline-block;
+}
+
+.totem-select{
+    margin-top:12px;
+    background:rgba(0,0,0,.25);
+    border:1px solid rgba(255,255,255,.3);
+    color:#fff;
+    padding:10px 16px;
+    border-radius:12px;
+    font-size:16px;
+    min-width:240px;
+}
+
+.btn-totem{
+    border:none;
+    border-radius:18px;
+    cursor:pointer;
+    font-weight:700;
+    transition:.15s;
+    width:min(420px,92vw);
+}
+
+.btn-principal{
+    background:#2a9d8f;
+    color:#fff;
+    font-size:clamp(20px,4vw,28px);
+    padding:28px 24px;
+    margin:24px 0 16px;
+    box-shadow:0 8px 24px rgba(0,0,0,.25);
+}
+
+.btn-principal:active{transform:scale(.98);background:#21867a;}
+.btn-principal:disabled{opacity:.45;cursor:not-allowed;}
+.btn-concluir-porta{margin-top:8px;}
+.btn-pulse{
+    animation:btnPulse 1.2s ease-in-out infinite;
+    box-shadow:0 0 0 0 rgba(255,255,255,.55);
+}
+@keyframes btnPulse{
+    0%,100%{box-shadow:0 0 0 0 rgba(255,255,255,.45);}
+    50%{box-shadow:0 0 0 14px rgba(255,255,255,0);}
+}
+
+.btn-secundario{
+    background:rgba(255,255,255,.18);
+    border:2px solid rgba(255,255,255,.35);
+    color:#fff;
+    font-size:clamp(18px,3.5vw,24px);
+    padding:22px 24px;
+    margin-top:12px;
+}
+
+.btn-secundario i{display:block;font-size:28px;margin-bottom:8px;}
+
+.tela-scroll{
+    justify-content:flex-start;
+    padding-top:56px;
+    overflow-y:auto;
+}
+
+.form-totem{
+    width:min(400px,92vw);
+    text-align:left;
+    margin-top:12px;
+}
+
+.form-totem label{
+    display:block;
+    font-size:14px;
+    opacity:.85;
+    margin:12px 0 6px;
+}
+
+.input-totem{
+    width:100%;
+    padding:14px 16px;
+    font-size:18px;
+    border:none;
+    border-radius:12px;
+    background:rgba(255,255,255,.95);
+    color:#1a1a2e;
+}
+
+.input-totem:focus{outline:3px solid #6ee7b7;}
+
+.btn-depositar{margin-top:20px;}
+
+.btn-principal i{
+    display:block;
+    font-size:36px;
+    margin-bottom:10px;
+}
+
+.totem-dica{
+    opacity:.75;
+    font-size:15px;
+    margin-top:8px;
+}
+
+.totem-footer{
+    position:fixed;
+    bottom:12px;
+    opacity:.45;
+    font-size:12px;
+}
+
+.btn-voltar{
+    position:absolute;
+    top:16px;
+    left:16px;
+    background:rgba(255,255,255,.15);
+    border:none;
+    color:#fff;
+    padding:10px 16px;
+    border-radius:12px;
+    font-size:15px;
+    cursor:pointer;
+}
+
+.tela-titulo{
+    font-size:clamp(24px,5vw,32px);
+    margin-bottom:6px;
+}
+
+.tela-sub{
+    opacity:.8;
+    font-size:16px;
+    margin-bottom:20px;
+}
+
+.codigo-display{
+    background:rgba(0,0,0,.28);
+    border-radius:14px;
+    padding:16px 24px;
+    font-size:clamp(32px,8vw,44px);
+    letter-spacing:12px;
+    font-weight:bold;
+    min-width:min(340px,90vw);
+    margin-bottom:20px;
+}
+
+.teclado{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:10px;
+    max-width:min(340px,92vw);
+    width:100%;
+}
+
+.tecla{
+    background:rgba(255,255,255,.14);
+    border:2px solid rgba(255,255,255,.22);
+    border-radius:14px;
+    color:#fff;
+    font-size:clamp(22px,5vw,30px);
+    font-weight:bold;
+    padding:16px;
+    cursor:pointer;
+}
+
+.tecla:active{background:rgba(255,255,255,.32);}
+
+.tecla-limpar{
+    background:rgba(214,40,40,.65);
+    border-color:#d62828;
+    font-size:18px;
+}
+
+.resultado.erro{
+    margin-top:16px;
+    padding:12px 20px;
+    border-radius:12px;
+    background:rgba(214,40,40,.85);
+    font-size:16px;
+    display:none;
+    max-width:340px;
+}
+
+.resultado.erro.visivel{display:block;}
+
+.sucesso-icon{
+    font-size:64px;
+    color:#6ee7b7;
+    margin-bottom:12px;
+}
+
+.porta-box{
+    background:rgba(0,0,0,.25);
+    border-radius:20px;
+    padding:20px 40px;
+    margin:20px 0;
+    min-width:200px;
+}
+
+.porta-label{
+    display:block;
+    font-size:16px;
+    opacity:.85;
+    margin-bottom:8px;
+}
+
+.porta-numero{
+    display:block;
+    font-size:clamp(72px,18vw,120px);
+    font-weight:800;
+    line-height:1;
+    color:#6ee7b7;
+}
+
+.contagem{
+    margin-top:16px;
+    opacity:.6;
+    font-size:14px;
+}
+
+.mapa-portas{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:8px;
+    max-width:min(320px,88vw);
+    margin:12px auto 0;
+}
+
+.porta-celula{
+    background:rgba(255,255,255,.1);
+    border:2px solid rgba(255,255,255,.2);
+    border-radius:10px;
+    padding:10px 4px;
+    font-size:18px;
+    font-weight:700;
+    opacity:.5;
+}
+
+.mapa-selecao .porta-celula{
+    cursor:pointer;
+    border:none;
+    font-family:inherit;
+    color:#fff;
+}
+
+.mapa-selecao .porta-celula.livre{
+    opacity:1;
+    background:rgba(110,231,183,.25);
+    border:2px solid rgba(110,231,183,.5);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:2px;
+    min-height:52px;
+    padding:8px 4px;
+}
+
+.porta-num{
+    display:block;
+    font-size:20px;
+    font-weight:800;
+    line-height:1;
+}
+
+.porta-tam{
+    display:block;
+    font-size:13px;
+    font-weight:700;
+    opacity:.9;
+    letter-spacing:.5px;
+}
+
+.mapa-selecao .porta-celula.livre.ativa .porta-tam{
+    opacity:1;
+}
+
+.mapa-selecao .porta-celula.livre.ativa{
+    background:#6ee7b7;
+    color:#134736;
+    border-color:#6ee7b7;
+    transform:scale(1.08);
+    box-shadow:0 0 16px rgba(110,231,183,.5);
+}
+
+.mapa-selecao .porta-celula.ocupada{
+    opacity:.2;
+    cursor:not-allowed;
+}
+
+.form-compacto{margin-top:16px;}
+
+.tamanho-botoes{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:8px;
+    max-width:min(360px,92vw);
+    margin:12px auto 8px;
+}
+
+.btn-tamanho{
+    background:rgba(255,255,255,.12);
+    border:2px solid rgba(255,255,255,.25);
+    border-radius:14px;
+    color:#fff;
+    padding:12px 6px;
+    cursor:pointer;
+    font-family:inherit;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:2px;
+    min-height:72px;
+}
+
+.btn-tamanho .tam-letra{
+    font-size:26px;
+    font-weight:800;
+    line-height:1;
+}
+
+.btn-tamanho .tam-info{
+    font-size:10px;
+    opacity:.75;
+}
+
+.btn-tamanho .tam-qtd{
+    font-size:11px;
+    font-weight:600;
+    color:#6ee7b7;
+}
+
+.btn-tamanho.ativo{
+    background:#6ee7b7;
+    color:#134736;
+    border-color:#6ee7b7;
+    transform:scale(1.05);
+    box-shadow:0 0 16px rgba(110,231,183,.45);
+}
+
+.btn-tamanho.ativo .tam-qtd{color:#134736;}
+
+.btn-tamanho.sem-livre,
+.btn-tamanho:disabled{
+    opacity:.35;
+    cursor:not-allowed;
+}
+
+.porta-auto-msg{
+    font-size:15px;
+    color:#6ee7b7;
+    margin:8px 0 4px;
+    min-height:20px;
+}
+
+.porta-tam-grande{
+    display:block;
+    font-size:22px;
+    font-weight:700;
+    margin-top:8px;
+    color:#fff;
+    opacity:.9;
+}
+
+.mapa-selecao .porta-celula.ocupada .porta-tam{
+    opacity:.5;
+}
+
+.autocomplete-wrap{
+    position:relative;
+    width:100%;
+}
+
+.autocomplete-list{
+    display:none;
+    position:fixed;
+    background:#fff;
+    border-radius:12px;
+    box-shadow:0 8px 24px rgba(0,0,0,.35);
+    max-height:220px;
+    overflow-y:auto;
+    z-index:200;
+    text-align:left;
+}
+
+.autocomplete-list.aberta{
+    display:block;
+}
+
+.autocomplete-item{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:10px;
+    width:100%;
+    padding:14px 16px;
+    border:none;
+    border-bottom:1px solid #eee;
+    background:#fff;
+    color:#1a1a2e;
+    font-family:inherit;
+    font-size:16px;
+    cursor:pointer;
+    text-align:left;
+}
+
+.autocomplete-item:last-child{
+    border-bottom:none;
+}
+
+.autocomplete-item:active,
+.autocomplete-item:hover{
+    background:#e8f8f0;
+}
+
+.autocomplete-vazio{
+    padding:14px 16px;
+    color:#64748b;
+    font-size:14px;
+    text-align:center;
+}
+
+.ac-nome{
+    font-weight:700;
+    flex:1;
+}
+
+.ac-tel{
+    font-size:14px;
+    color:#134736;
+    white-space:nowrap;
+}
+
+.porta-aberta-icon{color:#fbbf24;}
+
+.totem-dica.destaque{
+    font-size:17px;
+    margin:16px 0;
+    opacity:1;
+}
+
+.porta-celula.ativa{
+    background:#6ee7b7;
+    color:#134736;
+    border-color:#6ee7b7;
+    opacity:1;
+    transform:scale(1.08);
+    box-shadow:0 0 20px rgba(110,231,183,.6);
+    animation:porta-pulse 1s ease infinite;
+}
+
+.mapa-selecao .porta-celula.livre.ativa{
+    animation:none;
+}
+
+@keyframes porta-pulse{
+    0%,100%{transform:scale(1.08);}
+    50%{transform:scale(1.14);}
+}
+
+.anim-pulse{animation:fade-in .4s ease;}
+
+@keyframes fade-in{
+    from{opacity:0;transform:scale(.9);}
+    to{opacity:1;transform:scale(1);}
+}
+
+.totem-dica{
+    opacity:.75;
+    font-size:15px;
+    margin-top:8px;
+    width:min(420px,92vw);
+    margin-left:auto;
+    margin-right:auto;
+}
+
+.totem-ajuda-wrap{
+    width:min(420px,92vw);
+    margin:12px auto 0;
+    display:flex;
+    justify-content:center;
+}
+
+.btn-ajuda{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    width:100%;
+    max-width:320px;
+    margin:0 auto;
+    background:rgba(255,255,255,.08);
+    border:1px solid rgba(255,255,255,.28);
+    color:rgba(255,255,255,.92);
+    padding:12px 20px;
+    border-radius:999px;
+    font-size:15px;
+    font-weight:600;
+    cursor:pointer;
+}
+
+.ajuda-overlay{
+    display:none;
+    position:fixed;
+    inset:0;
+    background:rgba(15,61,117,.82);
+    backdrop-filter:blur(4px);
+    z-index:100;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+}
+
+.ajuda-overlay.ativa{display:flex;}
+
+.ajuda-box{
+    position:relative;
+    background:#fff;
+    color:#1a1a2e;
+    border-radius:20px;
+    padding:28px 24px 24px;
+    max-width:340px;
+    width:100%;
+    text-align:center;
+    box-shadow:0 16px 48px rgba(0,0,0,.35);
+    animation:fade-in .2s ease;
+}
+
+.ajuda-fechar-x{
+    position:absolute;
+    top:12px;
+    right:12px;
+    width:36px;
+    height:36px;
+    border:none;
+    border-radius:50%;
+    background:#f0f4f8;
+    color:#64748b;
+    font-size:18px;
+    cursor:pointer;
+}
+
+.ajuda-icon{
+    width:56px;
+    height:56px;
+    margin:0 auto 12px;
+    border-radius:50%;
+    background:#e8f4fc;
+    color:#134736;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:26px;
+}
+
+.ajuda-box h3{
+    margin-bottom:8px;
+    font-size:20px;
+    color:#134736;
+}
+
+.ajuda-lead{
+    font-size:15px;
+    line-height:1.45;
+    color:#64748b;
+    margin-bottom:16px;
+}
+
+.ajuda-status{
+    font-size:14px;
+    font-weight:700;
+    color:#134736;
+    margin-bottom:12px;
+    min-height:1.2em;
+}
+
+.ajuda-status.erro{
+    color:#b91c1c;
+}
+
+.ajuda-tel-link{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    font-size:20px;
+    font-weight:700;
+    color:#134736;
+    text-decoration:none;
+    background:#f0f7ff;
+    border:2px solid #c7dff5;
+    border-radius:14px;
+    padding:14px 20px;
+    margin-bottom:16px;
+    width:100%;
+}
+
+.ajuda-tel-link:active{transform:scale(.98);}
+
+.btn-ajuda-fechar{
+    width:100%;
+    border:none;
+    border-radius:12px;
+    padding:14px;
+    font-size:16px;
+    font-weight:600;
+    cursor:pointer;
+    background:#e2e8f0;
+    color:#334155;
+}
+
+.btn-ajuda-fechar:active{background:#cbd5e1;}
+
+/* 7" paisagem ~800×480 */
+@media (max-height:520px){
+    .totem-logo i{font-size:40px;}
+    .btn-principal{padding:18px;font-size:20px;}
+    .btn-principal i{font-size:28px;margin-bottom:6px;}
+    .tecla{padding:12px;}
+    .porta-numero{font-size:72px;}
+}
+
+@media (orientation:portrait){
+    .teclado{max-width:300px;}
+    .codigo-display{letter-spacing:8px;}
+}
+
+/* Badge de versão — identifica totem v2 no canto da tela */
+.totem-badge{
+    position:fixed;
+    top:8px;
+    right:10px;
+    z-index:9999;
+    font-size:11px;
+    font-weight:600;
+    letter-spacing:.03em;
+    padding:4px 8px;
+    border-radius:6px;
+    background:rgba(0,0,0,.35);
+    color:rgba(255,255,255,.85);
+    pointer-events:none;
+    font-family:ui-monospace,Consolas,monospace;
+}
