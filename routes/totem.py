@@ -6,7 +6,7 @@ import json
 
 import config
 
-TOTEM_VERSAO = "2.4.2"
+TOTEM_VERSAO = "2.4.3"
 from middleware.rate_limit import rate_limit
 from services.encomenda_service import EncomendaService
 from services.armario_service import ArmarioService
@@ -15,6 +15,7 @@ from services.esp32_service import Esp32Service
 from services.qrcode_service import QrcodeService
 from services.totem_auth_service import autorizar_deposito_totem, deposito_totem_habilitado
 from services.totem_destinatario_service import TotemDestinatarioService
+from services.totem_ajuda_service import TotemAjudaService
 
 totem_bp = Blueprint("totem", __name__)
 
@@ -76,6 +77,7 @@ def index(armario_id=None):
 
     ajuda_tel = (config.TOTEM_AJUDA_TELEFONE or "").strip()
     ajuda_tel_fmt, ajuda_tel_link = _formatar_telefone_ajuda(ajuda_tel)
+    ajuda_habilitada = TotemAjudaService.ajuda_habilitada()
 
     resp = make_response(render_template(
         "totem.html",
@@ -86,6 +88,7 @@ def index(armario_id=None):
         ajuda_telefone=ajuda_tel,
         ajuda_telefone_fmt=ajuda_tel_fmt,
         ajuda_telefone_link=ajuda_tel_link,
+        ajuda_habilitada=ajuda_habilitada,
         armario_id=armario_id,
         deposito_habilitado=deposito_totem_habilitado(),
         whatsapp_ativo=config.NOTIF_WHATSAPP_ATIVO,
@@ -98,6 +101,46 @@ def index(armario_id=None):
     resp.headers["Pragma"] = "no-cache"
     resp.headers["X-Eleva-Totem"] = TOTEM_VERSAO
     return resp
+
+
+@totem_bp.route("/totem/solicitar-ajuda", methods=["POST"])
+@rate_limit("totem-ajuda", max_tentativas=5, janela_seg=600)
+def solicitar_ajuda():
+    if not TotemAjudaService.ajuda_habilitada():
+        return jsonify({
+            "sucesso": False,
+            "mensagem": "Ajuda não configurada neste totem.",
+        }), 503
+
+    dados = request.get_json(silent=True) or {}
+    armario_id = dados.get("armario_id") or request.form.get("armario_id")
+    if armario_id in ("", None):
+        armario_id = None
+    else:
+        try:
+            armario_id = int(armario_id)
+        except (TypeError, ValueError):
+            return jsonify({"sucesso": False, "mensagem": "Armário inválido."}), 400
+
+    ip = request.headers.get("X-Forwarded-For", request.remote_addr or "")
+    if ip and "," in ip:
+        ip = ip.split(",")[0].strip()
+
+    try:
+        resultado = TotemAjudaService.solicitar(armario_id=armario_id, ip_origem=ip)
+        return jsonify({
+            "sucesso": True,
+            "mensagem": resultado["mensagem"],
+            "whatsapp_enviado": resultado.get("whatsapp_enviado", False),
+            "duplicado": resultado.get("duplicado", False),
+        })
+    except ValueError as erro:
+        return jsonify({"sucesso": False, "mensagem": str(erro)}), 400
+    except Exception:
+        return jsonify({
+            "sucesso": False,
+            "mensagem": "Erro ao registrar pedido de ajuda.",
+        }), 500
 
 
 @totem_bp.route("/totem/<int:armario_id>/manifest.json")

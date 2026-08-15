@@ -57,7 +57,7 @@
 
         <p class="totem-dica">Morador: código no WhatsApp · Portaria: depositar acima</p>
 
-        {% if ajuda_telefone %}
+        {% if ajuda_habilitada %}
         <div class="totem-ajuda-wrap">
             <button type="button" class="btn-totem btn-ajuda" onclick="mostrarAjuda()">
                 <i class="fa-solid fa-circle-question"></i> Preciso de ajuda
@@ -218,7 +218,7 @@
 
 </div>
 
-{% if ajuda_telefone %}
+{% if ajuda_habilitada %}
 <div class="ajuda-overlay" id="ajuda-overlay" onclick="fecharAjuda()">
     <div class="ajuda-box" onclick="event.stopPropagation()">
         <button type="button" class="ajuda-fechar-x" onclick="fecharAjuda()" aria-label="Fechar">
@@ -226,13 +226,14 @@
         </button>
         <div class="ajuda-icon"><i class="fa-solid fa-headset"></i></div>
         <h3>Precisa de ajuda?</h3>
-        <p class="ajuda-lead">Código no WhatsApp, porta que não abriu ou outra dúvida — fale com a portaria.</p>
+        <p class="ajuda-lead" id="ajuda-lead">Código no WhatsApp, porta que não abriu ou outra dúvida — fale com a portaria.</p>
+        <p class="ajuda-status" id="ajuda-status"></p>
         {% if ajuda_telefone_link %}
         <a href="{{ ajuda_telefone_link }}" class="ajuda-tel-link">
             <i class="fa-solid fa-phone"></i>
             <span>{{ ajuda_telefone_fmt }}</span>
         </a>
-        {% else %}
+        {% elif ajuda_telefone %}
         <p class="ajuda-tel-link"><i class="fa-solid fa-phone"></i> {{ ajuda_telefone_fmt }}</p>
         {% endif %}
         <button type="button" class="btn-ajuda-fechar" onclick="fecharAjuda()">Entendi</button>
@@ -762,6 +763,36 @@ function irRetirar(){
 }
 
 function mostrarAjuda(){
+    const armarioId = ROOT.dataset.armarioId || "";
+    const statusEl = document.getElementById("ajuda-status");
+    if(statusEl) statusEl.textContent = "Avisando a portaria...";
+
+    fetch("/totem/solicitar-ajuda", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+            armario_id: armarioId ? parseInt(armarioId, 10) : null
+        })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if(statusEl){
+            if(data.sucesso){
+                statusEl.textContent = data.mensagem || "Portaria avisada!";
+                statusEl.classList.remove("erro");
+            } else {
+                statusEl.textContent = data.mensagem || "Não foi possível avisar agora.";
+                statusEl.classList.add("erro");
+            }
+        }
+    })
+    .catch(() => {
+        if(statusEl){
+            statusEl.textContent = "Sem conexão — ligue para a portaria.";
+            statusEl.classList.add("erro");
+        }
+    });
+
     document.getElementById("ajuda-overlay").classList.add("ativa");
 }
 

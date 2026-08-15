@@ -80,6 +80,7 @@ ENCOMENDA_DIAS_VALIDADE = int(os.getenv("ENCOMENDA_DIAS_VALIDADE", "7"))
 TOTEM_RATE_LIMIT = int(os.getenv("TOTEM_RATE_LIMIT", "8"))
 TOTEM_RATE_JANELA = int(os.getenv("TOTEM_RATE_JANELA", "300"))
 TOTEM_AJUDA_TELEFONE = os.getenv("TOTEM_AJUDA_TELEFONE", "")
+TOTEM_AJUDA_ALERTA = os.getenv("TOTEM_AJUDA_ALERTA", "1") == "1"
 TOTEM_DEPOSITO_PIN = os.getenv("TOTEM_DEPOSITO_PIN", "")
 TOTEM_ARMARIO_ID = os.getenv("TOTEM_ARMARIO_ID", "").strip()
 _sem_pin_env = os.getenv("TOTEM_DEPOSITO_SEM_PIN", "").strip()

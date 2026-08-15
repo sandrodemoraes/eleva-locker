@@ -11,8 +11,68 @@
 <div class="page-header">
     <div>
         <h1>Notificações</h1>
-        <p>Histórico de SMS, WhatsApp e e-mails enviados</p>
+        <p>Alertas do totem e histórico de mensagens enviadas aos moradores</p>
     </div>
+</div>
+
+<div class="table-box" id="ajuda-totem" style="margin-bottom:20px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:12px;">
+        <h2 style="margin:0;font-size:1.15rem;">
+            <i class="fa-solid fa-life-ring"></i> Pedidos de ajuda no totem
+            {% if ajuda_pendentes %}
+            <span class="badge badge-aguardando_retirada" style="margin-left:8px;">{{ ajuda_pendentes }} pendente(s)</span>
+            {% endif %}
+        </h2>
+    </div>
+    <p style="color:#666;margin-bottom:16px;">
+        Quando alguém toca <strong>Preciso de ajuda</strong> no totem, aparece aqui e a portaria recebe WhatsApp
+        (se <code>TOTEM_AJUDA_TELEFONE</code> e WhatsApp estiverem ativos no .env).
+    </p>
+    {% if pedidos_ajuda %}
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Data</th>
+                <th>Armário</th>
+                <th>WhatsApp</th>
+                <th>Status</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for p in pedidos_ajuda %}
+            <tr>
+                <td>{{ p.id }}</td>
+                <td>{{ p.criado_em }}</td>
+                <td>{{ p.armario_nome or '—' }}</td>
+                <td>{% if p.whatsapp_enviado %}✅ Enviado{% else %}—{% endif %}</td>
+                <td>
+                    <span class="badge badge-{{ 'aguardando_retirada' if p.status == 'pendente' else 'retirada' }}">
+                        {{ p.status }}
+                    </span>
+                </td>
+                <td class="acoes-cell">
+                    {% if p.status == 'pendente' %}
+                    <form method="POST" action="{{ url_for('notificacoes.atender_ajuda', pedido_id=p.id) }}">
+                        <button type="submit" class="btn btn-sm btn-success" title="Marcar atendido">
+                            <i class="fa-solid fa-check"></i> Atendido
+                        </button>
+                    </form>
+                    {% else %}
+                    <small style="color:#666;">{{ p.atendido_por or '—' }} · {{ p.atendido_em or '' }}</small>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state" style="padding:24px;">
+        <i class="fa-solid fa-life-ring fa-2x"></i>
+        <p>Nenhum pedido de ajuda registrado ainda.</p>
+    </div>
+    {% endif %}
 </div>
 
 <div class="table-box" style="margin-bottom:20px;">
@@ -49,11 +109,13 @@
     {% endif %}
     <p style="margin-top:8px;color:#888;font-size:13px;">
         Configure via variáveis de ambiente (NOTIF_MODO, SMTP_*, WHATSAPP_*, SMS_*).
+        Ajuda no totem: <code>TOTEM_AJUDA_TELEFONE</code> e <code>TOTEM_AJUDA_ALERTA=1</code>.
         Em modo <code>console</code>, mensagens aparecem no terminal do servidor.
     </p>
 </div>
 
 <div class="table-box">
+    <h2 style="margin:0 0 16px;font-size:1.15rem;"><i class="fa-solid fa-paper-plane"></i> Mensagens aos moradores</h2>
     {% if notificacoes %}
     <table>
         <thead>

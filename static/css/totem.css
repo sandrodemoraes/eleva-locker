@@ -623,6 +623,18 @@ html,body{
     margin-bottom:16px;
 }
 
+.ajuda-status{
+    font-size:14px;
+    font-weight:700;
+    color:#134736;
+    margin-bottom:12px;
+    min-height:1.2em;
+}
+
+.ajuda-status.erro{
+    color:#b91c1c;
+}
+
 .ajuda-tel-link{
     display:inline-flex;
     align-items:center;

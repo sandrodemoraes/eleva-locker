@@ -28,8 +28,11 @@
         </form>
         {% endif %}
 
-        <a href="{{ url_for('notificacoes.listar') }}" class="btn-icon" title="Notificações">
+        <a href="{{ url_for('notificacoes.listar') }}#ajuda-totem" class="btn-icon btn-icon-badge" title="Notificações{% if ajuda_pendentes %} — {{ ajuda_pendentes }} pedido(s) de ajuda{% endif %}">
             <i class="fa-solid fa-bell"></i>
+            {% if ajuda_pendentes %}
+            <span class="badge-alerta">{{ ajuda_pendentes }}</span>
+            {% endif %}
         </a>
 
         <a href="{{ url_for('esp32.configuracoes') }}" class="btn-icon" title="Configurações">
