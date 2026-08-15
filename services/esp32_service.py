@@ -65,13 +65,16 @@ class Esp32Service:
 
         max_portas = config.normalizar_max_portas(dados.get("max_portas") or 16)
         dados["max_portas"] = max_portas
+        dados["porta_inicial"] = int(dados.get("porta_inicial") or 1)
 
         esp_id = Esp32Repository.criar(dados)
 
         from services.esp32_portas_service import Esp32PortasService
         if dados.get("armario"):
             try:
-                Esp32PortasService.sincronizar_compartimentos(esp_id, max_portas)
+                Esp32PortasService.sincronizar_compartimentos(
+                    esp_id, max_portas, porta_inicial=dados["porta_inicial"],
+                )
             except ValueError:
                 pass
 
@@ -95,15 +98,24 @@ class Esp32Service:
         if "max_portas" in dados:
             dados["max_portas"] = config.normalizar_max_portas(dados.get("max_portas") or 16)
 
+        if "porta_inicial" in dados:
+            dados["porta_inicial"] = int(dados.get("porta_inicial") or 1)
+
         Esp32Repository.atualizar(esp32_id, dados)
 
         from services.esp32_sync_service import Esp32SyncService
         from services.esp32_portas_service import Esp32PortasService
 
         max_novo = dados.get("max_portas", esp_antigo["max_portas"] if esp_antigo["max_portas"] else None)
+        porta_ini = dados.get(
+            "porta_inicial",
+            esp_antigo["porta_inicial"] if esp_antigo["porta_inicial"] else None,
+        )
         if max_novo and esp_antigo["armario"]:
             try:
-                Esp32PortasService.sincronizar_compartimentos(esp32_id, max_novo)
+                Esp32PortasService.sincronizar_compartimentos(
+                    esp32_id, max_novo, porta_inicial=porta_ini,
+                )
             except ValueError:
                 Esp32SyncService.incrementar_versao(esp32_id)
         else:

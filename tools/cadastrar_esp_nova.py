@@ -6,6 +6,7 @@ Uso:
   py tools/cadastrar_esp_nova.py --ip-esp 192.168.16.105
   py tools/cadastrar_esp_nova.py --ip-esp 192.168.16.105 --armario-id 2
   py tools/cadastrar_esp_nova.py --ip-esp 192.168.16.105 --armario-nome "Bancada 2"
+  py tools/cadastrar_esp_nova.py --ip-esp 192.168.16.106 --armario-id 3 --porta-inicial 9 --portas 8
 
 Depois: grave o firmware com o TOKEN impresso abaixo.
 """
@@ -90,7 +91,15 @@ def main():
     )
     parser.add_argument(
         "--portas", type=int, default=8, choices=config.ESP32_PORTAS_OPCOES,
-        help="Portas 8/16/24/32/64",
+        help="Portas desta ESP (relés locais 1..N)",
+    )
+    parser.add_argument(
+        "--porta-inicial", type=int, default=1,
+        help="Nº do 1º compartimento no armário (ex.: 9 para módulo B em armário 24)",
+    )
+    parser.add_argument(
+        "--max-portas-armario", type=int,
+        help="Total de portas do armário (ex.: 24). Atualiza o armário ao cadastrar.",
     )
     parser.add_argument("--servidor", default=SERVIDOR_PADRAO, help="URL para o firmware")
     args = parser.parse_args()
@@ -100,14 +109,28 @@ def main():
 
     armario_id, armario_nome = resolver_armario(args)
     max_portas = config.normalizar_max_portas(args.portas)
+    porta_inicial = int(args.porta_inicial)
+    if porta_inicial < 1:
+        raise SystemExit("porta-inicial deve ser >= 1.")
+
+    arm = ArmarioRepository.buscar_por_id(armario_id)
+    max_armario = max_portas
+    if args.max_portas_armario:
+        max_armario = config.normalizar_max_portas(args.max_portas_armario)
+    elif arm and arm["max_portas"]:
+        max_armario = config.normalizar_max_portas(arm["max_portas"])
+    if porta_inicial + max_portas - 1 > max_armario:
+        max_armario = config.normalizar_max_portas(porta_inicial + max_portas - 1)
 
     ArmarioRepository.atualizar(armario_id, {
         "nome": armario_nome,
-        "endereco": "Bancada ELEVA",
-        "cidade": "São Paulo",
-        "estado": "SP",
+        "endereco": arm.get("endereco") if arm else "Bancada ELEVA",
+        "cidade": arm.get("cidade") if arm else "São Paulo",
+        "estado": arm.get("estado") if arm else "SP",
         "status": "ativo",
-        "max_portas": max_portas,
+        "empresa_id": arm.get("empresa_id") if arm else None,
+        "site_id": arm.get("site_id") if arm else 1,
+        "max_portas": max_armario,
     })
 
     with BaseRepository.get_connection() as conn:
@@ -128,26 +151,31 @@ def main():
             "status": "offline",
             "token": token,
             "max_portas": max_portas,
+            "porta_inicial": porta_inicial,
         })
         print(f"ESP atualizada id={esp_id} ip={args.ip_esp}")
     else:
-        esp_id = Esp32Service.criar({
+        esp_id = Esp32Repository.criar({
             "nome": args.nome_esp,
             "ip": args.ip_esp,
             "mac": "",
             "armario": armario_id,
             "porta": 80,
             "max_portas": max_portas,
+            "porta_inicial": porta_inicial,
             "status": "offline",
+            "token": config.gerar_token_esp32(),
         })
         esp = Esp32Repository.buscar_por_id(esp_id)
         token = esp["token"]
         print(f"ESP criada id={esp_id} ip={args.ip_esp}")
 
-    resultado = Esp32PortasService.sincronizar_compartimentos(esp_id, max_portas)
+    resultado = Esp32PortasService.sincronizar_compartimentos(
+        esp_id, max_portas, porta_inicial=porta_inicial,
+    )
     print(
-        f"Compartimentos: {resultado['criados']} criados, "
-        f"{resultado['atualizados']} atualizados"
+        f"Compartimentos {resultado['porta_inicial']}–{resultado['porta_final']}: "
+        f"{resultado['criados']} criados, {resultado['atualizados']} atualizados"
     )
 
     print("\n" + "=" * 62)
@@ -156,6 +184,8 @@ def main():
     print(f"\n  Painel : {args.servidor}/armarios/{armario_id}")
     print(f"  Armário: {armario_nome} (id={armario_id})")
     print(f"  ESP    : {args.nome_esp} (id={esp_id})")
+    print(f"  Portas : {porta_inicial}–{porta_inicial + max_portas - 1} (relés locais 1–{max_portas})")
+    print(f"  Armário total: {max_armario} compartimentos")
     print(f"  IP     : {args.ip_esp}")
     print(f"  Token  : {token}")
     print("\n--- Arduino: firmware/elevalocker_sync/elevalocker_sync.ino ---")

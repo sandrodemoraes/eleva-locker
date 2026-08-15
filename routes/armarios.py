@@ -6,6 +6,7 @@ from middleware.operador_scope import operador_acessa_armario, redirect_home
 from services.armario_service import ArmarioService
 from services.empresa_service import EmpresaService
 from services.esp32_service import Esp32Service
+from services.esp32_portas_service import Esp32PortasService
 from services.compartimento_service import CompartimentoService
 from services.usuario_service import UsuarioService
 from services.log_service import LogService
@@ -141,13 +142,19 @@ def esp32_novo(armario_id):
 
     try:
         armario = ArmarioService.buscar_por_id(armario_id)
+        max_armario = config.normalizar_max_portas(armario["max_portas"] or 16)
+        porta_inicial = Esp32PortasService.proxima_porta_inicial_armario(armario_id)
+        restantes = max(0, max_armario - porta_inicial + 1)
+        max_portas_esp = min(8, restantes) if restantes else 8
+
         Esp32Service.criar({
             "nome": request.form.get("nome", f"ESP Armário {armario_id}"),
             "ip": request.form.get("ip", ""),
             "mac": request.form.get("mac", ""),
             "armario": armario_id,
             "porta": int(request.form.get("porta", 80)),
-            "max_portas": armario["max_portas"] or 16,
+            "max_portas": max_portas_esp,
+            "porta_inicial": porta_inicial,
             "status": "offline",
         })
         flash("Placa ESP adicionada ao armário!", "success")
@@ -165,14 +172,21 @@ def esp32_novo(armario_id):
 def esp32_editar(armario_id, esp32_id):
 
     try:
-        armario = ArmarioService.buscar_por_id(armario_id)
+        ArmarioService.buscar_por_id(armario_id)
+        esp = Esp32Repository.buscar_por_id(esp32_id)
+        porta_inicial = Esp32PortasService.resolver_porta_inicial(esp32_id)
+        max_portas_esp = config.normalizar_max_portas(
+            esp["max_portas"] if esp and esp["max_portas"] else 8
+        )
+
         Esp32Service.atualizar(esp32_id, {
             "nome": request.form.get("nome", ""),
             "ip": request.form.get("ip", ""),
             "mac": request.form.get("mac", ""),
             "armario": armario_id,
             "porta": int(request.form.get("porta", 80)),
-            "max_portas": armario["max_portas"] or 16,
+            "max_portas": max_portas_esp,
+            "porta_inicial": porta_inicial,
             "status": request.form.get("status", "offline"),
             "token": request.form.get("token", ""),
         })

@@ -26,8 +26,11 @@ echo.
 echo  Segunda bancada (armario novo):
 echo    %PYTHON% tools\cadastrar_esp_nova.py --ip-esp 192.168.16.105 --criar-armario
 echo.
-echo  No armario Matriz existente (id=2):
-echo    %PYTHON% tools\cadastrar_esp_nova.py --ip-esp 192.168.16.105 --armario-id 2 --nome-esp "ESP Matriz reserva"
+echo  Modulo 2 (portas 9-16) no armario Bancada id=3:
+echo    %PYTHON% tools\cadastrar_esp_nova.py --ip-esp 192.168.16.122 --nome-esp "ESP Bancada M2" --armario-id 3 --porta-inicial 9 --portas 8 --max-portas-armario 24
+echo.
+echo  Preparar armario 24 portas (ressincroniza ESP existente):
+echo    tools\configurar_bancada_24_portas.bat
 echo.
 
 set /p IP_ESP="IP da ESP nova: "

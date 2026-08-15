@@ -27,6 +27,7 @@ from services.esp32_portas_service import Esp32PortasService
 def main():
     parser = argparse.ArgumentParser(description="Ajusta portas do ESP32")
     parser.add_argument("--portas", type=int, required=True, choices=config.ESP32_PORTAS_OPCOES)
+    parser.add_argument("--porta-inicial", type=int, help="1º compartimento desta ESP (ex.: 9)")
     parser.add_argument("--nome-esp", default="ESP Matriz 8ch")
     args = parser.parse_args()
 
@@ -54,6 +55,7 @@ def main():
         "token": esp["token"],
         "porta": esp["porta"] or 80,
         "max_portas": max_portas,
+        "porta_inicial": args.porta_inicial or esp["porta_inicial"] or 1,
     })
 
     if esp["armario"]:
@@ -70,8 +72,14 @@ def main():
                 "max_portas": max_portas,
             })
 
-    r = Esp32PortasService.sincronizar_compartimentos(esp_id, max_portas)
-    print(f"OK — {r['criados']} criados, {r['atualizados']} atualizados, {r['removidos']} removidos")
+    porta_inicial = args.porta_inicial
+    r = Esp32PortasService.sincronizar_compartimentos(
+        esp_id, max_portas, porta_inicial=porta_inicial,
+    )
+    print(
+        f"OK — compartimentos {r['porta_inicial']}–{r['porta_final']}: "
+        f"{r['criados']} criados, {r['atualizados']} atualizados, {r['removidos']} removidos"
+    )
     print("Regrave o firmware (suporta até 64 portas) e aguarde Sync na ESP.")
 
 

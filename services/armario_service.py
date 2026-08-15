@@ -93,17 +93,11 @@ class ArmarioService:
         total_removidos = 0
         esps = Esp32Repository.listar_por_armario(armario_id)
         for esp in esps:
-            Esp32Repository.atualizar(esp["id"], {
-                "nome": esp["nome"],
-                "ip": esp["ip"],
-                "mac": esp["mac"] or "",
-                "armario": armario_id,
-                "status": esp["status"],
-                "token": esp["token"],
-                "porta": esp["porta"] or 80,
-                "max_portas": max_portas,
-            })
-            resultado = Esp32PortasService.sincronizar_compartimentos(esp["id"], max_portas)
+            max_esp = config.normalizar_max_portas(esp["max_portas"] or 8)
+            porta_inicial = Esp32PortasService.resolver_porta_inicial(esp["id"])
+            resultado = Esp32PortasService.sincronizar_compartimentos(
+                esp["id"], max_esp, porta_inicial=porta_inicial,
+            )
             total_removidos += resultado.get("removidos", 0)
 
         return total_removidos
