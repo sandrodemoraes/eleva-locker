@@ -11,8 +11,13 @@
         {% endblock %}
     </title>
 
+    <link rel="icon" href="{{ url_for('static', filename='brand/logo-eleva-locker-icon.svg') }}" type="image/svg+xml">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
+
     <!-- CSS Global -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/eleva-theme.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/layout.css') }}">
 
     <!-- Font Awesome -->
@@ -33,7 +38,8 @@
         </header>
 
         <!-- Sidebar -->
-        <aside class="sidebar-container">
+        <div class="sidebar-overlay" id="sidebarOverlay"></div>
+        <aside class="sidebar-container" id="sidebarContainer">
             {% include 'layout/sidebar.html' %}
         </aside>
 
@@ -49,6 +55,26 @@
 
     <!-- JQuery -->
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+    <script>
+    (function(){
+        var btn = document.getElementById('btnMenuMobile');
+        var sidebar = document.getElementById('sidebarContainer');
+        var overlay = document.getElementById('sidebarOverlay');
+        if(!btn || !sidebar) return;
+
+        function abrir(){ sidebar.classList.add('open'); overlay.classList.add('open'); }
+        function fechar(){ sidebar.classList.remove('open'); overlay.classList.remove('open'); }
+
+        btn.addEventListener('click', function(){
+            sidebar.classList.contains('open') ? fechar() : abrir();
+        });
+        overlay.addEventListener('click', fechar);
+        sidebar.querySelectorAll('a').forEach(function(a){
+            a.addEventListener('click', fechar);
+        });
+    })();
+    </script>
 
     <!-- Scripts específicos -->
     {% block scripts %}
