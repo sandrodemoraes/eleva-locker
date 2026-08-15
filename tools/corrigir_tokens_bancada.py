@@ -27,10 +27,12 @@ criar_banco()
 from repositories.base_repository import BaseRepository
 from repositories.esp32_repository import Esp32Repository
 
-# Tokens conhecidos no firmware das placas da bancada (atualize se regravar .ino)
+# Tokens gravados no firmware (.ino) — atualize se regravar a placa
 TOKENS_FIRMWARE = {
     "192.168.16.104": "2e5bb4db71d8330be8bae43b13ac19f6",  # Matriz ESP32-C3
-    "192.168.16.121": "1bb2821a61346ed14c32664e62b18235",  # Bancada 2 Dev
+    "192.168.16.121": "1bb2821a61346ed14c32664e62b18235",  # Bancada M1 (1-8)
+    "192.168.16.145": "7c519983b4c875473452feed99b3d394",  # Bancada M2 (9-16)
+    "192.168.16.146": "22bde9bb0745aa00731b292352c0b7b6",  # Bancada M3 (17-24)
 }
 
 

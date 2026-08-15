@@ -82,8 +82,19 @@ def abrir_numero(armario_id, numero, pausa=2):
     print(f"  #{numero} relé {comp['rele']} ({esp_info}): {mark}", end="")
     if not ok:
         print(f" — {r.get('mensagem', '?')}")
+        if esp and esp.get("ip"):
+            tok = (esp.get("token") or "")[:8]
+            print(
+                f"       Teste direto: http://{esp['ip']}/abrir/{comp['rele']}"
+                f"?token={esp['token']}&duracao=3"
+            )
     else:
-        print(" — clique na placa?")
+        print(" — ouviu clique na placa?")
+        if esp and esp.get("ip"):
+            print(
+                f"       Se NÃO clicou: RELE_ATIVO_LOW no firmware "
+                f"(false=Dev, true=C3) ou token errado na placa"
+            )
     if pausa:
         time.sleep(pausa)
     return ok
