@@ -1,5 +1,5 @@
 @echo off
-title ELEVA LOCKER - Backup diario 11h (Agendador)
+title ELEVA LOCKER - Backup diario 23h (Agendador)
 color 0E
 cd /d "%~dp0.."
 
@@ -7,7 +7,7 @@ echo ============================================================
 echo   BACKUP DIARIO — Agendador de Tarefas Windows
 echo ============================================================
 echo.
-echo  Cria tarefa: todo dia as 11:00
+echo  Cria tarefa: todo dia as 23:00 (11 da noite)
 echo  Faz: banco + .env + disco D: (+ firmware ESP se existir)
 echo  Log: logs\backup_diario.log
 echo.
@@ -16,7 +16,7 @@ echo  e escolha "Executar como administrador" se der erro de permissao.
 echo.
 pause
 
-powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0instalar_backup_diario_tarefa.ps1" -Hora "11:00"
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0instalar_backup_diario_tarefa.ps1" -Hora "23:00"
 if errorlevel 1 (
     echo.
     echo ERRO ao criar tarefa. Tente "Executar como administrador".
