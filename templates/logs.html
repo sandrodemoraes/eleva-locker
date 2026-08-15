@@ -1,0 +1,52 @@
+{% extends "layout/base.html" %}
+
+{% block title %}Logs | ELEVA LOCKER{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/crud.css') }}">
+{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+    <div>
+        <h1>Logs de Auditoria</h1>
+        <p>Histórico de ações no sistema</p>
+    </div>
+</div>
+
+<div class="table-box">
+    {% if logs %}
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Data/Hora</th>
+                <th>Usuário</th>
+                <th>Armário</th>
+                <th>Compartimento</th>
+                <th>Ação</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for l in logs %}
+            <tr>
+                <td>{{ l.id }}</td>
+                <td>{{ l.data }}</td>
+                <td>{{ l.usuario }}</td>
+                <td>{{ l.armario_nome or '—' }}</td>
+                <td>{% if l.compartimento_numero %}#{{ l.compartimento_numero }}{% else %}—{% endif %}</td>
+                <td>{{ l.acao }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state">
+        <i class="fa-solid fa-file-lines fa-3x"></i>
+        <p>Nenhum log registrado ainda.</p>
+    </div>
+    {% endif %}
+</div>
+
+{% endblock %}

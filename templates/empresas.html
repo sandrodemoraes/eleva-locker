@@ -1,805 +1,216 @@
 {% extends "layout/base.html" %}
 
-{% block title %}
-Empresas | ELEVA LOCKER
-{% endblock %}
+{% block title %}Empresas | ELEVA LOCKER{% endblock %}
 
 {% block styles %}
-<style>
-
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family:Arial,Helvetica,sans-serif;
-}
-
-body{
-background:#f4f7fb;
-}
-
-.topo{
-
-width:100%;
-height:65px;
-background:#005ecb;
-display:flex;
-align-items:center;
-padding:0 30px;
-color:white;
-font-size:28px;
-font-weight:bold;
-box-shadow:0 2px 8px rgba(0,0,0,.2);
-
-}
-
-.menu{
-
-position:fixed;
-left:0;
-top:65px;
-width:230px;
-bottom:0;
-background:#17324d;
-
-}
-
-.menu a{
-
-display:block;
-padding:15px 20px;
-color:white;
-text-decoration:none;
-transition:.2s;
-
-}
-
-.menu a:hover{
-
-background:#005ecb;
-
-}
-
-.menu .ativo{
-
-background:#005ecb;
-
-}
-
-.logout{
-
-margin-top:30px;
-border-top:1px solid rgba(255,255,255,.2);
-
-}
-
-.pagina{
-
-margin-left:230px;
-margin-top:65px;
-padding:30px;
-
-}
-
-.cabecalho{
-
-display:flex;
-justify-content:space-between;
-align-items:center;
-margin-bottom:25px;
-
-}
-
-.cabecalho h1{
-
-font-size:34px;
-color:#005ecb;
-
-}
-
-.cabecalho p{
-
-color:#666;
-margin-top:5px;
-
-}
-
-.btn{
-
-background:#005ecb;
-color:white;
-border:none;
-padding:12px 22px;
-border-radius:8px;
-cursor:pointer;
-font-weight:bold;
-transition:.2s;
-
-}
-
-.btn:hover{
-
-background:#004aa2;
-
-}
-
-.card{
-
-background:white;
-padding:25px;
-border-radius:12px;
-box-shadow:0 5px 20px rgba(0,0,0,.08);
-
-}
-
-.barra{
-
-margin-bottom:20px;
-
-}
-
-.pesquisa{
-
-position:relative;
-
-}
-
-.pesquisa input{
-
-width:100%;
-padding:13px 45px 13px 15px;
-border:1px solid #ddd;
-border-radius:8px;
-font-size:15px;
-
-}
-
-.pesquisa i{
-
-position:absolute;
-right:15px;
-top:14px;
-color:#777;
-
-}
-
-table{
-
-width:100%;
-border-collapse:collapse;
-
-}
-
-thead{
-
-background:#005ecb;
-color:white;
-
-}
-
-th{
-
-padding:15px;
-text-align:left;
-
-}
-
-td{
-
-padding:15px;
-border-bottom:1px solid #eee;
-
-}
-
-tbody tr:hover{
-
-background:#f8fbff;
-
-}
-
-.status{
-
-padding:5px 12px;
-border-radius:30px;
-color:white;
-font-size:12px;
-font-weight:bold;
-
-}
-
-.ativoStatus{
-
-background:#27ae60;
-
-}
-
-.inativoStatus{
-
-background:#e74c3c;
-
-}
-
-.acoes{
-
-white-space:nowrap;
-
-}
-
-.acoes a{
-
-margin-right:10px;
-text-decoration:none;
-font-size:16px;
-
-}
-
-.editar{
-
-color:#005ecb;
-
-}
-
-.excluir{
-
-color:#d63031;
-
-}
-
-.rodape{
-
-margin-top:20px;
-color:#666;
-
-}
-
-.modal{
-
-display:none;
-position:fixed;
-left:0;
-top:0;
-width:100%;
-height:100%;
-background:rgba(0,0,0,.45);
-justify-content:center;
-align-items:center;
-z-index:999;
-
-}
-
-.modal-conteudo{
-
-background:white;
-width:900px;
-max-height:90vh;
-overflow:auto;
-border-radius:12px;
-padding:30px;
-
-}
-
-.modal h2{
-
-color:#005ecb;
-margin-bottom:20px;
-
-}
-
-.linha{
-
-display:flex;
-gap:15px;
-margin-bottom:15px;
-
-}
-
-.campo{
-
-flex:1;
-display:flex;
-flex-direction:column;
-
-}
-
-.campo label{
-
-margin-bottom:6px;
-font-weight:bold;
-
-}
-
-.campo input,
-.campo select{
-
-padding:11px;
-border:1px solid #ccc;
-border-radius:8px;
-
-}
-
-.botoes{
-
-display:flex;
-justify-content:flex-end;
-gap:10px;
-margin-top:20px;
-
-}
-
-.cancelar{
-
-background:#999;
-
-}
-
-.salvar{
-
-background:#27ae60;
-
-}
-
-</style>
-
-
+<link rel="stylesheet" href="{{ url_for('static', filename='css/crud.css') }}">
 {% endblock %}
 
 {% block content %}
 
-<div class="pagina">
-
-    <div class="cabecalho">
-
-<div>
-
-<h1>Empresas</h1>
-
-<p>Cadastro de empresas do ELEVA LOCKER</p>
-
-</div>
+<div class="page-header">
+    <div>
+        <h1>Empresas</h1>
+        <p>Cadastro de empresas do ELEVA LOCKER</p>
+    </div>
+    <button class="btn" onclick="abrirModal()">
+        <i class="fa-solid fa-plus"></i> Nova Empresa
+    </button>
 </div>
 
 {% if erro == "cnpj" %}
-
-<div style="
-    background:#ffe5e5;
-    color:#b30000;
-    border:1px solid #ffb3b3;
-    padding:15px;
-    margin-bottom:20px;
-    border-radius:8px;
-    font-weight:bold;
-">
+<div class="alert alert-danger">
     <i class="fa-solid fa-triangle-exclamation"></i>
     Já existe uma empresa cadastrada com este CNPJ.
 </div>
-
 {% endif %}
 
-
-
-<button class="btn" onclick="abrirModal()">
-
-<i class="fa-solid fa-plus"></i>
-
-
-Nova Empresa
-
-</button>
-
-</div>
-
-<div class="card">
-
-<div class="barra">
-
-<div class="pesquisa">
-
-<input
-id="pesquisa"
-type="text"
-placeholder="Pesquisar empresa...">
-
-<i class="fa-solid fa-magnifying-glass"></i>
-
-</div>
-
-</div><table id="tabelaEmpresas">
-
-    <thead>
-
-        <tr>
-
-            <th>ID</th>
-            <th>Razão Social</th>
-            <th>Nome Fantasia</th>
-            <th>CNPJ</th>
-            <th>Cidade</th>
-            <th>Telefone</th>
-            <th>Status</th>
-            <th>Ações</th>
-
-        </tr>
-
-    </thead>
-
-    <tbody>
-
-    {% for empresa in empresas %}
-
-        <tr>
-
-            <td>{{ empresa.id }}</td>
-
-            <td>{{ empresa.razao_social }}</td>
-
-            <td>{{ empresa.nome_fantasia }}</td>
-
-            <td class="cnpj">{{ empresa.cnpj }}</td>
-
-            <td>{{ empresa.cidade }}</td>
-
-            <td>{{ empresa.telefone }}</td>
-
-            <td>
-
-                {% if empresa.status == 1 %}
-
-                    <span class="status ativoStatus">
-                        Ativo
-                    </span>
-
-                {% else %}
-
-                    <span class="status inativoStatus">
-                        Inativo
-                    </span>
-
-                {% endif %}
-
-            </td>
-
-           <td class="acoes">
-
-    <a
-        href="#"
-        class="editar"
-        data-id="{{ empresa.id }}"
-        data-razao="{{ empresa.razao_social }}"
-        data-fantasia="{{ empresa.nome_fantasia }}"
-        data-cnpj="{{ empresa.cnpj }}"
-        data-ie="{{ empresa.inscricao_estadual }}"
-        data-responsavel="{{ empresa.responsavel }}"
-        data-telefone="{{ empresa.telefone }}"
-        data-whatsapp="{{ empresa.whatsapp }}"
-        data-email="{{ empresa.email }}"
-        data-cep="{{ empresa.cep }}"
-        data-endereco="{{ empresa.endereco }}"
-        data-numero="{{ empresa.numero }}"
-        data-bairro="{{ empresa.bairro }}"
-        data-cidade="{{ empresa.cidade }}"
-        data-estado="{{ empresa.estado }}"
-        data-status="{{ empresa.status }}">
-
-        <i class="fa-solid fa-pen"></i>
-
-    </a>
-
-    <a
-        href="#"
-        class="excluir"
-        data-id="{{ empresa.id }}"
-        data-razao="{{ empresa.razao_social }}">
-
-        <i class="fa-solid fa-trash"></i>
-
-    </a>
-
-</td>
-
-</tr>
-
-{% endfor %}
-
-</tbody>
-
-
-</table>
-
-<div class="rodape">
-
-    Total de empresas cadastradas:
-
-    <strong>{{ empresas|length }}</strong>
-
-</div>
-
-</div>
-
-</div>
-
-<!-- =================== MODAL ==================== -->
-
-<div class="modal" id="modalEmpresa">
-
-<div class="modal-conteudo">
-
-<h2>Nova Empresa</h2>
-
-<form
-id="formEmpresa"
-method="POST"
-action="/empresas/nova">
-
-<input
-type="hidden"
-id="empresa_id"
-name="empresa_id">
-
-<div class="linha">
-
-<div class="campo">
-
-<label>Razão Social *</label>
-
-<input
-type="text"
-name="razao_social"
-required>
-
-</div>
-
-<div class="campo">
-
-<label>Nome Fantasia</label>
-
-<input
-type="text"
-name="nome_fantasia">
-
-</div>
-
-</div>
-
-<div class="linha">
-
-<div class="campo">
-
-<label>CNPJ</label>
-
-<input
-    type="text"
-    id="cnpj"
-    name="cnpj"
-    maxlength="18"
-    placeholder="00.000.000/0000-00">
-
-</div>
-
-<div class="campo">
-
-<label>Inscrição Estadual</label>
-
-<input
-type="text"
-name="inscricao_estadual">
-
-</div>
-
-</div>
-
-<div class="linha">
-
-<div class="campo">
-
-<label>Responsável</label>
-
-<input
-type="text"
-name="responsavel">
-
-</div>
-
-<div class="campo">
-
-<label>Telefone</label>
-
-<input
-type="text"
-name="telefone">
-
-</div>
-
-</div>
-
-<div class="linha">
-
-<div class="campo">
-
-<label>WhatsApp</label>
-
-<input
-type="text"
-name="whatsapp">
-
-</div>
-
-<div class="campo">
-
-<label>E-mail</label>
-
-<input
-type="email"
-name="email">
-
-</div>
-
-</div>
-
-<div class="linha">
-
-<div class="campo">
-
-<label>CEP</label>
-
-<input
-type="text"
-name="cep">
-
-</div>
-
-<div class="campo">
-
-<label>Número</label>
-
-<input
-type="text"
-name="numero">
-
-</div>
-
-</div>
-
-<div class="linha">
-
-<div class="campo">
-
-<label>Endereço</label>
-
-<input
-type="text"
-name="endereco">
-
-</div>
-
-</div>
-
-<div class="linha">
-
-<div class="campo">
-
-<label>Bairro</label>
-
-<input
-type="text"
-name="bairro">
-
-</div>
-
-<div class="campo">
-
-<label>Cidade</label>
-
-<input
-type="text"
-name="cidade">
-
-</div>
-
-<div class="campo">
-
-<label>Estado</label>
-
-<input
-type="text"
-name="estado">
-
-</div>
-
-</div>
-
-<div class="linha">
-
-<div class="campo">
-
-<label>Status</label>
-
-<select name="status">
-
-<option value="1">Ativo</option>
-
-<option value="0">Inativo</option>
-
-</select>
-
-</div>
-
-</div>
-
-<div class="botoes">
-
-<button
-type="button"
-class="btn cancelar"
-onclick="fecharModal()">
-
-Cancelar
-
-</button>
-
-<button
-type="submit"
-class="btn salvar">
-
-Salvar Empresa
-
-</button>
-
-</div>
-
-</form>
-
-</div>
-
-</div>
-<!-- ==========================
-     MODAL EXCLUIR EMPRESA
-========================== -->
-
-<div class="modal" id="modalExcluir">
-    
-    
-
-    <div class="modal-conteudo" style="max-width:420px;">
-
-        <h2>Excluir Empresa</h2>
-
-        <p style="margin:20px 0;">
-            Deseja realmente excluir a empresa:
-        </p>
-
-        <strong id="empresaExcluir"></strong>
-
-        <form id="formExcluir" method="POST">
-
-            <div class="botoes">
-
-                <button
-                    type="button"
-                    class="btn cancelar"
-                    onclick="fecharModalExcluir()">
-
-                    Cancelar
-
-                </button>
-
-
-                <button
-    type="submit"
-    class="btn btn-excluir">
-                    Excluir
-
-                </button>
-
-            </div>
-
-        </form>
-
+<div class="table-box">
+    <div class="search-bar">
+        <input id="pesquisa" type="text" placeholder="Pesquisar empresa...">
+        <i class="fa-solid fa-magnifying-glass"></i>
     </div>
 
+    <table id="tabelaEmpresas">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Razão Social</th>
+                <th>Nome Fantasia</th>
+                <th>CNPJ</th>
+                <th>Cidade</th>
+                <th>Telefone</th>
+                <th>Status</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for empresa in empresas %}
+            <tr>
+                <td>{{ empresa.id }}</td>
+                <td>{{ empresa.razao_social }}</td>
+                <td>{{ empresa.nome_fantasia }}</td>
+                <td class="cnpj">{{ empresa.cnpj }}</td>
+                <td>{{ empresa.cidade }}</td>
+                <td>{{ empresa.telefone }}</td>
+                <td>
+                    {% if empresa.status == 1 %}
+                    <span class="badge badge-ativo">Ativo</span>
+                    {% else %}
+                    <span class="badge badge-suspenso">Inativo</span>
+                    {% endif %}
+                </td>
+                <td class="acoes-cell">
+                    <a href="#"
+                       class="btn btn-sm editar"
+                       data-id="{{ empresa.id }}"
+                       data-razao="{{ empresa.razao_social }}"
+                       data-fantasia="{{ empresa.nome_fantasia }}"
+                       data-cnpj="{{ empresa.cnpj }}"
+                       data-ie="{{ empresa.inscricao_estadual }}"
+                       data-responsavel="{{ empresa.responsavel }}"
+                       data-telefone="{{ empresa.telefone }}"
+                       data-whatsapp="{{ empresa.whatsapp }}"
+                       data-email="{{ empresa.email }}"
+                       data-cep="{{ empresa.cep }}"
+                       data-endereco="{{ empresa.endereco }}"
+                       data-numero="{{ empresa.numero }}"
+                       data-bairro="{{ empresa.bairro }}"
+                       data-cidade="{{ empresa.cidade }}"
+                       data-estado="{{ empresa.estado }}"
+                       data-status="{{ empresa.status }}">
+                        <i class="fa-solid fa-pen"></i>
+                    </a>
+                    <a href="#"
+                       class="btn btn-sm btn-danger excluir"
+                       data-id="{{ empresa.id }}"
+                       data-razao="{{ empresa.razao_social }}">
+                        <i class="fa-solid fa-trash"></i>
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="table-footer">
+        Total de empresas cadastradas: <strong>{{ empresas|length }}</strong>
+    </div>
 </div>
 
+<!-- Modal cadastro / edição -->
+<div class="modal-overlay" id="modalEmpresa">
+    <div class="modal modal-lg">
+        <h2>Nova Empresa</h2>
+        <form id="formEmpresa" method="POST" action="/empresas/nova">
+            <input type="hidden" id="empresa_id" name="empresa_id">
 
+            <div class="grid-2">
+                <div class="form-group">
+                    <label>Razão Social *</label>
+                    <input type="text" name="razao_social" required>
+                </div>
+                <div class="form-group">
+                    <label>Nome Fantasia</label>
+                    <input type="text" name="nome_fantasia">
+                </div>
+            </div>
 
+            <div class="grid-2">
+                <div class="form-group">
+                    <label>CNPJ</label>
+                    <input type="text" id="cnpj" name="cnpj" maxlength="18" placeholder="00.000.000/0000-00">
+                </div>
+                <div class="form-group">
+                    <label>Inscrição Estadual</label>
+                    <input type="text" name="inscricao_estadual">
+                </div>
+            </div>
+
+            <div class="grid-2">
+                <div class="form-group">
+                    <label>Responsável</label>
+                    <input type="text" name="responsavel">
+                </div>
+                <div class="form-group">
+                    <label>Telefone</label>
+                    <input type="text" name="telefone">
+                </div>
+            </div>
+
+            <div class="grid-2">
+                <div class="form-group">
+                    <label>WhatsApp</label>
+                    <input type="text" name="whatsapp">
+                </div>
+                <div class="form-group">
+                    <label>E-mail</label>
+                    <input type="email" name="email">
+                </div>
+            </div>
+
+            <div class="grid-2">
+                <div class="form-group">
+                    <label>CEP</label>
+                    <input type="text" name="cep">
+                </div>
+                <div class="form-group">
+                    <label>Número</label>
+                    <input type="text" name="numero">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Endereço</label>
+                <input type="text" name="endereco">
+            </div>
+
+            <div class="grid-2">
+                <div class="form-group">
+                    <label>Bairro</label>
+                    <input type="text" name="bairro">
+                </div>
+                <div class="form-group">
+                    <label>Cidade</label>
+                    <input type="text" name="cidade">
+                </div>
+            </div>
+
+            <div class="grid-2">
+                <div class="form-group">
+                    <label>Estado</label>
+                    <input type="text" name="estado">
+                </div>
+                <div class="form-group">
+                    <label>Status</label>
+                    <select name="status">
+                        <option value="1">Ativo</option>
+                        <option value="0">Inativo</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="button" class="btn btn-secondary" onclick="fecharModal()">Cancelar</button>
+                <button type="submit" class="btn btn-success">Salvar Empresa</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal excluir -->
+<div class="modal-overlay" id="modalExcluir">
+    <div class="modal">
+        <h2>Excluir Empresa</h2>
+        <p style="margin:20px 0;">Deseja realmente excluir a empresa:</p>
+        <strong id="empresaExcluir"></strong>
+        <form id="formExcluir" method="POST">
+            <div class="form-actions">
+                <button type="button" class="btn btn-secondary" onclick="fecharModalExcluir()">Cancelar</button>
+                <button type="submit" class="btn btn-danger">Excluir</button>
+            </div>
+        </form>
+    </div>
 </div>
 
 {% endblock %}
