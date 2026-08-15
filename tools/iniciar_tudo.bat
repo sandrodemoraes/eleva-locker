@@ -74,8 +74,10 @@ if /i "%ELEVA_BANCADA%"=="1" (
     )
     if defined BASE (
         set "BASE=!BASE: =!"
+        set "BASE=!BASE:"=!"
         set "PAINEL_DASH=!BASE!/dashboard"
         set "PAINEL_DASH=!PAINEL_DASH:/dashboard/dashboard=/dashboard!"
+        set "PAINEL_DASH=!PAINEL_DASH:"=!"
     )
 ) else (
     set "PAINEL_DASH=%PAINEL_URL%/dashboard"

@@ -3,6 +3,7 @@ REM Aguarda Flask local e abre painel VERDE (IP bancada — nunca APP_URL_BASE p
 setlocal
 set "URL=%~1"
 if "%URL%"=="" set "URL=http://192.168.16.130:15000/dashboard"
+set "URL=%URL:"=%"
 
 echo.%URL%| findstr /i /r "^https\?://" >nul || set "URL=http://192.168.16.130:15000/dashboard"
 
