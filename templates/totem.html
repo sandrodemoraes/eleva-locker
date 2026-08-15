@@ -132,48 +132,56 @@
     </section>
 
     <!-- Depósito — tamanho + morador -->
-    <section id="tela-deposito" class="tela tela-scroll">
+    <section id="tela-deposito" class="tela tela-deposito">
         <button type="button" class="btn-voltar" onclick="irDepositoVoltar()"><i class="fa-solid fa-arrow-left"></i> Voltar</button>
-        <h2 class="tela-titulo">Tamanho da encomenda</h2>
-        <p class="tela-sub">Toque no tamanho — abrimos a 1ª porta livre</p>
 
-        <div class="tamanho-botoes" id="tamanho-botoes">
-            <button type="button" class="btn-tamanho" data-tam="P" onclick="selecionarTamanho('P')">
-                <span class="tam-letra">P</span><span class="tam-info">Pequeno</span><span class="tam-qtd"></span>
-            </button>
-            <button type="button" class="btn-tamanho" data-tam="M" onclick="selecionarTamanho('M')">
-                <span class="tam-letra">M</span><span class="tam-info">Médio</span><span class="tam-qtd"></span>
-            </button>
-            <button type="button" class="btn-tamanho" data-tam="G" onclick="selecionarTamanho('G')">
-                <span class="tam-letra">G</span><span class="tam-info">Grande</span><span class="tam-qtd"></span>
-            </button>
-            <button type="button" class="btn-tamanho" data-tam="GG" onclick="selecionarTamanho('GG')">
-                <span class="tam-letra">GG</span><span class="tam-info">Extra</span><span class="tam-qtd"></span>
-            </button>
+        <div class="deposito-scroll">
+            <h2 class="tela-titulo">Tamanho da encomenda</h2>
+            <p class="tela-sub">Toque no tamanho — abrimos a 1ª porta livre</p>
+
+            <div class="tamanho-botoes" id="tamanho-botoes">
+                <button type="button" class="btn-tamanho" data-tam="P" onclick="selecionarTamanho('P')">
+                    <span class="tam-letra">P</span><span class="tam-info">Pequeno</span><span class="tam-qtd"></span>
+                </button>
+                <button type="button" class="btn-tamanho" data-tam="M" onclick="selecionarTamanho('M')">
+                    <span class="tam-letra">M</span><span class="tam-info">Médio</span><span class="tam-qtd"></span>
+                </button>
+                <button type="button" class="btn-tamanho" data-tam="G" onclick="selecionarTamanho('G')">
+                    <span class="tam-letra">G</span><span class="tam-info">Grande</span><span class="tam-qtd"></span>
+                </button>
+                <button type="button" class="btn-tamanho" data-tam="GG" onclick="selecionarTamanho('GG')">
+                    <span class="tam-letra">GG</span><span class="tam-info">Extra</span><span class="tam-qtd"></span>
+                </button>
+            </div>
+
+            <div class="deposito-mapa-wrap" id="deposito-mapa-wrap">
+                <div class="mapa-portas mapa-selecao" id="mapa-livres"></div>
+            </div>
         </div>
 
-        <div class="mapa-portas mapa-selecao" id="mapa-livres"></div>
         <input type="hidden" id="dep-compartimento" value="">
         <input type="hidden" id="dep-tamanho" value="">
 
-        <div class="form-totem form-compacto">
-            <label>Destinatário *</label>
-            <div class="autocomplete-wrap">
-                <input type="text" id="dep-cliente" placeholder="Busque morador cadastrado" class="input-totem"
-                       autocomplete="off" oninput="onClienteInput()" onfocus="onClienteInput()" onblur="fecharSugestoesAtraso()">
-                <input type="hidden" id="dep-usuario-id" value="">
-                <div class="autocomplete-list" id="dep-sugestoes"></div>
+        <div class="deposito-fixo">
+            <div class="form-totem form-compacto">
+                <label>Destinatário *</label>
+                <div class="autocomplete-wrap">
+                    <input type="text" id="dep-cliente" placeholder="Busque morador cadastrado" class="input-totem"
+                           autocomplete="off" oninput="onClienteInput()" onfocus="onClienteInput()" onblur="fecharSugestoesAtraso()">
+                    <input type="hidden" id="dep-usuario-id" value="">
+                    <div class="autocomplete-list" id="dep-sugestoes"></div>
+                </div>
+                <p class="totem-dica" id="dep-cadastro-dica">Selecione um morador cadastrado na lista</p>
+                <label>Telefone {% if whatsapp_ativo %}*{% endif %}</label>
+                <input type="tel" id="dep-telefone" placeholder="(48) 99999-9999" class="input-totem" oninput="atualizarBtnDeposito()">
+                <p class="porta-auto-msg" id="porta-auto-msg"></p>
+                <button type="button" class="btn-totem btn-principal btn-depositar" onclick="confirmarDeposito()" disabled id="btn-abrir-porta">
+                    <i class="fa-solid fa-lock-open"></i> Abrir porta
+                </button>
             </div>
-            <p class="totem-dica" id="dep-cadastro-dica">Selecione um morador cadastrado na lista</p>
-            <label>Telefone {% if whatsapp_ativo %}*{% endif %}</label>
-            <input type="tel" id="dep-telefone" placeholder="(48) 99999-9999" class="input-totem" oninput="atualizarBtnDeposito()">
-            <p class="porta-auto-msg" id="porta-auto-msg"></p>
-            <button type="button" class="btn-totem btn-principal btn-depositar" onclick="confirmarDeposito()" disabled id="btn-abrir-porta">
-                <i class="fa-solid fa-lock-open"></i> Abrir porta
-            </button>
+            <p class="totem-dica totem-dica-fixa">O código vai só para o WhatsApp após fechar a porta</p>
+            <div class="resultado erro" id="erro-deposito"></div>
         </div>
-        <p class="totem-dica">O código vai só para o WhatsApp após fechar a porta</p>
-        <div class="resultado erro" id="erro-deposito"></div>
     </section>
 
     <!-- Depósito — aguardando fechar porta -->
@@ -538,7 +546,13 @@ function fecharSugestoesAtraso(){
 
 function renderMapaLivres(numeroAtivo){
     const mapa = document.getElementById("mapa-livres");
+    const wrap = document.getElementById("deposito-mapa-wrap");
     mapa.innerHTML = "";
+    mapa.classList.toggle("mapa-denso", MAX_PORTAS > 8);
+    mapa.classList.toggle("mapa-muito-denso", MAX_PORTAS > 16);
+    if(wrap){
+        wrap.classList.toggle("mapa-wrap-oculto", MAX_PORTAS > 16);
+    }
     const porNumero = {};
     (mapaCompartimentos.length ? mapaCompartimentos : compartimentosLivres).forEach(c => {
         porNumero[c.numero] = c;

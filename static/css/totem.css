@@ -120,6 +120,100 @@ html,body{
     overflow-y:auto;
 }
 
+/* Depósito — mapa rolável + botão sempre visível (24 portas) */
+.tela-deposito{
+    justify-content:flex-start;
+    align-items:stretch;
+    padding:48px 0 0;
+    overflow:hidden;
+    min-height:100vh;
+    min-height:100dvh;
+}
+
+.deposito-scroll{
+    flex:1 1 auto;
+    overflow-y:auto;
+    min-height:0;
+    width:100%;
+    padding:0 16px 8px;
+    text-align:center;
+}
+
+.deposito-fixo{
+    flex:0 0 auto;
+    width:100%;
+    padding:8px 16px max(12px, env(safe-area-inset-bottom));
+    background:linear-gradient(180deg, transparent 0%, rgba(15,61,49,.94) 20px);
+    box-shadow:0 -10px 28px rgba(0,0,0,.18);
+}
+
+.deposito-fixo .form-totem{
+    margin:0 auto;
+}
+
+.deposito-fixo .btn-depositar{
+    margin-top:12px;
+    margin-bottom:0;
+    width:100%;
+    padding:20px 16px;
+    font-size:clamp(18px,3.5vw,24px);
+}
+
+.deposito-fixo .btn-depositar i{
+    font-size:28px;
+    margin-bottom:6px;
+}
+
+.totem-dica-fixa{
+    margin-top:6px;
+    margin-bottom:0;
+    font-size:13px;
+}
+
+.deposito-mapa-wrap{
+    max-height:min(32vh, 220px);
+    overflow-y:auto;
+    margin:8px auto 0;
+    padding:4px 2px;
+    -webkit-overflow-scrolling:touch;
+}
+
+.mapa-portas.mapa-denso{
+    grid-template-columns:repeat(6, 1fr);
+    gap:5px;
+    max-width:min(380px, 94vw);
+}
+
+.mapa-denso .porta-celula.livre{
+    min-height:40px;
+    padding:5px 2px;
+}
+
+.mapa-denso .porta-num{font-size:15px;}
+.mapa-denso .porta-tam{font-size:10px;}
+
+.mapa-portas.mapa-muito-denso{
+    grid-template-columns:repeat(8, 1fr);
+    gap:4px;
+}
+
+.mapa-muito-denso .porta-celula.livre{
+    min-height:34px;
+}
+
+.mapa-muito-denso .porta-num{font-size:13px;}
+
+.deposito-mapa-wrap.mapa-wrap-oculto{
+    display:none;
+}
+
+@media (max-height:520px){
+    .deposito-mapa-wrap{max-height:min(24vh, 140px);}
+    .deposito-fixo .btn-depositar{padding:14px 12px;}
+    .tela-sub{margin-bottom:10px;}
+    .btn-tamanho{min-height:58px;padding:8px 4px;}
+}
+
 .form-totem{
     width:min(400px,92vw);
     text-align:left;
