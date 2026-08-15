@@ -1,6 +1,6 @@
-# Tarefa agendada: backup diario ELEVA LOCKER (11:00)
+# Tarefa agendada: backup diario ELEVA LOCKER (23:00)
 param(
-    [string]$Hora = "11:00"
+    [string]$Hora = "23:00"
 )
 
 $ErrorActionPreference = "Stop"
