@@ -6,7 +6,7 @@ import json
 
 import config
 
-TOTEM_VERSAO = "2.4.7"
+TOTEM_VERSAO = "2.4.8"
 from middleware.rate_limit import rate_limit
 from services.encomenda_service import EncomendaService
 from services.armario_service import ArmarioService
