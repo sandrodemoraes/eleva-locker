@@ -157,13 +157,8 @@
             <div class="deposito-mapa-wrap" id="deposito-mapa-wrap">
                 <div class="mapa-portas mapa-selecao" id="mapa-livres"></div>
             </div>
-        </div>
 
-        <input type="hidden" id="dep-compartimento" value="">
-        <input type="hidden" id="dep-tamanho" value="">
-
-        <div class="deposito-fixo">
-            <div class="form-totem form-compacto">
+            <div class="form-totem deposito-campos">
                 <label>Destinatário *</label>
                 <div class="autocomplete-wrap">
                     <input type="text" id="dep-cliente" placeholder="Busque morador cadastrado" class="input-totem"
@@ -174,11 +169,17 @@
                 <p class="totem-dica" id="dep-cadastro-dica">Selecione um morador cadastrado na lista</p>
                 <label>Telefone {% if whatsapp_ativo %}*{% endif %}</label>
                 <input type="tel" id="dep-telefone" placeholder="(48) 99999-9999" class="input-totem" oninput="atualizarBtnDeposito()">
-                <p class="porta-auto-msg" id="porta-auto-msg"></p>
-                <button type="button" class="btn-totem btn-principal btn-depositar" onclick="confirmarDeposito()" disabled id="btn-abrir-porta">
-                    <i class="fa-solid fa-lock-open"></i> Abrir porta
-                </button>
             </div>
+        </div>
+
+        <input type="hidden" id="dep-compartimento" value="">
+        <input type="hidden" id="dep-tamanho" value="">
+
+        <div class="deposito-fixo">
+            <p class="porta-auto-msg" id="porta-auto-msg"></p>
+            <button type="button" class="btn-totem btn-principal btn-depositar" onclick="confirmarDeposito()" disabled id="btn-abrir-porta">
+                <i class="fa-solid fa-lock-open"></i> Abrir porta
+            </button>
             <p class="totem-dica totem-dica-fixa">O código vai só para o WhatsApp após fechar a porta</p>
             <div class="resultado erro" id="erro-deposito"></div>
         </div>
