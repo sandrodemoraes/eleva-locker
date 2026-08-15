@@ -14,6 +14,7 @@ CHAVES_BANCADA = {
     "ELEVA_BANCADA": "1",
     "ESP32_MODO_SIMULACAO": "0",
     "SKIP_BACKUP": "0",
+    "ELEVA_PAINEL_URL": "http://192.168.16.130:15000",
 }
 
 

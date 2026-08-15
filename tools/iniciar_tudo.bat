@@ -1,4 +1,5 @@
 @echo off
+setlocal EnableDelayedExpansion
 title ELEVA LOCKER - Iniciar servicos
 color 0B
 
@@ -47,6 +48,8 @@ if errorlevel 1 (
 
 echo [3/4] Parando servidor antigo (porta 15000)...
 %PYTHON% tools\parar_servidor.py nopause 2>nul
+docker stop elevalocker-web-1 2>nul
+docker rm -f elevalocker-web-1 2>nul
 
 echo [4/4] Docker WhatsApp + servidor...
 %PYTHON% tools\iniciar_tudo.py
@@ -63,9 +66,18 @@ echo   Ctrl+C para parar o servidor
 echo ============================================================
 echo.
 
-REM Bancada: abre IP LOCAL (nao APP_URL_BASE publico — evita azul / 0 armarios)
+REM Bancada: SEMPRE IP local (nunca APP_URL_BASE publico — evita azul / 0 armarios)
 set "PAINEL_DASH=http://192.168.16.130:15000/dashboard"
-if /i not "%ELEVA_BANCADA%"=="1" (
+if /i "%ELEVA_BANCADA%"=="1" (
+    for /f "usebackq tokens=1,* delims==" %%a in (`findstr /i /b "ELEVA_PAINEL_URL=" .env 2^>nul`) do (
+        set "BASE=%%b"
+    )
+    if defined BASE (
+        set "BASE=!BASE: =!"
+        set "PAINEL_DASH=!BASE!/dashboard"
+        set "PAINEL_DASH=!PAINEL_DASH:/dashboard/dashboard=/dashboard!"
+    )
+) else (
     set "PAINEL_DASH=%PAINEL_URL%/dashboard"
     for /f "usebackq tokens=1,* delims==" %%a in (`findstr /i /b "APP_URL_BASE=" .env 2^>nul`) do (
         set "PAINEL_DASH=%%b/dashboard"

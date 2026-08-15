@@ -23,10 +23,13 @@ if /i not "%CD%"=="C:\ElevaLocker" (
     echo.
 )
 
-echo [1] Preparar bancada SQLite + site_id...
+echo [1] Preparar bancada SQLite + site_id + ELEVA_PAINEL_URL...
 %PYTHON% tools\preparar_inicio_bancada.py
 
 echo.
+echo [1b] Parar Docker web antigo (tela azul na porta 15000)...
+docker stop elevalocker-web-1 2>nul
+docker rm -f elevalocker-web-1 2>nul
 echo [2] Recriar atalho Iniciar do Windows...
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0criar_atalho_startup.ps1"
 
@@ -49,6 +52,8 @@ echo ============================================================
 echo.
 echo  Reinicie o PC ou rode: C:\ElevaLocker\iniciar_elevalocker.bat
 echo.
+echo  Abra SEMPRE: http://192.168.16.130:15000/dashboard
+echo  (nao use IP publico 177.x no navegador da bancada)
 echo  No painel use filtro: Todos os sites (topo)
 echo  Deve abrir VERDE com armarios
 echo.

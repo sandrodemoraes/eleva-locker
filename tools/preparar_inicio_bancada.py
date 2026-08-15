@@ -56,6 +56,14 @@ def main():
         print("  AVISO: 0 armarios — apos entrar rode tools\\consertar_bancada.bat")
         return 2
 
+    env_path = ROOT / ".env"
+    if env_path.exists():
+        texto = env_path.read_text(encoding="utf-8", errors="replace")
+        for linha in texto.splitlines():
+            if linha.strip().startswith("APP_URL_BASE=") and "177." in linha:
+                print("  AVISO: APP_URL_BASE e IP publico — navegador usa ELEVA_PAINEL_URL local")
+                break
+
     # Aviso branch (nao bloqueia)
     try:
         import subprocess

@@ -163,8 +163,8 @@ def manifest_armario(armario_id):
         "scope": start,
         "display": "fullscreen",
         "orientation": "any",
-        "background_color": "#0f3d75",
-        "theme_color": "#0f3d75",
+        "background_color": "#0f3d31",
+        "theme_color": "#134736",
         "icons": [{
             "src": "/static/icons/icon.svg",
             "sizes": "any",
