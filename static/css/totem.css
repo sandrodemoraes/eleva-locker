@@ -120,22 +120,20 @@ html,body{
     overflow-y:auto;
 }
 
-/* Depósito — campos perto do tamanho; botão fixo embaixo */
+/* Depósito — fluxo compacto de cima para baixo (24 portas) */
 .tela-deposito{
     justify-content:flex-start;
     align-items:stretch;
-    padding:44px 0 0;
-    overflow:hidden;
+    padding:44px 0 16px;
+    overflow-y:auto;
     min-height:100vh;
     min-height:100dvh;
 }
 
 .deposito-scroll{
-    flex:0 1 auto;
-    overflow-y:auto;
-    min-height:0;
+    flex:0 0 auto;
     width:100%;
-    padding:0 16px 4px;
+    padding:0 16px 8px;
     text-align:center;
 }
 
@@ -144,7 +142,7 @@ html,body{
 }
 
 .deposito-campos{
-    margin:14px auto 0;
+    margin:12px auto 0;
     text-align:left;
 }
 
@@ -162,34 +160,31 @@ html,body{
     font-size:13px;
 }
 
-.deposito-fixo{
-    flex:0 0 auto;
-    width:100%;
-    margin-top:auto;
-    padding:10px 16px max(12px, env(safe-area-inset-bottom));
-    background:linear-gradient(180deg, transparent 0%, rgba(15,61,49,.96) 16px);
-    box-shadow:0 -10px 28px rgba(0,0,0,.18);
+.deposito-acao{
+    margin:14px auto 0;
+    width:min(420px, 92vw);
     text-align:center;
 }
 
-.deposito-fixo .porta-auto-msg{
-    margin:0 auto 8px;
+.deposito-acao .porta-auto-msg{
+    margin:0 0 8px;
+    min-height:20px;
 }
 
-.deposito-fixo .btn-depositar{
-    margin:0 auto;
-    width:min(420px, 92vw);
+.deposito-acao .btn-depositar{
+    margin:0;
+    width:100%;
     padding:18px 16px;
     font-size:clamp(18px,3.5vw,24px);
 }
 
-.deposito-fixo .btn-depositar i{
+.deposito-acao .btn-depositar i{
     font-size:28px;
     margin-bottom:6px;
 }
 
 .totem-dica-fixa{
-    margin-top:6px;
+    margin-top:8px;
     margin-bottom:0;
     font-size:13px;
 }
@@ -233,7 +228,7 @@ html,body{
 
 @media (max-height:520px){
     .deposito-mapa-wrap{max-height:min(24vh, 140px);}
-    .deposito-fixo .btn-depositar{padding:14px 12px;}
+    .deposito-acao .btn-depositar{padding:14px 12px;}
     .tela-sub{margin-bottom:10px;}
     .btn-tamanho{min-height:58px;padding:8px 4px;}
 }
