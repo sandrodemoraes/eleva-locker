@@ -30,3 +30,27 @@ const bool RELE_ATIVO_LOW = true;   // placa BESTER 8ch
 ```
 
 Token: painel **Armários → ELEVA Locker Matriz → ESP Matriz 8ch** ou `python tools/diagnostico_bancada.py --token SEU_TOKEN`.
+
+## Backup .ino no disco D:
+
+Recomendado: **uma pasta por placa** com token próprio:
+
+```
+firmware/elevalocker_matriz/elevalocker_matriz.ino
+firmware/elevalocker_bancada2/elevalocker_bancada2.ino
+```
+
+Backup automático para `D:\ElevaLockerBackup\firmware\`:
+
+```cmd
+tools\backup_firmware_esp.bat
+```
+
+Ou junto com o backup completo:
+
+```cmd
+tools\backup_obrigatorio.bat
+tools\backup_disco_d.bat
+```
+
+Cada ESP ganha subpasta com `.ino`, `ficha.txt` (IP, token, RELE_ATIVO_LOW) e cópia datada.

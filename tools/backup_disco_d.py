@@ -81,14 +81,26 @@ def main():
     print(f"   OK: {msg}")
 
     print()
-    print("2/2 Espelho completo do projeto...")
+    print("2/3 Espelho completo do projeto...")
     n = espelhar_projeto()
     print(f"   {n} itens copiados para {ESPELHO}")
+
+    print()
+    print("3/3 Firmware ESP (.ino de cada placa)...")
+    sys.path.insert(0, str(ROOT / "tools"))
+    from backup_firmware_esp import DISCO_D_FIRMWARE, executar_backup  # noqa: E402
+
+    ok_fw, _ = executar_backup(DISCO_D_FIRMWARE)
+    if not ok_fw:
+        print("   ERRO: backup firmware ESP falhou")
+        return 1
+    print(f"   OK: {DISCO_D_FIRMWARE}")
 
     print()
     print("OK — Backup concluido!")
     print(f"  Rotativo: {ROTATIVO}")
     print(f"  Espelho:  {ESPELHO}")
+    print(f"  Firmware: {DISCO_D_FIRMWARE}")
     return 0
 
 

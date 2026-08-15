@@ -65,6 +65,24 @@ def backup_firmware_ino(destino):
         print(f"    OK  firmware → elevalocker_sync.ino.bak")
 
 
+def backup_firmware_esps_disco_d():
+    """Copia .ino de cada ESP para D:\\ElevaLockerBackup\\firmware (se D: existir)."""
+    if not Path("D:/").exists():
+        return True
+
+    print("\n[backup] Firmware ESP (.ino por placa) → D:\\ElevaLockerBackup\\firmware...")
+    import subprocess
+    r = subprocess.run(
+        [sys.executable, str(ROOT / "tools" / "backup_firmware_esp.py")],
+        cwd=ROOT,
+    )
+    if r.returncode != 0:
+        print("    AVISO: backup firmware ESP no D: falhou (banco/env OK)")
+        return True  # nao bloqueia atualizacao — firmware e complementar
+    print("    OK  D:\\ElevaLockerBackup\\firmware")
+    return True
+
+
 def main():
     parser = argparse.ArgumentParser(description="Backup obrigatório ELEVA LOCKER")
     parser.add_argument("--sem-disco-d", action="store_true", help="Só backup local")
@@ -89,6 +107,7 @@ def main():
         return 1
 
     backup_firmware_ino(ROOT / "backups" / "backup_01")
+    backup_firmware_esps_disco_d()
 
     if not args.sem_disco_d and not backup_disco_d():
         print("\n" + "=" * 60)
