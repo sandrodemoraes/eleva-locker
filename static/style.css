@@ -1,50 +1,140 @@
-body{
-    margin:0;
-    padding:0;
-    font-family:Arial, Helvetica, sans-serif;
-    background:#f4f6f9;
+/* ELEVA LOCKER — Login */
+
+body.login-page {
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    font-family: var(--eleva-font);
+    background: linear-gradient(145deg, var(--eleva-verde-profundo) 0%, var(--eleva-verde) 40%, var(--eleva-verde-vivo) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
 }
 
-.login-box{
-    width:380px;
-    margin:120px auto;
-    background:white;
-    padding:40px;
-    border-radius:10px;
-    box-shadow:0 0 20px rgba(0,0,0,.15);
-    text-align:center;
+body.login-page::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(circle at 20% 80%, rgba(45, 138, 110, 0.25) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.08) 0%, transparent 40%);
+    pointer-events: none;
 }
 
-h1{
-    color:#0066cc;
-    margin-bottom:10px;
+.login-wrapper {
+    position: relative;
+    z-index: 1;
+    width: min(420px, 92vw);
+    padding: 20px;
 }
 
-p{
-    color:#666;
-    margin-bottom:30px;
+.login-box {
+    background: var(--eleva-branco);
+    padding: 40px 36px 36px;
+    border-radius: var(--eleva-raio-xl);
+    box-shadow: var(--eleva-sombra-lg);
+    text-align: center;
 }
 
-input{
-    width:100%;
-    padding:12px;
-    margin-bottom:15px;
-    border:1px solid #ccc;
-    border-radius:6px;
-    box-sizing:border-box;
+.login-brand {
+    margin-bottom: 28px;
 }
 
-button{
-    width:100%;
-    padding:12px;
-    background:#0066cc;
-    color:white;
-    border:none;
-    border-radius:6px;
-    cursor:pointer;
-    font-size:16px;
+.login-brand img {
+    width: 72px;
+    height: 72px;
+    border-radius: 18px;
+    box-shadow: var(--eleva-sombra-md);
+    margin-bottom: 16px;
 }
 
-button:hover{
-    background:#0050aa;
+.login-brand h1 {
+    color: var(--eleva-verde);
+    font-size: 1.75rem;
+    font-weight: 800;
+    margin: 0 0 6px;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+}
+
+.login-brand p {
+    color: var(--eleva-concreto);
+    font-size: 14px;
+    margin: 0;
+    font-weight: 600;
+}
+
+.login-erro {
+    color: var(--eleva-erro);
+    font-weight: 700;
+    font-size: 14px;
+    margin-bottom: 16px;
+    padding: 10px 14px;
+    background: #fdedec;
+    border-radius: var(--eleva-raio-sm);
+}
+
+.login-box form {
+    text-align: left;
+}
+
+.login-field {
+    margin-bottom: 16px;
+}
+
+.login-field label {
+    display: block;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--eleva-grafite);
+    margin-bottom: 6px;
+}
+
+.login-box input {
+    width: 100%;
+    padding: 13px 16px;
+    border: 2px solid var(--eleva-borda);
+    border-radius: var(--eleva-raio-md);
+    font-family: inherit;
+    font-size: 15px;
+    transition: var(--eleva-transicao);
+    box-sizing: border-box;
+    background: #fafcfb;
+}
+
+.login-box input:focus {
+    outline: none;
+    border-color: var(--eleva-verde-vivo);
+    background: var(--eleva-branco);
+    box-shadow: 0 0 0 3px rgba(26, 107, 84, 0.15);
+}
+
+.login-box button {
+    width: 100%;
+    padding: 14px;
+    margin-top: 8px;
+    background: linear-gradient(135deg, var(--eleva-verde) 0%, var(--eleva-verde-vivo) 100%);
+    color: var(--eleva-branco);
+    border: none;
+    border-radius: var(--eleva-raio-md);
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 16px;
+    font-weight: 800;
+    transition: var(--eleva-transicao);
+    box-shadow: 0 6px 20px rgba(19, 71, 54, 0.3);
+}
+
+.login-box button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 28px rgba(19, 71, 54, 0.35);
+}
+
+.login-footer {
+    margin-top: 24px;
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.55);
+    text-align: center;
 }
