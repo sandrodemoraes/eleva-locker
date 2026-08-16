@@ -1,0 +1,85 @@
+services:
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-eleva}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-eleva}
+      POSTGRES_DB: ${POSTGRES_DB:-elevalocker}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U eleva -d elevalocker"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # NÃO use em produção (Sandro usa python app.py).
+  # Só sobe com: docker compose --profile legacy-docker up -d
+  web:
+    profiles: ["legacy-docker"]
+    build: .
+    ports:
+      - "15000:15000"
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-eleva}:${POSTGRES_PASSWORD:-eleva}@db:5432/${POSTGRES_DB:-elevalocker}
+      SKIP_BACKUP: "1"
+      # Dentro do Docker, Evolution fica no hostname evolution-api
+      WHATSAPP_API_URL: http://evolution-api:8080
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # ── WhatsApp (Evolution API v2) — perfil whatsapp ─────────────
+  # Suba com: docker compose --profile whatsapp up -d
+  evolution-postgres:
+    profiles: ["whatsapp"]
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: evolution
+      POSTGRES_PASSWORD: evolution
+      POSTGRES_DB: evolution
+    volumes:
+      - evolution_pg:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U evolution -d evolution"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  evolution-redis:
+    profiles: ["whatsapp"]
+    image: redis:7-alpine
+    volumes:
+      - evolution_redis:/data
+
+  evolution-api:
+    profiles: ["whatsapp"]
+    image: evoapicloud/evolution-api:v2.3.0
+    ports:
+      - "8080:8080"
+    environment:
+      AUTHENTICATION_TYPE: apikey
+      AUTHENTICATION_API_KEY: ${WHATSAPP_API_KEY:-ElevaWhatsApp2026}
+      SERVER_URL: ${WHATSAPP_SERVER_URL:-http://localhost:8080}
+      DATABASE_ENABLED: "true"
+      DATABASE_PROVIDER: postgresql
+      DATABASE_CONNECTION_URI: postgresql://evolution:evolution@evolution-postgres:5432/evolution?schema=public
+      CACHE_REDIS_ENABLED: "true"
+      CACHE_REDIS_URI: redis://evolution-redis:6379/0
+    volumes:
+      - evolution_data:/evolution/instances
+    depends_on:
+      evolution-postgres:
+        condition: service_healthy
+      evolution-redis:
+        condition: service_started
+
+volumes:
+  pgdata:
+  evolution_pg:
+  evolution_redis:
+  evolution_data:

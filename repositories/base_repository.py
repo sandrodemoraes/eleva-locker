@@ -1,20 +1,16 @@
-import sqlite3
-from pathlib import Path
+from db.connection import get_connection
 
 
 class BaseRepository:
     """
-    Classe base responsável por fornecer conexão com o banco de dados.
-    Todos os repositories utilizarão esta classe.
+    Classe base — conexão SQLite ou PostgreSQL via DATABASE_URL.
     """
-
-    DB_PATH = Path(__file__).resolve().parent.parent / "database" / "elevalocker.db"
 
     @classmethod
     def get_connection(cls):
-        """
-        Retorna uma conexão SQLite configurada.
-        """
-        conn = sqlite3.connect(cls.DB_PATH)
-        conn.row_factory = sqlite3.Row
-        return conn
+        return get_connection()
+
+    @classmethod
+    def get_engine(cls):
+        from db.connection import get_engine
+        return get_engine()
