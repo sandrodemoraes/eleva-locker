@@ -154,6 +154,32 @@ class TotemAjudaService:
         }
 
     @staticmethod
+    def reenviar_whatsapp_pendentes():
+        """Reenvia WhatsApp de pedidos de ajuda com whatsapp_enviado=0."""
+        telefone = (config.TOTEM_AJUDA_TELEFONE or "").strip()
+        if not telefone and not config.TOTEM_AJUDA_ALERTA:
+            return {"tentados": 0, "enviados": 0, "erros": 0}
+
+        pedidos = TotemAjudaRepository.listar_whatsapp_pendentes(
+            horas=config.NOTIF_FILA_AJUDA_HORAS,
+        )
+        enviados = 0
+        erros = 0
+
+        for pedido in pedidos:
+            armario_id = pedido["armario_id"]
+            armario_nome = pedido["armario_nome"] or TotemAjudaService._nome_armario(armario_id)
+            mensagem = TotemAjudaService._montar_mensagem_whatsapp(armario_nome, armario_id)
+            ok, detalhe = TotemAjudaService._enviar_whatsapp_portaria(telefone, mensagem)
+            TotemAjudaRepository.atualizar_whatsapp(pedido["id"], ok, detalhe)
+            if ok:
+                enviados += 1
+            else:
+                erros += 1
+
+        return {"tentados": len(pedidos), "enviados": enviados, "erros": erros}
+
+    @staticmethod
     def listar(status=None, limite=50):
         return TotemAjudaRepository.listar(status=status, limite=limite)
 

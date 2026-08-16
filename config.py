@@ -92,6 +92,12 @@ else:
 
 TOTEM_DEPOSITO_SOMENTE_CADASTRADO = os.getenv("TOTEM_DEPOSITO_SOMENTE_CADASTRADO", "1") == "1"
 
+# Fila de reenvio — ajuda totem + encomendas não notificadas (ao subir / periodicamente)
+NOTIF_FILA_ATIVA = os.getenv("NOTIF_FILA_ATIVA", "1") == "1"
+NOTIF_FILA_INTERVALO_SEG = int(os.getenv("NOTIF_FILA_INTERVALO_SEG", "300"))
+NOTIF_FILA_DELAY_INICIO_SEG = int(os.getenv("NOTIF_FILA_DELAY_INICIO_SEG", "20"))
+NOTIF_FILA_AJUDA_HORAS = int(os.getenv("NOTIF_FILA_AJUDA_HORAS", "72"))
+
 # Bancada local — força SQLite mesmo se DATABASE_URL existir no .env
 ELEVA_BANCADA = os.getenv("ELEVA_BANCADA", "").strip().lower() in ("1", "true", "yes")
 

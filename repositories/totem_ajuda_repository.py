@@ -96,6 +96,20 @@ class TotemAjudaRepository:
             return conn.total_changes > 0
 
     @staticmethod
+    def listar_whatsapp_pendentes(horas=72, limite=30):
+        limite_data = (datetime.now() - timedelta(hours=horas)).strftime("%Y-%m-%d %H:%M:%S")
+        with BaseRepository.get_connection() as conn:
+            return conn.execute("""
+                SELECT *
+                FROM totem_ajuda_pedidos
+                WHERE status = 'pendente'
+                  AND whatsapp_enviado = 0
+                  AND criado_em >= ?
+                ORDER BY id ASC
+                LIMIT ?
+            """, (limite_data, limite)).fetchall()
+
+    @staticmethod
     def atualizar_whatsapp(pedido_id, enviado, detalhe=None):
         with BaseRepository.get_connection() as conn:
             conn.execute("""

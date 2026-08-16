@@ -132,6 +132,33 @@ def _iniciar_watchdog_esp32():
 _iniciar_watchdog_esp32()
 
 
+def _iniciar_fila_notificacoes():
+    """Reenvia ajuda totem e encomendas pendentes ao subir e periodicamente."""
+    import threading
+    import time
+    import config
+    from services.notificacao_fila_service import NotificacaoFilaService
+
+    if not config.NOTIF_FILA_ATIVA:
+        return
+
+    def _loop():
+        time.sleep(config.NOTIF_FILA_DELAY_INICIO_SEG)
+        while True:
+            try:
+                NotificacaoFilaService.processar()
+            except Exception as erro:
+                print(f"⚠ Fila notificações: {erro}")
+            time.sleep(config.NOTIF_FILA_INTERVALO_SEG)
+
+    threading.Thread(
+        target=_loop, daemon=True, name="notificacao-fila",
+    ).start()
+
+
+_iniciar_fila_notificacoes()
+
+
 @app.context_processor
 def inject_site_context():
     from flask import session

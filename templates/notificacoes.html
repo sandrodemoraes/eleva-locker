@@ -27,6 +27,7 @@
     <p style="color:#666;margin-bottom:16px;">
         Quando alguém toca <strong>Preciso de ajuda</strong> no totem, aparece aqui e a portaria recebe WhatsApp
         (se <code>TOTEM_AJUDA_TELEFONE</code> e WhatsApp estiverem ativos no .env).
+        Pedidos com WhatsApp falho são <strong>reenviados automaticamente</strong> quando o servidor/WhatsApp volta online.
     </p>
     {% if pedidos_ajuda %}
     <table>

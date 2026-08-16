@@ -557,6 +557,37 @@ class NotificacaoService:
         return resultados
 
     @staticmethod
+    def reenviar_encomendas_pendentes():
+        """Reenvia WhatsApp/e-mail de encomendas aguardando retirada sem notificado_em."""
+        from repositories.encomenda_repository import EncomendaRepository
+
+        encomendas = EncomendaRepository.listar_nao_notificadas()
+        enviados = 0
+        erros = 0
+
+        for encomenda in encomendas:
+            try:
+                resultados = NotificacaoService.notificar_encomenda_chegou(
+                    encomenda_id=encomenda["id"],
+                    codigo=encomenda["codigo"],
+                    cliente=encomenda["cliente"],
+                    telefone=encomenda["telefone"],
+                    email=encomenda["email"],
+                    armario=encomenda["armario_nome"] or "Armário",
+                    armario_id=encomenda["compartimento_armario"],
+                    compartimento=encomenda["compartimento_numero"] or "—",
+                    expira_em=encomenda["expira_em"],
+                )
+                if any(r.get("sucesso") for r in resultados):
+                    enviados += 1
+                else:
+                    erros += 1
+            except Exception:
+                erros += 1
+
+        return {"tentados": len(encomendas), "enviados": enviados, "erros": erros}
+
+    @staticmethod
     def reenviar(encomenda_id):
         encomenda = EncomendaRepository.buscar_por_id(encomenda_id)
 

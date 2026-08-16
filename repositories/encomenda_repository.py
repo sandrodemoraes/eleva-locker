@@ -211,6 +211,24 @@ class EncomendaRepository:
             conn.commit()
 
     @staticmethod
+    def listar_nao_notificadas(limite=50):
+        with BaseRepository.get_connection() as conn:
+            return conn.execute("""
+                SELECT
+                    e.*,
+                    c.numero AS compartimento_numero,
+                    c.armario AS compartimento_armario,
+                    a.nome AS armario_nome
+                FROM encomendas e
+                JOIN compartimentos c ON c.id = e.compartimento
+                JOIN armarios a ON a.id = c.armario
+                WHERE e.status = 'aguardando_retirada'
+                  AND e.notificado_em IS NULL
+                ORDER BY e.id ASC
+                LIMIT ?
+            """, (limite,)).fetchall()
+
+    @staticmethod
     def marcar_notificado(encomenda_id):
 
         from datetime import datetime
