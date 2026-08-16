@@ -1,0 +1,31 @@
+# ELEVA LOCKER — rede VPN (preencher na bancada)
+# Salvar como D:\mikrotik\rede.txt
+
+=== HUB SEDE (RB ELEVA 1) ===
+IP LAN:           192.168.16.100
+ROS:              7.21.5
+WireGuard:        wg-eleva
+VPN IP:           10.255.0.1
+Listen UDP:       51820
+Public Key hub:   pWWMpVG0lwuyqiKS0ja1zrpgsIa2Sud3nuJZygoIElU=
+
+IP PUBLICO sede:   ___________________  (ifconfig.me na internet 1)
+Port forward:     UDP 51820 -> 192.168.16.100
+
+=== ARMARIO BANCADA (2o MikroTik — internet 2) ===
+VPN IP:           10.255.0.50
+Listen UDP:       51821
+Public Key arm:   ___________________
+
+LAN ESPs:         192.168.50.0/24
+Gateway LAN:      192.168.50.1
+ESP M1:           192.168.50.121
+ESP M2:           192.168.50.145
+ESP M3:           192.168.50.146
+
+Wi-Fi SSID:       ELEVA - LOCKER BANCADA
+Wi-Fi senha:      ___________________
+
+=== SERVIDOR ===
+Flask:            http://192.168.16.130:15000
+SERVIDOR_URL ESP: http://192.168.16.130:15000
