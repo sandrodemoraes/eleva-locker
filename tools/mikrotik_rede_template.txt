@@ -1,7 +1,7 @@
-# ELEVA LOCKER — rede VPN (preencher na bancada)
+# ELEVA LOCKER — rede VPN site 050 (preenchido 2026-08-17)
 # Salvar como D:\mikrotik\rede.txt
 
-=== HUB SEDE (RB ELEVA 1) ===
+=== HUB SEDE (RB ELEVA 1 — MATRIZ) ===
 IP LAN:           192.168.16.100
 ROS:              7.21.5
 WireGuard:        wg-eleva
@@ -9,23 +9,37 @@ VPN IP:           10.255.0.1
 Listen UDP:       51820
 Public Key hub:   pWWMpVG0lwuyqiKS0ja1zrpgsIa2Sud3nuJZygoIElU=
 
-IP PUBLICO sede:   ___________________  (ifconfig.me na internet 1)
+IP PUBLICO sede:  177.74.79.32
 Port forward:     UDP 51820 -> 192.168.16.100
 
-=== ARMARIO BANCADA (2o MikroTik — internet 2) ===
+=== ARMARIO (RB-ELEVA-L050 — internet local) ===
+Identity:         RB-ELEVA-L050
 VPN IP:           10.255.0.50
 Listen UDP:       51821
-Public Key arm:   ___________________
+Public Key arm:   hxGlOG+QVgTEkMWJSPuXY4Uefkkr+6CcfohTBq6HuGA=
+Endpoint:         177.74.79.32:51820
 
 LAN ESPs:         192.168.50.0/24
 Gateway LAN:      192.168.50.1
+Bridge:           bridge-lan
 ESP M1:           192.168.50.121
 ESP M2:           192.168.50.145
 ESP M3:           192.168.50.146
+PC bancada:       192.168.50.10 (fixo, DNS 8.8.8.8)
 
-Wi-Fi SSID:       ELEVA - LOCKER BANCADA
-Wi-Fi senha:      ___________________
+Wi-Fi SSID:       ELEVA - LOCKER 050
+Wi-Fi senha:      (anotar)
 
-=== SERVIDOR ===
+=== SERVIDOR (mesma LAN matriz — NAO passa pelo MikroTik) ===
 Flask:            http://192.168.16.130:15000
 SERVIDOR_URL ESP: http://192.168.16.130:15000
+Rota Flask:       192.168.50.0/24 via 192.168.16.100 (IF adaptador 16.x)
+
+=== TESTE BANCADA (2 MikroTiks, sem internet) ===
+Matriz ether2:    192.168.99.1
+Armario ether1:   192.168.99.2
+Endpoint teste:   192.168.99.1:51820
+
+=== STATUS ===
+Tunel bancada 2 RB:  OK (2026-08-17)
+Tunel producao:      pendente port forward + hub na sede
