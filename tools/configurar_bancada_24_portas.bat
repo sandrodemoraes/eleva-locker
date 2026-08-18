@@ -22,11 +22,15 @@ echo  2. Este script ajusta o armario e ressincroniza ESPs existentes
 echo  3. Depois cadastre ESP M2 e M3 com cadastrar_esp_nova.bat
 echo.
 
-set /p ARM_ID="ID do armario Bancada [3]: "
-if "%ARM_ID%"=="" set "ARM_ID=3"
+set /p ARM_ID="ID do armario [2]: "
+if "%ARM_ID%"=="" set "ARM_ID=2"
+
+set /p TOTAL="Total de portas (8/16/24/32/64) [16]: "
+if "%TOTAL%"=="" set "TOTAL=16"
 
 echo.
-%PYTHON% tools\configurar_bancada_24_portas.py --armario-id %ARM_ID%
+%PYTHON% tools\configurar_portas_armario.py --armario-id %ARM_ID% --portas %TOTAL% 2>nul
+if errorlevel 1 %PYTHON% tools\configurar_bancada_24_portas.py --armario-id %ARM_ID% --portas %TOTAL%
 
 echo.
 pause

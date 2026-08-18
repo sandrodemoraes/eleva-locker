@@ -155,15 +155,20 @@ def main():
             f"({r['atualizados']} atualizados, {r['criados']} criados)"
         )
 
-    faltam = 3 - len(esps)
+    qtd_modulos = max(1, (total + 7) // 8)
+    faltam = qtd_modulos - len(esps)
     if faltam > 0:
         print(f"\nFaltam {faltam} ESP(s) para completar {total} portas:")
-        for _, nome, porta in MODULOS[len(esps):]:
+        for i in range(len(esps), qtd_modulos):
+            porta = 1 + (i * 8)
+            nome = f"ESP M{i + 1}"
             print(
                 f"  py tools/cadastrar_esp_nova.py --ip-esp IP --nome-esp \"{nome}\" "
                 f"--armario-id {armario_id} --porta-inicial {porta} --portas 8 "
                 f"--max-portas-armario {total}"
             )
+    elif len(esps) >= qtd_modulos:
+        print(f"\n  OK — {len(esps)} ESP(s) cobrem {total} portas.")
 
     print("\nPróximo passo: grave o firmware em cada placa (TOKEN no cadastro).")
     print(f"Painel: /armarios/{armario_id}")
