@@ -1,0 +1,234 @@
+{% extends "layout/base.html" %}
+
+{% block title %}ESP32 | ELEVA LOCKER{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/crud.css') }}">
+{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+    <div>
+        <h1>Dispositivos ESP32</h1>
+        <p>Gerencie os controladores IoT dos armários</p>
+    </div>
+    {% if perfil == 'Administrador' %}
+    <button class="btn" onclick="abrirModal('modalNovo')">
+        <i class="fa-solid fa-plus"></i> Novo ESP32
+    </button>
+    {% endif %}
+</div>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% for category, message in messages %}
+        <div class="alert alert-{{ category }}">{{ message }}</div>
+    {% endfor %}
+{% endwith %}
+
+<div class="table-box">
+    {% if dispositivos %}
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nome</th>
+                <th>IP</th>
+                <th>MAC</th>
+                <th>Armário</th>
+                <th>Portas</th>
+                <th>Compart.</th>
+                <th>Status</th>
+                <th>Último heartbeat</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for d in dispositivos %}
+            <tr>
+                <td>{{ d.id }}</td>
+                <td><strong>{{ d.nome }}</strong></td>
+                <td>{{ d.ip or '—' }}:{{ d.porta or 80 }}</td>
+                <td>{{ d.mac or '—' }}</td>
+                <td>{{ d.armario_nome or '—' }}</td>
+                <td>{{ d.max_portas or 16 }}</td>
+                <td>{{ d.total_compartimentos or 0 }}</td>
+                <td>
+                    <span class="badge badge-{{ d.status }}">
+                        {% if d.status == 'online' %}🟢{% elif d.status == 'offline' %}🔴{% else %}⚠️{% endif %}
+                        {{ d.status }}
+                    </span>
+                </td>
+                <td>{{ d.ultimo_heartbeat or '—' }}</td>
+                <td class="acoes-cell">
+                    <form method="POST" action="/esp32/testar/{{ d.id }}">
+                        <button type="submit" class="btn btn-sm" title="Testar conexão"><i class="fa-solid fa-wifi"></i></button>
+                    </form>
+                    {% if perfil == 'Administrador' %}
+                    <button class="btn btn-sm" onclick="editarEsp({{ d.id }}, '{{ d.nome | replace("'", "\\'") }}', '{{ d.ip or '' }}', '{{ d.mac or '' }}', {{ d.armario or 'null' }}, {{ d.porta or 80 }}, '{{ d.status }}', '{{ d.token or '' }}', {{ d.max_portas or 16 }})">
+                        <i class="fa-solid fa-pen"></i>
+                    </button>
+                    <form method="POST" action="/esp32/excluir/{{ d.id }}" onsubmit="return confirm('Excluir ESP32?')">
+                        <button type="submit" class="btn btn-sm btn-danger"><i class="fa-solid fa-trash"></i></button>
+                    </form>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state">
+        <i class="fa-solid fa-microchip fa-3x"></i>
+        <p>Nenhum ESP32 cadastrado.</p>
+    </div>
+    {% endif %}
+</div>
+
+<div class="painel" style="margin-top:25px;background:#fff;padding:25px;border-radius:12px;">
+    <h2 style="color:#0f3d75;margin-bottom:15px;">API para firmware ESP32</h2>
+    <table style="width:100%;font-size:14px;">
+        <tr><td style="padding:8px;"><strong>POST</strong> /api/esp32/heartbeat</td><td>Header: X-ESP32-Token — retorna precisa_sync</td></tr>
+        <tr><td style="padding:8px;"><strong>GET</strong> /api/esp32/sync</td><td>Compartimentos + códigos (8–32 portas)</td></tr>
+        <tr><td style="padding:8px;"><strong>POST</strong> /api/esp32/eventos</td><td>Upload eventos offline (batch)</td></tr>
+        <tr><td style="padding:8px;"><strong>POST</strong> /api/esp32/validar-codigo</td><td>Retirada online</td></tr>
+        <tr><td style="padding:8px;"><strong>GET</strong> /abrir/{rele}?token=</td><td>ESP expõe — servidor aciona relé</td></tr>
+    </table>
+    <p style="margin-top:12px;color:#666;">Firmware: <code>firmware/elevalocker_sync.ino</code> — ver <code>docs/ESP32_SYNC.md</code></p>
+</div>
+
+{% if perfil == 'Administrador' %}
+<div class="modal-overlay" id="modalNovo">
+    <div class="modal">
+        <h2>Novo ESP32</h2>
+        <form method="POST" action="/esp32/novo">
+            <div class="form-group">
+                <label>Nome *</label>
+                <input type="text" name="nome" required placeholder="ESP32 Bloco A">
+            </div>
+            <div class="grid-2">
+                <div class="form-group">
+                    <label>IP</label>
+                    <input type="text" name="ip" placeholder="192.168.1.100">
+                </div>
+                <div class="form-group">
+                    <label>Porta</label>
+                    <input type="number" name="porta" value="80">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>MAC</label>
+                <input type="text" name="mac" placeholder="AA:BB:CC:DD:EE:FF">
+            </div>
+            <div class="form-group">
+                <label>Armário</label>
+                <select name="armario">
+                    <option value="">— Sem vínculo —</option>
+                    {% for a in armarios %}
+                    <option value="{{ a.id }}">{{ a.nome }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Quantidade de portas</label>
+                <select name="max_portas">
+                    <option value="8">8 portas</option>
+                    <option value="16" selected>16 portas</option>
+                    <option value="24">24 portas</option>
+                    <option value="32">32 portas</option>
+                    <option value="64">64 portas</option>
+                </select>
+                <small style="color:#666;">Alterar recria/atualiza compartimentos 1..N no armário vinculado.</small>
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn">Salvar</button>
+                <button type="button" class="btn btn-danger" onclick="fecharModal('modalNovo')">Cancelar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="modal-overlay" id="modalEditar">
+    <div class="modal">
+        <h2>Editar ESP32</h2>
+        <form method="POST" id="formEditar">
+            <div class="form-group">
+                <label>Nome *</label>
+                <input type="text" name="nome" id="edit_nome" required>
+            </div>
+            <div class="grid-2">
+                <div class="form-group">
+                    <label>IP</label>
+                    <input type="text" name="ip" id="edit_ip">
+                </div>
+                <div class="form-group">
+                    <label>Porta</label>
+                    <input type="number" name="porta" id="edit_porta">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>MAC</label>
+                <input type="text" name="mac" id="edit_mac">
+            </div>
+            <div class="form-group">
+                <label>Armário</label>
+                <select name="armario" id="edit_armario">
+                    <option value="">— Sem vínculo —</option>
+                    {% for a in armarios %}
+                    <option value="{{ a.id }}">{{ a.nome }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Quantidade de portas</label>
+                <select name="max_portas" id="edit_max_portas">
+                    <option value="8">8 portas</option>
+                    <option value="16">16 portas</option>
+                    <option value="24">24 portas</option>
+                    <option value="32">32 portas</option>
+                    <option value="64">64 portas</option>
+                </select>
+                <small style="color:#666;">Salvar aplica no armário e sincroniza com a ESP.</small>
+            </div>
+            <div class="form-group">
+                <label>Token (para firmware)</label>
+                <input type="text" name="token" id="edit_token" readonly style="background:#f0f0f0;">
+            </div>
+            <div class="form-group">
+                <label>Status</label>
+                <select name="status" id="edit_status">
+                    <option value="online">Online</option>
+                    <option value="offline">Offline</option>
+                    <option value="erro">Erro</option>
+                </select>
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn">Salvar</button>
+                <button type="button" class="btn btn-danger" onclick="fecharModal('modalEditar')">Cancelar</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+function abrirModal(id){ document.getElementById(id).classList.add('active'); }
+function fecharModal(id){ document.getElementById(id).classList.remove('active'); }
+
+function editarEsp(id, nome, ip, mac, armario, porta, status, token, maxPortas){
+    document.getElementById('formEditar').action = '/esp32/editar/' + id;
+    document.getElementById('edit_nome').value = nome;
+    document.getElementById('edit_ip').value = ip;
+    document.getElementById('edit_mac').value = mac;
+    document.getElementById('edit_armario').value = armario || '';
+    document.getElementById('edit_porta').value = porta;
+    document.getElementById('edit_status').value = status;
+    document.getElementById('edit_token').value = token;
+    document.getElementById('edit_max_portas').value = maxPortas || 16;
+    abrirModal('modalEditar');
+}
+</script>
+{% endblock %}

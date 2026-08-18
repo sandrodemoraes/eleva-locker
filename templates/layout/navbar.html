@@ -2,56 +2,58 @@
 
     <div class="logo">
 
-        <div class="logo-icon">
-            <i class="fa-solid fa-box"></i>
-        </div>
+        <button type="button" class="btn-menu-mobile" id="btnMenuMobile" aria-label="Abrir menu">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+
+        <img class="logo-img" src="{{ url_for('static', filename='brand/logo-eleva-locker-icon.svg') }}" alt="ELEVA LOCKER">
 
         <div class="logo-text">
-
             <h2>ELEVA LOCKER</h2>
-
             <span>Sistema Administrativo</span>
-
         </div>
 
     </div>
 
     <div class="topo-direita">
 
-        <button class="btn-icon">
+        {% if session.usuario_id and sites is defined %}
+        <form method="POST" action="{{ url_for('sites.selecionar') }}" class="site-selector">
+            <select name="site_id" onchange="this.form.submit()">
+                <option value="" {% if not site_atual %}selected{% endif %}>Todos os sites</option>
+                {% for s in sites %}
+                <option value="{{ s.id }}" {% if site_atual == s.id %}selected{% endif %}>{{ s.nome }}</option>
+                {% endfor %}
+            </select>
+        </form>
+        {% endif %}
 
+        <a href="{{ url_for('notificacoes.listar') }}#ajuda-totem" class="btn-icon btn-icon-badge" title="Notificações{% if ajuda_pendentes %} — {{ ajuda_pendentes }} pedido(s) de ajuda{% endif %}">
             <i class="fa-solid fa-bell"></i>
+            {% if ajuda_pendentes %}
+            <span class="badge-alerta">{{ ajuda_pendentes }}</span>
+            {% endif %}
+        </a>
 
-        </button>
-
-        <button class="btn-icon">
-
+        <a href="{{ url_for('esp32.configuracoes') }}" class="btn-icon" title="Configurações">
             <i class="fa-solid fa-gear"></i>
-
-        </button>
+        </a>
 
         <div class="usuario">
 
             <div class="avatar">
-
                 <i class="fa-solid fa-user"></i>
-
             </div>
 
             <div>
-
                 <strong>
-
                     {% if session.nome %}
                         {{ session.nome }}
                     {% else %}
                         Administrador
                     {% endif %}
-
                 </strong>
-
                 <small>Administrador</small>
-
             </div>
 
         </div>
