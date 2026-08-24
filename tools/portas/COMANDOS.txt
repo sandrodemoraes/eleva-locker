@@ -1,0 +1,87 @@
+================================================================================
+  ELEVA LOCKER — Comandos para portas 8 a 64
+  Execute dentro de:  cd C:\ElevaLocker
+  Armario padrao id=2  (troque --armario-id se necessario)
+  Servidor: http://192.168.16.130:15000
+================================================================================
+
+--- CONFIGURAR (sincroniza banco + compartimentos) ---
+
+8 portas (1 ESP):
+  py tools\configurar_portas_armario.py --armario-id 2 --portas 8
+
+16 portas (2 ESPs):
+  py tools\configurar_portas_armario.py --armario-id 2 --portas 16
+
+24 portas (3 ESPs):
+  py tools\configurar_portas_armario.py --armario-id 2 --portas 24
+
+32 portas (4 ESPs):
+  py tools\configurar_portas_armario.py --armario-id 2 --portas 32
+
+64 portas (8 ESPs):
+  py tools\configurar_portas_armario.py --armario-id 2 --portas 64
+
+Listar armarios:
+  py tools\configurar_portas_armario.py --listar
+
+
+--- CADASTRAR ESP (uma placa por vez — substitua IP e grave TOKEN no Arduino) ---
+
+M1 — compartimentos #1-8:
+  py tools\cadastrar_esp_nova.py --ip-esp 192.168.16.121 --nome-esp "ESP M1" --armario-id 2 --porta-inicial 1 --portas 8 --max-portas-armario 8
+
+M2 — compartimentos #9-16 (armario 16 portas):
+  py tools\cadastrar_esp_nova.py --ip-esp 192.168.16.145 --nome-esp "ESP M2" --armario-id 2 --porta-inicial 9 --portas 8 --max-portas-armario 16
+
+M3 — compartimentos #17-24 (armario 24 portas):
+  py tools\cadastrar_esp_nova.py --ip-esp 192.168.16.146 --nome-esp "ESP M3" --armario-id 2 --porta-inicial 17 --portas 8 --max-portas-armario 24
+
+M4 — compartimentos #25-32 (armario 32 portas):
+  py tools\cadastrar_esp_nova.py --ip-esp 192.168.16.147 --nome-esp "ESP M4" --armario-id 2 --porta-inicial 25 --portas 8 --max-portas-armario 32
+
+M5 — compartimentos #33-40 (armario 64 portas):
+  py tools\cadastrar_esp_nova.py --ip-esp 192.168.16.148 --nome-esp "ESP M5" --armario-id 2 --porta-inicial 33 --portas 8 --max-portas-armario 64
+
+M6 — compartimentos #41-48:
+  py tools\cadastrar_esp_nova.py --ip-esp 192.168.16.149 --nome-esp "ESP M6" --armario-id 2 --porta-inicial 41 --portas 8 --max-portas-armario 64
+
+M7 — compartimentos #49-56:
+  py tools\cadastrar_esp_nova.py --ip-esp 192.168.16.150 --nome-esp "ESP M7" --armario-id 2 --porta-inicial 49 --portas 8 --max-portas-armario 64
+
+M8 — compartimentos #57-64:
+  py tools\cadastrar_esp_nova.py --ip-esp 192.168.16.151 --nome-esp "ESP M8" --armario-id 2 --porta-inicial 57 --portas 8 --max-portas-armario 64
+
+
+--- ATALHOS .BAT (duplo clique ou CMD) ---
+
+  tools\portas\menu.bat
+  tools\portas\configurar_16.bat
+  tools\portas\cadastrar_modulo.bat
+  tools\portas\validar.bat
+
+
+--- VALIDAR / TESTAR ---
+
+Listar mapeamento:
+  py tools\validar_portas_bancada.py --armario-id 2 --listar
+
+Abrir amostra (#1, #9, #17 — 1 por ESP):
+  py tools\validar_portas_bancada.py --armario-id 2 --amostra
+
+Abrir compartimento especifico (ex.: #10):
+  py tools\validar_portas_bancada.py --armario-id 2 --abrir 10
+
+Testar token apos gravar firmware:
+  py tools\testar_token_esp.py --url http://192.168.16.130:15000 --token SEU_TOKEN
+
+
+--- ORDEM TIPICA (ex.: ir de 8 para 16 portas) ---
+
+1. Painel /armarios/2 → Editar → 16 portas → Salvar
+2. py tools\configurar_portas_armario.py --armario-id 2 --portas 16
+3. Cadastrar M2 (comando acima) OU tools\portas\cadastrar_modulo.bat
+4. Gravar Arduino na 2a placa com TOKEN da M2
+5. py tools\validar_portas_bancada.py --armario-id 2 --amostra
+
+================================================================================
