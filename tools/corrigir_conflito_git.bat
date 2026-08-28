@@ -1,33 +1,71 @@
 @echo off
-title ELEVA LOCKER - Corrigir conflito Git
-color 0C
+title ELEVA LOCKER - Corrigir conflitos Git (branch retida)
+color 0A
 cd /d "%~dp0.."
 
-echo ============================================================
-echo   CORRIGIR database.py (marcadores de conflito Git)
-echo ============================================================
-echo.
-echo  Erro tipico: SyntaxError linha com ^>^>^>^>^>^>^>
-echo.
+set "BRANCH=cursor/retirada-pacote-retido-c05c"
 
-findstr /s /m /r "<<<<<<< ======= >>>>>>>" *.py 2>nul
+echo ============================================================
+echo   CORRIGIR CONFLITOS GIT — %BRANCH%
+echo ============================================================
+echo.
+echo  Restaura arquivos do GitHub (remove ^<^<^<^<^<^<^<^< HEAD etc.)
+echo  ATENCAO: sobrescreve alteracoes locais nesses arquivos.
+echo  Seu .env NAO e alterado.
+echo.
+pause
+
+set "PYTHON="
+where py >nul 2>&1 && set "PYTHON=py"
+if not defined PYTHON where python >nul 2>&1 && set "PYTHON=python"
+
+echo [1/4] Abortar merge pendente (se houver)...
+git merge --abort 2>nul
+
+echo [2/4] Buscar branch no GitHub...
+git fetch origin %BRANCH%
 if errorlevel 1 (
-    echo Nenhum conflito encontrado em .py na raiz.
+    echo ERRO no fetch. Verifique internet e git.
+    pause
+    exit /b 1
+)
+
+echo [3/4] Restaurar arquivos da branch...
+git checkout origin/%BRANCH% -- ^
+  database.py ^
+  config.py ^
+  app.py ^
+  repositories/encomenda_repository.py ^
+  services/encomenda_service.py ^
+  services/notificacao_service.py ^
+  services/dashboard_service.py ^
+  routes/encomendas.py ^
+  templates/encomendas.html ^
+  static/css/crud.css ^
+  tools/lembretes_encomenda.py ^
+  tools/lembretes_encomenda.bat
+
+if errorlevel 1 (
+    echo AVISO: alguns arquivos falharam — tentando reset completo...
+    git reset --hard origin/%BRANCH%
+)
+
+echo [4/4] Marcar conflitos resolvidos...
+git add database.py repositories/encomenda_repository.py services/dashboard_service.py 2>nul
+
+echo.
+echo Verificando marcadores de conflito restantes...
+findstr /s /m /c:"<<<<<<<" *.py repositories\*.py services\*.py routes\*.py 2>nul
+if errorlevel 1 (
+    echo   OK — nenhum ^<^<^<^<^<^<^< encontrado em .py
 ) else (
-    echo ARQUIVOS COM CONFLITO listados acima.
+    echo   AINDA HA CONFLITOS — rode: git reset --hard origin/%BRANCH%
 )
 
 echo.
-echo Restaurando database.py da branch retida-pacote-retido...
-git fetch origin cursor/retirada-pacote-retido-c05c 2>nul
-git checkout origin/cursor/retirada-pacote-retido-c05c -- database.py 2>nul
-if errorlevel 1 (
-    echo AVISO: checkout falhou — tente manualmente no VS Code.
-) else (
-    echo database.py restaurado.
-)
-
-echo.
-echo Proximo: py app.py
+echo ============================================================
+echo   Pronto. Proximo passo:
+echo     py app.py
+echo ============================================================
 echo.
 pause
