@@ -543,6 +543,19 @@ def status_porta(compartimento_id):
             "fechada": bool(resultado.get("fechada", False)),
             "aberta": bool(resultado.get("aberta", not resultado.get("fechada", False))),
             "sensor": bool(resultado.get("sensor", True)),
+            "mensagem": resultado.get("mensagem"),
+            "simulado": bool(resultado.get("simulado")),
         })
     except ValueError:
         return jsonify({"erro": "Compartimento não encontrado."}), 404
+    except Exception as erro:
+        logging.exception("totem status_porta falhou comp=%s", compartimento_id)
+        return jsonify({
+            "compartimento_id": compartimento_id,
+            "fechada": False,
+            "aberta": True,
+            "sensor": False,
+            "esp32_offline": False,
+            "mensagem": "Erro ao consultar sensor — use o botão concluir.",
+            "erro": str(erro),
+        }), 200

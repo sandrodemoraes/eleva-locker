@@ -715,8 +715,8 @@ function verificarPortaFechada(){
         const status = document.getElementById("sensor-status");
         const aviso = document.getElementById("sensor-aviso");
         const btn = document.getElementById("btn-concluir-porta");
-        if(status) status.textContent = "Sem conexão com ESP32";
-        if(aviso) aviso.textContent = "Toque no botão verde após fechar a porta";
+        if(status) status.textContent = "Sensor indisponível — ESP pode estar online";
+        if(aviso) aviso.textContent = "Toque em «Porta fechada — concluir» após fechar a porta";
         if(btn) btn.classList.add("btn-pulse");
     });
 }

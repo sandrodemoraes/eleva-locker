@@ -293,14 +293,6 @@ class Esp32Service:
                 "mensagem": "Compartimento sem ESP32 vinculado.",
             }
 
-        if config.ESP32_MODO_SIMULACAO:
-            return {
-                "sucesso": True,
-                "sensor": False,
-                "simulado": True,
-                "mensagem": "Sensor indisponível em modo simulação — use o botão concluir.",
-            }
-
         esp = Esp32Repository.buscar_por_id(esp32_id)
 
         if not esp or not esp["ip"]:

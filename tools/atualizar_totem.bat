@@ -14,6 +14,7 @@ echo === Checkout arquivos do totem ===
 git checkout %BR% -- ^
   config.py ^
   database.py ^
+  esp32.py ^
   routes/totem.py ^
   middleware/rate_limit.py ^
   middleware/operador_scope.py ^
