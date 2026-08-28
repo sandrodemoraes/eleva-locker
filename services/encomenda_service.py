@@ -22,6 +22,14 @@ class EncomendaService:
             return None
 
     @staticmethod
+    def _valor(encomenda, chave, default=None):
+        try:
+            val = encomenda[chave]
+        except (KeyError, IndexError, TypeError):
+            return default
+        return default if val is None else val
+
+    @staticmethod
     def _precisa_lembrete_automatico(encomenda):
         if not config.ENCOMENDA_LEMBRETE_AUTOMATICO:
             return False
@@ -29,12 +37,17 @@ class EncomendaService:
         if encomenda["status"] != "aguardando_retirada":
             return False
 
-        if not (encomenda.get("telefone") or encomenda.get("email")):
+        if not (
+            EncomendaService._valor(encomenda, "telefone")
+            or EncomendaService._valor(encomenda, "email")
+        ):
             return False
 
         horas = config.ENCOMENDA_HORAS_REENVIO
         agora = datetime.now()
-        entrada = EncomendaService._parse_data(encomenda.get("data_entrada"))
+        entrada = EncomendaService._parse_data(
+            EncomendaService._valor(encomenda, "data_entrada")
+        )
 
         if not entrada:
             return False
@@ -43,9 +56,9 @@ class EncomendaService:
             return False
 
         ref = (
-            encomenda.get("ultimo_lembrete_em")
-            or encomenda.get("notificado_em")
-            or encomenda.get("data_entrada")
+            EncomendaService._valor(encomenda, "ultimo_lembrete_em")
+            or EncomendaService._valor(encomenda, "notificado_em")
+            or EncomendaService._valor(encomenda, "data_entrada")
         )
         ref_dt = EncomendaService._parse_data(ref) or entrada
 
