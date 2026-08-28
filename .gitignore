@@ -27,5 +27,8 @@ Thumbs.db
 Desktop.ini
 .DS_Store
 
-# Banco SQLite (descomente se não quiser versionar o banco)
-# elevalocker.dbdatabase/*.db
+# Banco SQLite local (nunca versionar — dados da bancada)
+database/*.db
+database/*.db-journal
+database/*.db-wal
+database/*.db-shm
