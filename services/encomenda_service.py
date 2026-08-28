@@ -127,6 +127,7 @@ class EncomendaService:
             email=email,
             armario=compartimento["armario_nome"] or "Armário",
             compartimento=compartimento["numero"],
+            expira_em=expira,
         )
 
         return {

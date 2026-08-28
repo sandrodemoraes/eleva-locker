@@ -186,7 +186,7 @@ def criar_banco():
 
     cursor.execute("""
         UPDATE encomendas
-        SET expira_em = datetime(data_entrada, '+7 days')
+        SET expira_em = datetime(data_entrada, '+3 days')
         WHERE expira_em IS NULL
           AND status IN ('aguardando_retirada', 'retida')
           AND data_entrada IS NOT NULL

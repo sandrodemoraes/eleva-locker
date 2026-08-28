@@ -160,7 +160,11 @@ def reenviar_notificacao(encomenda_id):
     try:
 
         NotificacaoService.reenviar(encomenda_id)
-        flash("Notificação reenviada com sucesso!", "success")
+        flash(
+            f"Notificação reenviada com aviso: retirada em até "
+            f"{config.ENCOMENDA_DIAS_VALIDADE} dias ou pacote será retido.",
+            "success",
+        )
 
     except ValueError as erro:
         flash(str(erro), "warning")

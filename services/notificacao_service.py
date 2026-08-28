@@ -3,6 +3,7 @@ import re
 import smtplib
 import urllib.request
 import urllib.error
+from datetime import datetime
 from email.mime.text import MIMEText
 
 import config
@@ -26,16 +27,85 @@ class NotificacaoService:
         return numeros
 
     @staticmethod
-    def _montar_mensagem(cliente, armario, compartimento, codigo):
+    def _formatar_prazo(expira_em):
+        if not expira_em:
+            return None
+        try:
+            dt = datetime.strptime(str(expira_em)[:19], "%Y-%m-%d %H:%M:%S")
+            return dt.strftime("%d/%m/%Y às %H:%M")
+        except ValueError:
+            return str(expira_em)[:16]
 
-        return (
-            f"Olá {cliente}!\n\n"
-            f"Sua encomenda chegou no *ELEVA LOCKER*.\n"
+    @staticmethod
+    def _dias_restantes(expira_em):
+        if not expira_em:
+            return config.ENCOMENDA_DIAS_VALIDADE
+        try:
+            expira = datetime.strptime(str(expira_em)[:19], "%Y-%m-%d %H:%M:%S")
+            delta = expira.date() - datetime.now().date()
+            return max(0, delta.days)
+        except ValueError:
+            return config.ENCOMENDA_DIAS_VALIDADE
+
+    @staticmethod
+    def _montar_mensagem(
+        cliente,
+        armario,
+        compartimento,
+        codigo,
+        expira_em=None,
+        reenvio=False,
+    ):
+
+        dias_prazo = config.ENCOMENDA_DIAS_VALIDADE
+        prazo_fmt = NotificacaoService._formatar_prazo(expira_em)
+        dias_rest = NotificacaoService._dias_restantes(expira_em)
+
+        if reenvio:
+            intro = (
+                f"Olá {cliente}!\n\n"
+                f"🔔 *Lembrete ELEVA LOCKER* — sua encomenda ainda aguarda retirada.\n"
+            )
+        else:
+            intro = (
+                f"Olá {cliente}!\n\n"
+                f"Sua encomenda chegou no *ELEVA LOCKER*.\n"
+            )
+
+        corpo = (
+            f"{intro}"
             f"📍 Local: {armario}\n"
             f"📦 Compartimento: #{compartimento}\n"
-            f"🔑 Código de retirada: *{codigo}*\n\n"
-            f"Apresente este código no totem ou informe à portaria."
+            f"🔑 Código de retirada: *{codigo}*\n"
         )
+
+        if prazo_fmt:
+            corpo += f"⏰ Retire até: *{prazo_fmt}*\n"
+
+        if dias_rest == 0:
+            corpo += (
+                f"\n⚠️ *Último dia* para retirar pelo totem. "
+                f"Após o prazo, o pacote será *retido* na portaria.\n"
+            )
+        elif dias_rest == 1:
+            corpo += (
+                f"\n⚠️ Resta *1 dia* para retirar. "
+                f"Depois disso o pacote será *retido* e só poderá ser retirado na portaria.\n"
+            )
+        else:
+            corpo += (
+                f"\n⚠️ *Atenção:* se não retirar em até *{dias_prazo} dias*, "
+                f"o pacote será *retido* e deverá ser retirado na portaria.\n"
+            )
+
+        if reenvio and dias_rest > 0:
+            corpo += (
+                f"\n📌 Faltam *{dias_rest} dia(s)* antes da retenção automática.\n"
+            )
+
+        corpo += "\nApresente este código no totem ou informe à portaria."
+
+        return corpo
 
     @staticmethod
     def _registrar(encomenda_id, canal, destinatario, mensagem, status, detalhe=None):
@@ -166,13 +236,21 @@ class NotificacaoService:
         email,
         armario,
         compartimento,
+        expira_em=None,
+        reenvio=False,
     ):
 
         mensagem = NotificacaoService._montar_mensagem(
-            cliente, armario, compartimento, codigo
+            cliente, armario, compartimento, codigo,
+            expira_em=expira_em,
+            reenvio=reenvio,
         )
 
-        assunto = f"ELEVA LOCKER — Encomenda disponível (código {codigo})"
+        assunto = (
+            f"ELEVA LOCKER — Lembrete de retirada (código {codigo})"
+            if reenvio
+            else f"ELEVA LOCKER — Encomenda disponível (código {codigo})"
+        )
         resultados = []
 
         if config.NOTIF_EMAIL_ATIVO and email:
@@ -241,6 +319,8 @@ class NotificacaoService:
             email=encomenda["email"],
             armario=encomenda["armario_nome"] or "Armário",
             compartimento=encomenda["compartimento_numero"] or "—",
+            expira_em=encomenda["expira_em"] if encomenda["expira_em"] else None,
+            reenvio=True,
         )
 
     @staticmethod

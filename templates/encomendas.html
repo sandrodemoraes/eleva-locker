@@ -102,8 +102,9 @@
                 <td>
                     <a href="/encomendas/qrcode/{{ e.id }}" class="btn btn-sm" title="QR Code" target="_blank"><i class="fa-solid fa-qrcode"></i></a>
                     {% if e.status == 'aguardando_retirada' %}
-                    <form method="POST" action="/encomendas/reenviar/{{ e.id }}" style="display:inline">
-                        <button type="submit" class="btn btn-sm" title="Reenviar notificação"><i class="fa-solid fa-bell"></i></button>
+                    <form method="POST" action="/encomendas/reenviar/{{ e.id }}" style="display:inline"
+                          onsubmit="return confirm('Reenviar WhatsApp/e-mail com aviso de retenção em {{ dias_validade }} dias?');">
+                        <button type="submit" class="btn btn-sm" title="Reenviar com aviso de retenção ({{ dias_validade }} dias)"><i class="fa-solid fa-bell"></i></button>
                     </form>
                     {% endif %}
                     {% if e.status == 'retida' %}

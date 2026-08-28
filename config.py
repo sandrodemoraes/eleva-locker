@@ -44,8 +44,8 @@ PAGAMENTO_API_URL = os.getenv("PAGAMENTO_API_URL", "")
 PAGAMENTO_API_KEY = os.getenv("PAGAMENTO_API_KEY", "")
 PAGAMENTO_DIAS_VENCIMENTO = int(os.getenv("PAGAMENTO_DIAS_VENCIMENTO", "10"))
 
-# Encomendas — prazo para retirada pelo morador (dias)
-ENCOMENDA_DIAS_VALIDADE = int(os.getenv("ENCOMENDA_DIAS_VALIDADE", "7"))
+# Encomendas — prazo para retirada pelo morador (dias); após isso status retida
+ENCOMENDA_DIAS_VALIDADE = int(os.getenv("ENCOMENDA_DIAS_VALIDADE", "3"))
 
 
 def gerar_token_esp32():
