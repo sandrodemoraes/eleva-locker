@@ -258,7 +258,7 @@ class EncomendaService:
         if encomenda["status"] != "aguardando_retirada":
             raise ValueError("Encomenda não está pendente.")
 
-        if encomenda["notificado_em"]:
+        if EncomendaService._valor(encomenda, "notificado_em"):
             raise ValueError("Encomenda já notificada — não pode cancelar.")
 
         comp = CompartimentoRepository.buscar_por_id(encomenda["compartimento"])
@@ -300,7 +300,7 @@ class EncomendaService:
         if comp and not operador_acessa_armario(comp["armario"]):
             raise ValueError("Sem permissão para este armário.")
 
-        if encomenda["notificado_em"]:
+        if EncomendaService._valor(encomenda, "notificado_em"):
             from repositories.notificacao_repository import NotificacaoRepository
 
             ultimo_wa = NotificacaoRepository.ultimo_whatsapp_encomenda(encomenda_id)
@@ -322,8 +322,14 @@ class EncomendaService:
             armario=encomenda["armario_nome"] or "Armário",
             armario_id=comp["armario"] if comp else None,
             compartimento=encomenda["compartimento_numero"] or "—",
-            expira_em=encomenda["expira_em"] if encomenda["expira_em"] else None,
+            expira_em=EncomendaService._valor(encomenda, "expira_em"),
         )
+
+        # Totem: porta fechada = depósito concluído mesmo se WhatsApp falhar
+        if not EncomendaService._valor(encomenda, "notificado_em"):
+            enc_atual = EncomendaRepository.buscar_por_id(encomenda_id)
+            if not EncomendaService._valor(enc_atual, "notificado_em"):
+                EncomendaRepository.marcar_notificado(encomenda_id)
 
         LogService.registrar(
             encomenda["compartimento"],

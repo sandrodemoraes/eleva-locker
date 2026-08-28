@@ -1,4 +1,5 @@
 from pathlib import Path
+import logging
 import re
 
 from flask import Blueprint, render_template, request, jsonify, Response, make_response, redirect
@@ -445,7 +446,8 @@ def depositar():
     except ValueError as erro:
         return jsonify({"sucesso": False, "mensagem": str(erro)}), 400
 
-    except Exception:
+    except Exception as erro:
+        logging.exception("totem depositar falhou")
         return jsonify({"sucesso": False, "mensagem": "Erro ao depositar."}), 500
 
 
@@ -510,7 +512,8 @@ def concluir_deposito():
     except ValueError as erro:
         return jsonify({"sucesso": False, "mensagem": str(erro)}), 400
 
-    except Exception:
+    except Exception as erro:
+        logging.exception("totem concluir deposito falhou")
         return jsonify({"sucesso": False, "mensagem": "Erro ao concluir depósito."}), 500
 
 

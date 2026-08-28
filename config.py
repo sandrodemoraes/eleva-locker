@@ -25,9 +25,17 @@ SMTP_PASS = os.getenv("SMTP_PASS", "")
 SMTP_FROM = os.getenv("SMTP_FROM", "noreply@elevalocker.com")
 
 NOTIF_WHATSAPP_ATIVO = os.getenv("NOTIF_WHATSAPP_ATIVO", "0") == "1"
+WHATSAPP_PROVIDER = os.getenv("WHATSAPP_PROVIDER", "evolution")  # evolution | meta
 WHATSAPP_API_URL = os.getenv("WHATSAPP_API_URL", "")
 WHATSAPP_API_KEY = os.getenv("WHATSAPP_API_KEY", "")
 WHATSAPP_INSTANCIA = os.getenv("WHATSAPP_INSTANCIA", "")
+WHATSAPP_RETRY_MAX = int(os.getenv("WHATSAPP_RETRY_MAX", "3"))
+WHATSAPP_RETRY_DELAY = float(os.getenv("WHATSAPP_RETRY_DELAY", "1.5"))
+
+# Meta Cloud API (WHATSAPP_PROVIDER=meta)
+WHATSAPP_META_TOKEN = os.getenv("WHATSAPP_META_TOKEN", "")
+WHATSAPP_META_PHONE_ID = os.getenv("WHATSAPP_META_PHONE_ID", "")
+WHATSAPP_META_TEMPLATE = os.getenv("WHATSAPP_META_TEMPLATE", "encomenda_chegou")
 
 NOTIF_SMS_ATIVO = os.getenv("NOTIF_SMS_ATIVO", "0") == "1"
 SMS_API_URL = os.getenv("SMS_API_URL", "")
