@@ -11,7 +11,7 @@
 <div class="page-header">
     <div>
         <h1>Encomendas</h1>
-        <p>Depósito e retirada de encomendas</p>
+        <p>Depósito e retirada de encomendas — prazo padrão: {{ dias_validade }} dias</p>
     </div>
     <div style="display:flex;gap:10px;">
         <button class="btn btn-success" onclick="abrirModal('modalDeposito')">
@@ -41,6 +41,13 @@
 </div>
 {% endif %}
 
+{% if retidas_total and retidas_total > 0 %}
+<div class="alert alert-warning" style="margin-bottom:16px;">
+    <strong>{{ retidas_total }}</strong> encomenda(s) com prazo expirado aguardando retirada na portaria.
+    <a href="/encomendas?status=retida" style="margin-left:8px;">Ver retidas</a>
+</div>
+{% endif %}
+
 <div class="table-box" style="margin-bottom:20px;">
     <form method="GET" action="/encomendas">
         <div class="form-group" style="max-width:300px;margin:0;">
@@ -48,6 +55,7 @@
             <select name="status" onchange="this.form.submit()">
                 <option value="">Todas</option>
                 <option value="aguardando_retirada" {% if status_filtro == 'aguardando_retirada' %}selected{% endif %}>Aguardando retirada</option>
+                <option value="retida" {% if status_filtro == 'retida' %}selected{% endif %}>Retidas (prazo expirado)</option>
                 <option value="retirada" {% if status_filtro == 'retirada' %}selected{% endif %}>Retiradas</option>
             </select>
         </div>
@@ -66,6 +74,7 @@
                 <th>Armário</th>
                 <th>Compart.</th>
                 <th>Entrada</th>
+                <th>Prazo</th>
                 <th>Retirada</th>
                 <th>Status</th>
                 <th>Notificado</th>
@@ -82,14 +91,28 @@
                 <td>{{ e.armario_nome or '—' }}</td>
                 <td>#{{ e.compartimento_numero or '—' }}</td>
                 <td>{{ e.data_entrada or '—' }}</td>
+                <td>{{ e.expira_em or '—' }}</td>
                 <td>{{ e.data_retirada or '—' }}</td>
-                <td><span class="badge badge-{{ e.status }}">{{ e.status }}</span></td>
+                <td>
+                    <span class="badge badge-{{ e.status }}">
+                        {% if e.status == 'retida' %}retida{% else %}{{ e.status }}{% endif %}
+                    </span>
+                </td>
                 <td>{{ e.notificado_em or '—' }}</td>
                 <td>
                     <a href="/encomendas/qrcode/{{ e.id }}" class="btn btn-sm" title="QR Code" target="_blank"><i class="fa-solid fa-qrcode"></i></a>
                     {% if e.status == 'aguardando_retirada' %}
                     <form method="POST" action="/encomendas/reenviar/{{ e.id }}" style="display:inline">
                         <button type="submit" class="btn btn-sm" title="Reenviar notificação"><i class="fa-solid fa-bell"></i></button>
+                    </form>
+                    {% endif %}
+                    {% if e.status == 'retida' %}
+                    <form method="POST" action="/encomendas/{{ e.id }}/retirar-retida" style="display:inline"
+                          onsubmit="return confirm('Abrir compartimento #{{ e.compartimento_numero }} e registrar retirada do pacote retido?');">
+                        <input type="hidden" name="redirect_status" value="{{ status_filtro or 'retida' }}">
+                        <button type="submit" class="btn btn-sm btn-warning" title="Abrir porta e retirar pacote retido">
+                            <i class="fa-solid fa-door-open"></i> Abrir e retirar
+                        </button>
                     </form>
                     {% endif %}
                 </td>

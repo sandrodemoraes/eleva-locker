@@ -14,6 +14,8 @@ class DashboardService:
 
         site_id = get_site_id()
         Esp32Repository.marcar_offline_expirados()
+        from services.encomenda_service import EncomendaService
+        EncomendaService.sincronizar_retidas()
 
         return {
             "usuarios": len(UsuarioRepository.listar()),
@@ -21,6 +23,7 @@ class DashboardService:
             "compartimentos": CompartimentoRepository.contar(site_id),
             "encomendas": EncomendaRepository.contar(site_id=site_id),
             "encomendas_pendentes": EncomendaRepository.contar_pendentes(site_id),
+            "encomendas_retidas": EncomendaRepository.contar_retidas(site_id),
             "esp32_online": Esp32Repository.contar_online(site_id),
             "esp32_total": Esp32Repository.contar(site_id),
             "notificacoes_hoje": NotificacaoRepository.contar_hoje(),

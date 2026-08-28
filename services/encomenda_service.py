@@ -1,6 +1,7 @@
 import random
-from datetime import datetime
+from datetime import datetime, timedelta
 
+import config
 from repositories.encomenda_repository import EncomendaRepository
 from repositories.compartimento_repository import CompartimentoRepository
 from services.log_service import LogService
@@ -12,8 +13,18 @@ from services.limite_plano_service import LimitePlanoService
 class EncomendaService:
 
     @staticmethod
+    def sincronizar_retidas():
+        return EncomendaRepository.marcar_retidas()
+
+    @staticmethod
     def listar(status=None):
+        EncomendaService.sincronizar_retidas()
         return EncomendaRepository.listar(status)
+
+    @staticmethod
+    def contar_retidas():
+        EncomendaService.sincronizar_retidas()
+        return EncomendaRepository.contar_retidas()
 
     @staticmethod
     def buscar_por_id(encomenda_id):
@@ -36,6 +47,17 @@ class EncomendaService:
                 return codigo
 
         raise ValueError("Não foi possível gerar código único. Tente novamente.")
+
+    @staticmethod
+    def _codigo_expirado(encomenda):
+        expira_em = encomenda["expira_em"] if encomenda["expira_em"] else None
+        if not expira_em:
+            return False
+        try:
+            expira = datetime.strptime(str(expira_em)[:19], "%Y-%m-%d %H:%M:%S")
+            return datetime.now() > expira
+        except ValueError:
+            return False
 
     @staticmethod
     def depositar(
@@ -67,7 +89,11 @@ class EncomendaService:
             LimitePlanoService.verificar_encomenda(empresa_id)
 
         codigo = EncomendaService._gerar_codigo()
-        agora = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        agora = datetime.now()
+        agora_str = agora.strftime("%Y-%m-%d %H:%M:%S")
+        expira = (agora + timedelta(days=config.ENCOMENDA_DIAS_VALIDADE)).strftime(
+            "%Y-%m-%d %H:%M:%S"
+        )
 
         encomenda_id = EncomendaRepository.criar({
             "codigo": codigo,
@@ -75,7 +101,8 @@ class EncomendaService:
             "telefone": telefone.strip() if telefone else None,
             "email": email.strip() if email else None,
             "compartimento": compartimento_id,
-            "data_entrada": agora,
+            "data_entrada": agora_str,
+            "expira_em": expira,
             "status": "aguardando_retirada",
             "operador": operador,
             "transportadora": transportadora,
@@ -107,6 +134,7 @@ class EncomendaService:
             "codigo": codigo,
             "compartimento": compartimento["numero"],
             "armario": compartimento["armario_nome"],
+            "expira_em": expira,
             "esp32": abertura,
             "notificacoes": notificacoes,
         }
@@ -119,10 +147,25 @@ class EncomendaService:
         if not codigo:
             raise ValueError("Informe o código de retirada.")
 
+        EncomendaService.sincronizar_retidas()
+
         encomenda = EncomendaRepository.buscar_por_codigo(codigo)
 
         if not encomenda:
+            existente = EncomendaRepository.buscar_por_codigo_any(codigo)
+            if existente and existente["status"] == "retida":
+                raise ValueError(
+                    "Prazo de retirada expirado. Dirija-se à portaria para retirar o pacote."
+                )
+            if existente and existente["status"] == "retirada":
+                raise ValueError("Encomenda já retirada.")
             raise ValueError("Código inválido ou encomenda já retirada.")
+
+        if EncomendaService._codigo_expirado(encomenda):
+            EncomendaRepository.marcar_retidas()
+            raise ValueError(
+                "Prazo de retirada expirado. Dirija-se à portaria para retirar o pacote."
+            )
 
         agora = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
@@ -136,6 +179,53 @@ class EncomendaService:
         )
 
         abertura = Esp32Service.abrir_compartimento(encomenda["compartimento"], operador)
+
+        return {
+            "id": encomenda["id"],
+            "cliente": encomenda["cliente"],
+            "compartimento": encomenda["compartimento_numero"],
+            "armario": encomenda["armario_nome"],
+            "esp32": abertura,
+        }
+
+    @staticmethod
+    def retirar_retida(encomenda_id, operador, observacao=None):
+
+        EncomendaService.sincronizar_retidas()
+
+        encomenda = EncomendaRepository.buscar_por_id(encomenda_id)
+
+        if not encomenda:
+            raise ValueError("Encomenda não encontrada.")
+
+        if encomenda["status"] not in ("retida", "aguardando_retirada"):
+            raise ValueError("Encomenda não está retida ou aguardando retirada.")
+
+        if encomenda["status"] == "aguardando_retirada":
+            if not EncomendaService._codigo_expirado(encomenda):
+                raise ValueError(
+                    "Encomenda ainda dentro do prazo. Use retirada normal com o código."
+                )
+            EncomendaRepository.marcar_retidas()
+            encomenda = EncomendaRepository.buscar_por_id(encomenda_id)
+
+        if encomenda["status"] != "retida":
+            raise ValueError("Encomenda não está retida.")
+
+        agora = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        obs = observacao.strip() if observacao else "Pacote retido — retirada administrativa"
+
+        abertura = Esp32Service.abrir_compartimento(encomenda["compartimento"], operador)
+
+        EncomendaRepository.atualizar_retirada(encomenda["id"], agora, observacao=obs)
+        CompartimentoRepository.atualizar_status(encomenda["compartimento"], "livre")
+
+        LogService.registrar(
+            encomenda["compartimento"],
+            operador,
+            f"Retirada administrativa encomenda retida #{encomenda['id']} "
+            f"— compartimento #{encomenda['compartimento_numero']} — {encomenda['cliente']}",
+        )
 
         return {
             "id": encomenda["id"],

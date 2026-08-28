@@ -1,5 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, session, flash, jsonify, send_file
 
+import config
 from middleware.auth_required import login_required
 from services.encomenda_service import EncomendaService
 from services.armario_service import ArmarioService
@@ -23,6 +24,8 @@ def listar():
         encomendas=EncomendaService.listar(status),
         armarios=ArmarioService.listar_ativos(),
         status_filtro=status,
+        retidas_total=EncomendaService.contar_retidas(),
+        dias_validade=config.ENCOMENDA_DIAS_VALIDADE,
     )
 
 
@@ -94,6 +97,41 @@ def retirar():
     except Exception:
         flash("Erro ao processar retirada.", "danger")
 
+    return redirect("/encomendas")
+
+
+@encomendas_bp.route("/encomendas/<int:encomenda_id>/retirar-retida", methods=["POST"])
+@login_required
+def retirar_retida(encomenda_id):
+
+    try:
+
+        resultado = EncomendaService.retirar_retida(
+            encomenda_id=encomenda_id,
+            operador=session.get("usuario"),
+            observacao=request.form.get("observacao", ""),
+        )
+
+        msg = (
+            f"Pacote retido retirado! {resultado['cliente']} — "
+            f"compartimento #{resultado['compartimento']}"
+        )
+        esp = resultado.get("esp32") or {}
+        if esp.get("manual"):
+            msg += f" — {esp.get('mensagem', 'Abrir porta manualmente.')}"
+        elif not esp.get("sucesso"):
+            msg += " — Retirada registrada; verifique se a porta abriu."
+
+        flash(msg, "success" if esp.get("sucesso", True) else "warning")
+
+    except ValueError as erro:
+        flash(str(erro), "warning")
+    except Exception:
+        flash("Erro ao retirar pacote retido.", "danger")
+
+    status = request.form.get("redirect_status", "")
+    if status:
+        return redirect(f"/encomendas?status={status}")
     return redirect("/encomendas")
 
 

@@ -48,6 +48,15 @@
     background:#21867a;
 }
 
+.btn-warning{
+    background:#D4A017;
+    color:#1A2332;
+}
+
+.btn-warning:hover{
+    background:#b88914;
+}
+
 .btn-sm{
     padding:7px 12px;
     font-size:13px;
@@ -103,6 +112,7 @@ tr:hover{
 
 .badge-ativo,.badge-livre,.badge-retirada{background:#d4edda;color:#155724;}
 .badge-ocupado,.badge-aguardando_retirada{background:#fff3cd;color:#856404;}
+.badge-retida{background:#f8d7da;color:#721c24;}
 .badge-pendente,.badge-vencido{background:#fff3cd;color:#856404;}
 .badge-pago,.badge-ativo{background:#d4edda;color:#155724;}
 .badge-suspenso,.badge-cancelado{background:#f8d7da;color:#721c24;}

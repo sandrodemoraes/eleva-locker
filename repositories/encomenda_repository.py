@@ -87,9 +87,9 @@ class EncomendaRepository:
             cursor.execute("""
                 INSERT INTO encomendas (
                     codigo, cliente, telefone, email, compartimento,
-                    data_entrada, status, operador, transportadora, observacao
+                    data_entrada, expira_em, status, operador, transportadora, observacao
                 )
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, (
                 dados["codigo"],
                 dados["cliente"],
@@ -97,6 +97,7 @@ class EncomendaRepository:
                 dados.get("email"),
                 dados["compartimento"],
                 dados["data_entrada"],
+                dados.get("expira_em"),
                 dados.get("status", "aguardando_retirada"),
                 dados.get("operador"),
                 dados.get("transportadora"),
@@ -108,17 +109,84 @@ class EncomendaRepository:
             return cursor.lastrowid
 
     @staticmethod
-    def atualizar_retirada(encomenda_id, data_retirada):
+    def atualizar_retirada(encomenda_id, data_retirada, observacao=None):
 
         with BaseRepository.get_connection() as conn:
 
-            conn.execute("""
-                UPDATE encomendas
-                SET status = 'retirada', data_retirada = ?
-                WHERE id = ?
-            """, (data_retirada, encomenda_id))
+            if observacao:
+                conn.execute("""
+                    UPDATE encomendas
+                    SET status = 'retirada', data_retirada = ?,
+                        observacao = COALESCE(observacao || ' | ', '') || ?
+                    WHERE id = ?
+                """, (data_retirada, observacao, encomenda_id))
+            else:
+                conn.execute("""
+                    UPDATE encomendas
+                    SET status = 'retirada', data_retirada = ?
+                    WHERE id = ?
+                """, (data_retirada, encomenda_id))
 
             conn.commit()
+
+    @staticmethod
+    def buscar_por_codigo_any(codigo):
+
+        with BaseRepository.get_connection() as conn:
+
+            return conn.execute("""
+                SELECT
+                    e.*,
+                    c.numero AS compartimento_numero,
+                    a.nome AS armario_nome
+                FROM encomendas e
+                LEFT JOIN compartimentos c ON c.id = e.compartimento
+                LEFT JOIN armarios a ON a.id = c.armario
+                WHERE e.codigo = ?
+                ORDER BY e.id DESC
+                LIMIT 1
+            """, (codigo,)).fetchone()
+
+    @staticmethod
+    def marcar_retidas():
+
+        from datetime import datetime
+
+        agora = datetime.now()
+        agora_str = agora.strftime("%Y-%m-%d %H:%M:%S")
+        count = 0
+
+        with BaseRepository.get_connection() as conn:
+
+            rows = conn.execute("""
+                SELECT id, expira_em FROM encomendas
+                WHERE status = 'aguardando_retirada'
+                  AND expira_em IS NOT NULL
+                  AND expira_em != ''
+            """).fetchall()
+
+            for row in rows:
+                try:
+                    expira = datetime.strptime(str(row["expira_em"])[:19], "%Y-%m-%d %H:%M:%S")
+                except ValueError:
+                    continue
+                if agora <= expira:
+                    continue
+                conn.execute("""
+                    UPDATE encomendas
+                    SET status = 'retida', retida_em = ?
+                    WHERE id = ?
+                """, (agora_str, row["id"]))
+                count += 1
+
+            conn.commit()
+
+        return count
+
+    @staticmethod
+    def contar_retidas(site_id=None):
+
+        return EncomendaRepository.contar(status="retida", site_id=site_id)
 
     @staticmethod
     def marcar_notificado(encomenda_id):

@@ -181,6 +181,17 @@ def criar_banco():
 
     # Migrações Fase 3 — Notificações
     adicionar_coluna(cursor, "encomendas", "notificado_em", "DATETIME")
+    adicionar_coluna(cursor, "encomendas", "expira_em", "DATETIME")
+    adicionar_coluna(cursor, "encomendas", "retida_em", "DATETIME")
+
+    cursor.execute("""
+        UPDATE encomendas
+        SET expira_em = datetime(data_entrada, '+7 days')
+        WHERE expira_em IS NULL
+          AND status IN ('aguardando_retirada', 'retida')
+          AND data_entrada IS NOT NULL
+          AND data_entrada != ''
+    """)
 
     ddl("""
     CREATE TABLE IF NOT EXISTS notificacoes(
