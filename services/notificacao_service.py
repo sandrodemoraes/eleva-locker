@@ -238,6 +238,7 @@ class NotificacaoService:
         compartimento,
         expira_em=None,
         reenvio=False,
+        lembrete_automatico=False,
     ):
 
         mensagem = NotificacaoService._montar_mensagem(
@@ -296,7 +297,49 @@ class NotificacaoService:
                 "mensagem": "Notificação registrada no console.",
             })
 
-        EncomendaRepository.marcar_notificado(encomenda_id)
+        if lembrete_automatico:
+            print(
+                f"\n⏰ [LEMBRETE AUTOMÁTICO — encomenda #{encomenda_id} — {cliente}]\n"
+            )
+
+        if reenvio or lembrete_automatico:
+            EncomendaRepository.marcar_lembrete_enviado(encomenda_id)
+        else:
+            EncomendaRepository.marcar_notificado(encomenda_id)
+
+        return resultados
+
+    @staticmethod
+    def lembrete_automatico(encomenda_id):
+
+        encomenda = EncomendaRepository.buscar_por_id(encomenda_id)
+
+        if not encomenda:
+            raise ValueError("Encomenda não encontrada.")
+
+        if encomenda["status"] != "aguardando_retirada":
+            raise ValueError("Encomenda não está aguardando retirada.")
+
+        resultados = NotificacaoService.notificar_encomenda_chegou(
+            encomenda_id=encomenda_id,
+            codigo=encomenda["codigo"],
+            cliente=encomenda["cliente"],
+            telefone=encomenda["telefone"],
+            email=encomenda["email"],
+            armario=encomenda["armario_nome"] or "Armário",
+            compartimento=encomenda["compartimento_numero"] or "—",
+            expira_em=encomenda["expira_em"] if encomenda["expira_em"] else None,
+            reenvio=True,
+            lembrete_automatico=True,
+        )
+
+        from services.log_service import LogService
+
+        LogService.registrar(
+            encomenda["compartimento"],
+            "Sistema",
+            f"Lembrete automático 24h encomenda #{encomenda_id} — {encomenda['cliente']}",
+        )
 
         return resultados
 
@@ -321,6 +364,7 @@ class NotificacaoService:
             compartimento=encomenda["compartimento_numero"] or "—",
             expira_em=encomenda["expira_em"] if encomenda["expira_em"] else None,
             reenvio=True,
+            lembrete_automatico=False,
         )
 
     @staticmethod

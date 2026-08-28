@@ -13,11 +13,70 @@ from services.limite_plano_service import LimitePlanoService
 class EncomendaService:
 
     @staticmethod
+    def _parse_data(valor):
+        if not valor:
+            return None
+        try:
+            return datetime.strptime(str(valor)[:19], "%Y-%m-%d %H:%M:%S")
+        except ValueError:
+            return None
+
+    @staticmethod
+    def _precisa_lembrete_automatico(encomenda):
+        if not config.ENCOMENDA_LEMBRETE_AUTOMATICO:
+            return False
+
+        if encomenda["status"] != "aguardando_retirada":
+            return False
+
+        if not (encomenda.get("telefone") or encomenda.get("email")):
+            return False
+
+        horas = config.ENCOMENDA_HORAS_REENVIO
+        agora = datetime.now()
+        entrada = EncomendaService._parse_data(encomenda.get("data_entrada"))
+
+        if not entrada:
+            return False
+
+        if (agora - entrada).total_seconds() < horas * 3600:
+            return False
+
+        ref = (
+            encomenda.get("ultimo_lembrete_em")
+            or encomenda.get("notificado_em")
+            or encomenda.get("data_entrada")
+        )
+        ref_dt = EncomendaService._parse_data(ref) or entrada
+
+        return (agora - ref_dt).total_seconds() >= horas * 3600
+
+    @staticmethod
+    def processar_lembretes_automaticos():
+        """Reenvia notificação para encomendas há mais de 24h no armário (a cada 24h)."""
+        EncomendaService.sincronizar_retidas()
+        enviados = 0
+        erros = 0
+
+        for encomenda in EncomendaRepository.listar_aguardando_retirada():
+            if not EncomendaService._precisa_lembrete_automatico(encomenda):
+                continue
+            try:
+                NotificacaoService.lembrete_automatico(encomenda["id"])
+                enviados += 1
+            except Exception as erro:
+                erros += 1
+                print(f"[LEMBRETE] Falha encomenda #{encomenda['id']}: {erro}")
+
+        return {"enviados": enviados, "erros": erros}
+
+    @staticmethod
     def sincronizar_retidas():
         return EncomendaRepository.marcar_retidas()
 
     @staticmethod
     def listar(status=None):
+        EncomendaService.processar_lembretes_automaticos()
         EncomendaService.sincronizar_retidas()
         return EncomendaRepository.listar(status)
 

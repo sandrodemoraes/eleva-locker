@@ -15,6 +15,7 @@ class DashboardService:
         site_id = get_site_id()
         Esp32Repository.marcar_offline_expirados()
         from services.encomenda_service import EncomendaService
+        EncomendaService.processar_lembretes_automaticos()
         EncomendaService.sincronizar_retidas()
 
         return {

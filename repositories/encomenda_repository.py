@@ -189,6 +189,28 @@ class EncomendaRepository:
         return EncomendaRepository.contar(status="retida", site_id=site_id)
 
     @staticmethod
+    def marcar_lembrete_enviado(encomenda_id):
+
+        from datetime import datetime
+
+        agora = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+        with BaseRepository.get_connection() as conn:
+
+            conn.execute("""
+                UPDATE encomendas
+                SET ultimo_lembrete_em = ?, notificado_em = ?
+                WHERE id = ?
+            """, (agora, agora, encomenda_id))
+
+            conn.commit()
+
+    @staticmethod
+    def listar_aguardando_retirada():
+
+        return EncomendaRepository.listar(status="aguardando_retirada")
+
+    @staticmethod
     def marcar_notificado(encomenda_id):
 
         from datetime import datetime

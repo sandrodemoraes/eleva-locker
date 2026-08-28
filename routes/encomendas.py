@@ -26,6 +26,7 @@ def listar():
         status_filtro=status,
         retidas_total=EncomendaService.contar_retidas(),
         dias_validade=config.ENCOMENDA_DIAS_VALIDADE,
+        horas_reenvio=config.ENCOMENDA_HORAS_REENVIO,
     )
 
 

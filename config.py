@@ -46,6 +46,9 @@ PAGAMENTO_DIAS_VENCIMENTO = int(os.getenv("PAGAMENTO_DIAS_VENCIMENTO", "10"))
 
 # Encomendas — prazo para retirada pelo morador (dias); após isso status retida
 ENCOMENDA_DIAS_VALIDADE = int(os.getenv("ENCOMENDA_DIAS_VALIDADE", "3"))
+# Reenvio automático de lembrete após X horas no armário (aguardando retirada)
+ENCOMENDA_HORAS_REENVIO = int(os.getenv("ENCOMENDA_HORAS_REENVIO", "24"))
+ENCOMENDA_LEMBRETE_AUTOMATICO = os.getenv("ENCOMENDA_LEMBRETE_AUTOMATICO", "1") == "1"
 
 
 def gerar_token_esp32():

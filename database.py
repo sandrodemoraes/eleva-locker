@@ -183,6 +183,7 @@ def criar_banco():
     adicionar_coluna(cursor, "encomendas", "notificado_em", "DATETIME")
     adicionar_coluna(cursor, "encomendas", "expira_em", "DATETIME")
     adicionar_coluna(cursor, "encomendas", "retida_em", "DATETIME")
+    adicionar_coluna(cursor, "encomendas", "ultimo_lembrete_em", "DATETIME")
 
     cursor.execute("""
         UPDATE encomendas
