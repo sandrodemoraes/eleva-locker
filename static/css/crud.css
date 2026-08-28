@@ -225,3 +225,65 @@ tr:hover{
 @media(max-width:900px){
     .panels,.grid-2{grid-template-columns:1fr;}
 }
+
+.autocomplete-wrap{
+    position:relative;
+}
+
+.autocomplete-list{
+    display:none;
+    position:absolute;
+    left:0;
+    right:0;
+    top:100%;
+    margin-top:4px;
+    background:#fff;
+    border:1px solid #ddd;
+    border-radius:8px;
+    box-shadow:0 8px 24px rgba(0,0,0,.12);
+    max-height:220px;
+    overflow-y:auto;
+    z-index:2100;
+    text-align:left;
+}
+
+.autocomplete-list.aberta{
+    display:block;
+}
+
+.autocomplete-item{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:10px;
+    width:100%;
+    padding:12px 14px;
+    border:none;
+    border-bottom:1px solid #eee;
+    background:#fff;
+    color:#333;
+    font-family:inherit;
+    font-size:14px;
+    cursor:pointer;
+    text-align:left;
+}
+
+.autocomplete-item:last-child{
+    border-bottom:none;
+}
+
+.autocomplete-item:hover,
+.autocomplete-item:active{
+    background:#f0f7f4;
+}
+
+.ac-nome{
+    font-weight:600;
+    flex:1;
+}
+
+.ac-tel{
+    font-size:13px;
+    color:#134736;
+    white-space:nowrap;
+}

@@ -151,16 +151,20 @@
             </div>
             <div class="form-group">
                 <label>Destinatário *</label>
-                <input type="text" name="cliente" required placeholder="Nome do morador">
+                <div class="autocomplete-wrap">
+                    <input type="text" name="cliente" id="dep_cliente" required placeholder="Nome do morador"
+                           autocomplete="off" oninput="onDestinatarioInput()" onfocus="onDestinatarioInput()" onblur="fecharSugestoesAtraso()">
+                    <div class="autocomplete-list" id="dep_sugestoes"></div>
+                </div>
             </div>
             <div class="grid-2">
                 <div class="form-group">
                     <label>Telefone</label>
-                    <input type="text" name="telefone" placeholder="(11) 99999-9999">
+                    <input type="text" name="telefone" id="dep_telefone" placeholder="(11) 99999-9999">
                 </div>
                 <div class="form-group">
                     <label>E-mail</label>
-                    <input type="email" name="email">
+                    <input type="email" name="email" id="dep_email">
                 </div>
             </div>
             <div class="form-group">
@@ -227,6 +231,72 @@ function carregarCompartimentos(){
                 select.innerHTML += '<option value="'+c.id+'">#'+c.numero+'</option>';
             });
         });
+}
+
+var sugestoesTimer = null;
+var fecharSugestoesTimer = null;
+
+function onDestinatarioInput(){
+    var q = document.getElementById('dep_cliente').value.trim();
+    if(sugestoesTimer) clearTimeout(sugestoesTimer);
+    if(q.length < 2){
+        fecharSugestoes();
+        return;
+    }
+    sugestoesTimer = setTimeout(function(){ buscarDestinatarios(q); }, 280);
+}
+
+function buscarDestinatarios(q){
+    var armarioId = document.getElementById('dep_armario').value;
+    var url = '/encomendas/destinatarios?q=' + encodeURIComponent(q);
+    if(armarioId) url += '&armario_id=' + encodeURIComponent(armarioId);
+    fetch(url)
+        .then(function(r){ return r.json(); })
+        .then(function(lista){ renderSugestoes(lista || []); })
+        .catch(function(){ fecharSugestoes(); });
+}
+
+function renderSugestoes(lista){
+    var box = document.getElementById('dep_sugestoes');
+    box.innerHTML = '';
+    if(!lista.length){
+        box.classList.remove('aberta');
+        return;
+    }
+    lista.forEach(function(item){
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'autocomplete-item';
+        var tel = item.telefone || 'sem telefone';
+        btn.innerHTML = '<span class="ac-nome">' + item.nome + '</span><span class="ac-tel">' + tel + '</span>';
+        btn.onmousedown = function(e){
+            e.preventDefault();
+            selecionarDestinatario(item);
+        };
+        box.appendChild(btn);
+    });
+    box.classList.add('aberta');
+}
+
+function selecionarDestinatario(item){
+    document.getElementById('dep_cliente').value = item.nome;
+    if(item.telefone){
+        document.getElementById('dep_telefone').value = item.telefone;
+    }
+    if(item.email){
+        document.getElementById('dep_email').value = item.email;
+    }
+    fecharSugestoes();
+}
+
+function fecharSugestoes(){
+    var box = document.getElementById('dep_sugestoes');
+    if(box) box.classList.remove('aberta');
+}
+
+function fecharSugestoesAtraso(){
+    if(fecharSugestoesTimer) clearTimeout(fecharSugestoesTimer);
+    fecharSugestoesTimer = setTimeout(fecharSugestoes, 200);
 }
 </script>
 {% endblock %}

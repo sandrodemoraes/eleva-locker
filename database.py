@@ -271,6 +271,7 @@ def criar_banco():
     """)
 
     adicionar_coluna(cursor, "usuarios", "empresa_id", "INTEGER")
+    adicionar_coluna(cursor, "usuarios", "armario_id", "INTEGER")
 
     # FASE 5 — ESCALA
     ddl("""

@@ -6,6 +6,7 @@ from services.encomenda_service import EncomendaService
 from services.armario_service import ArmarioService
 from services.compartimento_service import CompartimentoService
 from services.notificacao_service import NotificacaoService
+from services.destinatario_service import DestinatarioService
 from services.qrcode_service import QrcodeService
 
 encomendas_bp = Blueprint("encomendas", __name__)
@@ -40,6 +41,17 @@ def compartimentos_livres(armario_id):
         {"id": c["id"], "numero": c["numero"]}
         for c in livres
     ])
+
+
+@encomendas_bp.route("/encomendas/destinatarios")
+@login_required
+def destinatarios():
+
+    termo = request.args.get("q", "").strip()
+    armario_raw = request.args.get("armario_id", "").strip()
+    armario_id = int(armario_raw) if armario_raw.isdigit() else None
+
+    return jsonify(DestinatarioService.buscar(termo, armario_id))
 
 
 @encomendas_bp.route("/encomendas/depositar", methods=["POST"])
