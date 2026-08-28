@@ -6,12 +6,42 @@ from middleware.site_scope import get_site_id
 class ArmarioService:
 
     @staticmethod
+    def _rotulo(row):
+        nome = (row["nome"] or "").strip() if row else ""
+        if nome:
+            return nome
+        return f"Armário #{row['id']}"
+
+    @staticmethod
+    def _para_totem(row):
+        if not row:
+            return None
+        keys = row.keys() if hasattr(row, "keys") else row
+        max_portas = row["max_portas"] if "max_portas" in keys else None
+        return {
+            "id": row["id"],
+            "nome": ArmarioService._rotulo(row),
+            "status": row["status"] if "status" in keys else None,
+            "max_portas": max_portas,
+        }
+
+    @staticmethod
+    def listar_para_totem():
+        return [
+            ArmarioService._para_totem(row)
+            for row in ArmarioRepository.listar_para_totem()
+        ]
+
+    @staticmethod
     def listar():
         return ArmarioRepository.listar(site_id=get_site_id())
 
     @staticmethod
     def listar_ativos():
-        return ArmarioRepository.listar_ativos()
+        rows = ArmarioRepository.listar_ativos()
+        if not rows:
+            rows = ArmarioRepository.listar_para_totem()
+        return [ArmarioService._para_totem(row) for row in rows]
 
     @staticmethod
     def buscar_por_id(armario_id):
@@ -22,6 +52,13 @@ class ArmarioService:
             raise ValueError("Armário não encontrado.")
 
         return armario
+
+    @staticmethod
+    def buscar_para_totem(armario_id):
+        row = ArmarioRepository.buscar_por_id(armario_id)
+        if not row:
+            raise ValueError("Armário não encontrado.")
+        return ArmarioService._para_totem(row)
 
     @staticmethod
     def criar(dados):

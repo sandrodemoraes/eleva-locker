@@ -73,6 +73,11 @@ html,body{
     min-width:240px;
 }
 
+.totem-select option{
+    color:#1a2332;
+    background:#fff;
+}
+
 .btn-totem{
     border:none;
     border-radius:18px;

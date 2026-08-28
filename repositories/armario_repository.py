@@ -57,12 +57,27 @@ class ArmarioRepository:
         with BaseRepository.get_connection() as conn:
 
             return conn.execute("""
-                SELECT id, nome
+                SELECT id, nome, status
                 FROM armarios
                 WHERE status IS NULL
-                   OR TRIM(status) = ''
-                   OR LOWER(TRIM(status)) IN ('ativo', 'active', '1')
-                ORDER BY nome
+                   OR TRIM(COALESCE(status, '')) = ''
+                   OR LOWER(TRIM(status)) NOT IN (
+                       'inativo', 'inactive', '0', 'desativado',
+                       'cancelado', 'suspenso', 'off'
+                   )
+                ORDER BY nome, id
+            """).fetchall()
+
+    @staticmethod
+    def listar_para_totem():
+        """Todos os armários visíveis no totem (fallback se listar_ativos vazio)."""
+
+        with BaseRepository.get_connection() as conn:
+
+            return conn.execute("""
+                SELECT id, nome, status
+                FROM armarios
+                ORDER BY nome, id
             """).fetchall()
 
     @staticmethod

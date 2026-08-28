@@ -50,8 +50,8 @@ ENCOMENDA_DIAS_VALIDADE = int(os.getenv("ENCOMENDA_DIAS_VALIDADE", "3"))
 ENCOMENDA_HORAS_REENVIO = int(os.getenv("ENCOMENDA_HORAS_REENVIO", "24"))
 ENCOMENDA_LEMBRETE_AUTOMATICO = os.getenv("ENCOMENDA_LEMBRETE_AUTOMATICO", "1") == "1"
 
-# Totem — ID fixo do armário (ex.: 2). Se definido, /totem redireciona para /totem/<id>
-_totem_armario = os.getenv("TOTEM_ARMARIO_ID", "").strip()
+# Totem — ID fixo do armário (default 2 = Matriz bancada). /totem → /totem/<id>
+_totem_armario = os.getenv("TOTEM_ARMARIO_ID", "2").strip()
 TOTEM_ARMARIO_ID = _totem_armario if _totem_armario.isdigit() else None
 
 TOTEM_RATE_LIMIT = int(os.getenv("TOTEM_RATE_LIMIT", "8"))

@@ -21,19 +21,19 @@
 
 <div class="totem-badge">v{{ totem_versao|default('2') }}</div>
 
-<div class="totem" data-armario-id="{{ armario['id'] if armario else '' }}" data-max-portas="{{ max_portas }}">
+<div class="totem" data-armario-id="{{ armario.id if armario else '' }}" data-max-portas="{{ max_portas }}">
 
     <section id="tela-inicio" class="tela tela-ativa">
         <div class="totem-logo">
             <img class="totem-logo-img" src="{{ url_for('static', filename='brand/logo-eleva-locker-icon.svg') }}" alt="ELEVA LOCKER">
             <h1>ELEVA LOCKER</h1>
             {% if armario %}
-            <p class="totem-local"><i class="fa-solid fa-location-dot"></i> {{ armario['nome'] }}</p>
+            <p class="totem-local"><i class="fa-solid fa-location-dot"></i> {{ armario.nome }}</p>
             {% elif armarios %}
             <select id="selArmario" class="totem-select" onchange="if(this.value) location.href='/totem/'+this.value">
                 <option value="">Selecione o armário</option>
                 {% for a in armarios %}
-                <option value="{{ a['id'] }}">{{ a['nome'] }}</option>
+                <option value="{{ a.id }}">{{ a.nome }}</option>
                 {% endfor %}
             </select>
             {% elif armario_inexistente %}

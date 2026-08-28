@@ -70,21 +70,18 @@ def index(armario_id=None):
 
     if armario_id:
         try:
-            armario = ArmarioService.buscar_por_id(armario_id)
+            armario = ArmarioService.buscar_para_totem(armario_id)
         except ValueError:
             armario = None
 
     armario_inexistente = bool(armario_id and not armario)
     armarios_lista = None
-    if not armario and not config.TOTEM_ARMARIO_ID:
+    if not armario:
         armarios_lista = todos_armarios
 
     max_portas = 8
     if armario:
-        try:
-            max_portas = armario["max_portas"] or 8
-        except (KeyError, IndexError, TypeError):
-            max_portas = 8
+        max_portas = armario.get("max_portas") or 8
 
     ajuda_tel = (config.TOTEM_AJUDA_TELEFONE or "").strip()
     ajuda_tel_fmt, ajuda_tel_link = _formatar_telefone_ajuda(ajuda_tel)
