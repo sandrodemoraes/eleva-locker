@@ -10,7 +10,7 @@
 @media(max-width:900px){.chart-grid{grid-template-columns:1fr;}}
 .kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:15px;margin-bottom:25px;}
 .kpi{background:#fff;border-radius:12px;padding:18px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.06);}
-.kpi .val{font-size:2rem;font-weight:700;color:#2563eb;}
+.kpi .val{font-size:2rem;font-weight:700;color:#134736;}
 .kpi .lbl{color:#666;font-size:.9rem;margin-top:5px;}
 </style>
 {% endblock %}
@@ -67,7 +67,7 @@ new Chart(document.getElementById('chartEncomendas'), {
     type: 'line',
     data: {
         labels: dias,
-        datasets: [{ label: 'Encomendas', data: totais, borderColor: '#2563eb', tension: 0.3, fill: false }]
+        datasets: [{ label: 'Encomendas', data: totais, borderColor: '#2D8A6E', tension: 0.3, fill: false }]
     },
     options: { responsive: true, plugins: { legend: { display: false } } }
 });

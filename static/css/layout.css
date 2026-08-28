@@ -419,7 +419,7 @@ a{
 
 .usuario small{
 
-    color:#d5dff0;
+    color:rgba(255,255,255,.65);
 
     display:block;
 

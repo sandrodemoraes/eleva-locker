@@ -23,7 +23,7 @@ class QrcodeService:
         qr.add_data(conteudo)
         qr.make(fit=True)
 
-        img = qr.make_image(fill_color="#0f3d75", back_color="white")
+        img = qr.make_image(fill_color="#134736", back_color="white")
 
         buffer = io.BytesIO()
         img.save(buffer, format="PNG")

@@ -5,7 +5,7 @@
     "start_url": "/totem",
     "display": "fullscreen",
     "orientation": "portrait",
-    "background_color": "#0f3d75",
-    "theme_color": "#0f3d75",
+    "background_color": "#134736",
+    "theme_color": "#134736",
     "icons": []
 }

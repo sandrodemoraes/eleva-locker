@@ -4,7 +4,7 @@
 html,body{
     height:100%;
     font-family:"Segoe UI",system-ui,sans-serif;
-    background:linear-gradient(160deg,#0f3d75 0%,#1a5fae 50%,#2563eb 100%);
+    background:linear-gradient(160deg,#0f3d31 0%,#134736 45%,#1a6b54 100%);
     color:#fff;
     overflow:hidden;
     user-select:none;
