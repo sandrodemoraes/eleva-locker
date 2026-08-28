@@ -1,139 +1,227 @@
 import json
 import re
 import smtplib
-import urllib.request
+import time
 import urllib.error
+import urllib.request
 from datetime import datetime
 from email.mime.text import MIMEText
 
 import config
-from repositories.notificacao_repository import NotificacaoRepository
 from repositories.encomenda_repository import EncomendaRepository
+from repositories.notificacao_repository import NotificacaoRepository
 
 
 class NotificacaoService:
 
     @staticmethod
-    def _normalizar_telefone(telefone):
+    def whatsapp_configurado():
+        if config.NOTIF_MODO == "console":
+            return False
+        if config.WHATSAPP_PROVIDER == "meta":
+            return bool(config.WHATSAPP_META_TOKEN and config.WHATSAPP_META_PHONE_ID)
+        return bool(config.WHATSAPP_API_URL and config.WHATSAPP_INSTANCIA)
 
+    @staticmethod
+    def _evolution_request(method, path, payload=None):
+        url = f"{config.WHATSAPP_API_URL.rstrip('/')}{path}"
+        headers = {
+            "apikey": config.WHATSAPP_API_KEY,
+            "Content-Type": "application/json",
+        }
+        data = json.dumps(payload).encode("utf-8") if payload is not None else None
+        req = urllib.request.Request(url, data=data, headers=headers, method=method)
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            return json.loads(resp.read().decode("utf-8"))
+
+    @staticmethod
+    def _extrair_status_instancia(instancia):
+        if isinstance(instancia, dict):
+            for chave in ("connectionStatus", "status", "state"):
+                if instancia.get(chave):
+                    return str(instancia[chave]).lower()
+            inner = instancia.get("instance") or instancia.get("data") or {}
+            if isinstance(inner, dict):
+                for chave in ("connectionStatus", "status", "state"):
+                    if inner.get(chave):
+                        return str(inner[chave]).lower()
+        return None
+
+    @staticmethod
+    def _buscar_instancia_evolution():
+        dados = NotificacaoService._evolution_request("GET", "/instance/fetchInstances")
+        alvo = config.WHATSAPP_INSTANCIA
+        lista = dados if isinstance(dados, list) else dados.get("instances", [])
+
+        for item in lista:
+            nome = (
+                item.get("name")
+                or item.get("instanceName")
+                or (item.get("instance") or {}).get("instanceName")
+            )
+            if nome == alvo:
+                return item
+        return None
+
+    @staticmethod
+    def status_whatsapp():
+        info = {
+            "ativo": config.NOTIF_WHATSAPP_ATIVO,
+            "modo": config.NOTIF_MODO,
+            "configurado": NotificacaoService.whatsapp_configurado(),
+            "instancia": config.WHATSAPP_INSTANCIA,
+            "conexao": None,
+            "pronto": False,
+            "mensagem": "",
+        }
+
+        if not config.NOTIF_WHATSAPP_ATIVO:
+            info["mensagem"] = "WhatsApp desativado (NOTIF_WHATSAPP_ATIVO=0)."
+            return info
+
+        if config.NOTIF_MODO == "console":
+            info["mensagem"] = (
+                "NOTIF_MODO=console — não envia de verdade. "
+                "Altere para producao no .env e reinicie py app.py"
+            )
+            return info
+
+        if not NotificacaoService.whatsapp_configurado():
+            info["mensagem"] = "WHATSAPP_API_URL ou WHATSAPP_INSTANCIA não configurados."
+            return info
+
+        try:
+            inst = NotificacaoService._buscar_instancia_evolution()
+            if not inst:
+                info["mensagem"] = (
+                    f'Instância "{config.WHATSAPP_INSTANCIA}" não encontrada no manager.'
+                )
+                return info
+
+            conexao = NotificacaoService._extrair_status_instancia(inst)
+            info["conexao"] = conexao
+
+            if conexao in ("open", "connected"):
+                info["pronto"] = True
+                info["mensagem"] = "WhatsApp conectado e pronto para enviar."
+            else:
+                info["mensagem"] = (
+                    f'WhatsApp desconectado (status: {conexao or "desconhecido"}). '
+                    "Abra o manager e escaneie o QR novamente."
+                )
+        except Exception as erro:
+            info["mensagem"] = f"Evolution API inacessível: {erro}"
+
+        return info
+
+    @staticmethod
+    def validar_telefone_br(telefone):
         numeros = re.sub(r"\D", "", telefone or "")
 
         if not numeros:
-            return None
+            return None, "Telefone não informado."
 
-        if len(numeros) <= 11:
-            numeros = "55" + numeros
+        if numeros.startswith("55") and len(numeros) > 11:
+            numeros = numeros[2:]
 
-        return numeros
-
-    @staticmethod
-    def _formatar_prazo(expira_em):
-        if not expira_em:
-            return None
-        try:
-            dt = datetime.strptime(str(expira_em)[:19], "%Y-%m-%d %H:%M:%S")
-            return dt.strftime("%d/%m/%Y às %H:%M")
-        except ValueError:
-            return str(expira_em)[:16]
-
-    @staticmethod
-    def _dias_restantes(expira_em):
-        if not expira_em:
-            return config.ENCOMENDA_DIAS_VALIDADE
-        try:
-            expira = datetime.strptime(str(expira_em)[:19], "%Y-%m-%d %H:%M:%S")
-            delta = expira.date() - datetime.now().date()
-            return max(0, delta.days)
-        except ValueError:
-            return config.ENCOMENDA_DIAS_VALIDADE
-
-    @staticmethod
-    def _montar_mensagem(
-        cliente,
-        armario,
-        compartimento,
-        codigo,
-        expira_em=None,
-        reenvio=False,
-    ):
-
-        dias_prazo = config.ENCOMENDA_DIAS_VALIDADE
-        prazo_fmt = NotificacaoService._formatar_prazo(expira_em)
-        dias_rest = NotificacaoService._dias_restantes(expira_em)
-
-        if reenvio:
-            intro = (
-                f"Olá {cliente}!\n\n"
-                f"🔔 *Lembrete ELEVA LOCKER* — sua encomenda ainda aguarda retirada.\n"
-            )
+        if len(numeros) == 10:
+            ddd = numeros[:2]
+            if ddd[0] == "0" or int(ddd) < 11:
+                return None, "DDD inválido. Use DDD + número (ex: 11 99999-9999)."
+        elif len(numeros) == 11:
+            ddd = numeros[:2]
+            nono = numeros[2]
+            if ddd[0] == "0" or int(ddd) < 11:
+                return None, "DDD inválido. Use DDD + número (ex: 11 99999-9999)."
+            if nono != "9":
+                return None, "Celular deve ter 9 dígitos após o DDD (ex: 11 99999-9999)."
         else:
-            intro = (
-                f"Olá {cliente}!\n\n"
-                f"Sua encomenda chegou no *ELEVA LOCKER*.\n"
-            )
+            return None, "Telefone inválido. Use DDD + número com 10 ou 11 dígitos."
 
-        corpo = (
-            f"{intro}"
-            f"📍 Local: {armario}\n"
-            f"📦 Compartimento: #{compartimento}\n"
-            f"🔑 Código de retirada: *{codigo}*\n"
+        return "55" + numeros, None
+
+    @staticmethod
+    def _normalizar_telefone(telefone):
+        numero, erro = NotificacaoService.validar_telefone_br(telefone)
+        return numero if not erro else None
+
+    @staticmethod
+    def _link_totem(armario_id=None):
+        base = config.APP_URL_BASE.rstrip("/")
+        if armario_id:
+            return f"{base}/totem/{armario_id}"
+        return f"{base}/totem"
+
+    @staticmethod
+    def _montar_mensagem_whatsapp(cliente, armario, compartimento, codigo, armario_id=None, expira_em=None):
+        totem = NotificacaoService._link_totem(armario_id)
+        validade = ""
+        if expira_em:
+            try:
+                dt = datetime.strptime(expira_em, "%Y-%m-%d %H:%M:%S")
+                validade = f"\n⏰ Válido até *{dt.strftime('%d/%m/%Y')}*\n"
+            except ValueError:
+                validade = "\n"
+        return (
+            f"Olá *{cliente}*! 📦\n\n"
+            f"Sua encomenda chegou no *ELEVA LOCKER*.\n\n"
+            f"📍 {armario}\n"
+            f"🚪 Compartimento *#{compartimento}*\n"
+            f"🔑 Código: *{codigo}*{validade}\n"
+            f"👉 Retire no totem:\n{totem}\n\n"
+            f"_Digite o código na tela do armário._"
         )
 
-        if prazo_fmt:
-            corpo += f"⏰ Retire até: *{prazo_fmt}*\n"
+    @staticmethod
+    def _montar_mensagem_email(cliente, armario, compartimento, codigo, armario_id=None, expira_em=None):
+        totem = NotificacaoService._link_totem(armario_id)
+        validade = f"\nVálido até: {expira_em}\n" if expira_em else ""
+        return (
+            f"Olá {cliente}!\n\n"
+            f"Sua encomenda chegou no ELEVA LOCKER.\n\n"
+            f"Local: {armario}\n"
+            f"Compartimento: #{compartimento}\n"
+            f"Código de retirada: {codigo}{validade}\n"
+            f"Retire no totem: {totem}\n"
+        )
 
-        if dias_rest == 0:
-            corpo += (
-                f"\n⚠️ *Último dia* para retirar pelo totem. "
-                f"Após o prazo, o pacote será *retido* na portaria.\n"
-            )
-        elif dias_rest == 1:
-            corpo += (
-                f"\n⚠️ Resta *1 dia* para retirar. "
-                f"Depois disso o pacote será *retido* e só poderá ser retirado na portaria.\n"
-            )
-        else:
-            corpo += (
-                f"\n⚠️ *Atenção:* se não retirar em até *{dias_prazo} dias*, "
-                f"o pacote será *retido* e deverá ser retirado na portaria.\n"
-            )
+    @staticmethod
+    def formatar_resultado_notificacoes(resultados):
+        if not resultados:
+            return ""
 
-        if reenvio and dias_rest > 0:
-            corpo += (
-                f"\n📌 Faltam *{dias_rest} dia(s)* antes da retenção automática.\n"
-            )
-
-        corpo += "\nApresente este código no totem ou informe à portaria."
-
-        return corpo
+        partes = []
+        for item in resultados:
+            canal = item.get("canal", "?")
+            if item.get("sucesso"):
+                sufixo = " (simulado)" if item.get("simulado") else ""
+                partes.append(f"{canal}: OK{sufixo}")
+            else:
+                partes.append(f"{canal}: {item.get('mensagem', 'falhou')}")
+        return " — ".join(partes)
 
     @staticmethod
     def _registrar(encomenda_id, canal, destinatario, mensagem, status, detalhe=None):
-
         NotificacaoRepository.registrar(
             encomenda_id, canal, destinatario, mensagem, status, detalhe
         )
 
     @staticmethod
     def _enviar_email(destinatario, assunto, mensagem):
-
         if not destinatario:
             return {"sucesso": False, "mensagem": "E-mail não informado."}
 
         if config.NOTIF_MODO == "console" or not config.SMTP_HOST:
-
             print(f"\n📧 [EMAIL → {destinatario}]\n{assunto}\n{mensagem}\n")
             return {"sucesso": True, "mensagem": "E-mail registrado (modo console).", "simulado": True}
 
         try:
-
             msg = MIMEText(mensagem, "plain", "utf-8")
             msg["Subject"] = assunto
             msg["From"] = config.SMTP_FROM
             msg["To"] = destinatario
 
             with smtplib.SMTP(config.SMTP_HOST, config.SMTP_PORT) as server:
-
                 server.starttls()
                 server.login(config.SMTP_USER, config.SMTP_PASS)
                 server.send_message(msg)
@@ -141,68 +229,237 @@ class NotificacaoService:
             return {"sucesso": True, "mensagem": "E-mail enviado."}
 
         except Exception as erro:
-
             return {"sucesso": False, "mensagem": str(erro)}
+
+    @staticmethod
+    def _parse_erro_whatsapp(erro):
+        if isinstance(erro, urllib.error.HTTPError):
+            try:
+                corpo = erro.read().decode("utf-8")
+                dados = json.loads(corpo)
+                if isinstance(dados, dict):
+                    return dados.get("message") or dados.get("error") or corpo[:200]
+            except Exception:
+                pass
+            return f"HTTP {erro.code}: {erro.reason}"
+        return str(erro)
+
+    @staticmethod
+    def _item_resposta_evolution(dados):
+        if isinstance(dados, list):
+            if not dados:
+                raise ValueError("Evolution API retornou lista vazia.")
+            return dados[0]
+        if isinstance(dados, dict):
+            return dados
+        raise ValueError(f"Resposta inesperada da Evolution: {type(dados).__name__}")
+
+    @staticmethod
+    def _variantes_numero_br(numero):
+        """Tenta formatos alternativos (9º dígito BR) — contorna bug da Evolution v2.3."""
+        limpo = re.sub(r"\D", "", numero or "")
+        if not limpo.startswith("55"):
+            return [limpo] if limpo else []
+        local = limpo[2:]
+        variantes = []
+        for cand in (limpo,):
+            if cand not in variantes:
+                variantes.append(cand)
+        if len(local) == 11 and local[2] == "9":
+            sem_nono = "55" + local[:2] + local[3:]
+            if sem_nono not in variantes:
+                variantes.append(sem_nono)
+        elif len(local) == 10 and local[2] in "6789":
+            com_nono = "55" + local[:2] + "9" + local[2:]
+            if com_nono not in variantes:
+                variantes.append(com_nono)
+        return variantes
+
+    @staticmethod
+    def _numeros_equivalentes_br(a, b):
+        da = re.sub(r"\D", "", a or "")
+        db = re.sub(r"\D", "", b or "")
+        if da == db:
+            return True
+        if da.startswith("55") and db.startswith("55"):
+            la, lb = da[2:], db[2:]
+            if len(la) == 11 and len(lb) == 10 and la[2] == "9" and la[:2] + la[3:] == lb:
+                return True
+            if len(lb) == 11 and len(la) == 10 and lb[2] == "9" and lb[:2] + lb[3:] == la:
+                return True
+        return da[-10:] == db[-10:]
+
+    @staticmethod
+    def _validar_resposta_evolution(dados, numero_destino):
+        item = NotificacaoService._item_resposta_evolution(dados)
+
+        if item.get("error"):
+            raise ValueError(str(item["error"]))
+
+        erro = item.get("message")
+        if isinstance(erro, str) and any(
+            palavra in erro.lower()
+            for palavra in ("error", "invalid", "not found", "exist", "fail")
+        ):
+            raise ValueError(erro)
+
+        status = str(item.get("status") or "").upper()
+        if status in ("ERROR", "FAILED"):
+            raise ValueError(item.get("message") or f"Status {status}")
+
+        jid = (item.get("key") or {}).get("remoteJid") or ""
+        if jid and numero_destino:
+            dest = re.sub(r"\D", "", jid.split("@")[0])
+            esperado = re.sub(r"\D", "", numero_destino)
+            if dest and esperado and not NotificacaoService._numeros_equivalentes_br(dest, esperado):
+                raise ValueError(
+                    f"Evolution enviou para {dest}, esperado {esperado}"
+                )
+
+        return item
+
+    @staticmethod
+    def _enviar_whatsapp_evolution_um(numero, mensagem):
+        url = (
+            f"{config.WHATSAPP_API_URL.rstrip('/')}/message/sendText/"
+            f"{config.WHATSAPP_INSTANCIA}"
+        )
+        payload = json.dumps({
+            "number": numero,
+            "text": mensagem,
+        }).encode("utf-8")
+
+        req = urllib.request.Request(
+            url,
+            data=payload,
+            headers={
+                "Content-Type": "application/json",
+                "apikey": config.WHATSAPP_API_KEY,
+            },
+            method="POST",
+        )
+
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            dados = json.loads(resp.read().decode("utf-8"))
+
+        item = NotificacaoService._validar_resposta_evolution(dados, numero)
+        return {"raw": dados, "item": item, "status": item.get("status"), "numero_usado": numero}
+
+    @staticmethod
+    def _enviar_whatsapp_evolution(numero, mensagem):
+        status = NotificacaoService.status_whatsapp()
+        if not status["pronto"]:
+            raise ValueError(status["mensagem"] or "WhatsApp não está pronto.")
+
+        ultimo_erro = None
+        for candidato in NotificacaoService._variantes_numero_br(numero):
+            try:
+                return NotificacaoService._enviar_whatsapp_evolution_um(candidato, mensagem)
+            except ValueError as erro:
+                ultimo_erro = str(erro)
+        raise ValueError(ultimo_erro or "Falha ao enviar WhatsApp.")
+
+    @staticmethod
+    def _enviar_whatsapp_meta(numero, mensagem):
+        url = f"https://graph.facebook.com/v18.0/{config.WHATSAPP_META_PHONE_ID}/messages"
+        payload = json.dumps({
+            "messaging_product": "whatsapp",
+            "to": numero,
+            "type": "text",
+            "text": {"body": mensagem},
+        }).encode("utf-8")
+
+        req = urllib.request.Request(
+            url,
+            data=payload,
+            headers={
+                "Content-Type": "application/json",
+                "Authorization": f"Bearer {config.WHATSAPP_META_TOKEN}",
+            },
+            method="POST",
+        )
+
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            return json.loads(resp.read().decode("utf-8"))
 
     @staticmethod
     def _enviar_whatsapp(telefone, mensagem):
+        numero, erro = NotificacaoService.validar_telefone_br(telefone)
+        if erro:
+            return {"sucesso": False, "mensagem": erro}
 
-        numero = NotificacaoService._normalizar_telefone(telefone)
-
-        if not numero:
-            return {"sucesso": False, "mensagem": "Telefone inválido."}
-
-        if config.NOTIF_MODO == "console" or not config.WHATSAPP_API_URL:
-
+        if config.NOTIF_MODO == "console" or not NotificacaoService.whatsapp_configurado():
             print(f"\n💬 [WHATSAPP → {numero}]\n{mensagem}\n")
             return {"sucesso": True, "mensagem": "WhatsApp registrado (modo console).", "simulado": True}
 
-        try:
+        ultimo_erro = "Falha ao enviar WhatsApp."
+        for tentativa in range(1, config.WHATSAPP_RETRY_MAX + 1):
+            try:
+                if config.WHATSAPP_PROVIDER == "meta":
+                    dados = NotificacaoService._enviar_whatsapp_meta(numero, mensagem)
+                else:
+                    dados = NotificacaoService._enviar_whatsapp_evolution(numero, mensagem)
 
-            url = (
-                f"{config.WHATSAPP_API_URL.rstrip('/')}/message/sendText/"
-                f"{config.WHATSAPP_INSTANCIA}"
-            )
+                detalhe = ""
+                if isinstance(dados, dict):
+                    detalhe = str(dados.get("status") or "")
+                    item = dados.get("item") or {}
+                    jid = (item.get("key") or {}).get("remoteJid")
+                    if jid:
+                        detalhe = (detalhe + " → " + jid).strip(" →")
+                return {
+                    "sucesso": True,
+                    "mensagem": "WhatsApp enviado.",
+                    "dados": dados,
+                    "detalhe": detalhe,
+                    "tentativa": tentativa,
+                }
 
-            payload = json.dumps({
-                "number": numero,
-                "text": mensagem,
-            }).encode("utf-8")
+            except Exception as erro:
+                ultimo_erro = NotificacaoService._parse_erro_whatsapp(erro)
+                if tentativa < config.WHATSAPP_RETRY_MAX:
+                    time.sleep(config.WHATSAPP_RETRY_DELAY)
 
-            req = urllib.request.Request(
-                url,
-                data=payload,
-                headers={
-                    "Content-Type": "application/json",
-                    "apikey": config.WHATSAPP_API_KEY,
-                },
-                method="POST",
-            )
+        return {"sucesso": False, "mensagem": ultimo_erro}
 
-            with urllib.request.urlopen(req, timeout=10) as resp:
-                dados = json.loads(resp.read().decode("utf-8"))
+    @staticmethod
+    def testar_whatsapp(telefone):
+        numero, erro = NotificacaoService.validar_telefone_br(telefone)
+        if erro:
+            raise ValueError(erro)
 
-            return {"sucesso": True, "mensagem": "WhatsApp enviado.", "dados": dados}
+        mensagem = (
+            "✅ *ELEVA LOCKER* — teste de WhatsApp\n\n"
+            "Se você recebeu esta mensagem, a integração está funcionando!"
+        )
+        resultado = NotificacaoService._enviar_whatsapp(telefone, mensagem)
 
-        except Exception as erro:
+        NotificacaoService._registrar(
+            None,
+            "whatsapp",
+            numero,
+            mensagem,
+            "enviado" if resultado["sucesso"] else "erro",
+            resultado.get("mensagem"),
+        )
 
-            return {"sucesso": False, "mensagem": str(erro)}
+        if not resultado["sucesso"]:
+            raise ValueError(resultado["mensagem"])
+
+        return resultado
 
     @staticmethod
     def _enviar_sms(telefone, mensagem):
-
         numero = NotificacaoService._normalizar_telefone(telefone)
 
         if not numero:
             return {"sucesso": False, "mensagem": "Telefone inválido."}
 
         if config.NOTIF_MODO == "console" or not config.SMS_API_URL:
-
             print(f"\n📱 [SMS → {numero}]\n{mensagem}\n")
             return {"sucesso": True, "mensagem": "SMS registrado (modo console).", "simulado": True}
 
         try:
-
             payload = json.dumps({
                 "to": numero,
                 "message": mensagem,
@@ -224,7 +481,6 @@ class NotificacaoService:
             return {"sucesso": True, "mensagem": "SMS enviado.", "dados": dados}
 
         except Exception as erro:
-
             return {"sucesso": False, "mensagem": str(erro)}
 
     @staticmethod
@@ -236,76 +492,67 @@ class NotificacaoService:
         email,
         armario,
         compartimento,
+        armario_id=None,
         expira_em=None,
-        reenvio=False,
-        lembrete_automatico=False,
     ):
-
-        mensagem = NotificacaoService._montar_mensagem(
-            cliente, armario, compartimento, codigo,
-            expira_em=expira_em,
-            reenvio=reenvio,
+        mensagem_whatsapp = NotificacaoService._montar_mensagem_whatsapp(
+            cliente, armario, compartimento, codigo, armario_id, expira_em
         )
-
-        assunto = (
-            f"ELEVA LOCKER — Lembrete de retirada (código {codigo})"
-            if reenvio
-            else f"ELEVA LOCKER — Encomenda disponível (código {codigo})"
+        mensagem_email = NotificacaoService._montar_mensagem_email(
+            cliente, armario, compartimento, codigo, armario_id, expira_em
         )
+        assunto = f"ELEVA LOCKER — Encomenda disponível (código {codigo})"
         resultados = []
 
         if config.NOTIF_EMAIL_ATIVO and email:
-
-            r = NotificacaoService._enviar_email(email, assunto, mensagem)
+            r = NotificacaoService._enviar_email(email, assunto, mensagem_email)
             NotificacaoService._registrar(
-                encomenda_id, "email", email, mensagem,
+                encomenda_id, "email", email, mensagem_email,
                 "enviado" if r["sucesso"] else "erro",
                 r.get("mensagem"),
             )
             resultados.append({"canal": "email", **r})
 
         if config.NOTIF_WHATSAPP_ATIVO and telefone:
-
-            r = NotificacaoService._enviar_whatsapp(telefone, mensagem)
+            r = NotificacaoService._enviar_whatsapp(telefone, mensagem_whatsapp)
             NotificacaoService._registrar(
-                encomenda_id, "whatsapp", telefone, mensagem,
+                encomenda_id, "whatsapp", telefone, mensagem_whatsapp,
                 "enviado" if r["sucesso"] else "erro",
-                r.get("mensagem"),
+                r.get("detalhe") or r.get("mensagem"),
             )
             resultados.append({"canal": "whatsapp", **r})
 
         if config.NOTIF_SMS_ATIVO and telefone:
-
-            r = NotificacaoService._enviar_sms(telefone, mensagem)
+            r = NotificacaoService._enviar_sms(telefone, mensagem_whatsapp)
             NotificacaoService._registrar(
-                encomenda_id, "sms", telefone, mensagem,
+                encomenda_id, "sms", telefone, mensagem_whatsapp,
                 "enviado" if r["sucesso"] else "erro",
                 r.get("mensagem"),
             )
             resultados.append({"canal": "sms", **r})
 
         if not resultados:
-
             NotificacaoService._registrar(
                 encomenda_id, "console", telefone or email or "—",
-                mensagem, "enviado", "Nenhum canal ativo — modo console",
+                mensagem_whatsapp, "enviado", "Nenhum canal ativo — modo console",
             )
-            print(f"\n🔔 [NOTIFICAÇÃO — encomenda #{encomenda_id}]\n{mensagem}\n")
+            print(f"\n🔔 [NOTIFICAÇÃO — encomenda #{encomenda_id}]\n{mensagem_whatsapp}\n")
             resultados.append({
                 "canal": "console",
                 "sucesso": True,
                 "mensagem": "Notificação registrada no console.",
+                "simulado": True,
             })
 
-        if lembrete_automatico:
-            print(
-                f"\n⏰ [LEMBRETE AUTOMÁTICO — encomenda #{encomenda_id} — {cliente}]\n"
-            )
+        whatsapp_ok = any(
+            r.get("canal") == "whatsapp" and r.get("sucesso") and not r.get("simulado")
+            for r in resultados
+        )
+        precisa_whatsapp = config.NOTIF_WHATSAPP_ATIVO and bool(telefone)
 
-        if reenvio or lembrete_automatico:
-            EncomendaRepository.marcar_lembrete_enviado(encomenda_id)
-        else:
-            EncomendaRepository.marcar_notificado(encomenda_id)
+        if whatsapp_ok or not precisa_whatsapp:
+            if any(r.get("sucesso") for r in resultados):
+                EncomendaRepository.marcar_notificado(encomenda_id)
 
         return resultados
 
@@ -327,10 +574,9 @@ class NotificacaoService:
             telefone=encomenda["telefone"],
             email=encomenda["email"],
             armario=encomenda["armario_nome"] or "Armário",
+            armario_id=encomenda["compartimento_armario"] if encomenda["compartimento_armario"] else None,
             compartimento=encomenda["compartimento_numero"] or "—",
             expira_em=encomenda["expira_em"] if encomenda["expira_em"] else None,
-            reenvio=True,
-            lembrete_automatico=True,
         )
 
         from services.log_service import LogService
@@ -338,14 +584,13 @@ class NotificacaoService:
         LogService.registrar(
             encomenda["compartimento"],
             "Sistema",
-            f"Lembrete automático 24h encomenda #{encomenda_id} — {encomenda['cliente']}",
+            f"Lembrete automático encomenda #{encomenda_id} — {encomenda['cliente']}",
         )
 
         return resultados
 
     @staticmethod
     def reenviar(encomenda_id):
-
         encomenda = EncomendaRepository.buscar_por_id(encomenda_id)
 
         if not encomenda:
@@ -361,10 +606,9 @@ class NotificacaoService:
             telefone=encomenda["telefone"],
             email=encomenda["email"],
             armario=encomenda["armario_nome"] or "Armário",
+            armario_id=encomenda["compartimento_armario"] if encomenda["compartimento_armario"] else None,
             compartimento=encomenda["compartimento_numero"] or "—",
             expira_em=encomenda["expira_em"] if encomenda["expira_em"] else None,
-            reenvio=True,
-            lembrete_automatico=False,
         )
 
     @staticmethod

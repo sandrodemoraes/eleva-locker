@@ -207,6 +207,23 @@ def criar_banco():
     )
     """)
 
+    ddl("""
+    CREATE TABLE IF NOT EXISTS totem_ajuda_pedidos(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        armario_id INTEGER,
+        armario_nome TEXT,
+        status TEXT NOT NULL DEFAULT 'pendente',
+        whatsapp_enviado INTEGER DEFAULT 0,
+        whatsapp_detalhe TEXT,
+        ip_origem TEXT,
+        criado_em DATETIME DEFAULT CURRENT_TIMESTAMP,
+        atendido_em DATETIME,
+        atendido_por TEXT
+    )
+    """)
+
+    adicionar_coluna(cursor, "armarios", "max_portas", "INTEGER DEFAULT 16")
+
     cursor.execute("""
         UPDATE esp32 SET status = 'offline'
         WHERE status IS NULL OR status = ''

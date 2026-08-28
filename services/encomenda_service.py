@@ -4,10 +4,12 @@ from datetime import datetime, timedelta
 import config
 from repositories.encomenda_repository import EncomendaRepository
 from repositories.compartimento_repository import CompartimentoRepository
+from repositories.base_repository import BaseRepository
 from services.log_service import LogService
 from services.esp32_service import Esp32Service
 from services.notificacao_service import NotificacaoService
 from services.limite_plano_service import LimitePlanoService
+from middleware.operador_scope import operador_acessa_armario
 
 
 class EncomendaService:
@@ -76,6 +78,7 @@ class EncomendaService:
                 continue
             try:
                 NotificacaoService.lembrete_automatico(encomenda["id"])
+                EncomendaRepository.marcar_lembrete_enviado(encomenda["id"])
                 enviados += 1
             except Exception as erro:
                 erros += 1
@@ -140,6 +143,8 @@ class EncomendaService:
         operador,
         transportadora=None,
         observacao=None,
+        notificar=True,
+        reverter_se_falhar_abertura=False,
     ):
 
         cliente = cliente.strip()
@@ -147,13 +152,22 @@ class EncomendaService:
         if not cliente:
             raise ValueError("Nome do destinatário é obrigatório.")
 
+        telefone = telefone.strip() if telefone else ""
+
+        if config.NOTIF_WHATSAPP_ATIVO and notificar:
+            if not telefone:
+                raise ValueError("Telefone é obrigatório para enviar WhatsApp ao destinatário.")
+            _, erro_tel = NotificacaoService.validar_telefone_br(telefone)
+            if erro_tel:
+                raise ValueError(erro_tel)
+
         compartimento = CompartimentoRepository.buscar_por_id(compartimento_id)
 
         if not compartimento:
             raise ValueError("Compartimento não encontrado.")
 
-        if compartimento["status"] != "livre":
-            raise ValueError("Compartimento não está livre.")
+        if not operador_acessa_armario(compartimento["armario"]):
+            raise ValueError("Sem permissão para depositar neste armário.")
 
         empresa_id = LimitePlanoService.empresa_id_do_compartimento(compartimento_id)
 
@@ -167,21 +181,21 @@ class EncomendaService:
             "%Y-%m-%d %H:%M:%S"
         )
 
-        encomenda_id = EncomendaRepository.criar({
-            "codigo": codigo,
-            "cliente": cliente,
-            "telefone": telefone.strip() if telefone else None,
-            "email": email.strip() if email else None,
-            "compartimento": compartimento_id,
-            "data_entrada": agora_str,
-            "expira_em": expira,
-            "status": "aguardando_retirada",
-            "operador": operador,
-            "transportadora": transportadora,
-            "observacao": observacao,
-        })
-
-        CompartimentoRepository.atualizar_status(compartimento_id, "ocupado")
+        encomenda_id, compartimento = EncomendaRepository.criar_deposito_atomico(
+            compartimento_id,
+            {
+                "codigo": codigo,
+                "cliente": cliente,
+                "telefone": telefone or None,
+                "email": email.strip() if email else None,
+                "data_entrada": agora_str,
+                "expira_em": expira,
+                "status": "aguardando_retirada",
+                "operador": operador,
+                "transportadora": transportadora,
+                "observacao": observacao,
+            },
+        )
 
         LogService.registrar(
             compartimento_id,
@@ -191,29 +205,142 @@ class EncomendaService:
 
         abertura = Esp32Service.abrir_compartimento(compartimento_id, operador)
 
-        notificacoes = NotificacaoService.notificar_encomenda_chegou(
-            encomenda_id=encomenda_id,
-            codigo=codigo,
-            cliente=cliente,
-            telefone=telefone,
-            email=email,
-            armario=compartimento["armario_nome"] or "Armário",
-            compartimento=compartimento["numero"],
-            expira_em=expira,
-        )
+        if (
+            reverter_se_falhar_abertura
+            and not abertura.get("sucesso")
+            and not abertura.get("simulado")
+            and not abertura.get("manual")
+        ):
+            EncomendaService.cancelar_deposito_totem(encomenda_id, operador)
+            raise ValueError(
+                abertura.get("mensagem") or "ESP32 offline — depósito cancelado."
+            )
+
+        notificacoes = []
+        if notificar:
+            notificacoes = NotificacaoService.notificar_encomenda_chegou(
+                encomenda_id=encomenda_id,
+                codigo=codigo,
+                cliente=cliente,
+                telefone=telefone,
+                email=email,
+                armario=compartimento["armario_nome"] or "Armário",
+                armario_id=compartimento["armario"],
+                compartimento=compartimento["numero"],
+                expira_em=expira,
+            )
+
+        try:
+            from services.esp32_sync_service import Esp32SyncService
+            Esp32SyncService.incrementar_por_compartimento(compartimento_id)
+        except Exception:
+            pass
 
         return {
             "id": encomenda_id,
             "codigo": codigo,
             "compartimento": compartimento["numero"],
+            "compartimento_id": compartimento_id,
             "armario": compartimento["armario_nome"],
             "expira_em": expira,
             "esp32": abertura,
             "notificacoes": notificacoes,
+            "notificado": bool(notificacoes),
         }
 
     @staticmethod
-    def retirar(codigo, operador):
+    def cancelar_deposito_totem(encomenda_id, operador):
+        encomenda = EncomendaRepository.buscar_por_id(encomenda_id)
+
+        if not encomenda:
+            raise ValueError("Encomenda não encontrada.")
+
+        if encomenda["status"] != "aguardando_retirada":
+            raise ValueError("Encomenda não está pendente.")
+
+        if encomenda["notificado_em"]:
+            raise ValueError("Encomenda já notificada — não pode cancelar.")
+
+        comp = CompartimentoRepository.buscar_por_id(encomenda["compartimento"])
+        if comp and not operador_acessa_armario(comp["armario"]):
+            raise ValueError("Sem permissão para este armário.")
+
+        with BaseRepository.get_connection() as conn:
+            conn.execute(
+                "DELETE FROM encomendas WHERE id = ? AND notificado_em IS NULL",
+                (encomenda_id,),
+            )
+            if comp:
+                conn.execute(
+                    "UPDATE compartimentos SET status = 'livre' WHERE id = ?",
+                    (encomenda["compartimento"],),
+                )
+            conn.commit()
+
+        if comp:
+            LogService.registrar(
+                encomenda["compartimento"],
+                operador,
+                f"Depósito totem cancelado #{encomenda_id} — {encomenda['cliente']}",
+            )
+
+        return {"id": encomenda_id, "cancelado": True}
+
+    @staticmethod
+    def concluir_deposito_totem(encomenda_id, operador):
+        encomenda = EncomendaRepository.buscar_por_id(encomenda_id)
+
+        if not encomenda:
+            raise ValueError("Encomenda não encontrada.")
+
+        if encomenda["status"] != "aguardando_retirada":
+            raise ValueError("Encomenda não está aguardando retirada.")
+
+        comp = CompartimentoRepository.buscar_por_id(encomenda["compartimento"])
+        if comp and not operador_acessa_armario(comp["armario"]):
+            raise ValueError("Sem permissão para este armário.")
+
+        if encomenda["notificado_em"]:
+            from repositories.notificacao_repository import NotificacaoRepository
+
+            ultimo_wa = NotificacaoRepository.ultimo_whatsapp_encomenda(encomenda_id)
+            if ultimo_wa and ultimo_wa["status"] == "enviado":
+                return {
+                    "id": encomenda_id,
+                    "compartimento": encomenda["compartimento_numero"],
+                    "cliente": encomenda["cliente"],
+                    "ja_notificado": True,
+                    "notificacoes": [],
+                }
+
+        notificacoes = NotificacaoService.notificar_encomenda_chegou(
+            encomenda_id=encomenda_id,
+            codigo=encomenda["codigo"],
+            cliente=encomenda["cliente"],
+            telefone=encomenda["telefone"],
+            email=encomenda["email"],
+            armario=encomenda["armario_nome"] or "Armário",
+            armario_id=comp["armario"] if comp else None,
+            compartimento=encomenda["compartimento_numero"] or "—",
+            expira_em=encomenda["expira_em"] if encomenda["expira_em"] else None,
+        )
+
+        LogService.registrar(
+            encomenda["compartimento"],
+            operador,
+            f"Depósito totem concluído #{encomenda_id} — porta fechada",
+        )
+
+        return {
+            "id": encomenda_id,
+            "compartimento": encomenda["compartimento_numero"],
+            "cliente": encomenda["cliente"],
+            "notificacoes": notificacoes,
+            "ja_notificado": False,
+        }
+
+    @staticmethod
+    def retirar(codigo, operador, armario_id=None):
 
         codigo = codigo.strip()
 
@@ -239,6 +366,10 @@ class EncomendaService:
             raise ValueError(
                 "Prazo de retirada expirado. Dirija-se à portaria para retirar o pacote."
             )
+
+        comp = CompartimentoRepository.buscar_por_id(encomenda["compartimento"])
+        if armario_id is not None and comp and int(comp["armario"]) != int(armario_id):
+            raise ValueError("Este código não é deste armário.")
 
         agora = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 

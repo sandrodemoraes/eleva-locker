@@ -55,3 +55,16 @@ class NotificacaoRepository:
                 FROM notificacoes
                 WHERE criado_em LIKE ?
             """, (f"{hoje}%",)).fetchone()["total"]
+
+    @staticmethod
+    def ultimo_whatsapp_encomenda(encomenda_id):
+
+        with BaseRepository.get_connection() as conn:
+
+            return conn.execute("""
+                SELECT *
+                FROM notificacoes
+                WHERE encomenda_id = ? AND canal = 'whatsapp'
+                ORDER BY id DESC
+                LIMIT 1
+            """, (encomenda_id,)).fetchone()

@@ -52,7 +52,19 @@ ENCOMENDA_LEMBRETE_AUTOMATICO = os.getenv("ENCOMENDA_LEMBRETE_AUTOMATICO", "1") 
 
 # Totem — ID fixo do armário (ex.: 2). Se definido, /totem redireciona para /totem/<id>
 _totem_armario = os.getenv("TOTEM_ARMARIO_ID", "").strip()
-TOTEM_ARMARIO_ID = int(_totem_armario) if _totem_armario.isdigit() else None
+TOTEM_ARMARIO_ID = _totem_armario if _totem_armario.isdigit() else None
+
+TOTEM_RATE_LIMIT = int(os.getenv("TOTEM_RATE_LIMIT", "8"))
+TOTEM_RATE_JANELA = int(os.getenv("TOTEM_RATE_JANELA", "300"))
+TOTEM_AJUDA_TELEFONE = os.getenv("TOTEM_AJUDA_TELEFONE", "")
+TOTEM_AJUDA_ALERTA = os.getenv("TOTEM_AJUDA_ALERTA", "1") == "1"
+TOTEM_DEPOSITO_PIN = os.getenv("TOTEM_DEPOSITO_PIN", "")
+_sem_pin_env = os.getenv("TOTEM_DEPOSITO_SEM_PIN", "").strip()
+if _sem_pin_env:
+    TOTEM_DEPOSITO_SEM_PIN = _sem_pin_env == "1"
+else:
+    TOTEM_DEPOSITO_SEM_PIN = bool(TOTEM_ARMARIO_ID)
+TOTEM_DEPOSITO_SOMENTE_CADASTRADO = os.getenv("TOTEM_DEPOSITO_SOMENTE_CADASTRADO", "1") == "1"
 
 
 def gerar_token_esp32():

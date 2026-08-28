@@ -49,10 +49,16 @@ class CompartimentoRepository:
         with BaseRepository.get_connection() as conn:
 
             return conn.execute("""
-                SELECT id, numero
-                FROM compartimentos
-                WHERE armario = ? AND status = 'livre'
-                ORDER BY numero
+                SELECT c.id, c.numero, c.tamanho
+                FROM compartimentos c
+                WHERE c.armario = ?
+                  AND c.status = 'livre'
+                  AND NOT EXISTS (
+                    SELECT 1 FROM encomendas e
+                    WHERE e.compartimento = c.id
+                      AND e.status = 'aguardando_retirada'
+                  )
+                ORDER BY c.numero
             """, (armario_id,)).fetchall()
 
     @staticmethod
@@ -64,9 +70,9 @@ class CompartimentoRepository:
 
             cursor.execute("""
                 INSERT INTO compartimentos (
-                    armario, numero, rele, esp32_id, status, tamanho
+                    armario, numero, rele, esp32_id, status, tamanho, gpio
                 )
-                VALUES (?, ?, ?, ?, ?, ?)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
             """, (
                 dados["armario"],
                 dados["numero"],
@@ -74,6 +80,7 @@ class CompartimentoRepository:
                 dados.get("esp32_id"),
                 dados.get("status", "livre"),
                 dados.get("tamanho", "M"),
+                dados.get("gpio"),
             ))
 
             conn.commit()
@@ -93,7 +100,8 @@ class CompartimentoRepository:
                     rele = ?,
                     esp32_id = ?,
                     status = ?,
-                    tamanho = ?
+                    tamanho = ?,
+                    gpio = ?
                 WHERE id = ?
             """, (
                 dados["armario"],
@@ -102,6 +110,7 @@ class CompartimentoRepository:
                 dados.get("esp32_id"),
                 dados["status"],
                 dados.get("tamanho", "M"),
+                dados.get("gpio"),
                 compartimento_id,
             ))
 
@@ -119,6 +128,22 @@ class CompartimentoRepository:
             """, (status, compartimento_id))
 
             conn.commit()
+
+    @staticmethod
+    def remover_acima_porta(armario_id, max_portas):
+
+        with BaseRepository.get_connection() as conn:
+
+            cursor = conn.cursor()
+            cursor.execute("""
+                DELETE FROM compartimentos
+                WHERE armario = ?
+                  AND numero > ?
+                  AND status = 'livre'
+            """, (armario_id, max_portas))
+            removidos = cursor.rowcount
+            conn.commit()
+            return removidos
 
     @staticmethod
     def excluir(compartimento_id):
@@ -148,6 +173,17 @@ class CompartimentoRepository:
             return conn.execute("""
                 SELECT COUNT(*) AS total FROM compartimentos
             """).fetchone()["total"]
+
+    @staticmethod
+    def buscar_por_armario_numero(armario_id, numero):
+
+        with BaseRepository.get_connection() as conn:
+
+            return conn.execute("""
+                SELECT *
+                FROM compartimentos
+                WHERE armario = ? AND numero = ?
+            """, (armario_id, numero)).fetchone()
 
     @staticmethod
     def numero_existe(armario_id, numero, excluir_id=None):
