@@ -59,7 +59,9 @@ class ArmarioRepository:
             return conn.execute("""
                 SELECT id, nome
                 FROM armarios
-                WHERE status = 'ativo'
+                WHERE status IS NULL
+                   OR TRIM(status) = ''
+                   OR LOWER(TRIM(status)) IN ('ativo', 'active', '1')
                 ORDER BY nome
             """).fetchall()
 

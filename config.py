@@ -50,6 +50,10 @@ ENCOMENDA_DIAS_VALIDADE = int(os.getenv("ENCOMENDA_DIAS_VALIDADE", "3"))
 ENCOMENDA_HORAS_REENVIO = int(os.getenv("ENCOMENDA_HORAS_REENVIO", "24"))
 ENCOMENDA_LEMBRETE_AUTOMATICO = os.getenv("ENCOMENDA_LEMBRETE_AUTOMATICO", "1") == "1"
 
+# Totem — ID fixo do armário (ex.: 2). Se definido, /totem redireciona para /totem/<id>
+_totem_armario = os.getenv("TOTEM_ARMARIO_ID", "").strip()
+TOTEM_ARMARIO_ID = int(_totem_armario) if _totem_armario.isdigit() else None
+
 
 def gerar_token_esp32():
     return secrets.token_hex(16)

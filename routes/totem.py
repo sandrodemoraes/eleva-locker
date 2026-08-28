@@ -1,5 +1,6 @@
-from flask import Blueprint, render_template, request, jsonify
+from flask import Blueprint, render_template, request, jsonify, redirect
 
+import config
 from services.encomenda_service import EncomendaService
 from services.armario_service import ArmarioService
 from services.destinatario_service import DestinatarioService
@@ -12,6 +13,14 @@ totem_bp = Blueprint("totem", __name__)
 @totem_bp.route("/totem/<int:armario_id>")
 def index(armario_id=None):
 
+    if armario_id is None and config.TOTEM_ARMARIO_ID:
+        return redirect(f"/totem/{config.TOTEM_ARMARIO_ID}")
+
+    armarios = ArmarioService.listar_ativos()
+
+    if armario_id is None and len(armarios) == 1:
+        return redirect(f"/totem/{armarios[0]['id']}")
+
     armario = None
 
     if armario_id:
@@ -23,7 +32,8 @@ def index(armario_id=None):
     return render_template(
         "totem.html",
         armario=armario,
-        armarios=ArmarioService.listar_ativos(),
+        armarios=armarios if not armario else None,
+        armario_id=armario_id,
     )
 
 

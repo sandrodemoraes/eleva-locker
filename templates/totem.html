@@ -22,16 +22,20 @@
 
     {% if armario %}
     <div class="totem-armario">
-        <i class="fa-solid fa-location-dot"></i> {{ armario.nome }}
+        <i class="fa-solid fa-location-dot"></i> {{ armario['nome'] }}
     </div>
     {% elif armarios %}
     <div class="totem-armario">
         <select id="selArmario" onchange="if(this.value) location.href='/totem/'+this.value" style="background:transparent;border:none;color:#fff;font-size:16px;">
             <option value="">Selecione o armário</option>
             {% for a in armarios %}
-            <option value="{{ a.id }}">{{ a.nome }}</option>
+            <option value="{{ a['id'] }}">{{ a['nome'] }}</option>
             {% endfor %}
         </select>
+    </div>
+    {% else %}
+    <div class="totem-armario" style="background:rgba(214,40,40,.35);">
+        <i class="fa-solid fa-triangle-exclamation"></i> Nenhum armário ativo. Cadastre em Armários ou defina TOTEM_ARMARIO_ID no .env
     </div>
     {% endif %}
 
@@ -63,6 +67,7 @@
 
 <script>
 let codigo = "";
+const ARMARIO_ID = {{ armario_id|tojson if armario_id else 'null' }};
 
 function atualizarDisplay(){
     let txt = codigo.padEnd(6, "_").split("").join(" ");
@@ -96,7 +101,7 @@ function confirmar(){
     fetch("/totem/retirar", {
         method: "POST",
         headers: {"Content-Type": "application/x-www-form-urlencoded"},
-        body: "codigo=" + codigo
+        body: "codigo=" + codigo + (ARMARIO_ID ? "&armario_id=" + ARMARIO_ID : "")
     })
     .then(r => r.json())
     .then(data => {
