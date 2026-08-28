@@ -13,7 +13,7 @@
 }
 
 .btn{
-    background:#0f3d75;
+    background:#134736;
     color:#fff;
     border:none;
     border-radius:8px;
@@ -29,7 +29,7 @@
 }
 
 .btn:hover{
-    background:#2563eb;
+    background:#0F3D31;
 }
 
 .btn-danger{
@@ -41,20 +41,37 @@
 }
 
 .btn-success{
-    background:#2a9d8f;
+    background:#2D8A6E;
 }
 
 .btn-success:hover{
-    background:#21867a;
+    background:#1A6B54;
 }
 
-.btn-warning{
-    background:#D4A017;
-    color:#1A2332;
+.btn-warning,
+.btn.btn-warning{
+    background:#D4A017 !important;
+    color:#1A2332 !important;
 }
 
-.btn-warning:hover{
-    background:#b88914;
+.btn-warning:hover,
+.btn.btn-warning:hover{
+    background:#b88914 !important;
+}
+
+.btn-retirar{
+    background:#1A6B54;
+    color:#fff;
+}
+
+.btn-retirar:hover{
+    background:#134736;
+}
+
+.btn-sm.btn-warning{
+    background:#D4A017 !important;
+    color:#1A2332 !important;
+    border:none;
 }
 
 .btn-sm{
@@ -94,7 +111,7 @@ th,td{
 
 th{
     background:#f8fafc;
-    color:#0f3d75;
+    color:#134736;
     font-weight:600;
 }
 
@@ -144,7 +161,7 @@ tr:hover{
 }
 
 .modal h2{
-    color:#0f3d75;
+    color:#134736;
     margin-bottom:20px;
 }
 
@@ -188,7 +205,7 @@ tr:hover{
 }
 
 .codigo-box{
-    background:#0f3d75;
+    background:#134736;
     color:#fff;
     font-size:36px;
     font-weight:bold;

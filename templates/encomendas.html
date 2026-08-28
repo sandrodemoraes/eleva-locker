@@ -17,7 +17,7 @@
         <button class="btn btn-success" onclick="abrirModal('modalDeposito')">
             <i class="fa-solid fa-box"></i> Depositar
         </button>
-        <button class="btn" onclick="abrirModal('modalRetirada')">
+        <button class="btn btn-retirar" onclick="abrirModal('modalRetirada')">
             <i class="fa-solid fa-hand-holding"></i> Retirar
         </button>
     </div>
@@ -44,7 +44,7 @@
 {% if retidas_total and retidas_total > 0 %}
 <div class="alert alert-warning" style="margin-bottom:16px;">
     <strong>{{ retidas_total }}</strong> encomenda(s) com prazo expirado aguardando retirada na portaria.
-    <a href="/encomendas?status=retida" style="margin-left:8px;">Ver retidas</a>
+    <a href="/encomendas?status=retida" style="margin-left:8px;color:#134736;font-weight:600;">Ver retidas</a>
 </div>
 {% endif %}
 

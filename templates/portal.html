@@ -21,13 +21,13 @@
 {% endif %}
 <div class="panels" style="margin-top:25px;">
 <div class="table-box">
-<h2 style="color:#0f3d75;margin-bottom:15px;">Contratos</h2>
+<h2 style="color:#134736;margin-bottom:15px;">Contratos</h2>
 {% for c in contratos %}
 <p><strong>{{ c.plano_nome }}</strong> — R$ {{ '%.2f'|format(c.valor_mensal) }}/mês — <span class="badge badge-{{ c.status }}">{{ c.status }}</span></p>
 {% else %}<p>Nenhum contrato.</p>{% endfor %}
 </div>
 <div class="table-box">
-<h2 style="color:#0f3d75;margin-bottom:15px;">Faturas</h2>
+<h2 style="color:#134736;margin-bottom:15px;">Faturas</h2>
 <table><thead><tr><th>Ref.</th><th>Valor</th><th>Status</th><th></th></tr></thead>
 <tbody>
 {% for f in faturas %}
