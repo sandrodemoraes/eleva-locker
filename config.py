@@ -27,8 +27,10 @@ def normalizar_max_portas(valor, padrao=16):
             return op
     return ESP32_MAX_PORTAS
 
-# Backup
+# Backup — pasta local ou disco D:
+BACKUP_DIR = os.getenv("BACKUP_DIR", "backups")
 BACKUP_MAX = int(os.getenv("BACKUP_MAX", "5"))
+SKIP_BACKUP = os.getenv("SKIP_BACKUP", "0") == "1"
 
 # Notificações — modo: console | producao
 NOTIF_MODO = os.getenv("NOTIF_MODO", "console")
