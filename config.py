@@ -10,6 +10,22 @@ ESP32_RELE_DURACAO = int(os.getenv("ESP32_RELE_DURACAO", "3"))
 ESP32_HEARTBEAT_TIMEOUT = int(os.getenv("ESP32_HEARTBEAT_TIMEOUT", "90"))
 ESP32_HTTP_TIMEOUT = int(os.getenv("ESP32_HTTP_TIMEOUT", "5"))
 ESP32_MODO_SIMULACAO = os.getenv("ESP32_MODO_SIMULACAO", "0") == "1"
+ESP32_PORTAS_OPCOES = [8, 16, 24, 32, 64]
+ESP32_MAX_PORTAS = max(ESP32_PORTAS_OPCOES)
+
+
+def normalizar_max_portas(valor, padrao=16):
+    """Valida max_portas — apenas 8, 16, 24, 32 ou 64."""
+    try:
+        n = int(valor)
+    except (TypeError, ValueError):
+        n = padrao
+    if n in ESP32_PORTAS_OPCOES:
+        return n
+    for op in ESP32_PORTAS_OPCOES:
+        if n <= op:
+            return op
+    return ESP32_MAX_PORTAS
 
 # Backup
 BACKUP_MAX = int(os.getenv("BACKUP_MAX", "5"))

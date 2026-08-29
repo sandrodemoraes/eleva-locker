@@ -70,9 +70,10 @@ class Esp32Repository:
 
             cursor.execute("""
                 INSERT INTO esp32 (
-                    nome, ip, mac, armario, status, token, porta, ultimo_heartbeat
+                    nome, ip, mac, armario, status, token, porta, ultimo_heartbeat,
+                    max_portas, porta_inicial, sync_versao
                 )
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, (
                 dados["nome"],
                 dados.get("ip"),
@@ -82,6 +83,9 @@ class Esp32Repository:
                 dados["token"],
                 dados.get("porta", 80),
                 dados.get("ultimo_heartbeat"),
+                dados.get("max_portas", 16),
+                dados.get("porta_inicial", 1),
+                dados.get("sync_versao", 1),
             ))
 
             conn.commit()
@@ -102,7 +106,9 @@ class Esp32Repository:
                     armario = ?,
                     status = ?,
                     token = ?,
-                    porta = ?
+                    porta = ?,
+                    max_portas = ?,
+                    porta_inicial = ?
                 WHERE id = ?
             """, (
                 dados["nome"],
@@ -112,10 +118,30 @@ class Esp32Repository:
                 dados.get("status", "offline"),
                 dados.get("token"),
                 dados.get("porta", 80),
+                dados.get("max_portas", 16),
+                dados.get("porta_inicial", 1),
                 esp32_id,
             ))
 
             conn.commit()
+
+    @staticmethod
+    def listar_por_armario(armario_id):
+
+        with BaseRepository.get_connection() as conn:
+
+            return conn.execute("""
+                SELECT
+                    e.*,
+                    (
+                        SELECT COUNT(*)
+                        FROM compartimentos c
+                        WHERE c.esp32_id = e.id
+                    ) AS total_compartimentos
+                FROM esp32 e
+                WHERE e.armario = ?
+                ORDER BY e.nome
+            """, (armario_id,)).fetchall()
 
     @staticmethod
     def atualizar_heartbeat(esp32_id, ip=None):
