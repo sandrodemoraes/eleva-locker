@@ -287,3 +287,28 @@ tr:hover{
     color:#134736;
     white-space:nowrap;
 }
+
+.acoes-cell{
+    white-space:nowrap;
+}
+
+.acoes-cell .btn,
+.acoes-cell form{
+    display:inline-flex;
+    vertical-align:middle;
+    margin-right:4px;
+}
+
+.acoes-cell form:last-child{
+    margin-right:0;
+}
+
+.link-primary{
+    font-weight:600;
+    color:#005ecb;
+    text-decoration:none;
+}
+
+.link-primary:hover{
+    text-decoration:underline;
+}

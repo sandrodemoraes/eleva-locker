@@ -54,7 +54,7 @@
                 <td>{{ a.compartimentos_ocupados or 0 }}/{{ a.total_compartimentos or 0 }}</td>
                 <td><span class="badge badge-{{ a.status }}">{{ a.status }}</span></td>
                 <td class="acoes-cell">
-                    <a href="/armarios/{{ a.id }}" class="btn btn-sm btn-success" title="Gerenciar"><i class="fa-solid fa-gear"></i></a>
+                    <a href="/armarios/{{ a.id }}" class="btn btn-sm btn-success" title="Gerenciar armário"><i class="fa-solid fa-gear"></i></a>
                     {% if perfil == 'Administrador' %}
                     <button type="button" class="btn btn-sm btn-editar-armario"
                         data-id="{{ a.id }}"
