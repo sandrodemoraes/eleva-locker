@@ -38,16 +38,27 @@ echo Python: %PY%
 echo URL totem: http://192.168.16.130:15000/totem/2
 echo.
 echo DEIXE ESTA JANELA ABERTA. Fechar = servidor para.
-echo Ctrl+C pede confirmacao (S/N) antes de encerrar.
+echo Ctrl+C para parar — pergunta S/N (N = reinicia o servidor).
 echo.
 
-%PY% app.py
+:loop
+%PY% -u app.py
 set "COD=%ERRORLEVEL%"
 if not "%COD%"=="0" (
     echo.
     echo === Servidor encerrou com erro (codigo %COD%) ===
     echo Se ModuleNotFoundError: tools\atualizar_totem.bat
+    pause
+    exit /b %COD%
 )
+
 echo.
+choice /C SN /M "Encerrar o servidor ELEVA LOCKER (N=reinicia)"
+if errorlevel 2 (
+    echo Reiniciando...
+    goto loop
+)
+
+echo Servidor encerrado.
 pause
-exit /b %COD%
+exit /b 0

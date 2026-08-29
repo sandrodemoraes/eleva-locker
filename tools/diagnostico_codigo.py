@@ -60,7 +60,8 @@ def main():
         ("templates/armarios.html", "Cadastre armários, placas ESP", "Engrenagem na listagem"),
         ("templates/armarios.html", "fa-solid fa-gear", "Icone engrenagem verde"),
         ("templates/armarios_detalhe.html", "Placas ESP32", "Tela /armarios/id"),
-        ("app.py", "Encerrar o servidor ELEVA LOCKER", "Confirmacao Ctrl+C"),
+        ("app.py", "confirmar_parada", "Confirmacao Ctrl+C"),
+        ("routes/api/esp32_api.py", 'route("/sync"', "API ESP32 sync"),
         ("templates/layout/navbar.html", "url_for('notificacoes.listar')", "Sino abre notificacoes"),
     ]
 

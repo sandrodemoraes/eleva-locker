@@ -105,7 +105,11 @@ def inject_site_context():
 
 if __name__ == "__main__":
 
-    print("Ctrl+C pede confirmacao antes de encerrar (S/N).")
+    from tools.confirmar_parada import instalar_handler_parada, perguntar_encerramento
+
+    instalar_handler_parada()
+
+    print("ELEVA LOCKER | Ctrl+C pergunta S/N antes de encerrar")
     print("DEIXE ESTA JANELA ABERTA enquanto o totem estiver em uso.\n")
 
     while True:
@@ -113,17 +117,14 @@ if __name__ == "__main__":
             app.run(
                 host="0.0.0.0",
                 port=15000,
-                debug=True,
+                debug=False,
                 use_reloader=False,
             )
             break
         except KeyboardInterrupt:
-            print("\n")
-            try:
-                resp = input("Encerrar o servidor ELEVA LOCKER? (S/N): ").strip().lower()
-            except (EOFError, KeyboardInterrupt):
-                resp = "s"
-            if resp in ("s", "sim", "y", "yes"):
+            if perguntar_encerramento():
                 print("Servidor encerrado.")
                 break
             print("Servidor continua — reiniciando...\n")
+        except SystemExit:
+            break
