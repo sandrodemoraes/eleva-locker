@@ -1,4 +1,4 @@
 @echo off
-REM Duplo clique neste arquivo na pasta ElevaLocker — janela fica aberta
+REM Duplo clique na pasta ElevaLocker
 cd /d "%~dp0"
-cmd /k "tools\iniciar_servidor.bat"
+call "%~dp0iniciar_elevalocker.bat"
