@@ -14,4 +14,3 @@ echo  Pasta atual: %CD%
 echo.
 
 call "%~dp0instalar_inicio_windows.bat"
-exit /b %ERRORLEVEL%

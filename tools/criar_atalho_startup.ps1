@@ -23,8 +23,8 @@ $atalho = Join-Path $startup "ELEVA LOCKER - Iniciar.lnk"
 
 $ws = New-Object -ComObject WScript.Shell
 $s = $ws.CreateShortcut($atalho)
-$s.TargetPath = $env:ComSpec
-$s.Arguments = "/k `"$bat`""
+$s.TargetPath = $bat
+$s.Arguments = ""
 $s.WorkingDirectory = $workdir
 $s.WindowStyle = 1
 $s.Description = "ELEVA LOCKER - inicia ao ligar o Windows"

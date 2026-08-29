@@ -31,8 +31,8 @@ function New-ElevaAtalho {
 
     $ws = New-Object -ComObject WScript.Shell
     $s = $ws.CreateShortcut($CaminhoLnk)
-    $s.TargetPath = $env:ComSpec
-    $s.Arguments = "/k `"$bat`""
+    $s.TargetPath = $bat
+    $s.Arguments = ""
     $s.WorkingDirectory = $workdir
     $s.WindowStyle = 1
     $s.Description = $Descricao
