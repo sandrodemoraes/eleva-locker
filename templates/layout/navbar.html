@@ -29,17 +29,17 @@
         </form>
         {% endif %}
 
-        <button class="btn-icon">
+        <a href="{{ url_for('notificacoes.listar') }}" class="btn-icon" title="Notificações">
 
             <i class="fa-solid fa-bell"></i>
 
-        </button>
+        </a>
 
-        <button class="btn-icon">
+        <a href="{{ url_for('esp32.configuracoes') }}" class="btn-icon" title="Configurações">
 
             <i class="fa-solid fa-gear"></i>
 
-        </button>
+        </a>
 
         <div class="usuario">
 

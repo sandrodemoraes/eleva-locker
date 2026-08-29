@@ -367,6 +367,18 @@ a{
 
 }
 
+a.btn-icon{
+
+    display:inline-flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    text-decoration:none;
+
+}
+
 .btn-icon:hover{
 
     background:rgba(255,255,255,.2);

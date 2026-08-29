@@ -58,28 +58,28 @@ def main():
         alvo = conn.execute(
             "SELECT id FROM armarios WHERE LOWER(nome) LIKE '%matriz%' ORDER BY id LIMIT 1"
         ).fetchone()
-        if not alvo:
-            alvo = conn.execute(
-                "SELECT id FROM armarios ORDER BY id LIMIT 1"
-            ).fetchone()
 
         if not alvo:
+            site = conn.execute(
+                "SELECT id FROM sites WHERE LOWER(nome) LIKE '%matriz%' ORDER BY id LIMIT 1"
+            ).fetchone()
+            site_id = site["id"] if site else 1
             cursor = conn.cursor()
             cursor.execute("""
-                INSERT INTO armarios (nome, status, cidade, estado)
-                VALUES (?, 'ativo', 'Lauro Müller', 'SC')
-            """, (NOME_ARMARIO,))
+                INSERT INTO armarios (nome, endereco, cidade, estado, status, site_id, max_portas)
+                VALUES (?, 'Matriz ELEVA', 'Lauro Müller', 'SC', 'ativo', ?, 16)
+            """, (NOME_ARMARIO, site_id))
             conn.commit()
             armario_id = cursor.lastrowid
             print(f"\n  Criado armário {NOME_ARMARIO} id={armario_id}")
         else:
             armario_id = alvo["id"]
             conn.execute(
-                "UPDATE armarios SET status = 'ativo', nome = COALESCE(NULLIF(TRIM(nome), ''), ?) WHERE id = ?",
-                (NOME_ARMARIO, armario_id),
+                "UPDATE armarios SET status = 'ativo', max_portas = COALESCE(max_portas, 16) WHERE id = ?",
+                (armario_id,),
             )
             conn.commit()
-            print(f"\n  Usando armário id={armario_id}")
+            print(f"\n  Usando armário Matriz id={armario_id}")
 
     _gravar_env("TOTEM_ARMARIO_ID", str(armario_id))
     print(f"\nReinicie o servidor e abra: /totem/{armario_id}\n")

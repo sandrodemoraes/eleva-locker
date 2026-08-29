@@ -1,42 +1,39 @@
 @echo off
-REM Restaura tela central do armario (engrenagem): ESP, compartimentos e usuarios
+REM Atualiza codigo completo + recria Matriz se sumiu do banco
 cd /d C:\ElevaLocker
 
 echo.
-echo === Fetch branch ===
+echo === [1/3] Buscar branch no GitHub ===
 git fetch origin cursor/retirada-pacote-retido-c05c
 if errorlevel 1 goto :erro
 
-set BR=origin/cursor/retirada-pacote-retido-c05c
-
 echo.
-echo === Checkout arquivos da configuracao central ===
-git checkout %BR% -- ^
-  config.py ^
-  database.py ^
-  routes/armarios.py ^
-  templates/armarios.html ^
-  templates/armarios_detalhe.html ^
-  services/armario_service.py ^
-  services/esp32_portas_service.py ^
-  services/esp32_service.py ^
-  services/usuario_service.py ^
-  repositories/armario_repository.py ^
-  repositories/esp32_repository.py ^
-  repositories/usuario_repository.py
-
+echo === [2/3] Atualizar codigo (git pull) ===
+git pull origin cursor/retirada-pacote-retido-c05c
 if errorlevel 1 goto :erro
 
 echo.
-echo === OK! Reinicie o servidor: py app.py ===
-echo     Armarios: http://192.168.16.130:15000/armarios
-echo     Clique na engrenagem verde para gerenciar ESP e usuarios.
+echo === [3/3] Recriar Matriz no banco (se faltar) ===
+py tools\recriar_matriz_armario.py
+if errorlevel 1 goto :erro
+
 echo.
+echo ============================================================
+echo   CONFERIR em /armarios:
+echo   - Subtitulo: "Cadastre armarios, placas ESP..."
+echo   - Coluna Portas + botao engrenagem verde
+echo   - ELEVA Locker Matriz na lista
+echo.
+echo   Sino (topo) abre /notificacoes
+echo   Engrenagem (topo) abre /configuracoes
+echo.
+echo   Reinicie: py app.py
+echo ============================================================
 goto :fim
 
 :erro
 echo.
-echo ERRO na atualizacao. Verifique git fetch e conexao.
+echo ERRO. Tente: git status
 pause
 exit /b 1
 

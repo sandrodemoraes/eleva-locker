@@ -12,7 +12,7 @@ class ArmarioRepository:
             params = ()
 
             if site_id is not None:
-                filtro = " WHERE a.site_id = ?"
+                filtro = " WHERE (a.site_id = ? OR a.site_id IS NULL)"
                 params = (site_id,)
 
             return conn.execute(f"""
