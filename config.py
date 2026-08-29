@@ -1,5 +1,28 @@
 import os
 import secrets
+from pathlib import Path
+
+
+def _carregar_env_arquivo():
+    """Lê C:\\ElevaLocker\\.env (ou ./.env) para os.getenv funcionar no py app.py."""
+    env_path = Path(__file__).resolve().parent / ".env"
+    if not env_path.exists():
+        return
+    valores = {}
+    for linha in env_path.read_text(encoding="utf-8").splitlines():
+        linha = linha.strip()
+        if not linha or linha.startswith("#") or "=" not in linha:
+            continue
+        chave, _, valor = linha.partition("=")
+        chave = chave.strip()
+        if not chave:
+            continue
+        valores[chave] = valor.strip().strip('"').strip("'")
+    for chave, valor in valores.items():
+        os.environ.setdefault(chave, valor)
+
+
+_carregar_env_arquivo()
 
 # Flask
 SECRET_KEY = os.getenv("SECRET_KEY", "ElevaLocker2026")
