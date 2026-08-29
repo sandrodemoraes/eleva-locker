@@ -54,6 +54,8 @@ def _totem_template_info():
 def versao():
     info = _totem_template_info()
     info["ok"] = info["deposito"] and info["home_botoes"] and not info["layout_antigo"]
+    info["quiosque"] = True
+    info["url_quiosque"] = "/totem/quiosque"
     return jsonify(info)
 
 
@@ -63,7 +65,8 @@ def totem_matriz():
     return redirect(f"/totem/{armario_id}")
 
 
-@totem_bp.route("/totem/quiosque")
+@totem_bp.route("/totem/quiosque", strict_slashes=False)
+@totem_bp.route("/totem/quiosque/")
 def totem_quiosque():
     armario_id = config.TOTEM_ARMARIO_ID or 2
     return redirect(f"/totem/{armario_id}?kiosk=1")
@@ -75,7 +78,8 @@ def _url_totem_quiosque():
     return f"{base}/totem/{armario_id}?kiosk=1"
 
 
-@totem_bp.route("/totem/quiosque/fully.json")
+@totem_bp.route("/totem/quiosque/fully.json", strict_slashes=False)
+@totem_bp.route("/totem/quiosque/fully.json/")
 def totem_quiosque_fully():
     """Configuração importável no Fully Kiosk Browser (Outras configurações → Importar)."""
     start = _url_totem_quiosque()

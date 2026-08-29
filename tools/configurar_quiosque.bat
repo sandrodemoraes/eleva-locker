@@ -30,6 +30,11 @@ echo.
 echo  URL do totem (modo quiosque):
 echo    %URL%
 echo.
+echo  Se der "pagina nao encontrada", use esta (sempre funciona):
+echo    http://192.168.16.130:15000/totem/2
+echo.
+echo  Na bancada: ATUALIZAR.bat ^> reinicie INICIAR.bat ^> TESTAR_TOTEM.bat
+echo.
 echo  Atalho curto:
 echo    %URL_CURTA%
 echo.

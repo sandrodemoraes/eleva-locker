@@ -63,6 +63,8 @@ def main():
         ("app.py", "confirmar_parada", "Confirmacao Ctrl+C"),
         ("routes/api/esp32_api.py", 'route("/sync"', "API ESP32 sync"),
         ("templates/layout/navbar.html", "url_for('notificacoes.listar')", "Sino abre notificacoes"),
+        ("routes/totem.py", 'route("/totem/quiosque"', "Rota modo quiosque"),
+        ("tools/configurar_quiosque.bat", "Fully Kiosk Browser", "Script quiosque celular"),
     ]
 
     ok = 0
