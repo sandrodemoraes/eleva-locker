@@ -1,10 +1,15 @@
 @echo off
 REM Aguarda Flask subir e abre o painel no navegador padrao
 setlocal EnableDelayedExpansion
+
 set "URL=%~1"
 if "%URL%"=="" set "URL=http://192.168.16.130:15000/dashboard"
 
+set "URL=%URL:"=%"
+set "URL=%URL: =%"
+
 echo.%URL%| findstr /i /r "^https\?://" >nul || set "URL=http://192.168.16.130:15000/dashboard"
+echo.%URL%| findstr /i /r "/[a-z]" >nul || set "URL=%URL%/dashboard"
 
 call "%~dp0encontrar_python.bat"
 set "PY=%ELEVA_PYTHON%"
