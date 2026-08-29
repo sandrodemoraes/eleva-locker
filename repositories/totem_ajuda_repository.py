@@ -93,7 +93,11 @@ class TotemAjudaRepository:
                 pedido_id,
             ))
             conn.commit()
-            return conn.total_changes > 0
+            row = conn.execute(
+                "SELECT status FROM totem_ajuda_pedidos WHERE id = ?",
+                (pedido_id,),
+            ).fetchone()
+            return row is not None and row["status"] == "atendido"
 
     @staticmethod
     def atualizar_whatsapp(pedido_id, enviado, detalhe=None):
