@@ -29,9 +29,12 @@
         </form>
         {% endif %}
 
-        <a href="{{ url_for('notificacoes.listar') }}" class="btn-icon" title="Notificações">
+        <a href="{{ url_for('notificacoes.listar') }}{% if ajuda_totem_pendentes %}#ajuda-totem{% endif %}" class="btn-icon btn-icon-notif" title="Notificações{% if ajuda_totem_pendentes %} — {{ ajuda_totem_pendentes }} pedido(s) de ajuda no totem{% endif %}">
 
             <i class="fa-solid fa-bell"></i>
+            {% if ajuda_totem_pendentes %}
+            <span class="nav-badge" aria-label="{{ ajuda_totem_pendentes }} pendente(s)">{{ ajuda_totem_pendentes }}</span>
+            {% endif %}
 
         </a>
 

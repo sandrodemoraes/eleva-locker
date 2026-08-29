@@ -15,6 +15,64 @@
     </div>
 </div>
 
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% for category, message in messages %}
+        <div class="alert alert-{{ category }}" style="margin-bottom:16px;">{{ message }}</div>
+    {% endfor %}
+{% endwith %}
+
+<div id="ajuda-totem" class="table-box ajuda-totem-box" style="margin-bottom:20px;{% if not ajuda_pedidos %}display:none;{% endif %}">
+    <h2 style="color:#134736;margin:0 0 12px;display:flex;align-items:center;gap:10px;">
+        <i class="fa-solid fa-circle-exclamation" style="color:#e74c3c;"></i>
+        Ajuda no totem — aguardando portaria
+        {% if ajuda_pedidos %}
+        <span class="badge badge-aguardando_retirada">{{ ajuda_pedidos|length }} pendente(s)</span>
+        {% endif %}
+    </h2>
+    <p style="color:#666;margin-bottom:16px;font-size:14px;">
+        Morador pediu ajuda no totem (código, porta ou dúvida). Atenda e marque como resolvido.
+    </p>
+    {% if ajuda_pedidos %}
+    <table>
+        <thead>
+            <tr>
+                <th>Quando</th>
+                <th>Armário</th>
+                <th>WhatsApp</th>
+                <th>Ação</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for p in ajuda_pedidos %}
+            <tr>
+                <td>{{ p.criado_em }}</td>
+                <td>{{ p.armario_nome or ('#' ~ p.armario_id) }}</td>
+                <td>
+                    {% if p.whatsapp_enviado %}
+                    <span class="badge badge-retirada">enviado</span>
+                    {% else %}
+                    <span class="badge badge-erro">falhou</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <form method="POST" action="{{ url_for('notificacoes.ajuda_totem_atendido', pedido_id=p.id) }}" style="display:inline;">
+                        <button type="submit" class="btn btn-success btn-sm">
+                            <i class="fa-solid fa-check"></i> Atendido
+                        </button>
+                    </form>
+                    {% if p.armario_id %}
+                    <a href="/totem/{{ p.armario_id }}" target="_blank" rel="noopener" class="btn btn-sm" style="margin-left:6px;">
+                        <i class="fa-solid fa-tablet-screen-button"></i> Totem
+                    </a>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+</div>
+
 <div class="table-box" style="margin-bottom:20px;">
     <p><strong>Modo atual:</strong> {{ config.NOTIF_MODO }}</p>
     <p style="margin-top:8px;color:#666;">

@@ -96,9 +96,12 @@ def inject_site_context():
     if "usuario_id" in session:
         from services.site_service import SiteService
         from middleware.site_scope import get_site_id
+        from services.totem_ajuda_service import TotemAjudaService
+        pendentes = TotemAjudaService.contar_pendentes()
         return {
             "sites": SiteService.listar_ativos(),
             "site_atual": get_site_id(),
+            "ajuda_totem_pendentes": pendentes,
         }
     return {}
 
