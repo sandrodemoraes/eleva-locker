@@ -2,10 +2,11 @@ from pathlib import Path
 import logging
 import re
 
-from flask import Blueprint, render_template, request, jsonify, Response, make_response, redirect
+from flask import Blueprint, render_template, request, jsonify, Response, make_response, redirect, session
 import json
 
 import config
+from middleware.auth_required import login_required
 
 TOTEM_VERSAO = "2.4.8"
 from middleware.rate_limit import rate_limit
@@ -56,14 +57,31 @@ def versao():
     return jsonify(info)
 
 
+@totem_bp.route("/totem/escolher")
+@login_required
+def escolher():
+
+    armarios = ArmarioService.listar()
+    if not armarios:
+        armarios = ArmarioService.listar_para_totem()
+
+    return render_template(
+        "totem_escolher.html",
+        usuario=session.get("usuario"),
+        perfil=session.get("perfil"),
+        armarios=armarios,
+    )
+
+
 @totem_bp.route("/totem")
 @totem_bp.route("/totem/<int:armario_id>")
 def index(armario_id=None):
 
-    if armario_id is None and config.TOTEM_ARMARIO_ID:
+    todos_armarios = ArmarioService.listar_ativos()
+
+    if armario_id is None and config.TOTEM_ARMARIO_ID and len(todos_armarios) <= 1:
         return redirect(f"/totem/{config.TOTEM_ARMARIO_ID}")
 
-    todos_armarios = ArmarioService.listar_ativos()
     if armario_id is None and len(todos_armarios) == 1:
         return redirect(f"/totem/{todos_armarios[0]['id']}")
 
