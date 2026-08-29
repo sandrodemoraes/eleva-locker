@@ -38,6 +38,16 @@ echo DEIXE ESTA JANELA ABERTA. Fechar = servidor para.
 echo Ctrl+C pergunta S/N (N = reinicia).
 echo.
 
+if /i not "%ELEVA_SEM_NAVEGADOR%"=="1" (
+    set "PAINEL=http://192.168.16.130:15000/dashboard"
+    for /f "usebackq tokens=1,* delims==" %%a in (`findstr /i /b "ELEVA_PAINEL_URL=" .env 2^>nul`) do (
+        set "PAINEL=%%b"
+        set "PAINEL=!PAINEL: =!"
+    )
+    echo Abrindo navegador em !PAINEL! ...
+    start /B "" "%~dp0abrir_navegador_atraso.bat" "!PAINEL!"
+)
+
 :loop
 echo [%date% %time%] Subindo app.py>> "%LOG%"
 "%PY%" -u app.py 2>&1

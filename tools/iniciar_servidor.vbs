@@ -8,7 +8,10 @@ Set shell = CreateObject("WScript.Shell")
 
 toolsDir = fso.GetParentFolderName(WScript.ScriptFullName)
 projeto = fso.GetParentFolderName(toolsDir)
-bat = toolsDir & "\iniciar_servidor.bat"
+bat = projeto & "\iniciar_elevalocker.bat"
+If Not fso.FileExists(bat) Then
+    bat = toolsDir & "\iniciar_servidor.bat"
+End If
 cmd = Environ("ComSpec")
 
 If Not fso.FileExists(bat) Then
