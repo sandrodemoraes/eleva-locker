@@ -21,12 +21,14 @@
     {% endfor %}
 {% endwith %}
 
-<div id="ajuda-totem" class="table-box ajuda-totem-box" style="margin-bottom:20px;{% if not ajuda_pedidos %}display:none;{% endif %}">
+<div id="ajuda-totem" class="table-box ajuda-totem-box" style="margin-bottom:20px;">
     <h2 style="color:#134736;margin:0 0 12px;display:flex;align-items:center;gap:10px;">
-        <i class="fa-solid fa-circle-exclamation" style="color:#e74c3c;"></i>
-        Ajuda no totem — aguardando portaria
+        <i class="fa-solid fa-circle-exclamation" style="color:#{% if ajuda_pedidos %}e74c3c{% else %}2d8659{% endif %};"></i>
+        Ajuda no totem — portaria
         {% if ajuda_pedidos %}
         <span class="badge badge-aguardando_retirada">{{ ajuda_pedidos|length }} pendente(s)</span>
+        {% else %}
+        <span class="badge badge-retirada">nenhum pendente</span>
         {% endif %}
     </h2>
     <p style="color:#666;margin-bottom:16px;font-size:14px;">
@@ -70,6 +72,11 @@
             {% endfor %}
         </tbody>
     </table>
+    {% else %}
+    <p style="color:#666;margin:0;font-size:14px;">
+        <i class="fa-solid fa-check-circle" style="color:#2d8659;"></i>
+        Nenhum pedido de ajuda aguardando no momento.
+    </p>
     {% endif %}
 </div>
 
