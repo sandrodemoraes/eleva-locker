@@ -21,9 +21,11 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
 </head>
-<body>
+<body{% if modo_quiosque %} class="modo-quiosque"{% endif %}>
 
+{% if not modo_quiosque %}
 <div class="totem-badge">v{{ totem_versao|default('2') }}</div>
+{% endif %}
 
 <div class="totem" data-armario-id="{{ armario.id if armario else '' }}" data-max-portas="{{ max_portas }}">
 
@@ -258,6 +260,7 @@
 const ROOT = document.querySelector(".totem");
 const ARMARIO_ID = ROOT.dataset.armarioId || "";
 const MAX_PORTAS = parseInt(ROOT.dataset.maxPortas || "8", 10);
+const MODO_QUIOSQUE = {{ 'true' if modo_quiosque else 'false' }};
 const USA_PIN = {{ 'true' if usa_pin_deposito else 'false' }};
 const SEM_PIN = {{ 'true' if deposito_sem_pin else 'false' }};
 const SOMENTE_CADASTRADO = {{ 'true' if deposito_somente_cadastrado else 'false' }};
@@ -982,10 +985,36 @@ document.addEventListener("click", resetIdle);
 document.addEventListener("touchstart", resetIdle);
 resetIdle();
 
-if(ARMARIO_ID && !document.querySelector(".totem-select")){
+if(ARMARIO_ID && !document.querySelector(".totem-select") && !MODO_QUIOSQUE){
     document.body.requestFullscreen && document.documentElement.addEventListener("dblclick", () => {
         if(!document.fullscreenElement) document.documentElement.requestFullscreen().catch(()=>{});
     });
+}
+
+if(MODO_QUIOSQUE){
+    document.addEventListener("contextmenu", e => e.preventDefault());
+
+    history.pushState(null, "", location.href);
+    window.addEventListener("popstate", () => history.pushState(null, "", location.href));
+
+    let wakeLock = null;
+    async function manterTelaLigada(){
+        if(!("wakeLock" in navigator)) return;
+        try {
+            wakeLock = await navigator.wakeLock.request("screen");
+            wakeLock.addEventListener("release", () => { wakeLock = null; });
+        } catch (_) {}
+    }
+    manterTelaLigada();
+    document.addEventListener("visibilitychange", () => {
+        if(document.visibilityState === "visible") manterTelaLigada();
+    });
+
+    window.addEventListener("online", () => location.reload());
+
+    if(document.documentElement.requestFullscreen){
+        document.documentElement.requestFullscreen().catch(() => {});
+    }
 }
 </script>
 

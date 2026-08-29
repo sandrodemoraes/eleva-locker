@@ -1,3 +1,3 @@
 @echo off
 cd /d "%~dp0"
-call "%~dp0configurar_celular_totem.bat"
+call "%~dp0tools\configurar_celular_totem.bat"

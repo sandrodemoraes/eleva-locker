@@ -38,11 +38,10 @@ echo  2. Compartilhar - "Adicionar a Tela de Inicio"
 echo  3. Nome: Totem Matriz
 echo.
 echo ------------------------------------------------------------
-echo  SEMPRE ABRIR NO TOTEM (Android avancado)
+echo  MODO QUIOSQUE (celular so abre o totem)
 echo ------------------------------------------------------------
-echo  App gratuito: "Fully Kiosk Browser" ou "Kiosk Browser Lockdown"
-echo  URL inicial: %URL%
-echo  Modo quiosque = celular so abre o totem.
+echo  Rode: CONFIGURAR_QUIOSQUE.bat
+echo  App: Fully Kiosk Browser (Play Store)
 echo.
 echo ============================================================
 echo.

@@ -63,6 +63,56 @@ def totem_matriz():
     return redirect(f"/totem/{armario_id}")
 
 
+@totem_bp.route("/totem/quiosque")
+def totem_quiosque():
+    armario_id = config.TOTEM_ARMARIO_ID or 2
+    return redirect(f"/totem/{armario_id}?kiosk=1")
+
+
+def _url_totem_quiosque():
+    base = config.APP_URL_BASE.rstrip("/")
+    armario_id = config.TOTEM_ARMARIO_ID or 2
+    return f"{base}/totem/{armario_id}?kiosk=1"
+
+
+@totem_bp.route("/totem/quiosque/fully.json")
+def totem_quiosque_fully():
+    """Configuração importável no Fully Kiosk Browser (Outras configurações → Importar)."""
+    start = _url_totem_quiosque()
+    dados = {
+        "startURL": start,
+        "kioskMode": True,
+        "launchOnBoot": True,
+        "keepScreenOn": True,
+        "forceSleepIfUnplugged": False,
+        "reloadOnInternetReconnect": True,
+        "reloadOnScreenOn": True,
+        "reloadEachSeconds": 0,
+        "motionDetection": False,
+        "enableScreensaver": False,
+        "timeToScreensaverV2": 0,
+        "enableZoom": False,
+        "showNavigationBar": False,
+        "showStatusBar": False,
+        "showActionBar": False,
+        "setRemoveSystemUI": True,
+        "disableHomeButton": True,
+        "disableVolumeButtons": True,
+        "disableOtherApps": True,
+        "disableNotifications": True,
+        "disablePowerButton": False,
+        "screensaverBrightness": 255,
+        "screenBrightness": 200,
+        "wifiEnabled": True,
+        "loadOverview": False,
+    }
+    return Response(
+        json.dumps(dados, indent=2),
+        mimetype="application/json",
+        headers={"Content-Disposition": 'attachment; filename="eleva-totem-quiosque.json"'},
+    )
+
+
 @totem_bp.route("/totem/escolher")
 @login_required
 def escolher():
@@ -112,6 +162,8 @@ def index(armario_id=None):
     ajuda_tel_fmt, ajuda_tel_link = _formatar_telefone_ajuda(ajuda_tel)
     ajuda_habilitada = TotemAjudaService.ajuda_habilitada()
 
+    modo_quiosque = request.args.get("kiosk") in ("1", "true", "yes")
+
     resp = make_response(render_template(
         "totem.html",
         armario=armario,
@@ -129,6 +181,7 @@ def index(armario_id=None):
         deposito_sem_pin=config.TOTEM_DEPOSITO_SEM_PIN,
         deposito_somente_cadastrado=config.TOTEM_DEPOSITO_SOMENTE_CADASTRADO,
         totem_versao=TOTEM_VERSAO,
+        modo_quiosque=modo_quiosque,
     ))
     resp.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
     resp.headers["Pragma"] = "no-cache"

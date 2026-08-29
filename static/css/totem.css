@@ -816,3 +816,9 @@ html,body{
     pointer-events:none;
     font-family:ui-monospace,Consolas,monospace;
 }
+
+body.modo-quiosque{
+    -webkit-user-select:none;
+    user-select:none;
+    overscroll-behavior:none;
+}
