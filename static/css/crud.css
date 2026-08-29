@@ -290,17 +290,35 @@ tr:hover{
 
 .acoes-cell{
     white-space:nowrap;
+    min-width:140px;
 }
 
 .acoes-cell .btn,
-.acoes-cell form{
+.acoes-cell a.btn{
     display:inline-flex;
     vertical-align:middle;
     margin-right:4px;
+    width:auto;
 }
 
-.acoes-cell form:last-child{
+.acoes-cell form{
+    display:inline;
+    margin:0;
+    vertical-align:middle;
+}
+
+.acoes-cell form button{
+    display:inline-flex;
+    width:auto;
+    vertical-align:middle;
     margin-right:0;
+}
+
+/* Sobrescreve style.css global (button{width:100%}) nas tabelas CRUD */
+.table-box button.btn-sm{
+    width:auto;
+    padding:7px 12px;
+    font-size:13px;
 }
 
 .link-primary{
