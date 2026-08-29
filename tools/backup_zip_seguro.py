@@ -74,6 +74,8 @@ def main() -> int:
     print()
     print(f"OK — {n} arquivos | {mb:.1f} MB")
     print(f"  {zip_path}")
+    print()
+    print("Abrir pasta: tools\\abrir_pasta_backup_zip.bat")
     return 0
 
 
