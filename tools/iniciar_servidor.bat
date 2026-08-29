@@ -47,7 +47,17 @@ if /i not "%ELEVA_SEM_NAVEGADOR%"=="1" (
     )
     set "PAINEL=!PAINEL:"=!"
     set "PAINEL=!PAINEL: =!"
-    echo !PAINEL!| findstr /i /r "/[a-z]" >nul || set "PAINEL=!PAINEL!/dashboard"
+    set "PAINEL=!PAINEL:/dashboard/dashboard=/dashboard!"
+    echo !PAINEL!| findstr /i /c:"/dashboard" >nul
+    if errorlevel 1 (
+        echo !PAINEL!| findstr /i /c:"/totem" >nul
+        if errorlevel 1 (
+            echo !PAINEL!| findstr /i /c:"/armarios" >nul
+            if errorlevel 1 (
+                if "!PAINEL:~-1!"=="/" (set "PAINEL=!PAINEL!dashboard") else (set "PAINEL=!PAINEL!/dashboard")
+            )
+        )
+    )
     echo Abrindo navegador em !PAINEL! ...
     start "ElevaNavegador" /MIN cmd /c call "%~dp0abrir_navegador_atraso.bat" "!PAINEL!"
 )

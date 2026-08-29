@@ -9,7 +9,17 @@ set "URL=%URL:"=%"
 set "URL=%URL: =%"
 
 echo.%URL%| findstr /i /r "^https\?://" >nul || set "URL=http://192.168.16.130:15000/dashboard"
-echo.%URL%| findstr /i /r "/[a-z]" >nul || set "URL=%URL%/dashboard"
+set "URL=%URL:/dashboard/dashboard=/dashboard%"
+echo.%URL%| findstr /i /c:"/dashboard" >nul
+if errorlevel 1 (
+    echo.%URL%| findstr /i /c:"/totem" >nul
+    if errorlevel 1 (
+        echo.%URL%| findstr /i /c:"/armarios" >nul
+        if errorlevel 1 (
+            if "%URL:~-1%"=="/" (set "URL=%URL%dashboard") else (set "URL=%URL%/dashboard")
+        )
+    )
+)
 
 call "%~dp0encontrar_python.bat"
 set "PY=%ELEVA_PYTHON%"
