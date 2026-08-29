@@ -59,7 +59,7 @@ def main():
     checks = [
         ("templates/armarios.html", "Cadastre armários, placas ESP", "Engrenagem na listagem"),
         ("templates/armarios.html", "fa-solid fa-gear", "Icone engrenagem verde"),
-        ("templates/armarios_detalhe.html", "ESP32 deste armário", "Tela /armarios/id"),
+        ("templates/armarios_detalhe.html", "Placas ESP32", "Tela /armarios/id"),
         ("app.py", "Encerrar o servidor ELEVA LOCKER", "Confirmacao Ctrl+C"),
         ("templates/layout/navbar.html", "url_for('notificacoes.listar')", "Sino abre notificacoes"),
     ]
