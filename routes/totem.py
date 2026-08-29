@@ -57,6 +57,12 @@ def versao():
     return jsonify(info)
 
 
+@totem_bp.route("/totem/matriz")
+def totem_matriz():
+    armario_id = config.TOTEM_ARMARIO_ID or 2
+    return redirect(f"/totem/{armario_id}")
+
+
 @totem_bp.route("/totem/escolher")
 @login_required
 def escolher():
@@ -187,13 +193,13 @@ def manifest_armario(armario_id):
         "short_name": "Totem",
         "description": "Totem de retirada ELEVA LOCKER",
         "start_url": start,
-        "scope": start,
-        "display": "fullscreen",
+        "scope": "/totem/",
+        "display": "standalone",
         "orientation": "any",
         "background_color": "#0f3d31",
         "theme_color": "#134736",
         "icons": [{
-            "src": "/static/icons/icon.svg",
+            "src": "/static/brand/logo-eleva-locker-icon.svg",
             "sizes": "any",
             "type": "image/svg+xml",
             "purpose": "any maskable",

@@ -7,6 +7,10 @@
     <meta name="mobile-web-app-capable" content="yes">
     <title>ELEVA LOCKER — Totem</title>
     <link rel="icon" href="{{ url_for('static', filename='brand/logo-eleva-locker-icon.svg') }}" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='brand/logo-eleva-locker-icon.svg') }}">
+    {% if armario_id %}
+    <meta name="apple-mobile-web-app-title" content="Totem {{ armario.nome if armario else armario_id }}">
+    {% endif %}
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
