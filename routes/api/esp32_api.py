@@ -61,7 +61,7 @@ def heartbeat():
 
         esp32_id = Esp32Service.heartbeat(request.esp32["token"], ip, mac)
 
-        versao_servidor = request.esp32.get("sync_versao") or 1
+        versao_servidor = 1
 
         with BaseRepository.get_connection() as conn:
             row = conn.execute(
