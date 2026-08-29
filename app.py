@@ -105,8 +105,25 @@ def inject_site_context():
 
 if __name__ == "__main__":
 
-    app.run(
-        host="0.0.0.0",
-        port=15000,
-        debug=True
-    )
+    print("Ctrl+C pede confirmacao antes de encerrar (S/N).")
+    print("DEIXE ESTA JANELA ABERTA enquanto o totem estiver em uso.\n")
+
+    while True:
+        try:
+            app.run(
+                host="0.0.0.0",
+                port=15000,
+                debug=True,
+                use_reloader=False,
+            )
+            break
+        except KeyboardInterrupt:
+            print("\n")
+            try:
+                resp = input("Encerrar o servidor ELEVA LOCKER? (S/N): ").strip().lower()
+            except (EOFError, KeyboardInterrupt):
+                resp = "s"
+            if resp in ("s", "sim", "y", "yes"):
+                print("Servidor encerrado.")
+                break
+            print("Servidor continua — reiniciando...\n")

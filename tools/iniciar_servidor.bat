@@ -38,6 +38,7 @@ echo Python: %PY%
 echo URL totem: http://192.168.16.130:15000/totem/2
 echo.
 echo DEIXE ESTA JANELA ABERTA. Fechar = servidor para.
+echo Ctrl+C pede confirmacao (S/N) antes de encerrar.
 echo.
 
 %PY% app.py
