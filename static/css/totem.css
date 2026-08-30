@@ -293,6 +293,16 @@ html,body{
     opacity:.9;
 }
 
+.totem-lgpd-aviso{
+    font-size:11px;
+    line-height:1.4;
+    opacity:.75;
+    margin:0 0 10px;
+    max-width:360px;
+    margin-left:auto;
+    margin-right:auto;
+}
+
 .btn-voltar{
     position:absolute;
     top:16px;

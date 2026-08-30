@@ -179,6 +179,13 @@
             </div>
 
             <div class="deposito-acao">
+                {% if lgpd_aviso_totem %}
+                <p class="totem-lgpd-aviso">
+                    Ao depositar, você concorda com o tratamento dos dados para entrega da encomenda,
+                    conforme a <a href="/privacidade" class="totem-lgpd-link">Política de Privacidade</a>
+                    (v{{ lgpd_politica_versao }}).
+                </p>
+                {% endif %}
                 <p class="porta-auto-msg" id="porta-auto-msg"></p>
                 <button type="button" class="btn-totem btn-principal btn-depositar" onclick="confirmarDeposito()" disabled id="btn-abrir-porta">
                     <i class="fa-solid fa-lock-open"></i> Abrir porta

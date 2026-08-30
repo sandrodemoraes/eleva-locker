@@ -324,6 +324,27 @@ def criar_banco():
     adicionar_coluna(cursor, "empresas", "site_id", "INTEGER")
     adicionar_coluna(cursor, "armarios", "site_id", "INTEGER")
 
+    # LGPD — Fase 2 (colunas nullable; flags off = sem impacto operacional)
+    adicionar_coluna(cursor, "usuarios", "lgpd_consentimento_em", "DATETIME")
+    adicionar_coluna(cursor, "usuarios", "lgpd_consentimento_versao", "TEXT")
+    adicionar_coluna(cursor, "usuarios", "lgpd_consentimento_ip", "TEXT")
+    adicionar_coluna(cursor, "encomendas", "lgpd_base_legal", "TEXT DEFAULT 'execucao_servico'")
+
+    ddl("""
+    CREATE TABLE IF NOT EXISTS lgpd_consentimentos(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        titular_tipo TEXT NOT NULL,
+        titular_id INTEGER,
+        telefone TEXT,
+        email TEXT,
+        finalidade TEXT NOT NULL,
+        versao_politica TEXT,
+        ip TEXT,
+        user_agent TEXT,
+        criado_em DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+    """)
+
     cursor.execute("SELECT COUNT(*) AS c FROM sites")
     rs = cursor.fetchone()
     n_sites = list(rs.values())[0] if hasattr(rs, "values") else rs[0]

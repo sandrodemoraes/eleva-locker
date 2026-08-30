@@ -164,9 +164,10 @@ class EncomendaRepository:
                 cursor.execute("""
                     INSERT INTO encomendas (
                         codigo, cliente, telefone, email, compartimento,
-                        data_entrada, status, operador, transportadora, observacao, expira_em
+                        data_entrada, status, operador, transportadora, observacao,
+                        expira_em, lgpd_base_legal
                     )
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """, (
                     dados["codigo"],
                     dados["cliente"],
@@ -179,6 +180,7 @@ class EncomendaRepository:
                     dados.get("transportadora"),
                     dados.get("observacao"),
                     dados.get("expira_em"),
+                    dados.get("lgpd_base_legal", "execucao_servico"),
                 ))
 
                 encomenda_id = cursor.lastrowid

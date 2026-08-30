@@ -1,7 +1,9 @@
 from werkzeug.security import generate_password_hash
 import sqlite3
 
+import config
 from repositories.usuario_repository import UsuarioRepository
+from services.lgpd_consentimento_service import LgpdConsentimentoService
 
 
 class UsuarioService:
@@ -29,7 +31,8 @@ class UsuarioService:
         return usuario
 
     @staticmethod
-    def criar(nome, email, telefone, senha, confirmar, perfil, status, armario_id=None):
+    def criar(nome, email, telefone, senha, confirmar, perfil, status, armario_id=None,
+              lgpd_consentimento=False, ip=None, user_agent=None):
 
         nome = nome.strip()
         email = email.strip().lower()
@@ -44,13 +47,21 @@ class UsuarioService:
         if UsuarioRepository.buscar_por_email(email):
             raise ValueError("Este e-mail já está cadastrado. Use outro e-mail.")
 
+        if config.LGPD_CONSENTIMENTO_USUARIO and not lgpd_consentimento:
+            raise ValueError("É necessário aceitar a Política de Privacidade.")
+
         armario_id = UsuarioService._normalizar_armario_id(perfil, armario_id)
         senha_hash = generate_password_hash(senha)
 
         try:
-            return UsuarioRepository.criar(
+            usuario_id = UsuarioRepository.criar(
                 nome, email, telefone, senha_hash, perfil, status, armario_id
             )
+            if config.LGPD_CONSENTIMENTO_USUARIO and lgpd_consentimento:
+                LgpdConsentimentoService.registrar_usuario(
+                    usuario_id, email, telefone, ip=ip, user_agent=user_agent,
+                )
+            return usuario_id
         except sqlite3.IntegrityError:
             raise ValueError("Este e-mail já está cadastrado. Use outro e-mail.")
 

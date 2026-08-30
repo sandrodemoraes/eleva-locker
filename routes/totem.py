@@ -18,8 +18,16 @@ from services.qrcode_service import QrcodeService
 from services.totem_auth_service import autorizar_deposito_totem, deposito_totem_habilitado
 from services.totem_destinatario_service import TotemDestinatarioService
 from services.totem_ajuda_service import TotemAjudaService
+from services.lgpd_consentimento_service import LgpdConsentimentoService
 
 totem_bp = Blueprint("totem", __name__)
+
+
+def _ip_cliente():
+    ip = request.headers.get("X-Forwarded-For", request.remote_addr or "")
+    if ip and "," in ip:
+        ip = ip.split(",")[0].strip()
+    return ip
 
 
 def _formatar_telefone_ajuda(telefone):
@@ -187,6 +195,8 @@ def index(armario_id=None):
         totem_versao=TOTEM_VERSAO,
         modo_quiosque=modo_quiosque,
         lgpd_aviso=config.LGPD_AVISO_ATIVO,
+        lgpd_aviso_totem=config.LGPD_AVISO_TOTEM,
+        lgpd_politica_versao=config.LGPD_POLITICA_VERSAO,
     ))
     resp.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
     resp.headers["Pragma"] = "no-cache"
@@ -213,9 +223,7 @@ def solicitar_ajuda():
         except (TypeError, ValueError):
             return jsonify({"sucesso": False, "mensagem": "Armário inválido."}), 400
 
-    ip = request.headers.get("X-Forwarded-For", request.remote_addr or "")
-    if ip and "," in ip:
-        ip = ip.split(",")[0].strip()
+    ip = _ip_cliente()
 
     try:
         resultado = TotemAjudaService.solicitar(armario_id=armario_id, ip_origem=ip)
@@ -504,6 +512,20 @@ def depositar():
 
         abertura = resultado.get("esp32") or {}
         porta_aberta = bool(abertura.get("sucesso"))
+
+        if config.LGPD_AVISO_TOTEM:
+            try:
+                LgpdConsentimentoService.registrar_totem_deposito(
+                    encomenda_id=resultado["id"],
+                    cliente=cliente,
+                    telefone=telefone,
+                    email=email_morador,
+                    usuario_id=morador_usuario_id,
+                    ip=_ip_cliente(),
+                    user_agent=(request.headers.get("User-Agent") or "")[:500],
+                )
+            except Exception:
+                logging.exception("lgpd consentimento totem deposito")
 
         return jsonify({
             "sucesso": True,

@@ -122,6 +122,10 @@ LGPD_CONTATO_EMAIL = os.getenv("LGPD_CONTATO_EMAIL", "").strip()
 LGPD_CONTATO_TELEFONE = os.getenv("LGPD_CONTATO_TELEFONE", "").strip()
 LGPD_CONTROLADOR_NOME = os.getenv("LGPD_CONTROLADOR_NOME", "ELEVA LOCKER — Matriz ELEVA").strip()
 
+# LGPD — Fase 2 (consentimento; flags 0 = comportamento idêntico ao anterior)
+LGPD_CONSENTIMENTO_USUARIO = os.getenv("LGPD_CONSENTIMENTO_USUARIO", "0") == "1"
+LGPD_AVISO_TOTEM = os.getenv("LGPD_AVISO_TOTEM", "0") == "1"
+
 
 def gerar_token_esp32():
     return secrets.token_hex(16)

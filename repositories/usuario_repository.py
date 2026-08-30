@@ -94,6 +94,26 @@ class UsuarioRepository:
             conn.commit()
 
     @staticmethod
+    def atualizar_consentimento(usuario_id, versao, ip=None, consentimento_em=None):
+
+        with BaseRepository.get_connection() as conn:
+
+            conn.execute("""
+                UPDATE usuarios
+                SET lgpd_consentimento_em = ?,
+                    lgpd_consentimento_versao = ?,
+                    lgpd_consentimento_ip = ?
+                WHERE id = ?
+            """, (
+                consentimento_em,
+                versao,
+                ip,
+                usuario_id,
+            ))
+
+            conn.commit()
+
+    @staticmethod
     def excluir(usuario_id):
 
         with BaseRepository.get_connection() as conn:

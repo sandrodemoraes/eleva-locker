@@ -194,6 +194,7 @@ class EncomendaService:
                 "operador": operador,
                 "transportadora": transportadora,
                 "observacao": observacao,
+                "lgpd_base_legal": "execucao_servico",
             },
         )
 

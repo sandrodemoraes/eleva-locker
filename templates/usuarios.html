@@ -388,6 +388,23 @@
 
         }
 
+        .lgpd-consentimento-campo{
+            margin:12px 0 4px;
+        }
+
+        .lgpd-consentimento-label{
+            display:flex;
+            align-items:flex-start;
+            gap:8px;
+            font-size:13px;
+            line-height:1.4;
+            color:#444;
+        }
+
+        .lgpd-consentimento-label a{
+            color:#134736;
+        }
+
     </style>
 
 </head>
@@ -706,6 +723,17 @@
                 </div>
 
             </div>
+
+            {% if lgpd_consentimento_usuario %}
+            <div class="linha lgpd-consentimento-campo">
+                <label class="lgpd-consentimento-label">
+                    <input type="checkbox" name="lgpd_consentimento" value="1" required>
+                    Li e concordo com a
+                    <a href="/privacidade" target="_blank" rel="noopener">Política de Privacidade</a>
+                    (versão {{ lgpd_politica_versao }})
+                </label>
+            </div>
+            {% endif %}
 
             <div class="botoes-modal">
 

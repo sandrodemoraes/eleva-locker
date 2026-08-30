@@ -120,6 +120,32 @@
     </div>
 
     <div class="table-box">
+        <h2 style="color:#134736;margin-bottom:15px;">LGPD — Consentimento (Fase 2)</h2>
+        <p style="color:#666;margin-bottom:15px;font-size:14px;">
+            Flags desligadas = sistema idêntico ao anterior. Ative uma por vez após validar na bancada.
+        </p>
+        <table>
+            <tr>
+                <td style="padding:8px;">Checkbox cadastro usuário</td>
+                <td><strong>{% if config.LGPD_CONSENTIMENTO_USUARIO %}Ativo{% else %}Inativo (padrão){% endif %}</strong>
+                    · <code>LGPD_CONSENTIMENTO_USUARIO</code></td>
+            </tr>
+            <tr>
+                <td style="padding:8px;">Aviso depósito totem</td>
+                <td><strong>{% if config.LGPD_AVISO_TOTEM %}Ativo{% else %}Inativo (padrão){% endif %}</strong>
+                    · <code>LGPD_AVISO_TOTEM</code></td>
+            </tr>
+            <tr>
+                <td style="padding:8px;">Registros de consentimento</td>
+                <td>Tabela <code>lgpd_consentimentos</code> (grava ao aceitar / depositar com flag on)</td>
+            </tr>
+        </table>
+        <p style="color:#888;font-size:13px;margin-top:15px;">
+            Ativar no <code>.env</code>: <code>LGPD_CONSENTIMENTO_USUARIO=1</code> ou <code>LGPD_AVISO_TOTEM=1</code>
+        </p>
+    </div>
+
+    <div class="table-box">
         <h2 style="color:#134736;margin-bottom:15px;">Notificações (Fase 3)</h2>
         <table>
             <tr><td style="padding:8px;">Modo</td><td><strong>{{ config.NOTIF_MODO }}</strong></td></tr>
