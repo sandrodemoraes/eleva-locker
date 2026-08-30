@@ -19,34 +19,83 @@
 
         <hr>
 
-        <a href="/armarios">
+        <a href="{{ url_for('armarios.listar') }}">
             <i class="fa-solid fa-box"></i>
             <span>Armários</span>
         </a>
 
-        <a href="/compartimentos">
+        <a href="{{ url_for('compartimentos.listar') }}">
             <i class="fa-solid fa-table-cells-large"></i>
             <span>Compartimentos</span>
         </a>
 
-        <a href="/encomendas">
+        <a href="{{ url_for('encomendas.listar') }}">
             <i class="fa-solid fa-box-open"></i>
             <span>Encomendas</span>
         </a>
 
-        <a href="/esp32">
+        <a href="{{ url_for('esp32.listar') }}">
             <i class="fa-solid fa-microchip"></i>
             <span>ESP32</span>
         </a>
 
+        <a href="{{ url_for('totem.escolher') }}">
+            <i class="fa-solid fa-tablet-screen-button"></i>
+            <span>Totem</span>
+        </a>
+
         <hr>
 
-        <a href="/logs">
+        <a href="{{ url_for('financeiro.dashboard') }}">
+            <i class="fa-solid fa-coins"></i>
+            <span>Financeiro</span>
+        </a>
+
+        <a href="{{ url_for('planos.listar') }}">
+            <i class="fa-solid fa-tags"></i>
+            <span>Planos</span>
+        </a>
+
+        <a href="{{ url_for('contratos.listar') }}">
+            <i class="fa-solid fa-file-contract"></i>
+            <span>Contratos</span>
+        </a>
+
+        <a href="{{ url_for('faturas.listar') }}">
+            <i class="fa-solid fa-file-invoice-dollar"></i>
+            <span>Faturas</span>
+        </a>
+
+        <a href="{{ url_for('portal.index') }}">
+            <i class="fa-solid fa-store"></i>
+            <span>Portal Cliente</span>
+        </a>
+
+        <hr>
+
+        <a href="{{ url_for('sites.listar') }}">
+            <i class="fa-solid fa-sitemap"></i>
+            <span>Sites / API</span>
+        </a>
+
+        <a href="{{ url_for('relatorios.index') }}">
+            <i class="fa-solid fa-chart-pie"></i>
+            <span>Relatórios BI</span>
+        </a>
+
+        <hr>
+
+        <a href="{{ url_for('notificacoes.listar') }}">
+            <i class="fa-solid fa-bell"></i>
+            <span>Notificações</span>
+        </a>
+
+        <a href="{{ url_for('logs.listar') }}">
             <i class="fa-solid fa-file-lines"></i>
             <span>Logs</span>
         </a>
 
-        <a href="/configuracoes">
+        <a href="{{ url_for('esp32.configuracoes') }}">
             <i class="fa-solid fa-gear"></i>
             <span>Configurações</span>
         </a>
