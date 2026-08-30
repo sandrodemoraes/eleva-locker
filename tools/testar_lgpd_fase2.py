@@ -44,9 +44,17 @@ def main():
         ("Tabela lgpd_consentimentos", _tabela_existe("lgpd_consentimentos")),
         ("Coluna usuarios.lgpd_consentimento_em", _coluna_existe("usuarios", "lgpd_consentimento_em")),
         ("Coluna encomendas.lgpd_base_legal", _coluna_existe("encomendas", "lgpd_base_legal")),
-        ("Flag LGPD_CONSENTIMENTO_USUARIO off", not config.LGPD_CONSENTIMENTO_USUARIO),
-        ("Flag LGPD_AVISO_TOTEM off", not config.LGPD_AVISO_TOTEM),
     ]
+
+    if config.LGPD_CONSENTIMENTO_USUARIO:
+        print("  OK     Flag LGPD_CONSENTIMENTO_USUARIO ligada")
+    else:
+        print("  OK     Flag LGPD_CONSENTIMENTO_USUARIO off")
+
+    if config.LGPD_AVISO_TOTEM:
+        print("  OK     Flag LGPD_AVISO_TOTEM ligada")
+    else:
+        print("  OK     Flag LGPD_AVISO_TOTEM off")
 
     for nome, ok in checks:
         if ok:
@@ -60,6 +68,12 @@ def main():
     if r.status_code != 200:
         falhas += 1
         print(f"  FALHA  Totem /totem/2 HTTP {r.status_code}")
+    elif config.LGPD_AVISO_TOTEM:
+        if b"totem-lgpd-aviso" in r.data:
+            print("  OK     Totem com aviso depósito (flag on)")
+        else:
+            falhas += 1
+            print("  FALHA  Aviso depósito ausente com flag on")
     elif b"totem-lgpd-aviso" in r.data:
         falhas += 1
         print("  FALHA  Aviso depósito visível com flag off")
@@ -83,7 +97,8 @@ def main():
     if falhas:
         print(f"  {falhas} teste(s) com problema")
     else:
-        print("  Fase 2 LGPD OK — migração e flags off")
+        estado = "ligadas" if (config.LGPD_CONSENTIMENTO_USUARIO or config.LGPD_AVISO_TOTEM) else "off"
+        print(f"  Fase 2 LGPD OK — migração e flags {estado}")
     print("=" * 60)
     print()
     return 1 if falhas else 0
