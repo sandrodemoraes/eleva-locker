@@ -25,6 +25,7 @@ from routes.api.compartimento_api import compartimento_api_bp
 from routes.sites import sites_bp
 from routes.relatorios import relatorios_bp
 from routes.api.v1.public_api import v1_bp
+from routes.lgpd import lgpd_bp
 
 
 app = Flask(__name__)
@@ -61,6 +62,7 @@ app.register_blueprint(compartimento_api_bp)
 app.register_blueprint(sites_bp)
 app.register_blueprint(relatorios_bp)
 app.register_blueprint(v1_bp)
+app.register_blueprint(lgpd_bp)
 
 
 def _iniciar_lembretes_automaticos():

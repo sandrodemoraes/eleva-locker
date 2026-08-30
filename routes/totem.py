@@ -186,6 +186,7 @@ def index(armario_id=None):
         deposito_somente_cadastrado=config.TOTEM_DEPOSITO_SOMENTE_CADASTRADO,
         totem_versao=TOTEM_VERSAO,
         modo_quiosque=modo_quiosque,
+        lgpd_aviso=config.LGPD_AVISO_ATIVO,
     ))
     resp.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
     resp.headers["Pragma"] = "no-cache"

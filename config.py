@@ -115,6 +115,13 @@ else:
     TOTEM_DEPOSITO_SEM_PIN = bool(TOTEM_ARMARIO_ID)
 TOTEM_DEPOSITO_SOMENTE_CADASTRADO = os.getenv("TOTEM_DEPOSITO_SOMENTE_CADASTRADO", "1") == "1"
 
+# LGPD — Fase 1 (documentação; flags avançadas na Fase 2+)
+LGPD_AVISO_ATIVO = os.getenv("LGPD_AVISO_ATIVO", "1") == "1"
+LGPD_POLITICA_VERSAO = os.getenv("LGPD_POLITICA_VERSAO", "2026-08-30")
+LGPD_CONTATO_EMAIL = os.getenv("LGPD_CONTATO_EMAIL", "").strip()
+LGPD_CONTATO_TELEFONE = os.getenv("LGPD_CONTATO_TELEFONE", "").strip()
+LGPD_CONTROLADOR_NOME = os.getenv("LGPD_CONTROLADOR_NOME", "ELEVA LOCKER — Matriz ELEVA").strip()
+
 
 def gerar_token_esp32():
     return secrets.token_hex(16)

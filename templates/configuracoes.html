@@ -83,6 +83,43 @@
     </div>
 
     <div class="table-box">
+        <h2 style="color:#134736;margin-bottom:15px;">LGPD — Documentos (Fase 1)</h2>
+        <p style="color:#666;margin-bottom:15px;font-size:14px;">
+            Transparência e políticas. Não altera totem, WhatsApp ou encomendas.
+            Versão: <strong>{{ config.LGPD_POLITICA_VERSAO }}</strong>
+        </p>
+        <table>
+            <tr>
+                <td style="padding:8px;">Seus dados (LGPD)</td>
+                <td><a href="{{ url_for('lgpd.index') }}" target="_blank" rel="noopener"><strong>/lgpd</strong></a></td>
+            </tr>
+            <tr>
+                <td style="padding:8px;">Política de Privacidade</td>
+                <td><a href="{{ url_for('lgpd.privacidade') }}" target="_blank" rel="noopener"><strong>/privacidade</strong></a></td>
+            </tr>
+            <tr>
+                <td style="padding:8px;">Termos de Uso (totem)</td>
+                <td><a href="{{ url_for('lgpd.termos') }}" target="_blank" rel="noopener"><strong>/termos</strong></a></td>
+            </tr>
+            <tr>
+                <td style="padding:8px;">Aviso no totem</td>
+                <td><strong>{% if config.LGPD_AVISO_ATIVO %}Ativo (link rodapé){% else %}Inativo{% endif %}</strong></td>
+            </tr>
+            <tr>
+                <td style="padding:8px;">Contato titular</td>
+                <td>
+                    {% if config.LGPD_CONTATO_EMAIL %}{{ config.LGPD_CONTATO_EMAIL }}{% endif %}
+                    {% if config.LGPD_CONTATO_TELEFONE %} · {{ config.LGPD_CONTATO_TELEFONE }}{% endif %}
+                    {% if not config.LGPD_CONTATO_EMAIL and not config.LGPD_CONTATO_TELEFONE %}<span style="color:#888;">Defina LGPD_CONTATO_* no .env</span>{% endif %}
+                </td>
+            </tr>
+        </table>
+        <p style="color:#888;font-size:13px;margin-top:15px;">
+            Plano completo: <code>docs/LGPD_PLANO_ADEQUACAO.md</code> · ROPA: <code>docs/LGPD_ROPA.md</code>
+        </p>
+    </div>
+
+    <div class="table-box">
         <h2 style="color:#134736;margin-bottom:15px;">Notificações (Fase 3)</h2>
         <table>
             <tr><td style="padding:8px;">Modo</td><td><strong>{{ config.NOTIF_MODO }}</strong></td></tr>

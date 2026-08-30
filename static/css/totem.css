@@ -280,8 +280,17 @@ html,body{
 .totem-footer{
     position:fixed;
     bottom:12px;
+    left:0;
+    right:0;
+    text-align:center;
     opacity:.45;
     font-size:12px;
+}
+
+.totem-lgpd-link{
+    color:inherit;
+    text-decoration:underline;
+    opacity:.9;
 }
 
 .btn-voltar{
