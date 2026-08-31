@@ -30,6 +30,9 @@ print("  LGPD — Fase 2")
 print(f"  LGPD_CONSENTIMENTO_USUARIO = {config.LGPD_CONSENTIMENTO_USUARIO}")
 print(f"  LGPD_AVISO_TOTEM           = {config.LGPD_AVISO_TOTEM}")
 print()
+print("  LGPD — Fase 3")
+print(f"  LGPD_TITULAR_ATIVO         = {config.LGPD_TITULAR_ATIVO}")
+print()
 
 if (config.TOTEM_AJUDA_TELEFONE or "").strip():
     print("  OK — .env carregado. Reinicie INICIAR.bat se acabou de atualizar.")

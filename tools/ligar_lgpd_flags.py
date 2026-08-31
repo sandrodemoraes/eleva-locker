@@ -11,6 +11,7 @@ ENV_PATH = ROOT / ".env"
 FLAGS = {
     "usuario": "LGPD_CONSENTIMENTO_USUARIO",
     "totem": "LGPD_AVISO_TOTEM",
+    "titular": "LGPD_TITULAR_ATIVO",
 }
 
 
@@ -42,10 +43,13 @@ def main():
     parser = argparse.ArgumentParser(description="Liga flags LGPD Fase 2 no .env")
     parser.add_argument("--usuario", action="store_true", help="Só LGPD_CONSENTIMENTO_USUARIO=1")
     parser.add_argument("--totem", action="store_true", help="Só LGPD_AVISO_TOTEM=1")
+    parser.add_argument("--titular", action="store_true", help="Só LGPD_TITULAR_ATIVO=1")
     args = parser.parse_args()
 
-    ligar_usuario = args.usuario or (not args.usuario and not args.totem)
-    ligar_totem = args.totem or (not args.usuario and not args.totem)
+    any_specific = args.usuario or args.totem or args.titular
+    ligar_usuario = args.usuario or (not any_specific)
+    ligar_totem = args.totem or (not any_specific)
+    ligar_titular = args.titular or (not any_specific)
 
     print()
     print("=" * 60)
@@ -63,6 +67,9 @@ def main():
     if ligar_totem:
         linhas = _definir_var(linhas, FLAGS["totem"], "1")
         alterados.append(FLAGS["totem"])
+    if ligar_titular:
+        linhas = _definir_var(linhas, FLAGS["titular"], "1")
+        alterados.append(FLAGS["titular"])
 
     ENV_PATH.write_text("".join(linhas), encoding="utf-8")
 

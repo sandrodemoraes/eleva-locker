@@ -126,6 +126,9 @@ LGPD_CONTROLADOR_NOME = os.getenv("LGPD_CONTROLADOR_NOME", "ELEVA LOCKER — Mat
 LGPD_CONSENTIMENTO_USUARIO = os.getenv("LGPD_CONSENTIMENTO_USUARIO", "0") == "1"
 LGPD_AVISO_TOTEM = os.getenv("LGPD_AVISO_TOTEM", "0") == "1"
 
+# LGPD — Fase 3 (direitos do titular; 0 = menu/ações ocultos)
+LGPD_TITULAR_ATIVO = os.getenv("LGPD_TITULAR_ATIVO", "0") == "1"
+
 
 def gerar_token_esp32():
     return secrets.token_hex(16)

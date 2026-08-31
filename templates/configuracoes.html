@@ -146,6 +146,37 @@
     </div>
 
     <div class="table-box">
+        <h2 style="color:#134736;margin-bottom:15px;">LGPD — Direitos do titular (Fase 3)</h2>
+        <p style="color:#666;margin-bottom:15px;font-size:14px;">
+            Exportar JSON/CSV e anonimizar no painel admin. Flag off = menu oculto.
+        </p>
+        <table>
+            <tr>
+                <td style="padding:8px;">Módulo titular</td>
+                <td><strong>{% if config.LGPD_TITULAR_ATIVO %}Ativo{% else %}Inativo (padrão){% endif %}</strong>
+                    · <code>LGPD_TITULAR_ATIVO</code></td>
+            </tr>
+            <tr>
+                <td style="padding:8px;">Painel admin</td>
+                <td>
+                    {% if config.LGPD_TITULAR_ATIVO %}
+                    <a href="{{ url_for('lgpd_admin.titular_index') }}"><strong>/lgpd/admin/titular</strong></a>
+                    {% else %}
+                    <span style="color:#888;">Defina LGPD_TITULAR_ATIVO=1 no .env</span>
+                    {% endif %}
+                </td>
+            </tr>
+            <tr>
+                <td style="padding:8px;">Registro solicitações</td>
+                <td>Tabela <code>lgpd_solicitacoes</code></td>
+            </tr>
+        </table>
+        <p style="color:#888;font-size:13px;margin-top:15px;">
+            Procedimento: <code>docs/LGPD_PROCEDIMENTO_TITULAR.md</code>
+        </p>
+    </div>
+
+    <div class="table-box">
         <h2 style="color:#134736;margin-bottom:15px;">Notificações (Fase 3)</h2>
         <table>
             <tr><td style="padding:8px;">Modo</td><td><strong>{{ config.NOTIF_MODO }}</strong></td></tr>

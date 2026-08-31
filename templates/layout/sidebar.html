@@ -95,6 +95,13 @@
             <span>Logs</span>
         </a>
 
+        {% if lgpd_titular_ativo %}
+        <a href="{{ url_for('lgpd_admin.titular_index') }}">
+            <i class="fa-solid fa-shield-halved"></i>
+            <span>LGPD Titular</span>
+        </a>
+        {% endif %}
+
         <a href="{{ url_for('esp32.configuracoes') }}">
             <i class="fa-solid fa-gear"></i>
             <span>Configurações</span>

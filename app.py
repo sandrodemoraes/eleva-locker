@@ -26,6 +26,7 @@ from routes.sites import sites_bp
 from routes.relatorios import relatorios_bp
 from routes.api.v1.public_api import v1_bp
 from routes.lgpd import lgpd_bp
+from routes.lgpd_admin import lgpd_admin_bp
 
 
 app = Flask(__name__)
@@ -63,6 +64,7 @@ app.register_blueprint(sites_bp)
 app.register_blueprint(relatorios_bp)
 app.register_blueprint(v1_bp)
 app.register_blueprint(lgpd_bp)
+app.register_blueprint(lgpd_admin_bp)
 
 
 def _iniciar_lembretes_automaticos():
@@ -104,6 +106,7 @@ def inject_site_context():
             "sites": SiteService.listar_ativos(),
             "site_atual": get_site_id(),
             "ajuda_totem_pendentes": pendentes,
+            "lgpd_titular_ativo": __import__("config").LGPD_TITULAR_ATIVO,
         }
     return {}
 

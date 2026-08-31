@@ -345,6 +345,23 @@ def criar_banco():
     )
     """)
 
+    # LGPD — Fase 3 (direitos titular; flags off = sem UI)
+    adicionar_coluna(cursor, "usuarios", "lgpd_anonimizado_em", "DATETIME")
+    adicionar_coluna(cursor, "usuarios", "marketing_opt_out", "INTEGER DEFAULT 0")
+    adicionar_coluna(cursor, "encomendas", "lgpd_anonimizado_em", "DATETIME")
+
+    ddl("""
+    CREATE TABLE IF NOT EXISTS lgpd_solicitacoes(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        tipo TEXT NOT NULL,
+        titular_tipo TEXT NOT NULL,
+        titular_id INTEGER,
+        operador TEXT,
+        detalhe TEXT,
+        criado_em DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+    """)
+
     cursor.execute("SELECT COUNT(*) AS c FROM sites")
     rs = cursor.fetchone()
     n_sites = list(rs.values())[0] if hasattr(rs, "values") else rs[0]
