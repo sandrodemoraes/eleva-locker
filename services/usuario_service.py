@@ -1,19 +1,27 @@
 from werkzeug.security import generate_password_hash
+import sqlite3
 
+import config
 from repositories.usuario_repository import UsuarioRepository
+from services.lgpd_consentimento_service import LgpdConsentimentoService
 
 
 class UsuarioService:
 
     @staticmethod
-    def listar():
-        return UsuarioRepository.listar()
+    def _normalizar_armario_id(perfil, armario_id):
+        if armario_id in (None, "", 0, "0"):
+            return None
+        if perfil in ("Operador", "Usuário"):
+            return int(armario_id)
+        return None
+
+    @staticmethod
+    def listar(armario_id=None):
+        return UsuarioRepository.listar(armario_id)
 
     @staticmethod
     def buscar_por_id(usuario_id):
-        """
-        Retorna um usuário pelo ID.
-        """
 
         usuario = UsuarioRepository.buscar_por_id(usuario_id)
 
@@ -23,15 +31,8 @@ class UsuarioService:
         return usuario
 
     @staticmethod
-    def criar(
-        nome,
-        email,
-        telefone,
-        senha,
-        confirmar,
-        perfil,
-        status
-    ):
+    def criar(nome, email, telefone, senha, confirmar, perfil, status, armario_id=None,
+              lgpd_consentimento=False, ip=None, user_agent=None):
 
         nome = nome.strip()
         email = email.strip().lower()
@@ -44,31 +45,28 @@ class UsuarioService:
             raise ValueError("As senhas não conferem.")
 
         if UsuarioRepository.buscar_por_email(email):
-            raise ValueError("Este e-mail já está cadastrado.")
+            raise ValueError("Este e-mail já está cadastrado. Use outro e-mail.")
 
+        if config.LGPD_CONSENTIMENTO_USUARIO and not lgpd_consentimento:
+            raise ValueError("É necessário aceitar a Política de Privacidade.")
+
+        armario_id = UsuarioService._normalizar_armario_id(perfil, armario_id)
         senha_hash = generate_password_hash(senha)
 
-        UsuarioRepository.criar(
-            nome,
-            email,
-            telefone,
-            senha_hash,
-            perfil,
-            status
-        )
+        try:
+            usuario_id = UsuarioRepository.criar(
+                nome, email, telefone, senha_hash, perfil, status, armario_id
+            )
+            if config.LGPD_CONSENTIMENTO_USUARIO and lgpd_consentimento:
+                LgpdConsentimentoService.registrar_usuario(
+                    usuario_id, email, telefone, ip=ip, user_agent=user_agent,
+                )
+            return usuario_id
+        except sqlite3.IntegrityError:
+            raise ValueError("Este e-mail já está cadastrado. Use outro e-mail.")
 
     @staticmethod
-    def atualizar(
-        usuario_id,
-        nome,
-        email,
-        telefone,
-        perfil,
-        status
-    ):
-        """
-        Atualiza os dados de um usuário.
-        """
+    def atualizar(usuario_id, nome, email, telefone, perfil, status, armario_id=None):
 
         nome = nome.strip()
         email = email.strip().lower()
@@ -87,24 +85,14 @@ class UsuarioService:
         if usuario_email and usuario_email["id"] != usuario_id:
             raise ValueError("Este e-mail já está cadastrado.")
 
+        armario_id = UsuarioService._normalizar_armario_id(perfil, armario_id)
+
         UsuarioRepository.atualizar(
-            usuario_id,
-            nome,
-            email,
-            telefone,
-            perfil,
-            status
+            usuario_id, nome, email, telefone, perfil, status, armario_id
         )
 
     @staticmethod
-    def alterar_senha(
-        usuario_id,
-        senha,
-        confirmar
-    ):
-        """
-        Altera a senha do usuário.
-        """
+    def alterar_senha(usuario_id, senha, confirmar):
 
         if not senha:
             raise ValueError("Informe a nova senha.")
@@ -112,22 +100,12 @@ class UsuarioService:
         if senha != confirmar:
             raise ValueError("As senhas não conferem.")
 
-        senha_hash = generate_password_hash(senha)
-
-        UsuarioRepository.alterar_senha(
-            usuario_id,
-            senha_hash
-        )
+        UsuarioRepository.alterar_senha(usuario_id, generate_password_hash(senha))
 
     @staticmethod
     def excluir(usuario_id):
-        """
-        Exclui um usuário.
-        """
 
-        usuario = UsuarioRepository.buscar_por_id(usuario_id)
-
-        if not usuario:
+        if not UsuarioRepository.buscar_por_id(usuario_id):
             raise ValueError("Usuário não encontrado.")
 
         UsuarioRepository.excluir(usuario_id)

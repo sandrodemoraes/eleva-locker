@@ -1,0 +1,105 @@
+{% extends "layout/base.html" %}
+
+{% block title %}Relatórios BI | ELEVA LOCKER{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/crud.css') }}">
+<style>
+.chart-box{background:#fff;border-radius:12px;padding:20px;margin-bottom:20px;box-shadow:0 2px 8px rgba(0,0,0,.06);}
+.chart-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+@media(max-width:900px){.chart-grid{grid-template-columns:1fr;}}
+.kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:15px;margin-bottom:25px;}
+.kpi{background:#fff;border-radius:12px;padding:18px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.06);}
+.kpi .val{font-size:2rem;font-weight:700;color:#134736;}
+.kpi .lbl{color:#666;font-size:.9rem;margin-top:5px;}
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+    <div>
+        <h1>Relatórios & BI</h1>
+        <p>Ocupação, tendências e previsão de demanda (Fase 5)</p>
+    </div>
+</div>
+
+<div class="kpi-row">
+    <div class="kpi"><div class="val">{{ dados.resumo.taxa_ocupacao }}%</div><div class="lbl">Taxa de ocupação</div></div>
+    <div class="kpi"><div class="val">{{ dados.resumo.ocupados }}/{{ dados.resumo.compartimentos }}</div><div class="lbl">Compartimentos ocupados</div></div>
+    <div class="kpi"><div class="val">{{ dados.resumo.armarios }}</div><div class="lbl">Armários</div></div>
+    <div class="kpi"><div class="val">{{ dados.resumo.encomendas_mes }}</div><div class="lbl">Encomendas no mês</div></div>
+</div>
+
+<div class="chart-grid">
+    <div class="chart-box">
+        <h3>Encomendas por dia (30 dias)</h3>
+        <canvas id="chartEncomendas" height="200"></canvas>
+    </div>
+    <div class="chart-box">
+        <h3>Ocupação por armário</h3>
+        <canvas id="chartOcupacao" height="200"></canvas>
+    </div>
+</div>
+
+<div class="chart-box">
+    <h3>Previsão de ocupação — próximos 7 dias</h3>
+    <p style="color:#666;margin-bottom:10px;">
+        Método: {{ dados.previsao.metodo }}
+        {% if dados.previsao.tendencia_diaria is defined %}
+        | Tendência diária: {{ dados.previsao.tendencia_diaria }} encomendas/dia
+        {% endif %}
+    </p>
+    <canvas id="chartPrevisao" height="120"></canvas>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+const dados = {{ dados | tojson }};
+
+const dias = dados.encomendas_diarias.map(r => r.dia);
+const totais = dados.encomendas_diarias.map(r => r.total);
+
+new Chart(document.getElementById('chartEncomendas'), {
+    type: 'line',
+    data: {
+        labels: dias,
+        datasets: [{ label: 'Encomendas', data: totais, borderColor: '#2D8A6E', tension: 0.3, fill: false }]
+    },
+    options: { responsive: true, plugins: { legend: { display: false } } }
+});
+
+const armNomes = dados.ocupacao_armarios.map(r => r.nome);
+const armTaxa = dados.ocupacao_armarios.map(r => {
+    const t = r.total || 0;
+    return t ? Math.round((r.ocupados || 0) / t * 100) : 0;
+});
+
+new Chart(document.getElementById('chartOcupacao'), {
+    type: 'bar',
+    data: {
+        labels: armNomes,
+        datasets: [{ label: '% Ocupação', data: armTaxa, backgroundColor: '#10b981' }]
+    },
+    options: { responsive: true, scales: { y: { max: 100 } } }
+});
+
+const prevDias = dados.previsao.previsao.map(r => r.dia);
+const prevTaxa = dados.previsao.previsao.map(r => r.taxa_estimada);
+
+new Chart(document.getElementById('chartPrevisao'), {
+    type: 'line',
+    data: {
+        labels: prevDias,
+        datasets: [
+            { label: 'Taxa estimada (%)', data: prevTaxa, borderColor: '#f59e0b', tension: 0.3 },
+            { label: 'Atual', data: prevDias.map(() => dados.previsao.taxa_atual), borderColor: '#94a3b8', borderDash: [5,5] }
+        ]
+    },
+    options: { responsive: true, scales: { y: { max: 100 } } }
+});
+</script>
+{% endblock %}
