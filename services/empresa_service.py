@@ -31,7 +31,7 @@ class EmpresaService:
         if not dados.get("razao_social"):
             raise ValueError("Razão social é obrigatória.")
 
-        EmpresaRepository.inserir(dados)
+        return EmpresaRepository.inserir(dados)
 
     @staticmethod
     def atualizar(empresa_id, dados):

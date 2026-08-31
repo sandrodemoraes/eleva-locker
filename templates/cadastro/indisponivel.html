@@ -1,0 +1,10 @@
+{% extends "lgpd/base_public.html" %}
+{% block title %}Cadastro indisponível{% endblock %}
+{% block content %}
+<div class="lgpd-doc cadastro-doc">
+    <h1>Cadastro temporariamente indisponível</h1>
+    <p>Entre em contato com a ELEVA para realizar seu cadastro.</p>
+    {% if lgpd_telefone %}<p>Telefone: {{ lgpd_telefone }}</p>{% endif %}
+    {% if lgpd_email %}<p>E-mail: {{ lgpd_email }}</p>{% endif %}
+</div>
+{% endblock %}

@@ -85,6 +85,9 @@ SMS_API_KEY = os.getenv("SMS_API_KEY", "")
 # URL base para links no totem/QR (ex: http://192.168.1.10:15000)
 APP_URL_BASE = os.getenv("APP_URL_BASE", "http://localhost:15000")
 
+# Cadastro público via QR — 0 desativa /cadastro
+CADASTRO_PUBLICO_ATIVO = os.getenv("CADASTRO_PUBLICO_ATIVO", "1") == "1"
+
 # Database — sqlite (dev) | postgresql (produção)
 DATABASE_URL = os.getenv("DATABASE_URL", "")
 DB_ENGINE = os.getenv("DB_ENGINE", "sqlite")

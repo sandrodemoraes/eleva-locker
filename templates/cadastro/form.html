@@ -1,0 +1,92 @@
+{% extends "lgpd/base_public.html" %}
+{% block title %}Cadastro{% endblock %}
+{% block head_extra %}<link rel="stylesheet" href="{{ url_for('static', filename='css/cadastro.css') }}">{% endblock %}
+{% block content %}
+<div class="lgpd-doc cadastro-doc">
+    <h1><i class="fa-solid fa-building-user"></i> Cadastre seu condomínio</h1>
+    <p class="lgpd-meta">Preencha os dados, escolha o plano e pague a primeira mensalidade.</p>
+
+    {% if erro %}
+    <div class="cadastro-erro"><i class="fa-solid fa-circle-exclamation"></i> {{ erro }}</div>
+    {% endif %}
+
+    <form method="POST" action="{{ url_for('cadastro.enviar') }}" class="cadastro-form">
+        <section>
+            <h2>Dados da empresa</h2>
+            <div class="cadastro-grid">
+                <label>Razão social *
+                    <input name="razao_social" required value="{{ form.razao_social if form else '' }}">
+                </label>
+                <label>Nome fantasia
+                    <input name="nome_fantasia" value="{{ form.nome_fantasia if form else '' }}">
+                </label>
+                <label>CNPJ *
+                    <input name="cnpj" required placeholder="00.000.000/0000-00" value="{{ form.cnpj if form else '' }}">
+                </label>
+                <label>Responsável *
+                    <input name="responsavel" required value="{{ form.responsavel if form else '' }}">
+                </label>
+                <label>Telefone *
+                    <input name="telefone" required value="{{ form.telefone if form else '' }}">
+                </label>
+                <label>E-mail da empresa *
+                    <input name="email_empresa" type="email" required value="{{ form.email_empresa if form else '' }}">
+                </label>
+            </div>
+        </section>
+
+        <section>
+            <h2>Acesso ao portal</h2>
+            <div class="cadastro-grid">
+                <label>Seu nome
+                    <input name="nome" placeholder="Igual ao responsável se vazio" value="{{ form.nome if form else '' }}">
+                </label>
+                <label>E-mail de login *
+                    <input name="email" type="email" required value="{{ form.email if form else '' }}">
+                </label>
+                <label>Senha *
+                    <input name="senha" type="password" required minlength="6">
+                </label>
+                <label>Confirmar senha *
+                    <input name="confirmar" type="password" required minlength="6">
+                </label>
+            </div>
+        </section>
+
+        <section>
+            <h2>Plano mensal</h2>
+            <div class="cadastro-planos">
+                {% for p in planos %}
+                <label class="cadastro-plano">
+                    <input type="radio" name="plano_id" value="{{ p.id }}" required
+                        {% if plano_pre == p.id or (not plano_pre and loop.first) %}checked{% endif %}>
+                    <span class="cadastro-plano-box">
+                        <strong>{{ p.nome }}</strong>
+                        <span class="cadastro-preco">R$ {{ '%.2f'|format(p.preco_mensal) }}/mês</span>
+                        {% if p.descricao %}<small>{{ p.descricao }}</small>{% endif %}
+                    </span>
+                </label>
+                {% else %}
+                <p>Nenhum plano disponível no momento. Entre em contato conosco.</p>
+                {% endfor %}
+            </div>
+        </section>
+
+        {% if lgpd_consentimento_obrigatorio %}
+        <label class="cadastro-lgpd">
+            <input type="checkbox" name="lgpd_consentimento" value="1" required>
+            Declaro que li e aceito a <a href="{{ url_for('lgpd.privacidade') }}" target="_blank">Política de Privacidade</a>.
+        </label>
+        {% else %}
+        <label class="cadastro-lgpd">
+            <input type="checkbox" name="lgpd_consentimento" value="1">
+            Li a <a href="{{ url_for('lgpd.privacidade') }}" target="_blank">Política de Privacidade</a>.
+        </label>
+        {% endif %}
+
+        <button type="submit" class="cadastro-btn">Cadastrar e continuar para pagamento</button>
+    </form>
+
+    <p class="lgpd-aviso">Já possui conta? <a href="/">Faça login</a></p>
+</div>
+{% endblock %}

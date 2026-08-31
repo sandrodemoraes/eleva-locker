@@ -1,0 +1,138 @@
+/* Cadastro público + admin QR */
+.cadastro-doc section{margin-bottom:28px;}
+
+.cadastro-erro{
+    background:#fde8e8;
+    color:#8b1a1a;
+    padding:12px 16px;
+    border-radius:10px;
+    margin-bottom:20px;
+    font-weight:600;
+}
+
+.cadastro-form label{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    font-size:14px;
+    font-weight:700;
+    color:var(--lgpd-link);
+}
+
+.cadastro-form input[type="text"],
+.cadastro-form input[type="email"],
+.cadastro-form input[type="password"]{
+    padding:10px 12px;
+    border:1px solid #c5ddd2;
+    border-radius:8px;
+    font:inherit;
+    font-weight:400;
+}
+
+.cadastro-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:14px;
+}
+
+.cadastro-planos{display:flex;flex-direction:column;gap:10px;}
+
+.cadastro-plano{display:flex;align-items:flex-start;gap:10px;cursor:pointer;}
+
+.cadastro-plano input{margin-top:14px;}
+
+.cadastro-plano-box{
+    flex:1;
+    padding:14px 16px;
+    border:2px solid #d4eadc;
+    border-radius:12px;
+    background:#f8fcf9;
+}
+
+.cadastro-plano input:checked + .cadastro-plano-box{
+    border-color:var(--lgpd-accent);
+    background:#eef8f2;
+}
+
+.cadastro-preco{display:block;font-size:18px;color:var(--lgpd-accent);margin:4px 0;}
+
+.cadastro-lgpd{
+    display:flex;
+    align-items:flex-start;
+    gap:10px;
+    font-size:14px;
+    margin:20px 0;
+    font-weight:600;
+}
+
+.cadastro-btn{
+    display:inline-block;
+    width:100%;
+    padding:14px 20px;
+    border:none;
+    border-radius:12px;
+    background:var(--lgpd-accent);
+    color:#fff;
+    font:inherit;
+    font-weight:800;
+    font-size:16px;
+    cursor:pointer;
+    text-align:center;
+    text-decoration:none;
+}
+
+.cadastro-btn:hover{background:#247a4f;}
+
+.cadastro-btn-link{width:auto;min-width:200px;}
+
+.cadastro-qr-admin{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:24px;
+    align-items:start;
+}
+
+@media(max-width:768px){
+    .cadastro-qr-admin{grid-template-columns:1fr;}
+}
+
+.cadastro-qr-card{
+    background:#fff;
+    border-radius:12px;
+    padding:28px;
+    text-align:center;
+    box-shadow:0 2px 12px rgba(0,0,0,.08);
+}
+
+.cadastro-qr-card img{
+    border:8px solid #f0f0f0;
+    border-radius:12px;
+    background:#fff;
+}
+
+.cadastro-qr-url{
+    word-break:break-all;
+    margin:16px 0;
+    font-size:13px;
+}
+
+.cadastro-qr-hint{
+    font-size:13px;
+    color:#666;
+    margin-bottom:16px;
+}
+
+.cadastro-qr-filtro{
+    background:#fff;
+    border-radius:12px;
+    padding:24px;
+    box-shadow:0 2px 12px rgba(0,0,0,.08);
+}
+
+.cadastro-qr-filtro select{
+    width:100%;
+    padding:10px;
+    margin-bottom:12px;
+    border-radius:8px;
+    border:1px solid #ddd;
+}

@@ -53,7 +53,7 @@ class UsuarioRepository:
             """, (email,)).fetchone()
 
     @staticmethod
-    def criar(nome, email, telefone, senha, perfil, status, armario_id=None):
+    def criar(nome, email, telefone, senha, perfil, status, armario_id=None, empresa_id=None):
 
         with BaseRepository.get_connection() as conn:
 
@@ -61,9 +61,9 @@ class UsuarioRepository:
 
             cursor.execute("""
                 INSERT INTO usuarios
-                (nome, email, telefone, senha, perfil, status, armario_id)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
-            """, (nome, email, telefone, senha, perfil, status, armario_id))
+                (nome, email, telefone, senha, perfil, status, armario_id, empresa_id)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            """, (nome, email, telefone, senha, perfil, status, armario_id, empresa_id))
 
             conn.commit()
 

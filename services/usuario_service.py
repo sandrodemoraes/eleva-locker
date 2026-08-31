@@ -32,7 +32,7 @@ class UsuarioService:
 
     @staticmethod
     def criar(nome, email, telefone, senha, confirmar, perfil, status, armario_id=None,
-              lgpd_consentimento=False, ip=None, user_agent=None):
+              empresa_id=None, lgpd_consentimento=False, ip=None, user_agent=None):
 
         nome = nome.strip()
         email = email.strip().lower()
@@ -55,7 +55,7 @@ class UsuarioService:
 
         try:
             usuario_id = UsuarioRepository.criar(
-                nome, email, telefone, senha_hash, perfil, status, armario_id
+                nome, email, telefone, senha_hash, perfil, status, armario_id, empresa_id
             )
             if config.LGPD_CONSENTIMENTO_USUARIO and lgpd_consentimento:
                 LgpdConsentimentoService.registrar_usuario(
