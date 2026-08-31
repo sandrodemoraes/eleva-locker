@@ -140,6 +140,15 @@ def lgpd_destinatario_filter(valor):
 
 
 @app.context_processor
+def inject_lgpd_ui():
+    import config as app_config
+    return {
+        "lgpd_consentimento_usuario": app_config.LGPD_CONSENTIMENTO_USUARIO,
+        "lgpd_politica_versao": app_config.LGPD_POLITICA_VERSAO,
+    }
+
+
+@app.context_processor
 def inject_site_context():
     from flask import session
     import config as app_config
