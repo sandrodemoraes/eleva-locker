@@ -248,10 +248,12 @@ def usuario_novo(armario_id):
         flash("Usuário cadastrado neste armário!", "success")
     except ValueError as erro:
         flash(str(erro), "warning")
+        return redirect(f"/armarios/{armario_id}?modal=novo_usuario")
     except Exception as erro:
         import traceback
         traceback.print_exc()
         flash(f"Erro ao cadastrar usuário: {erro}", "danger")
+        return redirect(f"/armarios/{armario_id}?modal=novo_usuario")
 
     return redirect(f"/armarios/{armario_id}")
 
