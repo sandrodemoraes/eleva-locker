@@ -1,0 +1,37 @@
+{% extends "layout/base.html" %}
+{% block title %}QR Code Cadastro | ELEVA LOCKER{% endblock %}
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/crud.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/cadastro.css') }}">
+{% endblock %}
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>QR Code — Cadastro</h1>
+        <p>Imprima ou exiba este QR para o cliente abrir a página de cadastro no celular.</p>
+    </div>
+</div>
+
+<div class="cadastro-qr-admin">
+    <div class="cadastro-qr-card">
+        <img src="{{ qrcode_url }}" alt="QR Code cadastro" width="280" height="280">
+        <p class="cadastro-qr-url"><code>{{ url_cadastro }}</code></p>
+        <p class="cadastro-qr-hint">Configure <strong>APP_URL_BASE</strong> no .env com o IP/host acessível pelo celular (ex.: <code>http://192.168.16.130:15000</code>).</p>
+        <a href="{{ qrcode_url }}" download="eleva-cadastro-qrcode.png" class="btn"><i class="fa-solid fa-download"></i> Baixar PNG</a>
+        <a href="{{ url_cadastro }}" target="_blank" class="btn btn-outline"><i class="fa-solid fa-external-link"></i> Abrir página</a>
+    </div>
+
+    <div class="cadastro-qr-filtro">
+        <h3>QR com plano pré-selecionado</h3>
+        <form method="GET" action="{{ url_for('cadastro.qr_admin') }}">
+            <select name="plano">
+                <option value="">Todos os planos (escolhe na página)</option>
+                {% for p in planos %}
+                <option value="{{ p.id }}" {% if plano_id == p.id %}selected{% endif %}>{{ p.nome }} — R$ {{ '%.2f'|format(p.preco_mensal) }}</option>
+                {% endfor %}
+            </select>
+            <button type="submit" class="btn">Atualizar QR</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

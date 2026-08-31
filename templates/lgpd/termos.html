@@ -1,0 +1,63 @@
+{% extends "lgpd/base_public.html" %}
+{% set pagina = 'termos' %}
+
+{% block title %}Termos de Uso{% endblock %}
+
+{% block content %}
+<article class="lgpd-doc">
+    <h1>Termos de Uso — Totem ELEVA LOCKER</h1>
+    <p class="lgpd-meta">Versão {{ lgpd_versao }}</p>
+
+    <section>
+        <h2>1. Serviço</h2>
+        <p>
+            O totem permite <strong>retirar</strong> encomendas com código de 6 dígitos e,
+            quando habilitado, <strong>depositar</strong> encomendas mediante identificação do destinatário.
+        </p>
+    </section>
+
+    <section>
+        <h2>2. Uso adequado</h2>
+        <ul>
+            <li>Use apenas códigos recebidos para você ou com autorização do destinatário</li>
+            <li>Não tente acessar compartimentos alheios ou burlar o sistema</li>
+            <li>Feche a porta do compartimento após retirar ou depositar</li>
+            <li>Em caso de dúvida, use “Preciso de ajuda” ou fale com a portaria</li>
+        </ul>
+    </section>
+
+    <section>
+        <h2>3. Dados informados no depósito</h2>
+        <p>
+            Ao depositar uma encomenda, o operador ou o sistema pode registrar nome e telefone do morador
+            para envio do código de retirada. Consulte a
+            <a href="{{ url_for('lgpd.privacidade') }}">Política de Privacidade</a>.
+        </p>
+    </section>
+
+    <section>
+        <h2>4. Disponibilidade</h2>
+        <p>
+            O serviço depende de energia, rede e equipamentos. Interrupções podem ocorrer por manutenção
+            ou falha técnica; a portaria permanece como canal alternativo.
+        </p>
+    </section>
+
+    <section>
+        <h2>5. Responsabilidade</h2>
+        <p>
+            O condomínio e a operação ELEVA LOCKER envidam esforços para operação segura, mas não se
+            responsabilizam por encomendas de conteúdo proibido, incorretamente endereçadas ou retiradas
+            por quem possua código válido.
+        </p>
+    </section>
+
+    <section>
+        <h2>6. Contato</h2>
+        <ul class="lgpd-contato">
+            {% if lgpd_email %}<li>E-mail: <a href="mailto:{{ lgpd_email }}">{{ lgpd_email }}</a></li>{% endif %}
+            {% if lgpd_telefone %}<li>Portaria: {{ lgpd_telefone }}</li>{% endif %}
+        </ul>
+    </section>
+</article>
+{% endblock %}

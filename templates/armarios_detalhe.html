@@ -1,0 +1,374 @@
+{% extends "layout/base.html" %}
+
+{% block title %}{{ armario.nome }} | ELEVA LOCKER{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/crud.css') }}">
+<style>
+.armario-resumo{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:20px}
+.armario-resumo .card{background:#fff;border-radius:10px;padding:14px;box-shadow:0 1px 4px rgba(0,0,0,.08);text-align:center}
+.armario-resumo .num{font-size:1.6rem;font-weight:bold;color:var(--eleva-verde-vivo)}
+.section-box{margin-bottom:24px}
+.section-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px}
+.token-box{font-family:monospace;font-size:.85rem;background:#f4f7fb;padding:8px;border-radius:6px;word-break:break-all}
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+    <div>
+        <h1>{{ armario.nome }}</h1>
+        <p>{{ armario.endereco or '—' }} · {{ armario.cidade or '' }}{% if armario.estado %}/{{ armario.estado }}{% endif %}</p>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <a href="{{ url_for('armarios.listar') }}" class="btn btn-secondary">← Armários</a>
+        <a href="{{ url_for('encomendas.listar') }}?armario_id={{ armario.id }}" class="btn">Encomendas</a>
+        {% if perfil == 'Administrador' %}
+        <button class="btn" onclick="abrirModal('modalEditarArmario')"><i class="fa-solid fa-pen"></i> Editar armário</button>
+        {% endif %}
+    </div>
+</div>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div id="flash-area">
+    {% for category, message in messages %}
+        <div class="alert alert-{{ category }}">{{ message }}</div>
+    {% endfor %}
+    </div>
+    {% endif %}
+{% endwith %}
+
+<div class="armario-resumo">
+    <div class="card"><div class="num">{{ armario.max_portas or 16 }}</div><div>Portas</div></div>
+    <div class="card"><div class="num">{{ esps|length }}</div><div>Placas ESP</div></div>
+    <div class="card"><div class="num">{{ compartimentos|length }}</div><div>Compartimentos</div></div>
+    <div class="card"><div class="num">{{ usuarios|length }}</div><div>Usuários</div></div>
+    <div class="card"><div class="num"><span class="badge badge-{{ armario.status }}">{{ armario.status }}</span></div><div>Status</div></div>
+</div>
+
+<!-- PLACAS ESP -->
+<div class="table-box section-box">
+    <div class="section-head">
+        <h2><i class="fa-solid fa-microchip"></i> Placas ESP32</h2>
+        {% if perfil == 'Administrador' %}
+        <button class="btn btn-sm" onclick="abrirModal('modalNovoEsp')"><i class="fa-solid fa-plus"></i> Adicionar ESP</button>
+        {% endif %}
+    </div>
+    <p style="color:#666;margin-bottom:12px;">Cadastre aqui cada placa ESP ligada a este armário. O token vai no firmware.</p>
+    {% if esps %}
+    <table>
+        <thead>
+            <tr><th>Nome</th><th>IP</th><th>Status</th><th>Token</th><th>Ações</th></tr>
+        </thead>
+        <tbody>
+            {% for e in esps %}
+            <tr>
+                <td><strong>{{ e.nome }}</strong></td>
+                <td>{{ e.ip or '—' }}:{{ e.porta or 80 }}</td>
+                <td><span class="badge badge-{{ e.status }}">{{ e.status }}</span></td>
+                <td><span class="token-box">{{ e.token }}</span></td>
+                <td class="acoes-cell">
+                    <form method="POST" action="{{ url_for('esp32.testar', esp32_id=e.id) }}">
+                        <input type="hidden" name="redirect" value="/armarios/{{ armario.id }}">
+                        <button type="submit" class="btn btn-sm" title="Testar"><i class="fa-solid fa-wifi"></i></button>
+                    </form>
+                    {% if perfil == 'Administrador' %}
+                    <button class="btn btn-sm" onclick="editarEsp({{ e.id }}, '{{ e.nome | replace("'", "\\'") }}', '{{ e.ip or '' }}', '{{ e.mac or '' }}', {{ e.porta or 80 }}, '{{ e.status }}', '{{ e.token or '' }}')"><i class="fa-solid fa-pen"></i></button>
+                    <form method="POST" action="/armarios/{{ armario.id }}/esp32/excluir/{{ e.id }}" onsubmit="return confirm('Remover ESP?')">
+                        <button type="submit" class="btn btn-sm btn-danger"><i class="fa-solid fa-trash"></i></button>
+                    </form>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state"><p>Nenhuma placa ESP. Clique em <strong>Adicionar ESP</strong>.</p></div>
+    {% endif %}
+</div>
+
+<!-- COMPARTIMENTOS -->
+<div class="table-box section-box">
+    <div class="section-head">
+        <h2><i class="fa-solid fa-table-cells-large"></i> Compartimentos ({{ compartimentos|length }})</h2>
+    </div>
+    <p style="color:#666;margin-bottom:12px;">Gerados automaticamente conforme <strong>{{ armario.max_portas or 16 }} portas</strong> ao adicionar a ESP.</p>
+    {% if compartimentos %}
+    <table>
+        <thead>
+            <tr><th>#</th><th>Tamanho</th><th>Relé</th><th>GPIO</th><th>Status</th><th>Abrir</th></tr>
+        </thead>
+        <tbody>
+            {% for c in compartimentos %}
+            <tr>
+                <td><strong>#{{ c.numero }}</strong></td>
+                <td>{{ c.tamanho or 'M' }}</td>
+                <td>{{ c.rele or '—' }}</td>
+                <td>{{ c.gpio or '—' }}</td>
+                <td><span class="badge badge-{{ c.status }}">{{ c.status }}</span></td>
+                <td>
+                    {% if c.rele and c.esp32_id %}
+                    <form method="POST" action="/esp32/abrir/{{ c.id }}" style="display:inline">
+                        <input type="hidden" name="redirect" value="/armarios/{{ armario.id }}">
+                        <button type="submit" class="btn btn-sm btn-success"><i class="fa-solid fa-lock-open"></i></button>
+                    </form>
+                    {% else %}—{% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state"><p>Adicione uma placa ESP para criar os compartimentos.</p></div>
+    {% endif %}
+</div>
+
+<!-- USUÁRIOS -->
+<div class="table-box section-box">
+    <div class="section-head">
+        <h2><i class="fa-solid fa-users"></i> Usuários deste armário</h2>
+        {% if perfil == 'Administrador' %}
+        <button class="btn btn-sm" onclick="abrirModal('modalNovoUsuario')"><i class="fa-solid fa-user-plus"></i> Novo usuário</button>
+        {% endif %}
+    </div>
+    <p style="color:#666;margin-bottom:12px;">
+        Operadores <strong>deste armário</strong> (ex.: síndico do condomínio).
+        Operadores globais (todos os armários) cadastre em <a href="{{ url_for('usuarios.usuarios') }}">Usuários</a>.
+    </p>
+    {% if usuarios %}
+    <table>
+        <thead>
+            <tr><th>Nome</th><th>E-mail</th><th>Perfil</th><th>Status</th><th>Ações</th></tr>
+        </thead>
+        <tbody>
+            {% for u in usuarios %}
+            <tr>
+                <td>{{ u.nome }}</td>
+                <td>{{ u.email }}</td>
+                <td>{{ u.perfil }}</td>
+                <td>{{ 'Ativo' if u.status else 'Inativo' }}</td>
+                <td class="acoes-cell">
+                    {% if perfil == 'Administrador' %}
+                    <button type="button" class="btn btn-sm btn-warning btn-senha-armario"
+                            title="Alterar senha"
+                            data-id="{{ u.id }}"
+                            data-nome="{{ u.nome }}">
+                        <i class="fa-solid fa-key"></i> Senha
+                    </button>
+                    <form method="POST" action="/armarios/{{ armario.id }}/usuarios/excluir/{{ u.id }}" onsubmit="return confirm('Excluir usuário?')">
+                        <button type="submit" class="btn btn-sm btn-danger" title="Excluir"><i class="fa-solid fa-trash"></i></button>
+                    </form>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state"><p>Nenhum usuário. Cadastre operadores deste armário.</p></div>
+    {% endif %}
+</div>
+
+<!-- Modal editar armário -->
+<div class="modal-overlay" id="modalEditarArmario">
+    <div class="modal">
+        <h2>Editar armário</h2>
+        <form method="POST" action="/armarios/editar/{{ armario.id }}">
+            <input type="hidden" name="redirect" value="/armarios/{{ armario.id }}">
+            <div class="form-group">
+                <label>Nome *</label>
+                <input type="text" name="nome" required value="{{ armario.nome }}">
+            </div>
+            <div class="form-group">
+                <label>Quantidade de portas *</label>
+                <select name="max_portas">
+                    {% for p in portas_opcoes %}
+                    <option value="{{ p }}" {% if (armario.max_portas or 16) == p %}selected{% endif %}>{{ p }} portas</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Empresa</label>
+                <select name="empresa_id">
+                    <option value="">— Sem vínculo —</option>
+                    {% for e in empresas %}
+                    <option value="{{ e.id }}" {% if armario.empresa_id == e.id %}selected{% endif %}>{{ e.razao_social }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group"><label>Endereço</label><input type="text" name="endereco" value="{{ armario.endereco or '' }}"></div>
+            <div class="grid-2">
+                <div class="form-group"><label>Cidade</label><input type="text" name="cidade" value="{{ armario.cidade or '' }}"></div>
+                <div class="form-group"><label>UF</label><input type="text" name="estado" maxlength="2" value="{{ armario.estado or '' }}"></div>
+            </div>
+            <div class="form-group">
+                <label>Status</label>
+                <select name="status">
+                    <option value="ativo" {% if armario.status == 'ativo' %}selected{% endif %}>Ativo</option>
+                    <option value="inativo" {% if armario.status == 'inativo' %}selected{% endif %}>Inativo</option>
+                    <option value="manutencao" {% if armario.status == 'manutencao' %}selected{% endif %}>Manutenção</option>
+                </select>
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn">Salvar</button>
+                <button type="button" class="btn btn-danger" onclick="fecharModal('modalEditarArmario')">Cancelar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% if perfil == 'Administrador' %}
+<div class="modal-overlay" id="modalNovoEsp">
+    <div class="modal">
+        <h2>Adicionar placa ESP</h2>
+        <form method="POST" action="/armarios/{{ armario.id }}/esp32/novo">
+            <div class="form-group"><label>Nome *</label><input type="text" name="nome" required placeholder="ESP Principal"></div>
+            <div class="grid-2">
+                <div class="form-group"><label>IP *</label><input type="text" name="ip" required placeholder="192.168.16.162"></div>
+                <div class="form-group"><label>Porta</label><input type="number" name="porta" value="80"></div>
+            </div>
+            <div class="form-group"><label>MAC (opcional)</label><input type="text" name="mac" placeholder="AA:BB:CC:DD:EE:FF"></div>
+            <p style="color:#666;font-size:.9rem">Portas do armário: <strong>{{ armario.max_portas or 16 }}</strong> — compartimentos criados automaticamente.</p>
+            <div class="form-actions">
+                <button type="submit" class="btn">Salvar ESP</button>
+                <button type="button" class="btn btn-danger" onclick="fecharModal('modalNovoEsp')">Cancelar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="modal-overlay" id="modalEditarEsp">
+    <div class="modal">
+        <h2>Editar ESP</h2>
+        <form method="POST" id="formEditarEsp">
+            <div class="form-group"><label>Nome</label><input type="text" name="nome" id="esp_nome" required></div>
+            <div class="grid-2">
+                <div class="form-group"><label>IP</label><input type="text" name="ip" id="esp_ip"></div>
+                <div class="form-group"><label>Porta</label><input type="number" name="porta" id="esp_porta"></div>
+            </div>
+            <div class="form-group"><label>MAC</label><input type="text" name="mac" id="esp_mac"></div>
+            <div class="form-group"><label>Token (firmware)</label><input type="text" name="token" id="esp_token" readonly style="background:#f0f0f0"></div>
+            <div class="form-group">
+                <label>Status</label>
+                <select name="status" id="esp_status">
+                    <option value="online">Online</option>
+                    <option value="offline">Offline</option>
+                </select>
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn">Salvar</button>
+                <button type="button" class="btn btn-danger" onclick="fecharModal('modalEditarEsp')">Cancelar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="modal-overlay" id="modalNovoUsuario">
+    <div class="modal">
+        <h2>Novo usuário — {{ armario.nome }}</h2>
+        <form method="POST" action="/armarios/{{ armario.id }}/usuarios/novo">
+            <div class="form-group"><label>Nome *</label><input type="text" name="nome" required></div>
+            <div class="form-group"><label>E-mail *</label><input type="email" name="email" required></div>
+            <div class="form-group"><label>Telefone</label><input type="text" name="telefone"></div>
+            <div class="grid-2">
+                <div class="form-group"><label>Senha *</label><input type="password" name="senha" required></div>
+                <div class="form-group"><label>Confirmar *</label><input type="password" name="confirmar" required></div>
+            </div>
+            <div class="grid-2">
+                <div class="form-group">
+                    <label>Perfil</label>
+                    <select name="perfil">
+                        <option value="Operador">Operador deste armário</option>
+                        <option value="Usuário">Usuário / morador</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Status</label>
+                    <select name="status">
+                        <option value="1">Ativo</option>
+                        <option value="0">Inativo</option>
+                    </select>
+                </div>
+            </div>
+            {% if lgpd_consentimento_usuario %}
+            <div class="form-group" style="margin-top:8px;">
+                <label style="display:flex;align-items:flex-start;gap:8px;font-weight:normal;font-size:13px;line-height:1.4;">
+                    <input type="checkbox" name="lgpd_consentimento" value="1" required style="margin-top:3px;">
+                    <span>Declaro que o titular foi informado e concorda com a
+                    <a href="/privacidade" target="_blank" rel="noopener">Política de Privacidade</a>
+                    (v{{ lgpd_politica_versao }})</span>
+                </label>
+            </div>
+            {% endif %}
+            <div class="form-actions">
+                <button type="submit" class="btn">Cadastrar</button>
+                <button type="button" class="btn btn-danger" onclick="fecharModal('modalNovoUsuario')">Cancelar</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endif %}
+
+<!-- Modal alterar senha (usuários do armário) -->
+<div class="modal-overlay" id="modalSenhaArmario">
+    <div class="modal">
+        <h2>Alterar senha — <span id="senhaArmarioNome"></span></h2>
+        <form method="POST" id="formSenhaArmario" action="">
+            <input type="hidden" name="redirect" value="/armarios/{{ armario.id }}">
+            <div class="grid-2">
+                <div class="form-group">
+                    <label>Nova senha</label>
+                    <input type="password" name="senha" required minlength="4">
+                </div>
+                <div class="form-group">
+                    <label>Confirmar senha</label>
+                    <input type="password" name="confirmar" required minlength="4">
+                </div>
+            </div>
+            <div class="form-actions">
+                <button type="button" class="btn btn-secondary" onclick="fecharModal('modalSenhaArmario')">Cancelar</button>
+                <button type="submit" class="btn btn-success">Alterar senha</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+function abrirModal(id){ document.getElementById(id).classList.add('active'); }
+function fecharModal(id){ document.getElementById(id).classList.remove('active'); }
+
+function editarEsp(id, nome, ip, mac, porta, status, token){
+    document.getElementById('formEditarEsp').action = '/armarios/{{ armario.id }}/esp32/editar/' + id;
+    document.getElementById('esp_nome').value = nome;
+    document.getElementById('esp_ip').value = ip;
+    document.getElementById('esp_mac').value = mac;
+    document.getElementById('esp_porta').value = porta;
+    document.getElementById('esp_status').value = status;
+    document.getElementById('esp_token').value = token;
+    abrirModal('modalEditarEsp');
+}
+
+document.querySelectorAll('.btn-senha-armario').forEach(function(btn){
+    btn.addEventListener('click', function(){
+        document.getElementById('formSenhaArmario').action = '/usuarios/senha/' + btn.dataset.id;
+        document.getElementById('senhaArmarioNome').textContent = btn.dataset.nome;
+        abrirModal('modalSenhaArmario');
+    });
+});
+
+document.querySelectorAll('.modal-overlay').forEach(function(el){
+    el.addEventListener('click', function(e){ if(e.target === el) el.classList.remove('active'); });
+});
+
+document.addEventListener('DOMContentLoaded', function(){
+    var flash = document.getElementById('flash-area');
+    if(flash) flash.scrollIntoView({behavior:'smooth', block:'start'});
+});
+</script>
+{% endblock %}

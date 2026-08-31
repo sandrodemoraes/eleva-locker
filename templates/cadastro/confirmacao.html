@@ -1,0 +1,25 @@
+{% extends "lgpd/base_public.html" %}
+{% block title %}Cadastro confirmado{% endblock %}
+{% block head_extra %}<link rel="stylesheet" href="{{ url_for('static', filename='css/cadastro.css') }}">{% endblock %}
+{% block content %}
+<div class="lgpd-doc cadastro-doc">
+    <h1><i class="fa-solid fa-circle-check"></i> Cadastro realizado!</h1>
+    <p class="lgpd-meta">Plano <strong>{{ resultado.plano_nome }}</strong> — use o e-mail <strong>{{ resultado.email }}</strong> para acessar o portal.</p>
+
+    {% if resultado.link_pagamento %}
+    <section>
+        <h2>Próximo passo: pagamento</h2>
+        <p>Para ativar o serviço, conclua o pagamento da primeira mensalidade:</p>
+        <p><a class="cadastro-btn cadastro-btn-link" href="{{ resultado.link_pagamento }}">Pagar agora</a></p>
+    </section>
+    {% endif %}
+
+    <section>
+        <h2>Depois do pagamento</h2>
+        <ul>
+            <li><a href="/">Entrar no painel</a> com seu e-mail e senha</li>
+            <li>Acompanhar contrato e faturas em <a href="/portal">Portal Cliente</a></li>
+        </ul>
+    </section>
+</div>
+{% endblock %}

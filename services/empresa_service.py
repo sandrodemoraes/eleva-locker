@@ -1,172 +1,50 @@
-import sqlite3
-
-DB = "database/elevalocker.db"
+from repositories.empresa_repository import EmpresaRepository
 
 
 class EmpresaService:
 
     @staticmethod
     def listar():
-
-        conn = sqlite3.connect(DB)
-        conn.row_factory = sqlite3.Row
-
-        empresas = conn.execute("""
-            SELECT *
-            FROM empresas
-            ORDER BY razao_social
-        """).fetchall()
-
-        conn.close()
-
-        return empresas
-
+        return EmpresaRepository.listar()
 
     @staticmethod
-    def buscar_por_id(id):
+    def listar_ativas():
+        return EmpresaRepository.listar_ativas()
 
-        conn = sqlite3.connect(DB)
-        conn.row_factory = sqlite3.Row
+    @staticmethod
+    def buscar_por_id(empresa_id):
 
-        empresa = conn.execute("""
-            SELECT *
-            FROM empresas
-            WHERE id=?
-        """, (id,)).fetchone()
+        empresa = EmpresaRepository.buscar_por_id(empresa_id)
 
-        conn.close()
+        if not empresa:
+            raise ValueError("Empresa não encontrada.")
 
         return empresa
 
-
     @staticmethod
     def cnpj_existe(cnpj):
-
-        conn = sqlite3.connect(DB)
-        cursor = conn.cursor()
-
-        cursor.execute("""
-            SELECT id
-            FROM empresas
-            WHERE cnpj = ?
-        """, (cnpj,))
-
-        empresa = cursor.fetchone()
-
-        conn.close()
-
-        return empresa is not None
-
+        return EmpresaRepository.buscar_por_cnpj(cnpj) is not None
 
     @staticmethod
     def inserir(dados):
 
-        conn = sqlite3.connect(DB)
-        cursor = conn.cursor()
+        if not dados.get("razao_social"):
+            raise ValueError("Razão social é obrigatória.")
 
-        cursor.execute("""
-            INSERT INTO empresas (
-                razao_social,
-                nome_fantasia,
-                cnpj,
-                inscricao_estadual,
-                responsavel,
-                telefone,
-                whatsapp,
-                email,
-                cep,
-                endereco,
-                numero,
-                bairro,
-                cidade,
-                estado,
-                status
-            )
-            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
-        """, (
-
-            dados["razao_social"],
-            dados["nome_fantasia"],
-            dados["cnpj"],
-            dados["inscricao_estadual"],
-            dados["responsavel"],
-            dados["telefone"],
-            dados["whatsapp"],
-            dados["email"],
-            dados["cep"],
-            dados["endereco"],
-            dados["numero"],
-            dados["bairro"],
-            dados["cidade"],
-            dados["estado"],
-            dados["status"]
-
-        ))
-
-        conn.commit()
-        conn.close()
-
+        return EmpresaRepository.inserir(dados)
 
     @staticmethod
-    def atualizar(id, dados):
+    def atualizar(empresa_id, dados):
 
-        conn = sqlite3.connect(DB)
-        cursor = conn.cursor()
+        if not EmpresaRepository.buscar_por_id(empresa_id):
+            raise ValueError("Empresa não encontrada.")
 
-        cursor.execute("""
-            UPDATE empresas
-            SET
-                razao_social=?,
-                nome_fantasia=?,
-                cnpj=?,
-                inscricao_estadual=?,
-                responsavel=?,
-                telefone=?,
-                whatsapp=?,
-                email=?,
-                cep=?,
-                endereco=?,
-                numero=?,
-                bairro=?,
-                cidade=?,
-                estado=?,
-                status=?
-            WHERE id=?
-        """, (
-
-            dados["razao_social"],
-            dados["nome_fantasia"],
-            dados["cnpj"],
-            dados["inscricao_estadual"],
-            dados["responsavel"],
-            dados["telefone"],
-            dados["whatsapp"],
-            dados["email"],
-            dados["cep"],
-            dados["endereco"],
-            dados["numero"],
-            dados["bairro"],
-            dados["cidade"],
-            dados["estado"],
-            dados["status"],
-            id
-
-        ))
-
-        conn.commit()
-        conn.close()
-
+        EmpresaRepository.atualizar(empresa_id, dados)
 
     @staticmethod
-    def excluir(id):
+    def excluir(empresa_id):
 
-        conn = sqlite3.connect(DB)
-        cursor = conn.cursor()
+        if not EmpresaRepository.buscar_por_id(empresa_id):
+            raise ValueError("Empresa não encontrada.")
 
-        cursor.execute("""
-            DELETE FROM empresas
-            WHERE id=?
-        """, (id,))
-
-        conn.commit()
-        conn.close()
+        EmpresaRepository.excluir(empresa_id)

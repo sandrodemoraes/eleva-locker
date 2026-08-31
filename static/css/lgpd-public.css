@@ -1,0 +1,166 @@
+/* Páginas públicas LGPD — alinhado ao tema ELEVA */
+:root{
+    --lgpd-bg:#0f3d31;
+    --lgpd-card:#fff;
+    --lgpd-text:#1a2e28;
+    --lgpd-muted:#5a6b65;
+    --lgpd-accent:#2d8659;
+    --lgpd-link:#134736;
+}
+
+*{box-sizing:border-box;}
+
+body{
+    margin:0;
+    min-height:100vh;
+    font-family:"Nunito",system-ui,sans-serif;
+    background:linear-gradient(160deg,#0f3d31 0%,#134736 45%,#1a5c4a 100%);
+    color:var(--lgpd-text);
+    display:flex;
+    flex-direction:column;
+}
+
+.lgpd-header{
+    display:flex;
+    flex-wrap:wrap;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    padding:16px 24px;
+    background:rgba(0,0,0,.2);
+}
+
+.lgpd-brand{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    color:#fff;
+    text-decoration:none;
+    font-weight:800;
+    font-size:18px;
+}
+
+.lgpd-brand img{width:36px;height:36px;}
+
+.lgpd-nav{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+}
+
+.lgpd-nav a{
+    color:rgba(255,255,255,.85);
+    text-decoration:none;
+    padding:8px 14px;
+    border-radius:10px;
+    font-weight:600;
+    font-size:14px;
+}
+
+.lgpd-nav a:hover,.lgpd-nav a.ativa{
+    background:rgba(255,255,255,.15);
+    color:#fff;
+}
+
+.lgpd-main{
+    flex:1;
+    padding:24px 16px 40px;
+    max-width:820px;
+    width:100%;
+    margin:0 auto;
+}
+
+.lgpd-doc{
+    background:var(--lgpd-card);
+    border-radius:16px;
+    padding:28px 32px;
+    box-shadow:0 8px 32px rgba(0,0,0,.2);
+}
+
+.lgpd-doc h1{
+    margin:0 0 8px;
+    color:var(--lgpd-link);
+    font-size:clamp(24px,4vw,32px);
+}
+
+.lgpd-meta{
+    color:var(--lgpd-muted);
+    font-size:14px;
+    margin-bottom:24px;
+}
+
+.lgpd-doc section{margin-bottom:24px;}
+
+.lgpd-doc h2{
+    font-size:18px;
+    color:var(--lgpd-link);
+    margin:0 0 10px;
+}
+
+.lgpd-doc ul{padding-left:22px;line-height:1.6;}
+
+.lgpd-doc p,.lgpd-doc li{color:#333;line-height:1.65;}
+
+.lgpd-doc a{color:var(--lgpd-accent);font-weight:600;}
+
+.lgpd-contato{list-style:none;padding:0;}
+
+.lgpd-contato li{margin-bottom:8px;}
+
+.lgpd-aviso{
+    font-size:13px;
+    color:var(--lgpd-muted);
+    border-top:1px solid #eee;
+    padding-top:16px;
+    margin-top:24px;
+}
+
+.lgpd-cards{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:16px;
+    margin-bottom:8px;
+}
+
+.lgpd-card{
+    display:block;
+    padding:20px;
+    border-radius:12px;
+    background:#f4faf7;
+    border:1px solid #d4eadc;
+    text-decoration:none;
+    color:inherit;
+    transition:transform .2s,box-shadow .2s;
+}
+
+.lgpd-card:hover{
+    transform:translateY(-2px);
+    box-shadow:0 4px 16px rgba(19,71,54,.12);
+}
+
+.lgpd-card i{
+    font-size:28px;
+    color:var(--lgpd-accent);
+    margin-bottom:10px;
+}
+
+.lgpd-card h2{
+    margin:0 0 8px;
+    font-size:17px;
+    color:var(--lgpd-link);
+}
+
+.lgpd-card p{margin:0;font-size:14px;color:var(--lgpd-muted);}
+
+.lgpd-footer{
+    text-align:center;
+    padding:16px;
+    color:rgba(255,255,255,.7);
+    font-size:13px;
+}
+
+.lgpd-footer a{color:#fff;font-weight:600;}
+
+@media(max-width:600px){
+    .lgpd-doc{padding:20px 18px;}
+}

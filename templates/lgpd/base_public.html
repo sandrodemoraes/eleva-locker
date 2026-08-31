@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}LGPD{% endblock %} | ELEVA LOCKER</title>
+    <link rel="icon" href="{{ url_for('static', filename='brand/logo-eleva-locker-icon.svg') }}" type="image/svg+xml">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/lgpd-public.css') }}">
+    {% block head_extra %}{% endblock %}
+</head>
+<body>
+    <header class="lgpd-header">
+        <a href="/totem/2" class="lgpd-brand">
+            <img src="{{ url_for('static', filename='brand/logo-eleva-locker-icon.svg') }}" alt="">
+            <span>ELEVA LOCKER</span>
+        </a>
+        <nav class="lgpd-nav">
+            <a href="{{ url_for('lgpd.index') }}"{% if pagina == 'lgpd' %} class="ativa"{% endif %}>Seus dados</a>
+            <a href="{{ url_for('lgpd.privacidade') }}"{% if pagina == 'privacidade' %} class="ativa"{% endif %}>Privacidade</a>
+            <a href="{{ url_for('lgpd.termos') }}"{% if pagina == 'termos' %} class="ativa"{% endif %}>Termos</a>
+        </nav>
+    </header>
+
+    <main class="lgpd-main">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="lgpd-footer">
+        <p>Versão da política: {{ lgpd_versao }} · {{ lgpd_controlador }}</p>
+        <p>
+            <a href="/totem/2"><i class="fa-solid fa-tablet-screen-button"></i> Voltar ao totem</a>
+        </p>
+    </footer>
+</body>
+</html>

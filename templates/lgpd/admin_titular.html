@@ -1,0 +1,103 @@
+{% extends "layout/base.html" %}
+
+{% block title %}LGPD — Direitos do titular | ELEVA LOCKER{% endblock %}
+
+{% block content %}
+
+<h1>LGPD — Direitos do titular</h1>
+<p style="color:#666;margin:10px 0 20px;">
+    Exportar dados (acesso/portabilidade) ou anonimizar titular. Versão política: <strong>{{ lgpd_politica_versao }}</strong>.
+    Procedimento: <code>docs/LGPD_PROCEDIMENTO_TITULAR.md</code>
+</p>
+
+<div class="table-box" style="margin-bottom:20px;">
+    <h2 style="color:#134736;margin-bottom:15px;">Consultar titular</h2>
+    <form method="GET" action="{{ url_for('lgpd_admin.titular_index') }}" style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;">
+        <div>
+            <label style="display:block;font-size:13px;margin-bottom:4px;">Tipo</label>
+            <select name="tipo" class="input-totem" style="padding:8px;">
+                <option value="usuario" {% if titular_tipo == 'usuario' %}selected{% endif %}>Usuário (morador/operador)</option>
+                <option value="encomenda" {% if titular_tipo == 'encomenda' %}selected{% endif %}>Encomenda</option>
+            </select>
+        </div>
+        <div>
+            <label style="display:block;font-size:13px;margin-bottom:4px;">ID</label>
+            <input type="number" name="id" value="{{ titular_id }}" min="1" required style="padding:8px;width:120px;">
+        </div>
+        <button type="submit" class="btn btn-success">Consultar</button>
+    </form>
+</div>
+
+{% if preview and titular_id %}
+<div class="table-box" style="margin-bottom:20px;">
+    <h2 style="color:#134736;margin-bottom:15px;">Ações — {{ titular_tipo }} #{{ titular_id }}</h2>
+    <p style="margin-bottom:12px;color:#666;font-size:14px;">
+        Anonimizar substitui nome/telefone/e-mail por <code>*** ANONIMIZADO ***</code> e mantém encomendas para estatística.
+    </p>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <a class="btn btn-success" href="{{ url_for('lgpd_admin.exportar_json', titular_tipo=titular_tipo, titular_id=titular_id|int) }}">
+            <i class="fa-solid fa-file-code"></i> Exportar JSON
+        </a>
+        <a class="btn btn-success" href="{{ url_for('lgpd_admin.exportar_csv', titular_tipo=titular_tipo, titular_id=titular_id|int) }}">
+            <i class="fa-solid fa-file-csv"></i> Exportar CSV
+        </a>
+        <form method="POST" action="{{ url_for('lgpd_admin.anonimizar', titular_tipo=titular_tipo, titular_id=titular_id|int) }}"
+              onsubmit="return confirm('Anonimizar este titular? Esta ação não apaga encomendas, mas remove dados pessoais.');">
+            <button type="submit" class="btn btn-warning">
+                <i class="fa-solid fa-user-slash"></i> Anonimizar
+            </button>
+        </form>
+        {% if titular_tipo == 'usuario' and preview.usuario and not preview.usuario.lgpd_anonimizado_em %}
+        <form method="POST" action="{{ url_for('lgpd_admin.oposicao_marketing', usuario_id=titular_id|int) }}">
+            <button type="submit" class="btn btn-sm" title="Marketing futuro">
+                <i class="fa-solid fa-ban"></i> Oposição marketing
+            </button>
+        </form>
+        {% endif %}
+    </div>
+
+    {% if preview.usuario and preview.usuario.lgpd_anonimizado_em %}
+    <p style="margin-top:12px;color:#888;">Usuário anonimizado em {{ preview.usuario.lgpd_anonimizado_em }}</p>
+    {% endif %}
+    {% if preview.encomenda and preview.encomenda.lgpd_anonimizado_em %}
+    <p style="margin-top:12px;color:#888;">Encomenda anonimizada em {{ preview.encomenda.lgpd_anonimizado_em }}</p>
+    {% endif %}
+
+    <details style="margin-top:16px;">
+        <summary style="cursor:pointer;color:#134736;font-weight:600;">Pré-visualização dos dados</summary>
+        <pre style="margin-top:10px;background:#f8f8f8;padding:12px;border-radius:6px;overflow:auto;max-height:320px;font-size:12px;">{{ preview | tojson(indent=2) }}</pre>
+    </details>
+</div>
+{% endif %}
+
+<div class="table-box">
+    <h2 style="color:#134736;margin-bottom:15px;">Solicitações recentes</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Tipo</th>
+                <th>Titular</th>
+                <th>Operador</th>
+                <th>Detalhe</th>
+                <th>Data</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for s in solicitacoes %}
+            <tr>
+                <td>{{ s.id }}</td>
+                <td>{{ s.tipo }}</td>
+                <td>{{ s.titular_tipo }} #{{ s.titular_id }}</td>
+                <td>{{ s.operador or '—' }}</td>
+                <td>{{ s.detalhe or '—' }}</td>
+                <td>{{ s.criado_em }}</td>
+            </tr>
+            {% else %}
+            <tr><td colspan="6" style="color:#888;">Nenhuma solicitação registrada.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}
