@@ -1,4 +1,6 @@
 from werkzeug.security import generate_password_hash
+import re
+import secrets
 import sqlite3
 
 import config
@@ -143,3 +145,35 @@ class UsuarioService:
             raise ValueError("Usuário não encontrado.")
 
         UsuarioRepository.excluir(usuario_id)
+
+    @staticmethod
+    def criar_morador_armario(nome, telefone, armario_id, email=None, senha=None):
+        """Cadastro enxuto de morador — só o que o totem precisa (nome + telefone + armário)."""
+        nome = (nome or "").strip()
+        telefone = UsuarioService._validar_telefone(telefone, obrigatorio=True)
+        if not nome:
+            raise ValueError("Nome é obrigatório.")
+
+        email = (email or "").strip().lower()
+        if not email:
+            digits = re.sub(r"\D", "", telefone)
+            email = f"morador.{digits}@eleva.local"
+
+        if not senha:
+            senha = secrets.token_urlsafe(10)
+
+        lgpd = bool(config.LGPD_CONSENTIMENTO_USUARIO)
+
+        return UsuarioService.criar(
+            nome=nome,
+            email=email,
+            telefone=telefone,
+            senha=senha,
+            confirmar=senha,
+            perfil="Usuário",
+            status=1,
+            armario_id=armario_id,
+            lgpd_consentimento=lgpd,
+            ip="127.0.0.1",
+            user_agent="cadastro_morador_cli",
+        )
