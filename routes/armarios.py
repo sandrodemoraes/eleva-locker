@@ -15,6 +15,13 @@ from repositories.esp32_repository import Esp32Repository
 armarios_bp = Blueprint("armarios", __name__)
 
 
+def _ip_cliente():
+    ip = request.headers.get("X-Forwarded-For", request.remote_addr or "")
+    if ip and "," in ip:
+        ip = ip.split(",")[0].strip()
+    return ip
+
+
 @armarios_bp.route("/armarios")
 @login_required
 def listar():
@@ -53,6 +60,8 @@ def detalhe(armario_id):
         usuarios=usuarios,
         empresas=EmpresaService.listar_ativas(),
         portas_opcoes=config.ESP32_PORTAS_OPCOES,
+        lgpd_consentimento_usuario=config.LGPD_CONSENTIMENTO_USUARIO,
+        lgpd_politica_versao=config.LGPD_POLITICA_VERSAO,
     )
 
 
@@ -231,6 +240,9 @@ def usuario_novo(armario_id):
             perfil=request.form.get("perfil", "Operador"),
             status=int(request.form.get("status", 1)),
             armario_id=armario_id,
+            lgpd_consentimento=request.form.get("lgpd_consentimento") == "1",
+            ip=_ip_cliente(),
+            user_agent=(request.headers.get("User-Agent") or "")[:500],
         )
         LogService.registrar(None, session.get("usuario"), f"Usuário #{usuario_id} cadastrado no armário #{armario_id}")
         flash("Usuário cadastrado neste armário!", "success")

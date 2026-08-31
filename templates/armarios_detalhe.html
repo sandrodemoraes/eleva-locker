@@ -293,6 +293,16 @@
                     </select>
                 </div>
             </div>
+            {% if lgpd_consentimento_usuario %}
+            <div class="form-group" style="margin-top:8px;">
+                <label style="display:flex;align-items:flex-start;gap:8px;font-weight:normal;font-size:13px;line-height:1.4;">
+                    <input type="checkbox" name="lgpd_consentimento" value="1" required style="margin-top:3px;">
+                    <span>Declaro que o titular foi informado e concorda com a
+                    <a href="/privacidade" target="_blank" rel="noopener">Política de Privacidade</a>
+                    (v{{ lgpd_politica_versao }})</span>
+                </label>
+            </div>
+            {% endif %}
             <div class="form-actions">
                 <button type="submit" class="btn">Cadastrar</button>
                 <button type="button" class="btn btn-danger" onclick="fecharModal('modalNovoUsuario')">Cancelar</button>
