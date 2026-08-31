@@ -118,7 +118,7 @@
                     {% if n.canal == 'whatsapp' %}💬{% elif n.canal == 'email' %}📧{% elif n.canal == 'sms' %}📱{% else %}🔔{% endif %}
                     {{ n.canal }}
                 </td>
-                <td>{{ n.destinatario or '—' }}</td>
+                <td>{{ n.destinatario | lgpd_destinatario }}</td>
                 <td><span class="badge badge-{{ 'retirada' if n.status == 'enviado' else 'aguardando_retirada' }}">{{ n.status }}</span></td>
                 <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;">{{ n.detalhe or '—' }}</td>
             </tr>

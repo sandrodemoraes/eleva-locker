@@ -33,6 +33,11 @@ print()
 print("  LGPD — Fase 3")
 print(f"  LGPD_TITULAR_ATIVO         = {config.LGPD_TITULAR_ATIVO}")
 print()
+print("  LGPD — Fase 4")
+print(f"  LGPD_MASCARAR_TELEFONE     = {config.LGPD_MASCARAR_TELEFONE}")
+print(f"  LGPD_JOB_ATIVO             = {config.LGPD_JOB_ATIVO}")
+print(f"  LGPD_RETENCAO_ENCOMENDA_DIAS = {config.LGPD_RETENCAO_ENCOMENDA_DIAS}")
+print()
 
 if (config.TOTEM_AJUDA_TELEFONE or "").strip():
     print("  OK — .env carregado. Reinicie INICIAR.bat se acabou de atualizar.")

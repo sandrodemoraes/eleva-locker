@@ -129,6 +129,14 @@ LGPD_AVISO_TOTEM = os.getenv("LGPD_AVISO_TOTEM", "0") == "1"
 # LGPD — Fase 3 (direitos do titular; 0 = menu/ações ocultos)
 LGPD_TITULAR_ATIVO = os.getenv("LGPD_TITULAR_ATIVO", "0") == "1"
 
+# LGPD — Fase 4 (retenção + mascaramento; job 0 = não roda automático)
+LGPD_RETENCAO_ENCOMENDA_DIAS = int(os.getenv("LGPD_RETENCAO_ENCOMENDA_DIAS", "365"))
+LGPD_RETENCAO_LOG_DIAS = int(os.getenv("LGPD_RETENCAO_LOG_DIAS", "180"))
+LGPD_RETENCAO_AJUDA_TOTEM_DIAS = int(os.getenv("LGPD_RETENCAO_AJUDA_TOTEM_DIAS", "90"))
+LGPD_RETENCAO_NOTIFICACAO_DIAS = int(os.getenv("LGPD_RETENCAO_NOTIFICACAO_DIAS", "365"))
+LGPD_JOB_ATIVO = os.getenv("LGPD_JOB_ATIVO", "0") == "1"
+LGPD_MASCARAR_TELEFONE = os.getenv("LGPD_MASCARAR_TELEFONE", "0") == "1"
+
 
 def gerar_token_esp32():
     return secrets.token_hex(16)

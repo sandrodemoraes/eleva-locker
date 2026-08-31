@@ -87,7 +87,7 @@
                 <td>{{ e.id }}</td>
                 <td><strong>{{ e.codigo }}</strong></td>
                 <td>{{ e.cliente }}</td>
-                <td>{{ e.telefone or '—' }}</td>
+                <td>{{ e.telefone | lgpd_telefone }}</td>
                 <td>{{ e.armario_nome or '—' }}</td>
                 <td>#{{ e.compartimento_numero or '—' }}</td>
                 <td>{{ e.data_entrada or '—' }}</td>

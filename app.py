@@ -94,9 +94,55 @@ def _iniciar_lembretes_automaticos():
 _iniciar_lembretes_automaticos()
 
 
+def _iniciar_lgpd_retencao_diaria():
+    """Retenção LGPD 1x/dia quando LGPD_JOB_ATIVO=1."""
+    import threading
+    import time
+
+    intervalo_h = int(os.getenv("LGPD_JOB_INTERVALO_HORAS", "24"))
+
+    def _loop():
+        time.sleep(120)
+        while True:
+            try:
+                import config as app_config
+                if app_config.LGPD_JOB_ATIVO:
+                    with app.app_context():
+                        from services.lgpd_retencao_service import LgpdRetencaoService
+                        r = LgpdRetencaoService.executar(simular=False)
+                        print(
+                            "[LGPD-RETENCAO] encomendas="
+                            f"{r['encomendas']['elegiveis']} logs={r['logs']['elegiveis']}"
+                        )
+            except Exception as erro:
+                print(f"[LGPD-RETENCAO] Erro: {erro}")
+            time.sleep(max(1, intervalo_h) * 3600)
+
+    if os.getenv("LGPD_JOB_ATIVO", "0") == "1":
+        threading.Thread(target=_loop, daemon=True, name="lgpd-retencao").start()
+
+
+_iniciar_lgpd_retencao_diaria()
+
+
+@app.template_filter("lgpd_telefone")
+def lgpd_telefone_filter(valor):
+    from flask import session
+    from services.lgpd_mascara_service import LgpdMascaraService
+    return LgpdMascaraService.telefone_para_exibicao(valor, session.get("perfil"))
+
+
+@app.template_filter("lgpd_destinatario")
+def lgpd_destinatario_filter(valor):
+    from flask import session
+    from services.lgpd_mascara_service import LgpdMascaraService
+    return LgpdMascaraService.texto_para_exibicao(valor, session.get("perfil"))
+
+
 @app.context_processor
 def inject_site_context():
     from flask import session
+    import config as app_config
     if "usuario_id" in session:
         from services.site_service import SiteService
         from middleware.site_scope import get_site_id
@@ -106,7 +152,7 @@ def inject_site_context():
             "sites": SiteService.listar_ativos(),
             "site_atual": get_site_id(),
             "ajuda_totem_pendentes": pendentes,
-            "lgpd_titular_ativo": __import__("config").LGPD_TITULAR_ATIVO,
+            "lgpd_titular_ativo": app_config.LGPD_TITULAR_ATIVO,
         }
     return {}
 

@@ -12,6 +12,7 @@ FLAGS = {
     "usuario": "LGPD_CONSENTIMENTO_USUARIO",
     "totem": "LGPD_AVISO_TOTEM",
     "titular": "LGPD_TITULAR_ATIVO",
+    "mascarar": "LGPD_MASCARAR_TELEFONE",
 }
 
 
@@ -44,12 +45,14 @@ def main():
     parser.add_argument("--usuario", action="store_true", help="Só LGPD_CONSENTIMENTO_USUARIO=1")
     parser.add_argument("--totem", action="store_true", help="Só LGPD_AVISO_TOTEM=1")
     parser.add_argument("--titular", action="store_true", help="Só LGPD_TITULAR_ATIVO=1")
+    parser.add_argument("--mascarar", action="store_true", help="Só LGPD_MASCARAR_TELEFONE=1")
     args = parser.parse_args()
 
-    any_specific = args.usuario or args.totem or args.titular
+    any_specific = args.usuario or args.totem or args.titular or args.mascarar
     ligar_usuario = args.usuario or (not any_specific)
     ligar_totem = args.totem or (not any_specific)
-    ligar_titular = args.titular or (not any_specific)
+    ligar_titular = bool(args.titular)
+    ligar_mascarar = bool(args.mascarar)
 
     print()
     print("=" * 60)
@@ -70,6 +73,9 @@ def main():
     if ligar_titular:
         linhas = _definir_var(linhas, FLAGS["titular"], "1")
         alterados.append(FLAGS["titular"])
+    if ligar_mascarar:
+        linhas = _definir_var(linhas, FLAGS["mascarar"], "1")
+        alterados.append(FLAGS["mascarar"])
 
     ENV_PATH.write_text("".join(linhas), encoding="utf-8")
 

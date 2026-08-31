@@ -177,6 +177,48 @@
     </div>
 
     <div class="table-box">
+        <h2 style="color:#134736;margin-bottom:15px;">LGPD — Retenção e mascaramento (Fase 4)</h2>
+        <p style="color:#666;margin-bottom:15px;font-size:14px;">
+            Job anonimiza dados antigos (retiradas, logs, ajuda, notificações). Padrão: simular antes de executar.
+        </p>
+        <table>
+            <tr>
+                <td style="padding:8px;">Mascarar telefone (Operador)</td>
+                <td><strong>{% if config.LGPD_MASCARAR_TELEFONE %}Ativo{% else %}Inativo (padrão){% endif %}</strong>
+                    · <code>LGPD_MASCARAR_TELEFONE</code></td>
+            </tr>
+            <tr>
+                <td style="padding:8px;">Job automático diário</td>
+                <td><strong>{% if config.LGPD_JOB_ATIVO %}Ativo{% else %}Inativo (padrão){% endif %}</strong>
+                    · <code>LGPD_JOB_ATIVO</code></td>
+            </tr>
+            <tr>
+                <td style="padding:8px;">Retenção encomenda retirada</td>
+                <td><strong>{{ config.LGPD_RETENCAO_ENCOMENDA_DIAS }}</strong> dias</td>
+            </tr>
+            <tr>
+                <td style="padding:8px;">Retenção logs</td>
+                <td><strong>{{ config.LGPD_RETENCAO_LOG_DIAS }}</strong> dias</td>
+            </tr>
+            <tr>
+                <td style="padding:8px;">Retenção ajuda totem</td>
+                <td><strong>{{ config.LGPD_RETENCAO_AJUDA_TOTEM_DIAS }}</strong> dias</td>
+            </tr>
+            <tr>
+                <td style="padding:8px;">Retenção notificações</td>
+                <td><strong>{{ config.LGPD_RETENCAO_NOTIFICACAO_DIAS }}</strong> dias</td>
+            </tr>
+            <tr>
+                <td style="padding:8px;">Scripts</td>
+                <td><code>SIMULAR_LGPD_RETENCAO.bat</code> · <code>EXECUTAR_LGPD_RETENCAO.bat</code></td>
+            </tr>
+        </table>
+        <p style="color:#888;font-size:13px;margin-top:15px;">
+            Log do job: <code>logs/lgpd_retencao.log</code>
+        </p>
+    </div>
+
+    <div class="table-box">
         <h2 style="color:#134736;margin-bottom:15px;">Notificações (Fase 3)</h2>
         <table>
             <tr><td style="padding:8px;">Modo</td><td><strong>{{ config.NOTIF_MODO }}</strong></td></tr>
