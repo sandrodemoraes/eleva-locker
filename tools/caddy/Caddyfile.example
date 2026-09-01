@@ -1,0 +1,7 @@
+# Copie para Caddyfile e troque pelo domínio registrado.
+# Uso: caddy.exe run --config Caddyfile
+# Pasta sugerida: C:\ElevaLocker\tools\caddy\
+
+locker.seudominio.com.br {
+    reverse_proxy localhost:15000
+}
