@@ -1,8 +1,10 @@
 import json
+import os
 import re
 import smtplib
 import time
 import urllib.error
+import urllib.parse
 import urllib.request
 from datetime import datetime
 from email.mime.text import MIMEText
@@ -153,8 +155,86 @@ class NotificacaoService:
         return f"{base}/totem"
 
     @staticmethod
+    def _url_totem_eh_rede_local(base=None):
+        base = (base or config.APP_URL_BASE or "").strip()
+        host = (urllib.parse.urlparse(base).hostname or "").lower()
+        if host in ("localhost", "127.0.0.1", ""):
+            return True
+        if host.startswith("192.168.") or host.startswith("10."):
+            return True
+        if host.startswith("172."):
+            try:
+                segundo = int(host.split(".")[1])
+                if 16 <= segundo <= 31:
+                    return True
+            except (ValueError, IndexError):
+                pass
+        return False
+
+    @staticmethod
+    def _incluir_link_totem_whatsapp():
+        flag = os.getenv("NOTIF_INCLUIR_LINK_TOTEM", "").strip()
+        if flag == "1":
+            return True
+        if flag == "0":
+            return False
+        return not NotificacaoService._url_totem_eh_rede_local()
+
+    @staticmethod
+    def _formatar_local_armario(armario_id, armario_nome=None):
+        nome = (armario_nome or "").strip()
+        endereco = ""
+        if armario_id:
+            try:
+                from repositories.armario_repository import ArmarioRepository
+                row = ArmarioRepository.buscar_por_id(armario_id)
+                if row:
+                    if not nome:
+                        nome = (row["nome"] or "").strip() or f"Armário #{armario_id}"
+                    partes = []
+                    rua = (row["endereco"] or "").strip()
+                    if rua:
+                        partes.append(rua)
+                    cidade = (row["cidade"] or "").strip()
+                    uf = (row["estado"] or "").strip()
+                    if cidade and uf:
+                        partes.append(f"{cidade}/{uf}")
+                    elif cidade or uf:
+                        partes.append(cidade or uf)
+                    endereco = " · ".join(partes)
+            except Exception:
+                pass
+        if not nome:
+            nome = "ELEVA LOCKER"
+        return nome, endereco
+
+    @staticmethod
+    def _bloco_local_mensagem(armario, armario_id):
+        nome, endereco = NotificacaoService._formatar_local_armario(armario_id, armario)
+        if endereco:
+            return f"📍 *{nome}*\n   {endereco}"
+        return f"📍 *{nome}*"
+
+    @staticmethod
+    def _instrucao_retirada_whatsapp(armario_id=None):
+        if NotificacaoService._incluir_link_totem_whatsapp() and armario_id:
+            totem = NotificacaoService._link_totem(armario_id)
+            return (
+                f"👉 Retire no totem:\n{totem}\n\n"
+                f"_Digite o código na tela do armário._"
+            )
+        return "👉 Vá até o *totem do armário* e digite o código na tela."
+
+    @staticmethod
+    def _instrucao_retirada_email(armario_id=None):
+        if NotificacaoService._incluir_link_totem_whatsapp() and armario_id:
+            return f"Retire no totem: {NotificacaoService._link_totem(armario_id)}\n"
+        return "Dirija-se ao totem do armário e digite o código na tela.\n"
+
+    @staticmethod
     def _montar_mensagem_whatsapp(cliente, armario, compartimento, codigo, armario_id=None, expira_em=None):
-        totem = NotificacaoService._link_totem(armario_id)
+        local = NotificacaoService._bloco_local_mensagem(armario, armario_id)
+        instrucao = NotificacaoService._instrucao_retirada_whatsapp(armario_id)
         validade = ""
         if expira_em:
             try:
@@ -165,24 +245,25 @@ class NotificacaoService:
         return (
             f"Olá *{cliente}*! 📦\n\n"
             f"Sua encomenda chegou no *ELEVA LOCKER*.\n\n"
-            f"📍 {armario}\n"
+            f"{local}\n"
             f"🚪 Compartimento *#{compartimento}*\n"
             f"🔑 Código: *{codigo}*{validade}\n"
-            f"👉 Retire no totem:\n{totem}\n\n"
-            f"_Digite o código na tela do armário._"
+            f"{instrucao}"
         )
 
     @staticmethod
     def _montar_mensagem_email(cliente, armario, compartimento, codigo, armario_id=None, expira_em=None):
-        totem = NotificacaoService._link_totem(armario_id)
+        nome, endereco = NotificacaoService._formatar_local_armario(armario_id, armario)
+        local = f"{nome} — {endereco}" if endereco else nome
+        instrucao = NotificacaoService._instrucao_retirada_email(armario_id)
         validade = f"\nVálido até: {expira_em}\n" if expira_em else ""
         return (
             f"Olá {cliente}!\n\n"
             f"Sua encomenda chegou no ELEVA LOCKER.\n\n"
-            f"Local: {armario}\n"
+            f"Local: {local}\n"
             f"Compartimento: #{compartimento}\n"
             f"Código de retirada: {codigo}{validade}\n"
-            f"Retire no totem: {totem}\n"
+            f"{instrucao}"
         )
 
     @staticmethod
