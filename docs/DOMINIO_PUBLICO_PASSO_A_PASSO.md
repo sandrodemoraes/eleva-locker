@@ -1,8 +1,14 @@
 # Domínio público — passo a passo (Matriz ELEVA)
 
+> ⚠️ **Não use na Fase 1 (Matriz local).**  
+> Leia primeiro: [`ARQUITETURA_REDE_FASES.md`](ARQUITETURA_REDE_FASES.md)  
+> Domínio + HTTPS = **Fase 3**, quando morador precisar abrir link fora da rede ou portal público.
+
 **Para:** Sandro / Matriz  
 **Ambiente:** `C:\ElevaLocker` · PC `192.168.16.130:15000` · Mikrotik HUB RB · WireGuard ESP  
-**Objetivo:** Morador abrir links no WhatsApp e portal pelo celular (fora da rede Wi‑Fi).
+**Objetivo (Fase 3):** Morador abrir links no WhatsApp e portal pelo celular (fora da rede Wi‑Fi).
+
+**Fase 1 (agora):** manter `APP_URL_BASE=http://192.168.16.130:15000` e `NOTIF_INCLUIR_LINK_TOTEM=0`.
 
 ---
 
