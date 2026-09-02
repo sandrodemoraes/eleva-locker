@@ -43,7 +43,7 @@ a{
     left:0;
     right:0;
     height:70px;
-    background:#0f3d75;
+    background:#134736;
     color:#fff;
     display:flex;
     align-items:center;
@@ -101,7 +101,7 @@ a{
     left:0;
     width:260px;
     height:calc(100vh - 70px);
-    background:#1d2633;
+    background:#0F3D31;
     overflow-y:auto;
     box-shadow:2px 0 8px rgba(0,0,0,.15);
 }
@@ -134,7 +134,7 @@ a{
 }
 
 .sidebar-menu a:hover{
-    background:#0f3d75;
+    background:#134736;
     color:#fff;
 }
 
@@ -171,7 +171,7 @@ a{
 =========================== */
 
 .content h1{
-    color:#0f3d75;
+    color:#134736;
     font-size:42px;
     margin-bottom:10px;
 }
@@ -207,7 +207,7 @@ a{
 
 .numero{
     font-size:48px;
-    color:#0f3d75;
+    color:#134736;
     font-weight:bold;
 }
 
@@ -230,7 +230,7 @@ a{
 }
 
 .painel h2{
-    color:#0f3d75;
+    color:#134736;
     margin-bottom:20px;
 }
 
@@ -309,13 +309,13 @@ a{
 
     justify-content:center;
 
-    background:linear-gradient(135deg,#2563EB,#1D4ED8);
+    background:rgba(255,255,255,.12);
 
     color:white;
 
     font-size:22px;
 
-    box-shadow:0 6px 15px rgba(37,99,235,.35);
+    box-shadow:inset 0 0 0 1px rgba(255,255,255,.15);
 
 }
 
@@ -331,7 +331,7 @@ a{
 
 .logo-text span{
 
-    color:#d7e4ff;
+    color:rgba(255,255,255,.72);
 
     font-size:12px;
 
@@ -367,12 +367,46 @@ a{
 
 }
 
+a.btn-icon{
+
+    display:inline-flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    text-decoration:none;
+
+}
+
 .btn-icon:hover{
 
-    background:#2563EB;
+    background:rgba(255,255,255,.2);
 
     transform:translateY(-2px);
 
+}
+
+.btn-icon-notif{
+    position:relative;
+}
+
+.nav-badge{
+    position:absolute;
+    top:2px;
+    right:2px;
+    min-width:18px;
+    height:18px;
+    padding:0 5px;
+    border-radius:999px;
+    background:#e74c3c;
+    color:#fff;
+    font-size:11px;
+    font-weight:700;
+    line-height:18px;
+    text-align:center;
+    box-shadow:0 0 0 2px #134736;
+    pointer-events:none;
 }
 
 .avatar{
@@ -383,7 +417,7 @@ a{
 
     border-radius:50%;
 
-    background:#2563EB;
+    background:#2D8A6E;
 
     color:white;
 
@@ -419,7 +453,7 @@ a{
 
 .usuario small{
 
-    color:#d5dff0;
+    color:rgba(255,255,255,.65);
 
     display:block;
 

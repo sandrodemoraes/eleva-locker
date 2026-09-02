@@ -27,5 +27,14 @@ Thumbs.db
 Desktop.ini
 .DS_Store
 
-# Banco SQLite (descomente se não quiser versionar o banco)
-# elevalocker.db
+# Ambiente local (segredos e config da bancada)
+.env
+
+# Dados gerados por site (tokens, api keys — bootstrap_site_piloto.py)
+Sites/
+
+# Banco SQLite local (nunca versionar — dados da bancada)
+database/*.db
+database/*.db-journal
+database/*.db-wal
+database/*.db-shm
