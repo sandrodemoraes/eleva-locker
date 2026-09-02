@@ -1,0 +1,302 @@
+{% extends "layout/base.html" %}
+
+{% block title %}Encomendas | ELEVA LOCKER{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/crud.css') }}">
+{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+    <div>
+        <h1>Encomendas</h1>
+        <p>Depósito e retirada — prazo {{ dias_validade }} dias | lembrete automático a cada {{ horas_reenvio }}h</p>
+    </div>
+    <div style="display:flex;gap:10px;">
+        <button class="btn btn-success" onclick="abrirModal('modalDeposito')">
+            <i class="fa-solid fa-box"></i> Depositar
+        </button>
+        <button class="btn btn-retirar" onclick="abrirModal('modalRetirada')">
+            <i class="fa-solid fa-hand-holding"></i> Retirar
+        </button>
+    </div>
+</div>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% for category, message in messages %}
+        <div class="alert alert-{{ category }}">{{ message }}</div>
+    {% endfor %}
+{% endwith %}
+
+{% if session.get('ultimo_codigo') %}
+<div class="codigo-box">
+    Código gerado: {{ session.pop('ultimo_codigo') }}
+    {% set eid = session.pop('ultimo_encomenda_id', None) %}
+    {% if eid %}
+    <br><br>
+    <img src="/encomendas/qrcode/{{ eid }}" alt="QR Code" style="max-width:180px;border-radius:8px;background:#fff;padding:10px;">
+    <br><small style="opacity:.8;">Escaneie no totem ou envie ao morador</small>
+    {% endif %}
+</div>
+{% endif %}
+
+{% if retidas_total and retidas_total > 0 %}
+<div class="alert alert-warning" style="margin-bottom:16px;">
+    <strong>{{ retidas_total }}</strong> encomenda(s) com prazo expirado aguardando retirada na portaria.
+    <a href="/encomendas?status=retida" style="margin-left:8px;color:#134736;font-weight:600;">Ver retidas</a>
+</div>
+{% endif %}
+
+<div class="table-box" style="margin-bottom:20px;">
+    <form method="GET" action="/encomendas">
+        <div class="form-group" style="max-width:300px;margin:0;">
+            <label>Filtrar por status</label>
+            <select name="status" onchange="this.form.submit()">
+                <option value="">Todas</option>
+                <option value="aguardando_retirada" {% if status_filtro == 'aguardando_retirada' %}selected{% endif %}>Aguardando retirada</option>
+                <option value="retida" {% if status_filtro == 'retida' %}selected{% endif %}>Retidas (prazo expirado)</option>
+                <option value="retirada" {% if status_filtro == 'retirada' %}selected{% endif %}>Retiradas</option>
+            </select>
+        </div>
+    </form>
+</div>
+
+<div class="table-box">
+    {% if encomendas %}
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Código</th>
+                <th>Destinatário</th>
+                <th>Telefone</th>
+                <th>Armário</th>
+                <th>Compart.</th>
+                <th>Entrada</th>
+                <th>Prazo</th>
+                <th>Retirada</th>
+                <th>Status</th>
+                <th>Notificado</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for e in encomendas %}
+            <tr>
+                <td>{{ e.id }}</td>
+                <td><strong>{{ e.codigo }}</strong></td>
+                <td>{{ e.cliente }}</td>
+                <td>{{ e.telefone | lgpd_telefone }}</td>
+                <td>{{ e.armario_nome or '—' }}</td>
+                <td>#{{ e.compartimento_numero or '—' }}</td>
+                <td>{{ e.data_entrada or '—' }}</td>
+                <td>{{ e.expira_em or '—' }}</td>
+                <td>{{ e.data_retirada or '—' }}</td>
+                <td>
+                    <span class="badge badge-{{ e.status }}">
+                        {% if e.status == 'retida' %}retida{% else %}{{ e.status }}{% endif %}
+                    </span>
+                </td>
+                <td>{{ e.notificado_em or '—' }}</td>
+                <td>
+                    <a href="/encomendas/qrcode/{{ e.id }}" class="btn btn-sm" title="QR Code" target="_blank"><i class="fa-solid fa-qrcode"></i></a>
+                    {% if e.status == 'aguardando_retirada' %}
+                    <form method="POST" action="/encomendas/reenviar/{{ e.id }}" style="display:inline"
+                          onsubmit="return confirm('Reenviar WhatsApp/e-mail com aviso de retenção em {{ dias_validade }} dias?');">
+                        <button type="submit" class="btn btn-sm" title="Reenviar com aviso de retenção ({{ dias_validade }} dias)"><i class="fa-solid fa-bell"></i></button>
+                    </form>
+                    {% endif %}
+                    {% if e.status == 'retida' %}
+                    <form method="POST" action="/encomendas/{{ e.id }}/retirar-retida" style="display:inline"
+                          onsubmit="return confirm('Abrir compartimento #{{ e.compartimento_numero }} e registrar retirada do pacote retido?');">
+                        <input type="hidden" name="redirect_status" value="{{ status_filtro or 'retida' }}">
+                        <button type="submit" class="btn btn-sm btn-warning" title="Abrir porta e retirar pacote retido">
+                            <i class="fa-solid fa-door-open"></i> Abrir e retirar
+                        </button>
+                    </form>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state">
+        <i class="fa-solid fa-box-open fa-3x"></i>
+        <p>Nenhuma encomenda registrada. Use "Depositar" para registrar a primeira.</p>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Modal Depósito -->
+<div class="modal-overlay" id="modalDeposito">
+    <div class="modal">
+        <h2>Depositar Encomenda</h2>
+        <form method="POST" action="/encomendas/depositar">
+            <div class="form-group">
+                <label>Armário *</label>
+                <select id="dep_armario" required onchange="carregarCompartimentos()">
+                    <option value="">Selecione...</option>
+                    {% for a in armarios %}
+                    <option value="{{ a.id }}">{{ a.nome }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Compartimento livre *</label>
+                <select name="compartimento_id" id="dep_compartimento" required>
+                    <option value="">Selecione o armário primeiro</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Destinatário *</label>
+                <div class="autocomplete-wrap">
+                    <input type="text" name="cliente" id="dep_cliente" required placeholder="Nome do morador"
+                           autocomplete="off" oninput="onDestinatarioInput()" onfocus="onDestinatarioInput()" onblur="fecharSugestoesAtraso()">
+                    <div class="autocomplete-list" id="dep_sugestoes"></div>
+                </div>
+            </div>
+            <div class="grid-2">
+                <div class="form-group">
+                    <label>Telefone</label>
+                    <input type="text" name="telefone" id="dep_telefone" placeholder="(11) 99999-9999">
+                </div>
+                <div class="form-group">
+                    <label>E-mail</label>
+                    <input type="email" name="email" id="dep_email">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Transportadora</label>
+                <input type="text" name="transportadora" placeholder="Correios, Mercado Livre...">
+            </div>
+            <div class="form-group">
+                <label>Observação</label>
+                <textarea name="observacao" rows="2"></textarea>
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-success">Depositar e gerar código</button>
+                <button type="button" class="btn btn-danger" onclick="fecharModal('modalDeposito')">Cancelar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal Retirada -->
+<div class="modal-overlay" id="modalRetirada">
+    <div class="modal">
+        <h2>Retirar Encomenda</h2>
+        <form method="POST" action="/encomendas/retirar">
+            <div class="form-group">
+                <label>Código de retirada *</label>
+                <input type="text" name="codigo" required maxlength="6" placeholder="000000"
+                       style="font-size:24px;letter-spacing:6px;text-align:center;">
+            </div>
+            <p style="color:#666;font-size:14px;">Informe o código de 6 dígitos entregue ao destinatário.</p>
+            <div class="form-actions">
+                <button type="submit" class="btn">Confirmar retirada</button>
+                <button type="button" class="btn btn-danger" onclick="fecharModal('modalRetirada')">Cancelar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+function abrirModal(id){ document.getElementById(id).classList.add('active'); }
+function fecharModal(id){ document.getElementById(id).classList.remove('active'); }
+
+function carregarCompartimentos(){
+    var armarioId = document.getElementById('dep_armario').value;
+    var select = document.getElementById('dep_compartimento');
+    select.innerHTML = '<option value="">Carregando...</option>';
+
+    if(!armarioId){
+        select.innerHTML = '<option value="">Selecione o armário primeiro</option>';
+        return;
+    }
+
+    fetch('/encomendas/compartimentos-livres/' + armarioId)
+        .then(r => r.json())
+        .then(data => {
+            if(data.length === 0){
+                select.innerHTML = '<option value="">Nenhum compartimento livre</option>';
+                return;
+            }
+            select.innerHTML = '<option value="">Selecione...</option>';
+            data.forEach(c => {
+                select.innerHTML += '<option value="'+c.id+'">#'+c.numero+'</option>';
+            });
+        });
+}
+
+var sugestoesTimer = null;
+var fecharSugestoesTimer = null;
+
+function onDestinatarioInput(){
+    var q = document.getElementById('dep_cliente').value.trim();
+    if(sugestoesTimer) clearTimeout(sugestoesTimer);
+    if(q.length < 2){
+        fecharSugestoes();
+        return;
+    }
+    sugestoesTimer = setTimeout(function(){ buscarDestinatarios(q); }, 280);
+}
+
+function buscarDestinatarios(q){
+    var armarioId = document.getElementById('dep_armario').value;
+    var url = '/encomendas/destinatarios?q=' + encodeURIComponent(q);
+    if(armarioId) url += '&armario_id=' + encodeURIComponent(armarioId);
+    fetch(url)
+        .then(function(r){ return r.json(); })
+        .then(function(lista){ renderSugestoes(lista || []); })
+        .catch(function(){ fecharSugestoes(); });
+}
+
+function renderSugestoes(lista){
+    var box = document.getElementById('dep_sugestoes');
+    box.innerHTML = '';
+    if(!lista.length){
+        box.classList.remove('aberta');
+        return;
+    }
+    lista.forEach(function(item){
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'autocomplete-item';
+        var tel = item.telefone || 'sem telefone';
+        btn.innerHTML = '<span class="ac-nome">' + item.nome + '</span><span class="ac-tel">' + tel + '</span>';
+        btn.onmousedown = function(e){
+            e.preventDefault();
+            selecionarDestinatario(item);
+        };
+        box.appendChild(btn);
+    });
+    box.classList.add('aberta');
+}
+
+function selecionarDestinatario(item){
+    document.getElementById('dep_cliente').value = item.nome;
+    if(item.telefone){
+        document.getElementById('dep_telefone').value = item.telefone;
+    }
+    if(item.email){
+        document.getElementById('dep_email').value = item.email;
+    }
+    fecharSugestoes();
+}
+
+function fecharSugestoes(){
+    var box = document.getElementById('dep_sugestoes');
+    if(box) box.classList.remove('aberta');
+}
+
+function fecharSugestoesAtraso(){
+    if(fecharSugestoesTimer) clearTimeout(fecharSugestoesTimer);
+    fecharSugestoesTimer = setTimeout(fecharSugestoes, 200);
+}
+</script>
+{% endblock %}

@@ -1,0 +1,87 @@
+{% extends "lgpd/base_public.html" %}
+{% set pagina = 'privacidade' %}
+
+{% block title %}Política de Privacidade{% endblock %}
+
+{% block content %}
+<article class="lgpd-doc">
+    <h1>Política de Privacidade</h1>
+    <p class="lgpd-meta">Última atualização: {{ lgpd_versao }}</p>
+
+    <section>
+        <h2>1. Quem somos (controlador)</h2>
+        <p>
+            O <strong>{{ lgpd_controlador }}</strong> opera o sistema ELEVA LOCKER para recebimento
+            e retirada de encomendas em armários inteligentes.
+        </p>
+    </section>
+
+    <section>
+        <h2>2. Dados que tratamos</h2>
+        <ul>
+            <li><strong>Moradores / destinatários:</strong> nome, telefone, e-mail (quando informados no depósito ou cadastro)</li>
+            <li><strong>Operadores e portaria:</strong> nome, e-mail, telefone, credenciais de acesso</li>
+            <li><strong>Encomendas:</strong> código de retirada, compartimento, datas de depósito e retirada</li>
+            <li><strong>Notificações:</strong> envio de WhatsApp, e-mail ou SMS sobre encomendas</li>
+            <li><strong>Totem — ajuda:</strong> horário, armário e endereço IP ao solicitar suporte</li>
+            <li><strong>Logs técnicos:</strong> ações no painel e abertura de compartimentos (auditoria)</li>
+        </ul>
+    </section>
+
+    <section>
+        <h2>3. Finalidades</h2>
+        <ul>
+            <li>Entregar, armazenar e permitir a retirada de encomendas</li>
+            <li>Enviar código de retirada e lembretes (WhatsApp/e-mail)</li>
+            <li>Prestar suporte no totem (“Preciso de ajuda”)</li>
+            <li>Segurança do condomínio e do equipamento</li>
+            <li>Cumprir obrigações legais e resolver incidentes</li>
+        </ul>
+    </section>
+
+    <section>
+        <h2>4. Base legal (LGPD)</h2>
+        <p>Conforme o caso: execução de contrato ou de procedimentos preliminares, legítimo interesse
+        (segurança e operação do serviço) ou consentimento quando aplicável em comunicações opcionais.</p>
+    </section>
+
+    <section>
+        <h2>5. Compartilhamento</h2>
+        <p>
+            Podemos usar provedores de mensagens (ex.: API WhatsApp/Evolution) exclusivamente para
+            notificar sobre encomendas. <strong>Não vendemos</strong> dados pessoais.
+        </p>
+    </section>
+
+    <section>
+        <h2>6. Retenção</h2>
+        <p>
+            Mantemos os dados pelo tempo necessário à operação e exigências legais.
+            Encomendas retiradas e logs antigos podem ser anonimizados conforme política interna de retenção.
+        </p>
+    </section>
+
+    <section>
+        <h2>7. Seus direitos (Art. 18 LGPD)</h2>
+        <p>Você pode solicitar: confirmação de tratamento, acesso, correção, anonimização, portabilidade
+        e informações sobre compartilhamento. Entre em contato:</p>
+        <ul class="lgpd-contato">
+            {% if lgpd_email %}<li>E-mail: <a href="mailto:{{ lgpd_email }}">{{ lgpd_email }}</a></li>{% endif %}
+            {% if lgpd_telefone %}<li>Telefone / WhatsApp portaria: {{ lgpd_telefone }}</li>{% endif %}
+            {% if not lgpd_email and not lgpd_telefone %}<li>Portaria do condomínio ou administrador do sistema</li>{% endif %}
+        </ul>
+    </section>
+
+    <section>
+        <h2>8. Segurança</h2>
+        <p>Adotamos controle de acesso, backups, registros de auditoria e comunicação na rede local protegida.</p>
+    </section>
+
+    <section>
+        <h2>9. Alterações</h2>
+        <p>Esta política pode ser atualizada. A versão vigente está indicada no topo desta página.</p>
+    </section>
+
+    <p class="lgpd-aviso"><em>Rascunho operacional — recomenda-se revisão jurídica antes de uso externo ampliado.</em></p>
+</article>
+{% endblock %}
