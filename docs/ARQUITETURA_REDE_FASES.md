@@ -112,6 +112,90 @@ ESP32_MODO_SIMULACAO=0
 
 ---
 
+## WireGuard vs offline — regra de ouro
+
+**WireGuard não é a operação do armário.** É só a **ponte de gestão** Matriz ↔ site remoto.
+
+Separar sempre **3 planos**:
+
+| Plano | O quê | Precisa internet? | Precisa WireGuard? |
+|-------|--------|-------------------|---------------------|
+| **Operacional** | Totem, ESP, abrir porta, código retirada | ❌ Não (só LAN local) | ❌ Não |
+| **Notificação** | WhatsApp / e-mail ao morador | ✅ Sim (link 4G operadora) | ❌ Não |
+| **Gestão** | Painel Matriz ver armário remoto, backup, suporte | ✅ Sim | ✅ Sim (site remoto) |
+
+```mermaid
+flowchart LR
+    subgraph local [Sempre local — funciona sem internet]
+        Totem[Totem]
+        SRV[Servidor Eleva no site]
+        ESP[ESP32]
+        Totem --> SRV
+        SRV --> ESP
+    end
+
+    subgraph optional [Opcional — quando online]
+        WG[WireGuard]
+        MAT[Matriz ELEVA]
+        WA[WhatsApp]
+        SRV --> WA
+        SRV -.-> WG
+        WG -.-> MAT
+    end
+```
+
+### Cenários offline (o que acontece)
+
+| Cenário | Matriz Fase 1 (tudo local) | Site remoto Modelo A | Site remoto Modelo B |
+|---------|---------------------------|----------------------|----------------------|
+| **Internet cai** | ✅ Totem + ESP + retirada OK | ✅ Operação OK no site | ❌ ESP não alcança Matriz |
+| **WireGuard cai** | ✅ (WG nem entra na operação) | ✅ Operação OK; Matriz fica “cega” | ❌ Operação comprometida |
+| **PC servidor cai** | ❌ Totem/ESP param* | ❌ Idem | ❌ Idem |
+| **WhatsApp cai** | Depósito OK; morador **não recebe** código na hora | Idem | Idem |
+| **Volta internet** | WhatsApp reenvia / lembrete | Sync WG + filas pendentes | Sync + reconciliar |
+
+\* Hoje o totem **bloqueia depósito** se ESP offline; retirada depende de ESP + servidor. Firmware prevê cache de códigos (ver `PROJETO.md` §6.3) — evoluir no firmware.
+
+### Matriz (Fase 1) — offline na prática
+
+Na LAN `192.168.16.x`:
+
+- **Internet cai** → armário continua (totem, ESP, retirada com código).
+- **WireGuard cai** → **zero impacto** (ESP não usam túnel).
+- **WhatsApp cai** → encomenda depositada, código no painel; reenviar depois.
+
+Conclusão: **não misturar WG na operação da Matriz.**
+
+### Site remoto — desenho seguro com WG + offline
+
+**Recomendado (Modelo A):**
+
+1. **Mini PC no condomínio** = cérebro do armário (Flask + banco).
+2. **ESP** → só IP local desse PC.
+3. **WireGuard** → Matriz enxerga o site para suporte/BI/backup (quando online).
+4. Se WG cair: condomínio **continua operando**; Matriz perde visão temporária.
+
+**Evitar (Modelo B)** para produção offline-first: ESP no site remoto falando **só** com Matriz via túnel — qualquer queda de link **para o armário**.
+
+### Fila quando voltar online (já parcialmente no sistema)
+
+| Fila | Onde | Quando sincroniza |
+|------|------|-------------------|
+| Eventos ESP → servidor | Firmware + `POST /api/esp32/eventos` | Ao reconectar LAN/servidor |
+| Heartbeat / sync versão | `GET /api/esp32/sync` | Periódico |
+| Notificações WhatsApp | Servidor | Reenvio manual ou job lembrete |
+| Logs / BI para Matriz | Via WG | Quando túnel voltar |
+
+### O que pensar / implementar depois (sem urgência)
+
+- [ ] Firmware: cache de códigos ativos 24h (retirada com servidor down)
+- [ ] Firmware: fila SPIFFS de eventos (doc `PROJETO.md`)
+- [ ] Servidor: fila de WhatsApp “pendente envio” se Evolution offline
+- [ ] Site remoto: job “exportar resumo” para Matriz quando WG conectar
+- [ ] Totem: mensagem clara se WhatsApp falhou mas depósito OK
+
+---
+
 ## Fase 3 — Domínio público (quando fizer sentido)
 
 **Não é prioridade para Matriz local.**
