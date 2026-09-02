@@ -30,6 +30,9 @@ Desktop.ini
 # Ambiente local (segredos e config da bancada)
 .env
 
+# Dados gerados por site (tokens, api keys — bootstrap_site_piloto.py)
+Sites/
+
 # Banco SQLite local (nunca versionar — dados da bancada)
 database/*.db
 database/*.db-journal

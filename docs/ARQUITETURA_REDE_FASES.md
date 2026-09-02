@@ -244,10 +244,11 @@ Se Matriz Fase 1 → **manter `.env` local**; não implementar domínio ainda.
 ## Próximos passos sugeridos (sem pressa)
 
 1. **Concluir Matriz** — cadastro morador, depósito, retirada, WhatsApp (rede local).
-2. **Documentar peers WireGuard** — template por condomínio (nome, IP WG, IP LAN ESP).
-3. **Piloto Fase 2** — um condomínio com Modelo A (servidor local + túnel monitoramento).
-4. **Fase 3** — domínio quando portal morador / pagamento externo forem prioridade.
+2. **Iniciar site piloto** — `INSTALAR_SITE.bat` ou `tools/bootstrap_site_piloto.py` → ver [INSTALACAO_SITE.md](INSTALACAO_SITE.md).
+3. **Documentar peers WireGuard** — [WIREGUARD_PEERS.md](WIREGUARD_PEERS.md).
+4. **Piloto Fase 2** — Modelo A no local; WG só para Matriz enxergar quando online.
+5. **Fase 3** — domínio quando portal morador / pagamento externo forem prioridade.
 
 ---
 
-*Atualizado em 02/09/2026 — revisar após primeiro deploy remoto.*
+*Atualizado em 02/09/2026 — WireGuard = gestão; operação = LAN local; offline-first.*
