@@ -77,6 +77,74 @@ docker compose -f docker-compose.prod.yml exec db \
 
 ---
 
+## Guia específico — Hostinger VPS (provedor escolhido)
+
+Passo a passo do zero, do jeito Hostinger. Plano sugerido: **KVM 1** (1 vCPU / 4 GB) só para o
+portal, ou **KVM 2** (2 vCPU / 8 GB) se já quiser rodar o **WhatsApp (Evolution)** junto na nuvem.
+
+### 1) Contratar o VPS
+
+1. Em [hostinger.com.br](https://www.hostinger.com/br/servidor-vps), escolha **KVM 1** ou **KVM 2**.
+2. No checkout, em **localização do servidor**, selecione **Brasil — São Paulo**.
+   Se "São Paulo" não aparecer (vagas limitadas), tente outro dia/plano — vale insistir pela latência.
+3. Em **sistema operacional / template**, escolha **Ubuntu 24.04 com Docker** (ou "Docker").
+   Se só houver Ubuntu puro, o guia instala o Docker no passo 4.
+4. Pagamento aceita **PIX / boleto**. Anote o **IP do servidor** e a **senha root** (aba VPS do hPanel).
+
+### 2) Registrar e apontar o domínio
+
+1. Registre `elevalocker.com.br` no [registro.br](https://registro.br) (~R$ 40/ano), se ainda não tiver.
+2. No DNS do domínio, crie os registros apontando para o **IP do VPS**:
+
+   | Tipo | Nome | Valor |
+   |------|------|-------|
+   | A | `@` (ou `elevalocker.com.br`) | IP do VPS |
+   | A | `www` | IP do VPS |
+
+3. Espere propagar (minutos a algumas horas). Só suba o HTTPS **depois** que o DNS estiver apontando —
+   o certificado só é emitido com o domínio já resolvendo para o servidor.
+
+### 3) Liberar o firewall
+
+No hPanel da Hostinger, em **VPS → Firewall**, garanta liberadas as portas **22** (SSH),
+**80** e **443** (HTTP/HTTPS). Sem 80/443 o certificado não é emitido.
+
+### 4) Acessar e subir a aplicação
+
+Conecte via SSH (`ssh root@IP_DO_VPS`, senha do hPanel) ou pelo **Browser Terminal** do painel, e rode:
+
+```bash
+# (só se o Docker NÃO veio no template)
+command -v docker || curl -fsSL https://get.docker.com | sh
+
+# Clonar o projeto
+git clone <url-do-repo> elevalocker && cd elevalocker
+
+# Configurar produção
+cp deploy/.env.prod.example deploy/.env
+nano deploy/.env      # SITE_DOMAIN, TLS_EMAIL, SECRET_KEY, senhas do Postgres
+
+# Subir (build + start)
+cd deploy
+docker compose -f docker-compose.prod.yml --env-file .env up -d --build
+
+# Acompanhar o HTTPS sendo emitido
+docker compose -f docker-compose.prod.yml logs -f caddy
+```
+
+### 5) Validar
+
+- Site público: `https://elevalocker.com.br/energia-solar`
+- Painel: `https://elevalocker.com.br/login` → **troque a senha do admin no 1º acesso**.
+
+### Atenção Hostinger (2 avisos honestos)
+
+- **Renovação sobe:** o preço promocional (24 meses) quase dobra na renovação — some 24 meses de
+  promoção + 12 de renovação e divida por 36 para saber o custo real por mês.
+- **Vaga em SP é limitada:** confirme "São Paulo" disponível no checkout antes de fechar.
+
+---
+
 ## Segurança (checklist rápido)
 
 - [x] Banco **não exposto** (sem `ports:` no serviço `db`)
