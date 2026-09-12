@@ -1,0 +1,12 @@
+# Proxy reverso com HTTPS automático (Let's Encrypt).
+# O domínio e o e-mail vêm das variáveis de ambiente do container caddy
+# (SITE_DOMAIN e TLS_EMAIL), definidas no docker-compose.prod.yml a partir do .env.
+
+{
+	email {$TLS_EMAIL}
+}
+
+{$SITE_DOMAIN} {
+	encode gzip
+	reverse_proxy web:15000
+}
