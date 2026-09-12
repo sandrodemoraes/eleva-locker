@@ -1,0 +1,79 @@
+# ELEVA LOCKER — deploy do PORTAL PÚBLICO + PAINEL na nuvem (VPS com Docker)
+#
+# O QUE ISSO SOBE:
+#   - web    : app Flask (site público + painel) via gunicorn (servidor de produção)
+#   - db     : PostgreSQL com volume persistente (NÃO exposto na internet)
+#   - caddy  : proxy reverso com HTTPS automático (Let's Encrypt) para o domínio
+#
+# O QUE ISSO **NÃO** FAZ (de propósito):
+#   - NÃO controla ESP32 / totem. A operação do armário continua LOCAL (offline-first).
+#     Ver docs/ARQUITETURA_REDE_FASES.md.
+#
+# USO:
+#   1) copie deploy/.env.prod.example para deploy/.env e edite os valores
+#   2) cd deploy && docker compose -f docker-compose.prod.yml --env-file .env up -d --build
+
+services:
+  db:
+    image: postgres:15-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    # sem "ports:" — o banco só é acessível pela rede interna dos containers
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  web:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    command: gunicorn --bind 0.0.0.0:15000 --workers 3 --timeout 60 app:app
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      SECRET_KEY: ${SECRET_KEY}
+      APP_URL_BASE: https://${SITE_DOMAIN}
+      SKIP_BACKUP: "1"
+      # nuvem não fala com ESP32 — mantém simulação para nunca tentar abrir relé
+      ESP32_MODO_SIMULACAO: "1"
+      # notificação: comece em console; ligue o WhatsApp quando quiser ("melhorar depois")
+      NOTIF_MODO: ${NOTIF_MODO:-console}
+      NOTIF_WHATSAPP_ATIVO: ${NOTIF_WHATSAPP_ATIVO:-0}
+      WHATSAPP_PROVIDER: ${WHATSAPP_PROVIDER:-evolution}
+      WHATSAPP_API_URL: ${WHATSAPP_API_URL:-}
+      WHATSAPP_API_KEY: ${WHATSAPP_API_KEY:-}
+      WHATSAPP_INSTANCIA: ${WHATSAPP_INSTANCIA:-}
+      ORCAMENTO_SOLAR_WHATSAPP: ${ORCAMENTO_SOLAR_WHATSAPP:-}
+      ORCAMENTO_SOLAR_EMAIL: ${ORCAMENTO_SOLAR_EMAIL:-}
+      TOTEM_AJUDA_TELEFONE: ${TOTEM_AJUDA_TELEFONE:-}
+    depends_on:
+      db:
+        condition: service_healthy
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      SITE_DOMAIN: ${SITE_DOMAIN}
+      TLS_EMAIL: ${TLS_EMAIL}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - web
+
+volumes:
+  pgdata:
+  caddy_data:
+  caddy_config:
