@@ -145,6 +145,63 @@ docker compose -f docker-compose.prod.yml logs -f caddy
 
 ---
 
+## Alternativa — Self-host num PC próprio (com IP fixo)
+
+Em vez de VPS, dá para hospedar o portal num **PC dedicado** na sua estrutura, aproveitando que você
+tem **IP fixo**. Sem custo de servidor, sem esperar vaga. Roda o **mesmo** `docker-compose.prod.yml`.
+
+> ⚠️ Use um **PC separado**, **não** o servidor que controla os armários — essa máquina abre fechaduras
+> físicas e não deve ficar exposta na internet. Mantenha a operação (ESP32/totem) isolada e offline-first.
+
+> ⚠️ Lembre-se: a disponibilidade depende da **energia e internet locais**. Se cair, o site cai. Use um
+> **nobreak (UPS)** e conexão cabeada.
+
+### Máquina recomendada (não precisa ser potente)
+
+| Item | Mínimo | Recomendado (com WhatsApp) |
+|------|--------|-----------------------------|
+| CPU | 2 núcleos | 4 núcleos (i3/Ryzen 3 ou melhor) |
+| RAM | 4 GB (só o site) | **8 GB** (site + banco + Evolution + Redis) |
+| Disco | SSD 60 GB | SSD 120 GB |
+| Rede | Ethernet cabeada | Ethernet cabeada |
+| SO | Ubuntu Server 24.04 | Ubuntu Server 24.04 |
+| Energia | — | **Nobreak (UPS)** |
+
+> Windows com Docker Desktop também funciona, mas para um servidor ligado 24/7 o **Ubuntu** é mais leve e estável.
+
+### Passo a passo
+
+1. **Instale o Ubuntu Server 24.04** no PC e o Docker:
+   ```bash
+   command -v docker || curl -fsSL https://get.docker.com | sh
+   ```
+2. **Rede:**
+   - Reserve um **IP interno fixo** para o PC no roteador (ex.: `192.168.0.20`).
+   - No roteador, **encaminhe (port forward) as portas 80 e 443** para esse IP interno.
+   - Aponte o domínio: registro **A** de `elevalocker.com.br` → seu **IP fixo público**.
+   - No firewall do Ubuntu, libere as portas:
+     ```bash
+     sudo ufw allow 22/tcp && sudo ufw allow 80/tcp && sudo ufw allow 443/tcp && sudo ufw enable
+     ```
+3. **Suba a aplicação** (igual ao VPS):
+   ```bash
+   git clone <url-do-repo> elevalocker && cd elevalocker
+   cp deploy/.env.prod.example deploy/.env
+   nano deploy/.env
+   cd deploy
+   docker compose -f docker-compose.prod.yml --env-file .env up -d --build
+   # (com WhatsApp: adicione -f docker-compose.whatsapp.yml)
+   ```
+4. **Pronto:** o Caddy emite o HTTPS e o site fica em `https://elevalocker.com.br`.
+
+### Se o provedor bloquear a porta 80 (ou você não quiser abrir portas)
+
+Alguns provedores bloqueiam a 80/443 mesmo com IP fixo. Nesse caso, use um **túnel** (ex.: Cloudflare
+Tunnel) — o PC faz conexão de saída e publica o site com HTTPS **sem abrir portas**. Me avise que eu
+adiciono o serviço do túnel ao pacote de deploy.
+
+---
+
 ## Segurança (checklist rápido)
 
 - [x] Banco **não exposto** (sem `ports:` no serviço `db`)
