@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}ELEVA{% endblock %} | ELEVA</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/site-publico.css') }}">
+</head>
+<body>
+    <header class="site-header">
+        <a href="{{ url_for('orcamento_solar.energia_solar') }}" class="site-brand">
+            <i class="fa-solid fa-bolt"></i>
+            <span>ELEVA</span>
+        </a>
+        <nav class="site-nav">
+            <a href="#servicos">Serviços</a>
+            <a href="#orcamento">Orçamento solar</a>
+            <a href="/totem/2">Locker</a>
+        </nav>
+    </header>
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="site-footer">
+        <div class="site-footer-inner">
+            <div>
+                <strong>ELEVA</strong> · Elétrica &amp; Energia Solar
+                {% if contato_telefone %}<br><i class="fa-solid fa-phone"></i> {{ contato_telefone }}{% endif %}
+            </div>
+            <div class="site-footer-links">
+                <a href="/privacidade">Privacidade</a>
+                <a href="/termos">Termos</a>
+                <a href="/totem/2">Locker</a>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

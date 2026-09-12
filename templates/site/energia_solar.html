@@ -1,0 +1,127 @@
+{% extends "site/base_public.html" %}
+{% block title %}Energia Solar{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <div class="hero-inner">
+        <div class="hero-text">
+            <span class="hero-tag"><i class="fa-solid fa-sun"></i> Energia Solar</span>
+            <h1>Economize até 95% na conta de luz com energia solar</h1>
+            <p>
+                Projetos elétricos e usinas fotovoltaicas com instalação profissional.
+                Peça seu orçamento sem compromisso — respondemos com uma simulação personalizada.
+            </p>
+            <a href="#orcamento" class="btn-primary btn-lg">
+                <i class="fa-solid fa-calculator"></i> Solicitar orçamento
+            </a>
+        </div>
+        <div class="hero-card">
+            <i class="fa-solid fa-solar-panel"></i>
+            <p>Simulação gratuita<br><strong>em até 24h</strong></p>
+        </div>
+    </div>
+</section>
+
+<section id="servicos" class="servicos">
+    <h2>Nossos serviços</h2>
+    <div class="cards">
+        <div class="card">
+            <i class="fa-solid fa-solar-panel"></i>
+            <h3>Energia Solar</h3>
+            <p>Dimensionamento, instalação e homologação de sistemas fotovoltaicos on-grid.</p>
+        </div>
+        <div class="card">
+            <i class="fa-solid fa-plug-circle-bolt"></i>
+            <h3>Instalações Elétricas</h3>
+            <p>Projetos, quadros, padrões de entrada e manutenção elétrica residencial e comercial.</p>
+        </div>
+        <div class="card">
+            <i class="fa-solid fa-box"></i>
+            <h3>ELEVA Locker</h3>
+            <p>Armários inteligentes para recebimento e retirada de encomendas em condomínios.</p>
+        </div>
+    </div>
+</section>
+
+<section id="orcamento" class="orcamento">
+    <h2>Peça seu orçamento de energia solar</h2>
+    <p class="orcamento-sub">Preencha os dados abaixo. É rápido e sem compromisso.</p>
+
+    {% if enviado %}
+    <div class="alerta alerta-ok">
+        <i class="fa-solid fa-circle-check"></i>
+        <div>
+            <strong>Pedido recebido!</strong> Seu protocolo é <strong>#{{ protocolo }}</strong>.
+            Em breve entramos em contato com sua simulação.
+        </div>
+    </div>
+    {% endif %}
+
+    {% if erro %}
+    <div class="alerta alerta-erro">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+        <div>{{ erro }}</div>
+    </div>
+    {% endif %}
+
+    <form class="form-orcamento" method="POST" action="{{ url_for('orcamento_solar.solicitar') }}">
+        <div class="grid">
+            <div class="campo campo-2">
+                <label>Nome completo *</label>
+                <input type="text" name="nome" value="{{ form.nome or '' }}" required placeholder="Seu nome">
+            </div>
+            <div class="campo">
+                <label>WhatsApp / Telefone *</label>
+                <input type="text" name="telefone" value="{{ form.telefone or '' }}" required placeholder="(48) 99999-9999">
+            </div>
+            <div class="campo">
+                <label>E-mail</label>
+                <input type="email" name="email" value="{{ form.email or '' }}" placeholder="voce@email.com">
+            </div>
+            <div class="campo">
+                <label>Cidade</label>
+                <input type="text" name="cidade" value="{{ form.cidade or '' }}" placeholder="Cidade">
+            </div>
+            <div class="campo campo-uf">
+                <label>UF</label>
+                <input type="text" name="estado" value="{{ form.estado or '' }}" maxlength="2" placeholder="SC">
+            </div>
+            <div class="campo">
+                <label>Tipo de imóvel</label>
+                <select name="tipo_imovel">
+                    <option value="">Selecione...</option>
+                    {% for t in tipos_imovel %}
+                    <option value="{{ t }}"{% if form.tipo_imovel == t %} selected{% endif %}>{{ t }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="campo">
+                <label>Valor médio da conta (R$)</label>
+                <input type="text" name="valor_conta" value="{{ form.valor_conta or '' }}" placeholder="Ex: 450">
+            </div>
+            <div class="campo">
+                <label>Consumo médio (kWh/mês)</label>
+                <input type="text" name="consumo_kwh" value="{{ form.consumo_kwh or '' }}" placeholder="Ex: 350">
+            </div>
+            <div class="campo">
+                <label>Concessionária</label>
+                <input type="text" name="concessionaria" value="{{ form.concessionaria or '' }}" placeholder="Ex: Celesc">
+            </div>
+            <div class="campo campo-full">
+                <label>Mensagem</label>
+                <textarea name="mensagem" rows="3" placeholder="Conte um pouco sobre o que precisa...">{{ form.mensagem or '' }}</textarea>
+            </div>
+        </div>
+
+        <label class="lgpd-check">
+            <input type="checkbox" name="lgpd_consentimento" value="1">
+            <span>Autorizo o contato e o tratamento dos meus dados para envio do orçamento, conforme a
+                <a href="/privacidade" target="_blank">Política de Privacidade</a>.</span>
+        </label>
+
+        <button type="submit" class="btn-primary btn-lg">
+            <i class="fa-solid fa-paper-plane"></i> Enviar pedido de orçamento
+        </button>
+    </form>
+</section>
+{% endblock %}
