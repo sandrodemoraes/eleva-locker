@@ -157,13 +157,62 @@ docker compose -f docker-compose.prod.yml logs -f caddy
 
 ---
 
+## WhatsApp na nuvem (Evolution API) — opcional
+
+Sobe o Evolution API junto do portal para enviar as notificações **direto da nuvem**
+(fim do problema de "o PC reiniciou e o WhatsApp parou"). Fica em containers separados,
+com banco e cache próprios, e **não é exposto na internet**.
+
+### 1) Preencher o `.env`
+
+No `deploy/.env`, ligue o WhatsApp e configure o Evolution:
+
+```env
+NOTIF_MODO=producao
+NOTIF_WHATSAPP_ATIVO=1
+WHATSAPP_PROVIDER=evolution
+WHATSAPP_API_URL=http://evolution:8080
+WHATSAPP_API_KEY=<uma-chave-forte>        # vira o AUTHENTICATION_API_KEY do Evolution
+WHATSAPP_INSTANCIA=eleva-locker
+
+EVOLUTION_SERVER_URL=http://localhost:8080
+EVOLUTION_DB_USER=evolution
+EVOLUTION_DB_PASSWORD=<senha-forte>
+EVOLUTION_DB_NAME=evolution_db
+```
+
+### 2) Subir portal + WhatsApp juntos
+
+```bash
+cd deploy
+docker compose -f docker-compose.prod.yml -f docker-compose.whatsapp.yml --env-file .env up -d --build
+```
+
+### 3) Conectar seu número (escanear o QR)
+
+O Evolution só escuta em `127.0.0.1:8080` (seguro). Do **seu PC**, abra um túnel SSH:
+
+```bash
+ssh -L 8080:localhost:8080 root@IP_DO_VPS
+```
+
+Com o túnel aberto, acesse `http://localhost:8080/manager` no navegador:
+1. Faça login com a **`WHATSAPP_API_KEY`**.
+2. Crie uma instância com o nome **exatamente igual** a `WHATSAPP_INSTANCIA` (ex.: `eleva-locker`).
+3. **Escaneie o QR** com o WhatsApp do número que vai enviar as mensagens.
+
+Pronto: o painel do ELEVA (`/notificacoes`) mostra o status "conectado" e passa a enviar de verdade.
+
+> Se preferir não usar túnel SSH, dá para expor o manager num subdomínio (ex.: `evo.elevalocker.com.br`)
+> via Caddy — mas o túnel é mais seguro e não requer editar o `Caddyfile`.
+
+---
+
 ## Melhorar depois (fases seguintes)
 
-1. **WhatsApp na nuvem:** subir o Evolution API junto (fim do problema de reboot do PC).
-   Basta ligar `NOTIF_WHATSAPP_ATIVO=1` e apontar `WHATSAPP_API_URL/KEY/INSTANCIA` no `.env`.
-2. **Marca própria:** logo, cores e fotos dos seus trabalhos elétricos no site público.
-3. **Área do cliente + acesso ao locker** pelo site.
-4. **Câmeras Intelbras** ao vivo (fase futura).
+1. **Marca própria:** logo, cores e fotos dos seus trabalhos elétricos no site público.
+2. **Área do cliente + acesso ao locker** pelo site.
+3. **Câmeras Intelbras** ao vivo (fase futura).
 
 > Enquanto isso, os **armários** continuam operando **localmente** (Modelo A) e podem
 > sincronizar com a nuvem quando online — sem risco de uma queda de internet trancar a porta.

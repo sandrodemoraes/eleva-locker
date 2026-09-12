@@ -1,0 +1,74 @@
+# ELEVA LOCKER — overlay do WhatsApp (Evolution API) para a nuvem.
+#
+# Este arquivo é um COMPLEMENTO do docker-compose.prod.yml. Ele adiciona 3 serviços:
+#   - evolution        : Evolution API (WhatsApp) — evoapicloud/evolution-api
+#   - evolution_db     : PostgreSQL do Evolution (isolado do banco do app)
+#   - evolution_redis  : cache do Evolution
+#
+# SUBIR JUNTO COM O PORTAL (dentro de deploy/):
+#   docker compose -f docker-compose.prod.yml -f docker-compose.whatsapp.yml --env-file .env up -d --build
+#
+# SEGURANÇA: o Evolution NÃO é exposto na internet — só escuta em 127.0.0.1:8080.
+# Para conectar seu WhatsApp (escanear o QR), abra um túnel SSH a partir do seu PC:
+#   ssh -L 8080:localhost:8080 root@IP_DO_VPS
+# e acesse http://localhost:8080/manager (login com a AUTHENTICATION_API_KEY = WHATSAPP_API_KEY).
+# Crie uma instância com o mesmo nome de WHATSAPP_INSTANCIA (ex.: eleva-locker) e escaneie o QR.
+#
+# O serviço "web" (do docker-compose.prod.yml) alcança o Evolution pela rede interna
+# em http://evolution:8080 — basta preencher WHATSAPP_API_URL no .env.
+
+services:
+  evolution:
+    image: evoapicloud/evolution-api:v2.3.0
+    restart: unless-stopped
+    depends_on:
+      evolution_db:
+        condition: service_healthy
+      evolution_redis:
+        condition: service_started
+    ports:
+      - "127.0.0.1:8080:8080"   # só local (túnel SSH para escanear o QR)
+    environment:
+      SERVER_URL: ${EVOLUTION_SERVER_URL:-http://localhost:8080}
+      AUTHENTICATION_API_KEY: ${WHATSAPP_API_KEY}
+      AUTHENTICATION_EXPOSE_IN_FETCH_INSTANCES: "true"
+      DEL_INSTANCE: "false"
+      DATABASE_ENABLED: "true"
+      DATABASE_PROVIDER: postgresql
+      DATABASE_CONNECTION_URI: postgresql://${EVOLUTION_DB_USER:-evolution}:${EVOLUTION_DB_PASSWORD}@evolution_db:5432/${EVOLUTION_DB_NAME:-evolution_db}?schema=evolution_api
+      DATABASE_CONNECTION_CLIENT_NAME: eleva_evolution
+      DATABASE_SAVE_DATA_INSTANCE: "true"
+      DATABASE_SAVE_DATA_NEW_MESSAGE: "false"
+      CACHE_REDIS_ENABLED: "true"
+      CACHE_REDIS_URI: redis://evolution_redis:6379/6
+      CACHE_REDIS_PREFIX_KEY: evolution
+      CACHE_LOCAL_ENABLED: "false"
+    volumes:
+      - evolution_instances:/evolution/instances
+
+  evolution_db:
+    image: postgres:15-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${EVOLUTION_DB_USER:-evolution}
+      POSTGRES_PASSWORD: ${EVOLUTION_DB_PASSWORD}
+      POSTGRES_DB: ${EVOLUTION_DB_NAME:-evolution_db}
+    volumes:
+      - evolution_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${EVOLUTION_DB_USER:-evolution} -d ${EVOLUTION_DB_NAME:-evolution_db}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  evolution_redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    volumes:
+      - evolution_redis_data:/data
+
+volumes:
+  evolution_instances:
+  evolution_pgdata:
+  evolution_redis_data:
