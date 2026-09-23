@@ -15,7 +15,8 @@ class DashboardService:
         site_id = get_site_id()
         Esp32Repository.marcar_offline_expirados()
         from services.encomenda_service import EncomendaService
-        EncomendaService.processar_lembretes_automaticos()
+        # NÃO processar lembretes (WhatsApp) aqui — é I/O de rede que travava o
+        # dashboard. Fica a cargo da thread em segundo plano (app.py). Só sincroniza DB.
         EncomendaService.sincronizar_retidas()
 
         return {
