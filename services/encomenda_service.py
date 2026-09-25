@@ -92,7 +92,9 @@ class EncomendaService:
 
     @staticmethod
     def listar(status=None):
-        EncomendaService.processar_lembretes_automaticos()
+        # NÃO enviar lembretes (WhatsApp) aqui: isso é I/O de rede e travava a
+        # renderização das páginas. O envio é feito pela thread em segundo plano
+        # (_iniciar_lembretes_automaticos em app.py). Aqui só sincroniza status (DB).
         EncomendaService.sincronizar_retidas()
         return EncomendaRepository.listar(status)
 
