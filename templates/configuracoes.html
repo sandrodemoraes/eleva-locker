@@ -1,0 +1,234 @@
+{% extends "layout/base.html" %}
+
+{% block title %}Configurações | ELEVA LOCKER{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/crud.css') }}">
+{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+    <div>
+        <h1>Configurações</h1>
+        <p>Backup, restauração e parâmetros do sistema</p>
+    </div>
+    <form method="POST" action="/configuracoes/backup">
+        <button type="submit" class="btn btn-success">
+            <i class="fa-solid fa-floppy-disk"></i> Criar backup agora
+        </button>
+    </form>
+</div>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% for category, message in messages %}
+        <div class="alert alert-{{ category }}">{{ message }}</div>
+    {% endfor %}
+{% endwith %}
+
+<div class="panels">
+
+    <div class="table-box">
+        <h2 style="color:#134736;margin-bottom:15px;">Backups disponíveis</h2>
+        <p style="color:#666;margin-bottom:15px;">
+            O sistema mantém até <strong>5 backups</strong> rotativos.
+            Antes de cada atualização importante, um backup é criado automaticamente.
+        </p>
+
+        {% if backups %}
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Banco de dados</th>
+                    <th>Tamanho</th>
+                    <th>Ação</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for b in backups %}
+                <tr>
+                    <td>backup_{{ '%02d' | format(b.numero) }}</td>
+                    <td>{% if b.tem_banco %}✅ Sim{% else %}❌ Não{% endif %}</td>
+                    <td>{{ b.tamanho_kb }} KB</td>
+                    <td>
+                        <form method="POST" action="/configuracoes/restaurar/{{ b.numero }}"
+                              onsubmit="return confirm('Restaurar backup #{{ b.numero }}? Os dados atuais serão substituídos.')">
+                            <button type="submit" class="btn btn-sm btn-danger">
+                                <i class="fa-solid fa-rotate-left"></i> Restaurar
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="empty-state">
+            <p>Nenhum backup encontrado. Clique em "Criar backup agora".</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="table-box">
+        <h2 style="color:#134736;margin-bottom:15px;">Parâmetros ESP32</h2>
+        <table>
+            <tr><td style="padding:8px;">Duração do relé</td><td><strong>{{ config.ESP32_RELE_DURACAO }}s</strong></td></tr>
+            <tr><td style="padding:8px;">Timeout heartbeat</td><td><strong>{{ config.ESP32_HEARTBEAT_TIMEOUT }}s</strong></td></tr>
+            <tr><td style="padding:8px;">Modo simulação</td><td><strong>{% if config.ESP32_MODO_SIMULACAO %}Ativo{% else %}Inativo{% endif %}</strong></td></tr>
+        </table>
+        <p style="color:#888;font-size:13px;margin-top:15px;">
+            Configure via variáveis de ambiente: ESP32_MODO_SIMULACAO=1, ESP32_RELE_DURACAO=3
+        </p>
+    </div>
+
+    <div class="table-box">
+        <h2 style="color:#134736;margin-bottom:15px;">LGPD — Documentos (Fase 1)</h2>
+        <p style="color:#666;margin-bottom:15px;font-size:14px;">
+            Transparência e políticas. Não altera totem, WhatsApp ou encomendas.
+            Versão: <strong>{{ config.LGPD_POLITICA_VERSAO }}</strong>
+        </p>
+        <table>
+            <tr>
+                <td style="padding:8px;">Seus dados (LGPD)</td>
+                <td><a href="{{ url_for('lgpd.index') }}" target="_blank" rel="noopener"><strong>/lgpd</strong></a></td>
+            </tr>
+            <tr>
+                <td style="padding:8px;">Política de Privacidade</td>
+                <td><a href="{{ url_for('lgpd.privacidade') }}" target="_blank" rel="noopener"><strong>/privacidade</strong></a></td>
+            </tr>
+            <tr>
+                <td style="padding:8px;">Termos de Uso (totem)</td>
+                <td><a href="{{ url_for('lgpd.termos') }}" target="_blank" rel="noopener"><strong>/termos</strong></a></td>
+            </tr>
+            <tr>
+                <td style="padding:8px;">Aviso no totem</td>
+                <td><strong>{% if config.LGPD_AVISO_ATIVO %}Ativo (link rodapé){% else %}Inativo{% endif %}</strong></td>
+            </tr>
+            <tr>
+                <td style="padding:8px;">Contato titular</td>
+                <td>
+                    {% if config.LGPD_CONTATO_EMAIL %}{{ config.LGPD_CONTATO_EMAIL }}{% endif %}
+                    {% if config.LGPD_CONTATO_TELEFONE %} · {{ config.LGPD_CONTATO_TELEFONE }}{% endif %}
+                    {% if not config.LGPD_CONTATO_EMAIL and not config.LGPD_CONTATO_TELEFONE %}<span style="color:#888;">Defina LGPD_CONTATO_* no .env</span>{% endif %}
+                </td>
+            </tr>
+        </table>
+        <p style="color:#888;font-size:13px;margin-top:15px;">
+            Plano completo: <code>docs/LGPD_PLANO_ADEQUACAO.md</code> · ROPA: <code>docs/LGPD_ROPA.md</code>
+        </p>
+    </div>
+
+    <div class="table-box">
+        <h2 style="color:#134736;margin-bottom:15px;">LGPD — Consentimento (Fase 2)</h2>
+        <p style="color:#666;margin-bottom:15px;font-size:14px;">
+            Flags desligadas = sistema idêntico ao anterior. Ative uma por vez após validar na bancada.
+        </p>
+        <table>
+            <tr>
+                <td style="padding:8px;">Checkbox cadastro usuário</td>
+                <td><strong>{% if config.LGPD_CONSENTIMENTO_USUARIO %}Ativo{% else %}Inativo (padrão){% endif %}</strong>
+                    · <code>LGPD_CONSENTIMENTO_USUARIO</code></td>
+            </tr>
+            <tr>
+                <td style="padding:8px;">Aviso depósito totem</td>
+                <td><strong>{% if config.LGPD_AVISO_TOTEM %}Ativo{% else %}Inativo (padrão){% endif %}</strong>
+                    · <code>LGPD_AVISO_TOTEM</code></td>
+            </tr>
+            <tr>
+                <td style="padding:8px;">Registros de consentimento</td>
+                <td>Tabela <code>lgpd_consentimentos</code> (grava ao aceitar / depositar com flag on)</td>
+            </tr>
+        </table>
+        <p style="color:#888;font-size:13px;margin-top:15px;">
+            Ativar no <code>.env</code>: <code>LGPD_CONSENTIMENTO_USUARIO=1</code> ou <code>LGPD_AVISO_TOTEM=1</code>
+        </p>
+    </div>
+
+    <div class="table-box">
+        <h2 style="color:#134736;margin-bottom:15px;">LGPD — Direitos do titular (Fase 3)</h2>
+        <p style="color:#666;margin-bottom:15px;font-size:14px;">
+            Exportar JSON/CSV e anonimizar no painel admin. Flag off = menu oculto.
+        </p>
+        <table>
+            <tr>
+                <td style="padding:8px;">Módulo titular</td>
+                <td><strong>{% if config.LGPD_TITULAR_ATIVO %}Ativo{% else %}Inativo (padrão){% endif %}</strong>
+                    · <code>LGPD_TITULAR_ATIVO</code></td>
+            </tr>
+            <tr>
+                <td style="padding:8px;">Painel admin</td>
+                <td>
+                    {% if config.LGPD_TITULAR_ATIVO %}
+                    <a href="{{ url_for('lgpd_admin.titular_index') }}"><strong>/lgpd/admin/titular</strong></a>
+                    {% else %}
+                    <span style="color:#888;">Defina LGPD_TITULAR_ATIVO=1 no .env</span>
+                    {% endif %}
+                </td>
+            </tr>
+            <tr>
+                <td style="padding:8px;">Registro solicitações</td>
+                <td>Tabela <code>lgpd_solicitacoes</code></td>
+            </tr>
+        </table>
+        <p style="color:#888;font-size:13px;margin-top:15px;">
+            Procedimento: <code>docs/LGPD_PROCEDIMENTO_TITULAR.md</code>
+        </p>
+    </div>
+
+    <div class="table-box">
+        <h2 style="color:#134736;margin-bottom:15px;">LGPD — Retenção e mascaramento (Fase 4)</h2>
+        <p style="color:#666;margin-bottom:15px;font-size:14px;">
+            Job anonimiza dados antigos (retiradas, logs, ajuda, notificações). Padrão: simular antes de executar.
+        </p>
+        <table>
+            <tr>
+                <td style="padding:8px;">Mascarar telefone (Operador)</td>
+                <td><strong>{% if config.LGPD_MASCARAR_TELEFONE %}Ativo{% else %}Inativo (padrão){% endif %}</strong>
+                    · <code>LGPD_MASCARAR_TELEFONE</code></td>
+            </tr>
+            <tr>
+                <td style="padding:8px;">Job automático diário</td>
+                <td><strong>{% if config.LGPD_JOB_ATIVO %}Ativo{% else %}Inativo (padrão){% endif %}</strong>
+                    · <code>LGPD_JOB_ATIVO</code></td>
+            </tr>
+            <tr>
+                <td style="padding:8px;">Retenção encomenda retirada</td>
+                <td><strong>{{ config.LGPD_RETENCAO_ENCOMENDA_DIAS }}</strong> dias</td>
+            </tr>
+            <tr>
+                <td style="padding:8px;">Retenção logs</td>
+                <td><strong>{{ config.LGPD_RETENCAO_LOG_DIAS }}</strong> dias</td>
+            </tr>
+            <tr>
+                <td style="padding:8px;">Retenção ajuda totem</td>
+                <td><strong>{{ config.LGPD_RETENCAO_AJUDA_TOTEM_DIAS }}</strong> dias</td>
+            </tr>
+            <tr>
+                <td style="padding:8px;">Retenção notificações</td>
+                <td><strong>{{ config.LGPD_RETENCAO_NOTIFICACAO_DIAS }}</strong> dias</td>
+            </tr>
+            <tr>
+                <td style="padding:8px;">Scripts</td>
+                <td><code>SIMULAR_LGPD_RETENCAO.bat</code> · <code>EXECUTAR_LGPD_RETENCAO.bat</code></td>
+            </tr>
+        </table>
+        <p style="color:#888;font-size:13px;margin-top:15px;">
+            Log do job: <code>logs/lgpd_retencao.log</code>
+        </p>
+    </div>
+
+    <div class="table-box">
+        <h2 style="color:#134736;margin-bottom:15px;">Notificações (Fase 3)</h2>
+        <table>
+            <tr><td style="padding:8px;">Modo</td><td><strong>{{ config.NOTIF_MODO }}</strong></td></tr>
+            <tr><td style="padding:8px;">E-mail</td><td><strong>{% if config.NOTIF_EMAIL_ATIVO %}Ativo{% else %}Inativo{% endif %}</strong></td></tr>
+            <tr><td style="padding:8px;">WhatsApp</td><td><strong>{% if config.NOTIF_WHATSAPP_ATIVO %}Ativo{% else %}Inativo{% endif %}</strong></td></tr>
+            <tr><td style="padding:8px;">SMS</td><td><strong>{% if config.NOTIF_SMS_ATIVO %}Ativo{% else %}Inativo{% endif %}</strong></td></tr>
+            <tr><td style="padding:8px;">Totem</td><td><strong><a href="/totem/escolher">/totem/escolher</a></strong> · <a href="/totem" target="_blank">/totem</a></td></tr>
+        </table>
+    </div>
+
+</div>
+
+{% endblock %}

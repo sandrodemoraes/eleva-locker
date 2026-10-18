@@ -1,0 +1,18 @@
+{% extends "layout/base.html" %}
+{% block title %}Portal do Cliente | ELEVA LOCKER{% endblock %}
+{% block styles %}<link rel="stylesheet" href="{{ url_for('static', filename='css/crud.css') }}">{% endblock %}
+{% block content %}
+<h1>Portal do Cliente</h1>
+<p style="color:#666;margin-bottom:25px;">Selecione a empresa para ver plano, uso e faturas</p>
+<div class="cards">
+{% for e in empresas %}
+<a href="/portal/empresa/{{ e.id }}" class="card" style="text-decoration:none;color:inherit;">
+    <i class="fa-solid fa-building fa-2x" style="color:#134736;margin-bottom:10px;"></i>
+    <div class="titulo-card"><strong>{{ e.razao_social }}</strong></div>
+    <small style="color:#888">{{ e.nome_fantasia or '' }}</small>
+</a>
+{% else %}
+<div class="empty-state"><p>Cadastre empresas primeiro.</p></div>
+{% endfor %}
+</div>
+{% endblock %}

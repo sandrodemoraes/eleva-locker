@@ -12,7 +12,8 @@ class HashService:
     ]
 
     ARQUIVOS = [
-        "PROJETO.md"
+        "PROJETO.md",
+        ".env",
     ]
 
     @staticmethod

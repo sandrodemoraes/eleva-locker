@@ -1,0 +1,30 @@
+/* ELEVA LOCKER — Design tokens (Eleva Verde) */
+:root {
+    --eleva-verde: #134736;
+    --eleva-verde-profundo: #0f3d31;
+    --eleva-verde-vivo: #1a6b54;
+    --eleva-verde-claro: #2d8a6e;
+    --eleva-musgo: #e8f2ee;
+    --eleva-branco: #ffffff;
+
+    --eleva-grafite: #1a2332;
+    --eleva-concreto: #94a3b8;
+    --eleva-borda: #d8e4de;
+
+    --eleva-sucesso: #2d8a6e;
+    --eleva-alerta: #d4a017;
+    --eleva-erro: #c0392b;
+    --eleva-ambre: #c8943a;
+
+    --eleva-sombra-sm: 0 2px 8px rgba(19, 71, 54, 0.08);
+    --eleva-sombra-md: 0 8px 24px rgba(19, 71, 54, 0.12);
+    --eleva-sombra-lg: 0 16px 40px rgba(19, 71, 54, 0.16);
+
+    --eleva-raio-sm: 8px;
+    --eleva-raio-md: 12px;
+    --eleva-raio-lg: 16px;
+    --eleva-raio-xl: 20px;
+
+    --eleva-font: "Nunito", "Segoe UI", system-ui, sans-serif;
+    --eleva-transicao: 0.22s ease;
+}

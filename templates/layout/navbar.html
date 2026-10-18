@@ -18,17 +18,31 @@
 
     <div class="topo-direita">
 
-        <button class="btn-icon">
+        {% if session.usuario_id and sites is defined %}
+        <form method="POST" action="{{ url_for('sites.selecionar') }}" class="site-selector" style="margin-right:15px;">
+            <select name="site_id" onchange="this.form.submit()" style="padding:6px 10px;border-radius:8px;border:1px solid #ddd;">
+                <option value="" {% if not site_atual %}selected{% endif %}>Todos os sites</option>
+                {% for s in sites %}
+                <option value="{{ s.id }}" {% if site_atual == s.id %}selected{% endif %}>{{ s.nome }}</option>
+                {% endfor %}
+            </select>
+        </form>
+        {% endif %}
+
+        <a href="{{ url_for('notificacoes.listar') }}{% if ajuda_totem_pendentes %}#ajuda-totem{% endif %}" class="btn-icon btn-icon-notif" title="Notificações{% if ajuda_totem_pendentes %} — {{ ajuda_totem_pendentes }} pedido(s) de ajuda no totem{% endif %}">
 
             <i class="fa-solid fa-bell"></i>
+            {% if ajuda_totem_pendentes %}
+            <span class="nav-badge" aria-label="{{ ajuda_totem_pendentes }} pendente(s)">{{ ajuda_totem_pendentes }}</span>
+            {% endif %}
 
-        </button>
+        </a>
 
-        <button class="btn-icon">
+        <a href="{{ url_for('esp32.configuracoes') }}" class="btn-icon" title="Configurações">
 
             <i class="fa-solid fa-gear"></i>
 
-        </button>
+        </a>
 
         <div class="usuario">
 

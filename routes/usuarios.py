@@ -7,16 +7,23 @@ from flask import (
     flash
 )
 
+from middleware.auth_required import login_required
 from services.usuario_service import UsuarioService
+import config
 
 usuarios_bp = Blueprint("usuarios", __name__)
 
 
-@usuarios_bp.route("/usuarios")
-def usuarios():
+def _ip_cliente():
+    ip = request.headers.get("X-Forwarded-For", request.remote_addr or "")
+    if ip and "," in ip:
+        ip = ip.split(",")[0].strip()
+    return ip
 
-    if "usuario" not in session:
-        return redirect("/")
+
+@usuarios_bp.route("/usuarios")
+@login_required
+def usuarios():
 
     lista = UsuarioService.listar()
 
@@ -24,15 +31,15 @@ def usuarios():
         "usuarios.html",
         usuario=session["usuario"],
         perfil=session["perfil"],
-        usuarios=lista
+        usuarios=lista,
+        lgpd_consentimento_usuario=config.LGPD_CONSENTIMENTO_USUARIO,
+        lgpd_politica_versao=config.LGPD_POLITICA_VERSAO,
     )
 
 
 @usuarios_bp.route("/usuarios/novo", methods=["POST"])
+@login_required
 def novo_usuario():
-
-    if "usuario" not in session:
-        return redirect("/")
 
     try:
 
@@ -43,7 +50,10 @@ def novo_usuario():
             senha=request.form["senha"],
             confirmar=request.form["confirmar"],
             perfil=request.form["perfil"],
-            status=int(request.form["status"])
+            status=int(request.form["status"]),
+            lgpd_consentimento=request.form.get("lgpd_consentimento") == "1",
+            ip=_ip_cliente(),
+            user_agent=(request.headers.get("User-Agent") or "")[:500],
         )
 
         flash("Usuário cadastrado com sucesso!", "success")
@@ -60,10 +70,8 @@ def novo_usuario():
 
 
 @usuarios_bp.route("/usuarios/editar/<int:usuario_id>", methods=["POST"])
+@login_required
 def editar_usuario(usuario_id):
-
-    if "usuario" not in session:
-        return redirect("/")
 
     try:
 
@@ -90,10 +98,8 @@ def editar_usuario(usuario_id):
 
 
 @usuarios_bp.route("/usuarios/excluir/<int:usuario_id>", methods=["POST"])
+@login_required
 def excluir_usuario(usuario_id):
-
-    if "usuario" not in session:
-        return redirect("/")
 
     try:
 
@@ -113,10 +119,8 @@ def excluir_usuario(usuario_id):
 
 
 @usuarios_bp.route("/usuarios/senha/<int:usuario_id>", methods=["POST"])
+@login_required
 def alterar_senha(usuario_id):
-
-    if "usuario" not in session:
-        return redirect("/")
 
     try:
 

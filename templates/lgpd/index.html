@@ -1,0 +1,53 @@
+{% extends "lgpd/base_public.html" %}
+{% set pagina = 'lgpd' %}
+
+{% block title %}Seus dados (LGPD){% endblock %}
+
+{% block content %}
+<article class="lgpd-doc">
+    <h1>Proteção de dados — LGPD</h1>
+    <p class="lgpd-meta">Transparência sobre o tratamento de dados pessoais no ELEVA LOCKER</p>
+
+    <section class="lgpd-cards">
+        <a href="{{ url_for('lgpd.privacidade') }}" class="lgpd-card">
+            <i class="fa-solid fa-shield-halved"></i>
+            <h2>Política de Privacidade</h2>
+            <p>O que coletamos, por quê e por quanto tempo.</p>
+        </a>
+        <a href="{{ url_for('lgpd.termos') }}" class="lgpd-card">
+            <i class="fa-solid fa-file-contract"></i>
+            <h2>Termos de Uso</h2>
+            <p>Regras de uso do totem de encomendas.</p>
+        </a>
+    </section>
+
+    <section>
+        <h2>Seus direitos</h2>
+        <p>Conforme a Lei 13.709/2018 (LGPD), titulares de dados podem solicitar:</p>
+        <ul>
+            <li>Confirmação e acesso aos dados</li>
+            <li>Correção de dados incompletos ou desatualizados</li>
+            <li>Anonimização ou eliminação (quando aplicável)</li>
+            <li>Informação sobre compartilhamento</li>
+        </ul>
+        <p>Solicite à portaria ou pelos canais abaixo. Responderemos em prazo razoável.</p>
+    </section>
+
+    <section>
+        <h2>Contato do encarregado / canal titular</h2>
+        <ul class="lgpd-contato">
+            <li><strong>Controlador:</strong> {{ lgpd_controlador }}</li>
+            {% if lgpd_email %}<li><strong>E-mail:</strong> <a href="mailto:{{ lgpd_email }}">{{ lgpd_email }}</a></li>{% endif %}
+            {% if lgpd_telefone %}<li><strong>Telefone:</strong> {{ lgpd_telefone }}</li>{% endif %}
+        </ul>
+    </section>
+
+    <section>
+        <h2>Operação atual</h2>
+        <p>
+            Esta é a <strong>Fase 1</strong> de adequação: documentação e transparência.
+            O funcionamento do totem (retirada, depósito, WhatsApp) <strong>não é alterado</strong>.
+        </p>
+    </section>
+</article>
+{% endblock %}

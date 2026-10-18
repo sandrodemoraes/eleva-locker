@@ -1,0 +1,31 @@
+{% extends "layout/base.html" %}
+{% block title %}Financeiro | ELEVA LOCKER{% endblock %}
+{% block styles %}<link rel="stylesheet" href="{{ url_for('static', filename='css/crud.css') }}">{% endblock %}
+{% block content %}
+<h1>Painel Financeiro</h1>
+<p style="color:#666;margin-bottom:25px;">MRR, faturamento e contratos — referência {{ metricas.referencia }}</p>
+<div class="cards">
+    <div class="card"><div class="numero">R$ {{ '%.0f'|format(metricas.mrr) }}</div><div class="titulo-card">MRR</div></div>
+    <div class="card"><div class="numero">{{ metricas.contratos_ativos }}</div><div class="titulo-card">Contratos ativos</div></div>
+    <div class="card"><div class="numero">{{ metricas.faturas_pendentes }}</div><div class="titulo-card">Faturas pendentes</div></div>
+    <div class="card"><div class="numero">R$ {{ '%.0f'|format(metricas.recebido_mes) }}</div><div class="titulo-card">Recebido no mês</div></div>
+</div>
+<div class="painel" style="margin-top:25px;">
+<h2>Contratos recentes</h2>
+<table style="width:100%;margin-top:15px;border-collapse:collapse;">
+<tr style="border-bottom:2px solid #eee"><th style="padding:8px;text-align:left">Empresa</th><th>Plano</th><th>Valor</th><th>Status</th></tr>
+{% for c in contratos[:8] %}
+<tr style="border-bottom:1px solid #eee"><td style="padding:8px">{{ c.empresa_nome }}</td><td>{{ c.plano_nome }}</td><td>R$ {{ '%.2f'|format(c.valor_mensal) }}</td><td>{{ c.status }}</td></tr>
+{% endfor %}
+</table>
+</div>
+<div class="painel" style="margin-top:25px;">
+<h2>Últimas faturas</h2>
+<table style="width:100%;margin-top:15px;border-collapse:collapse;">
+<tr style="border-bottom:2px solid #eee"><th style="padding:8px;text-align:left">Empresa</th><th>Ref.</th><th>Valor</th><th>Status</th></tr>
+{% for f in faturas %}
+<tr style="border-bottom:1px solid #eee"><td style="padding:8px">{{ f.empresa_nome }}</td><td>{{ f.referencia }}</td><td>R$ {{ '%.2f'|format(f.valor) }}</td><td>{{ f.status }}</td></tr>
+{% endfor %}
+</table>
+</div>
+{% endblock %}

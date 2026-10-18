@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pagamento | ELEVA LOCKER</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/totem.css') }}">
+</head>
+<body>
+<div class="totem">
+    <div class="totem-logo">
+        <i class="fa-solid fa-credit-card"></i>
+        <h1>{% if erro %}Ops{% else %}Pagamento OK{% endif %}</h1>
+    </div>
+    <div class="resultado {% if erro %}erro{% else %}sucesso{% endif %}" style="display:block;">
+        {{ mensagem }}
+    </div>
+    <p style="margin-top:30px;opacity:.7;"><a href="/portal" style="color:#fff;">Voltar ao portal</a></p>
+</div>
+</body>
+</html>

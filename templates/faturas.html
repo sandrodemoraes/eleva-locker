@@ -1,0 +1,44 @@
+{% extends "layout/base.html" %}
+{% block title %}Faturas | ELEVA LOCKER{% endblock %}
+{% block styles %}<link rel="stylesheet" href="{{ url_for('static', filename='css/crud.css') }}">{% endblock %}
+{% block content %}
+<div class="page-header">
+    <div><h1>Faturas</h1><p>Cobranças e pagamentos</p></div>
+    <form method="POST" action="/faturas/gerar-mes"><button type="submit" class="btn btn-success"><i class="fa-solid fa-file-invoice"></i> Gerar faturas do mês</button></form>
+</div>
+{% with messages = get_flashed_messages(with_categories=true) %}{% for c,m in messages %}<div class="alert alert-{{ c }}">{{ m }}</div>{% endfor %}{% endwith %}
+<div class="table-box" style="margin-bottom:15px;">
+<form method="GET"><select name="status" onchange="this.form.submit()">
+<option value="">Todos</option>
+<option value="pendente" {% if status_filtro=='pendente' %}selected{% endif %}>Pendentes</option>
+<option value="pago" {% if status_filtro=='pago' %}selected{% endif %}>Pagas</option>
+<option value="vencido" {% if status_filtro=='vencido' %}selected{% endif %}>Vencidas</option>
+</select></form>
+</div>
+<div class="table-box">
+{% if faturas %}
+<table>
+<thead><tr><th>ID</th><th>Ref.</th><th>Empresa</th><th>Plano</th><th>Valor</th><th>Vencimento</th><th>Status</th><th>Ações</th></tr></thead>
+<tbody>
+{% for f in faturas %}
+<tr>
+    <td>{{ f.id }}</td>
+    <td>{{ f.referencia }}</td>
+    <td>{{ f.empresa_nome }}</td>
+    <td>{{ f.plano_nome }}</td>
+    <td>R$ {{ '%.2f'|format(f.valor) }}</td>
+    <td>{{ f.data_vencimento or '—' }}</td>
+    <td><span class="badge badge-{{ f.status }}">{{ f.status }}</span></td>
+    <td>
+        {% if f.link_pagamento %}<a href="{{ f.link_pagamento }}" target="_blank" class="btn btn-sm">Link</a>{% endif %}
+        {% if f.status != 'pago' %}
+        <form method="POST" action="/faturas/pagar/{{ f.id }}" style="display:inline"><button class="btn btn-sm btn-success">Marcar pago</button></form>
+        {% endif %}
+    </td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+{% else %}<div class="empty-state"><p>Nenhuma fatura.</p></div>{% endif %}
+</div>
+{% endblock %}
