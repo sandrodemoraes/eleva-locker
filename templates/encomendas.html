@@ -129,6 +129,22 @@
     {% endif %}
 </div>
 
+{% if total_paginas and total_paginas > 1 %}
+<div class="paginacao" style="display:flex;align-items:center;justify-content:center;gap:14px;margin-top:16px;">
+    {% if pagina > 1 %}
+    <a class="btn btn-sm" href="/encomendas?{% if status_filtro %}status={{ status_filtro }}&{% endif %}pagina={{ pagina - 1 }}">
+        <i class="fa-solid fa-chevron-left"></i> Anterior
+    </a>
+    {% endif %}
+    <span style="color:#555;">Página {{ pagina }} de {{ total_paginas }} — {{ total_encomendas }} encomenda(s)</span>
+    {% if pagina < total_paginas %}
+    <a class="btn btn-sm" href="/encomendas?{% if status_filtro %}status={{ status_filtro }}&{% endif %}pagina={{ pagina + 1 }}">
+        Próxima <i class="fa-solid fa-chevron-right"></i>
+    </a>
+    {% endif %}
+</div>
+{% endif %}
+
 <!-- Modal Depósito -->
 <div class="modal-overlay" id="modalDeposito">
     <div class="modal">
