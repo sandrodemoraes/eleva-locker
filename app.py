@@ -182,6 +182,7 @@ if __name__ == "__main__":
                 port=15000,
                 debug=False,
                 use_reloader=False,
+                threaded=True,
             )
             break
         except KeyboardInterrupt:

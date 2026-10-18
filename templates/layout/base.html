@@ -15,9 +15,9 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/layout.css') }}">
 
-    <!-- Font Awesome -->
+    <!-- Font Awesome (local — sem depender de CDN) -->
     <link rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+          href="{{ url_for('static', filename='vendor/fontawesome/css/all.min.css') }}">
 
     {% block styles %}
     {% endblock %}
@@ -47,8 +47,8 @@
 
     </div>
 
-    <!-- JQuery -->
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <!-- JQuery (local — sem depender de CDN) -->
+    <script src="{{ url_for('static', filename='vendor/jquery-3.7.1.min.js') }}"></script>
 
     <!-- Scripts específicos -->
     {% block scripts %}
