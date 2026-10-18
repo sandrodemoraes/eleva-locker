@@ -99,6 +99,38 @@ class EncomendaService:
         return EncomendaRepository.listar(status)
 
     @staticmethod
+    def listar_paginado(status=None, pagina=1, por_pagina=50):
+        """Listagem paginada para a tela de encomendas (não envia WhatsApp)."""
+        EncomendaService.sincronizar_retidas()
+
+        try:
+            pagina = max(1, int(pagina or 1))
+        except (TypeError, ValueError):
+            pagina = 1
+        try:
+            por_pagina = max(1, int(por_pagina or 50))
+        except (TypeError, ValueError):
+            por_pagina = 50
+
+        total = EncomendaRepository.contar_status(status)
+        total_paginas = max(1, (total + por_pagina - 1) // por_pagina)
+        pagina = min(pagina, total_paginas)
+        offset = (pagina - 1) * por_pagina
+
+        return {
+            "itens": EncomendaRepository.listar_paginado(status, por_pagina, offset),
+            "total": total,
+            "pagina": pagina,
+            "por_pagina": por_pagina,
+            "total_paginas": total_paginas,
+        }
+
+    @staticmethod
+    def listar_recentes(limite=5):
+        """Encomendas mais recentes (dashboard) — sem carregar a tabela inteira."""
+        return EncomendaRepository.listar_paginado(None, limite, 0)
+
+    @staticmethod
     def contar_retidas():
         EncomendaService.sincronizar_retidas()
         return EncomendaRepository.contar_retidas()

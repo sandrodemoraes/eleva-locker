@@ -322,6 +322,42 @@ class EncomendaRepository:
             conn.commit()
 
     @staticmethod
+    def listar_paginado(status=None, limite=50, offset=0):
+
+        with BaseRepository.get_connection() as conn:
+
+            where = "WHERE e.status = ?" if status else ""
+            params = ([status] if status else []) + [int(limite), int(offset)]
+
+            return conn.execute(f"""
+                SELECT
+                    e.*,
+                    c.numero AS compartimento_numero,
+                    c.tamanho AS compartimento_tamanho,
+                    c.armario AS compartimento_armario,
+                    a.nome AS armario_nome
+                FROM encomendas e
+                LEFT JOIN compartimentos c ON c.id = e.compartimento
+                LEFT JOIN armarios a ON a.id = c.armario
+                {where}
+                ORDER BY e.id DESC
+                LIMIT ? OFFSET ?
+            """, tuple(params)).fetchall()
+
+    @staticmethod
+    def contar_status(status=None):
+        """Conta encomendas pelo mesmo filtro da listagem (status), sem JOIN."""
+        with BaseRepository.get_connection() as conn:
+            if status:
+                return conn.execute(
+                    "SELECT COUNT(*) AS total FROM encomendas WHERE status = ?",
+                    (status,),
+                ).fetchone()["total"]
+            return conn.execute(
+                "SELECT COUNT(*) AS total FROM encomendas"
+            ).fetchone()["total"]
+
+    @staticmethod
     def contar(status=None, site_id=None):
 
         with BaseRepository.get_connection() as conn:

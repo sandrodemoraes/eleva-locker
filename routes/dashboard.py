@@ -14,7 +14,7 @@ dashboard_bp = Blueprint("dashboard", __name__)
 def dashboard():
 
     stats = DashboardService.obter_estatisticas()
-    encomendas_recentes = EncomendaService.listar()[:5]
+    encomendas_recentes = EncomendaService.listar_recentes(5)
 
     return render_template(
         "dashboard.html",

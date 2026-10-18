@@ -17,17 +17,23 @@ encomendas_bp = Blueprint("encomendas", __name__)
 def listar():
 
     status = request.args.get("status")
+    pagina = request.args.get("pagina", 1)
+
+    dados = EncomendaService.listar_paginado(status, pagina, 50)
 
     return render_template(
         "encomendas.html",
         usuario=session.get("usuario"),
         perfil=session.get("perfil"),
-        encomendas=EncomendaService.listar(status),
+        encomendas=dados["itens"],
         armarios=ArmarioService.listar_ativos(),
         status_filtro=status,
         retidas_total=EncomendaService.contar_retidas(),
         dias_validade=config.ENCOMENDA_DIAS_VALIDADE,
         horas_reenvio=config.ENCOMENDA_HORAS_REENVIO,
+        pagina=dados["pagina"],
+        total_paginas=dados["total_paginas"],
+        total_encomendas=dados["total"],
     )
 
 
