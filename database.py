@@ -362,6 +362,33 @@ def criar_banco():
     )
     """)
 
+    # ============================
+    # SITE PÚBLICO — Orçamentos de energia solar (leads)
+    # ============================
+    ddl("""
+    CREATE TABLE IF NOT EXISTS orcamentos_solar(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        nome TEXT NOT NULL,
+        telefone TEXT NOT NULL,
+        email TEXT,
+        cidade TEXT,
+        estado TEXT,
+        tipo_imovel TEXT,
+        valor_conta REAL,
+        consumo_kwh REAL,
+        concessionaria TEXT,
+        mensagem TEXT,
+        origem TEXT DEFAULT 'site',
+        status TEXT NOT NULL DEFAULT 'novo',
+        notificado INTEGER DEFAULT 0,
+        lgpd_consentimento_em DATETIME,
+        ip_origem TEXT,
+        criado_em DATETIME DEFAULT CURRENT_TIMESTAMP,
+        atendido_em DATETIME,
+        atendido_por TEXT
+    )
+    """)
+
     cursor.execute("SELECT COUNT(*) AS c FROM sites")
     rs = cursor.fetchone()
     n_sites = list(rs.values())[0] if hasattr(rs, "values") else rs[0]

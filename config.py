@@ -138,5 +138,13 @@ LGPD_JOB_ATIVO = os.getenv("LGPD_JOB_ATIVO", "0") == "1"
 LGPD_MASCARAR_TELEFONE = os.getenv("LGPD_MASCARAR_TELEFONE", "0") == "1"
 
 
+# Site público — Orçamento de energia solar (leads)
+# Para quem avisar quando chega um pedido de orçamento. Se vazio, usa TOTEM_AJUDA_TELEFONE.
+ORCAMENTO_SOLAR_WHATSAPP = os.getenv("ORCAMENTO_SOLAR_WHATSAPP", "").strip() or TOTEM_AJUDA_TELEFONE
+ORCAMENTO_SOLAR_EMAIL = os.getenv("ORCAMENTO_SOLAR_EMAIL", "").strip()
+# Confirmação automática por WhatsApp para o próprio cliente (1=liga)
+ORCAMENTO_SOLAR_CONFIRMA_CLIENTE = os.getenv("ORCAMENTO_SOLAR_CONFIRMA_CLIENTE", "1") == "1"
+
+
 def gerar_token_esp32():
     return secrets.token_hex(16)
