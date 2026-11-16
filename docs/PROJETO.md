@@ -556,3 +556,8 @@ PROSPECT → Demo → Proposta → Contrato → Onboarding → Go-live → Supor
 ---
 
 *Documento gerado como blueprint para evolução do ELEVA LOCKER de protótipo para plataforma comercial.*
+
+## Eleva Cam
+
+Ver `docs/ELEVA_CAM.md` — câmeras ao vivo (marca separada).
+

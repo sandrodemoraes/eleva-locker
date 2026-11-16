@@ -1,0 +1,92 @@
+{% extends "eleva_cam/base.html" %}
+
+{% block title %}Eleva Cam — Serra do Rio do Rastro Ao Vivo{% endblock %}
+
+{% block body %}
+<section class="cam-hero">
+    <header class="cam-top">
+        <a class="cam-brand" href="{{ url_for('cameras.eleva_cam_home') }}">
+            Eleva <span>Cam</span>
+        </a>
+        <nav class="cam-nav">
+            <a href="#pontos">Pontos</a>
+            {% if destaque %}
+            <a href="{{ url_for('cameras.eleva_cam_camera', slug=destaque.slug) }}">Assistir</a>
+            {% endif %}
+        </nav>
+    </header>
+
+    <div class="cam-hero-media" aria-hidden="true">
+        {% if destaque and destaque.youtube_video_id %}
+        <iframe
+            src="https://www.youtube.com/embed/{{ destaque.youtube_video_id }}?autoplay=1&mute=1&controls=0&modestbranding=1&rel=0&playsinline=1"
+            title="{{ destaque.nome }} ao vivo"
+            allow="autoplay; encrypted-media; picture-in-picture"
+            allowfullscreen></iframe>
+        {% else %}
+        <div class="cam-placeholder" aria-hidden="true"></div>
+        {% endif %}
+    </div>
+
+    <div class="cam-hero-shade"></div>
+
+    <div class="cam-hero-copy">
+        {% if destaque and destaque.stream_status == 'online' %}
+        <div class="cam-live"><i></i> Ao vivo agora</div>
+        {% else %}
+        <div class="cam-live"><i></i> Em breve ao vivo</div>
+        {% endif %}
+
+        <h1>Eleva Cam</h1>
+        <p>
+            A Serra do Rio do Rastro, vista da base em Lauro Müller —
+            clima, neblina e horizonte em tempo real.
+        </p>
+
+        <div class="cam-actions">
+            {% if destaque %}
+            <a class="cam-btn cam-btn-primary"
+               href="{{ url_for('cameras.eleva_cam_camera', slug=destaque.slug) }}">
+                Ver a serra
+            </a>
+            {% endif %}
+            <a class="cam-btn cam-btn-ghost" href="#pontos">
+                Pontos da rede
+            </a>
+        </div>
+    </div>
+</section>
+
+{% if erro %}
+<div class="cam-alert">{{ erro }}</div>
+{% endif %}
+
+<section class="cam-section" id="pontos">
+    <h2>Pontos ao vivo</h2>
+    <p>Rede Eleva Cam — começando pela Serra do Rio do Rastro, escalável para outros destinos.</p>
+
+    <div class="cam-grid">
+        {% for camera in cameras %}
+        <a class="cam-point" href="{{ url_for('cameras.eleva_cam_camera', slug=camera.slug) }}">
+            <div class="cam-point-meta">
+                <span>{{ camera.cidade }}{% if camera.estado %}/{{ camera.estado }}{% endif %}</span>
+                {% if camera.stream_status == 'online' %}
+                <span class="cam-badge cam-badge-online">Ao vivo</span>
+                {% elif camera.stream_status == 'manutencao' %}
+                <span class="cam-badge cam-badge-manutencao">Manutenção</span>
+                {% else %}
+                <span class="cam-badge cam-badge-offline">Offline</span>
+                {% endif %}
+            </div>
+            <h3>{{ camera.nome }}</h3>
+            <p>{{ camera.descricao or camera.local }}</p>
+        </a>
+        {% else %}
+        <div class="cam-point">
+            <h3>Nenhum ponto publicado</h3>
+            <p>Cadastre a primeira câmera no painel administrativo.</p>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,384 @@
+{% extends "layout/base.html" %}
+
+{% block title %}
+Câmeras | Eleva Cam
+{% endblock %}
+
+{% block styles %}
+<style>
+.cabecalho {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.cabecalho h1 {
+    font-size: 34px;
+    color: #0f3d75;
+}
+
+.cabecalho p {
+    color: #666;
+    margin-top: 5px;
+}
+
+.btn {
+    background: #0f3d75;
+    color: white;
+    border: none;
+    padding: 12px 22px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: .2s;
+}
+
+.btn:hover { background: #0a2d57; }
+
+.card {
+    background: white;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 5px 20px rgba(0,0,0,.08);
+}
+
+.pesquisa {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.pesquisa input {
+    width: 100%;
+    padding: 13px 45px 13px 15px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 15px;
+}
+
+.pesquisa i {
+    position: absolute;
+    right: 15px;
+    top: 14px;
+    color: #777;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+thead {
+    background: #0f3d75;
+    color: white;
+}
+
+th, td {
+    padding: 14px;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+}
+
+tbody tr:hover { background: #f8fbff; }
+
+.status {
+    padding: 5px 12px;
+    border-radius: 30px;
+    color: white;
+    font-size: 12px;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.status-online { background: #27ae60; }
+.status-offline { background: #7f8c8d; }
+.status-manutencao { background: #f39c12; }
+.status-inativo { background: #e74c3c; }
+
+.acoes { white-space: nowrap; }
+.acoes a { margin-right: 10px; text-decoration: none; font-size: 16px; }
+.editar { color: #0f3d75; }
+.excluir { color: #d63031; }
+
+.rodape { margin-top: 20px; color: #666; }
+
+.modal {
+    display: none;
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,.45);
+    justify-content: center;
+    align-items: center;
+    z-index: 999;
+}
+
+.modal-conteudo {
+    background: white;
+    width: min(820px, 94vw);
+    max-height: 90vh;
+    overflow: auto;
+    border-radius: 12px;
+    padding: 30px;
+}
+
+.modal h2 {
+    color: #0f3d75;
+    margin-bottom: 20px;
+}
+
+.linha {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+}
+
+.campo {
+    flex: 1;
+    min-width: 180px;
+    display: flex;
+    flex-direction: column;
+}
+
+.campo label {
+    margin-bottom: 6px;
+    font-weight: bold;
+}
+
+.campo input,
+.campo select,
+.campo textarea {
+    padding: 11px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font: inherit;
+}
+
+.botoes {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.cancelar { background: #999; }
+.salvar { background: #27ae60; }
+.btn-excluir { background: #d63031; color: white; }
+.link-publico {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+    color: #0f3d75;
+    font-weight: 600;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="cabecalho">
+    <div>
+        <h1>Câmeras</h1>
+        <p>Gestão Eleva Cam — pontos ao vivo</p>
+        <a class="link-publico" href="{{ url_for('cameras.eleva_cam_home') }}" target="_blank">
+            <i class="fa-solid fa-arrow-up-right-from-square"></i>
+            Abrir site Eleva Cam
+        </a>
+    </div>
+    <button class="btn" onclick="abrirModal()">
+        <i class="fa-solid fa-plus"></i>
+        Nova câmera
+    </button>
+</div>
+
+<div class="card">
+    <div class="pesquisa">
+        <input id="pesquisa" type="text" placeholder="Pesquisar câmera...">
+        <i class="fa-solid fa-magnifying-glass"></i>
+    </div>
+
+    <table id="tabelaCameras">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nome</th>
+                <th>Cidade</th>
+                <th>Stream</th>
+                <th>YouTube</th>
+                <th>Status</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for camera in cameras %}
+            <tr>
+                <td>{{ camera.id }}</td>
+                <td>
+                    <strong>{{ camera.nome }}</strong><br>
+                    <small style="color:#777;">/eleva-cam/{{ camera.slug }}</small>
+                </td>
+                <td>{{ camera.cidade }}{% if camera.estado %}/{{ camera.estado }}{% endif %}</td>
+                <td>
+                    <span class="status status-{{ camera.stream_status }}">
+                        {{ camera.stream_status }}
+                    </span>
+                </td>
+                <td>{{ camera.youtube_video_id or "—" }}</td>
+                <td>
+                    {% if camera.status == 1 %}
+                    <span class="status status-online">Ativo</span>
+                    {% else %}
+                    <span class="status status-inativo">Inativo</span>
+                    {% endif %}
+                </td>
+                <td class="acoes">
+                    <a href="#"
+                       class="editar"
+                       data-id="{{ camera.id }}"
+                       data-nome="{{ camera.nome }}"
+                       data-slug="{{ camera.slug }}"
+                       data-local="{{ camera.local or '' }}"
+                       data-cidade="{{ camera.cidade or '' }}"
+                       data-estado="{{ camera.estado or '' }}"
+                       data-descricao="{{ camera.descricao or '' }}"
+                       data-youtube-video-id="{{ camera.youtube_video_id or '' }}"
+                       data-youtube-channel-url="{{ camera.youtube_channel_url or '' }}"
+                       data-stream-status="{{ camera.stream_status }}"
+                       data-latitude="{{ camera.latitude if camera.latitude is not none else '' }}"
+                       data-longitude="{{ camera.longitude if camera.longitude is not none else '' }}"
+                       data-ordem="{{ camera.ordem }}"
+                       data-status="{{ camera.status }}">
+                        <i class="fa-solid fa-pen"></i>
+                    </a>
+                    <a href="#"
+                       class="excluir"
+                       data-id="{{ camera.id }}"
+                       data-nome="{{ camera.nome }}">
+                        <i class="fa-solid fa-trash"></i>
+                    </a>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="rodape">
+        Total de câmeras: <strong>{{ cameras|length }}</strong>
+    </div>
+</div>
+
+<div class="modal" id="modalCamera">
+    <div class="modal-conteudo">
+        <h2 id="tituloModal">Nova câmera</h2>
+
+        <form id="formCamera" method="POST" action="/cameras/nova">
+            <input type="hidden" id="camera_id" name="camera_id">
+
+            <div class="linha">
+                <div class="campo">
+                    <label>Nome *</label>
+                    <input type="text" name="nome" id="nome" required>
+                </div>
+                <div class="campo">
+                    <label>Slug</label>
+                    <input type="text" name="slug" id="slug" placeholder="gerado do nome">
+                </div>
+            </div>
+
+            <div class="linha">
+                <div class="campo">
+                    <label>Local</label>
+                    <input type="text" name="local" id="local">
+                </div>
+                <div class="campo">
+                    <label>Cidade</label>
+                    <input type="text" name="cidade" id="cidade">
+                </div>
+                <div class="campo">
+                    <label>UF</label>
+                    <input type="text" name="estado" id="estado" maxlength="2">
+                </div>
+            </div>
+
+            <div class="linha">
+                <div class="campo">
+                    <label>Descrição</label>
+                    <textarea name="descricao" id="descricao" rows="3"></textarea>
+                </div>
+            </div>
+
+            <div class="linha">
+                <div class="campo">
+                    <label>YouTube Video ID</label>
+                    <input type="text" name="youtube_video_id" id="youtube_video_id" placeholder="ex: dQw4w9WgXcQ">
+                </div>
+                <div class="campo">
+                    <label>URL do canal YouTube</label>
+                    <input type="url" name="youtube_channel_url" id="youtube_channel_url">
+                </div>
+            </div>
+
+            <div class="linha">
+                <div class="campo">
+                    <label>Status do stream</label>
+                    <select name="stream_status" id="stream_status">
+                        {% for status in stream_status %}
+                        <option value="{{ status }}">{{ status }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="campo">
+                    <label>Ordem</label>
+                    <input type="number" name="ordem" id="ordem" value="0">
+                </div>
+                <div class="campo">
+                    <label>Publicação</label>
+                    <select name="status" id="status">
+                        <option value="1">Ativo</option>
+                        <option value="0">Inativo</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="linha">
+                <div class="campo">
+                    <label>Latitude</label>
+                    <input type="text" name="latitude" id="latitude">
+                </div>
+                <div class="campo">
+                    <label>Longitude</label>
+                    <input type="text" name="longitude" id="longitude">
+                </div>
+            </div>
+
+            <div class="botoes">
+                <button type="button" class="btn cancelar" onclick="fecharModal()">Cancelar</button>
+                <button type="submit" class="btn salvar">Salvar câmera</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="modal" id="modalExcluir">
+    <div class="modal-conteudo" style="max-width:420px;">
+        <h2>Excluir câmera</h2>
+        <p style="margin:20px 0;">Deseja realmente excluir a câmera:</p>
+        <strong id="cameraExcluir"></strong>
+        <form id="formExcluir" method="POST">
+            <div class="botoes">
+                <button type="button" class="btn cancelar" onclick="fecharModalExcluir()">Cancelar</button>
+                <button type="submit" class="btn btn-excluir">Excluir</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/cameras.js') }}"></script>
+{% endblock %}
