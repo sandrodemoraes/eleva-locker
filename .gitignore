@@ -29,3 +29,10 @@ Desktop.ini
 
 # Banco SQLite (descomente se não quiser versionar o banco)
 # elevalocker.db
+
+# Eleva Cam — segredos e runtime do encoder
+tools/eleva-cam/.env.stream
+tools/eleva-cam/mediamtx.yml
+tools/eleva-cam/mediamtx.runtime.yml
+tools/eleva-cam/mediamtx/
+tools/eleva-cam/*.log

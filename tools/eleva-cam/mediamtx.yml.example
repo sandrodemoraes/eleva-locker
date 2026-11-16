@@ -1,0 +1,31 @@
+# MediaMTX — Eleva Cam (Serra do Rio do Rastro)
+# Copie para mediamtx.yml e ajuste o RTSP.
+# Docs: https://github.com/bluenviron/mediamtx
+
+logLevel: info
+logDestinations: [stdout]
+
+rtsp: yes
+rtspAddress: :8554
+rtpAddress: :8000
+rtcpAddress: :8001
+
+rtmp: yes
+rtmpAddress: :1935
+
+hls: yes
+hlsAddress: :8888
+
+webrtc: no
+srt: no
+
+# Path da câmera da Serra.
+# Substitua CAMERA_RTSP_URL pelo RTSP real, ou use o script INICIAR_STREAM
+# que injeta a variável a partir de .env.stream.
+paths:
+  serra:
+    source: CAMERA_RTSP_URL
+    sourceOnDemand: no
+    # Opcional: autenticar publicação local
+    # publishUser: eleva
+    # publishPass: troque-me

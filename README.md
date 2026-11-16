@@ -8,6 +8,7 @@ Câmeras ao vivo em pontos turísticos (marca irmã).
 
 - Site: `/eleva-cam`
 - Painel: `/cameras`
+- Setup do PC: `docs/ELEVA_CAM_SETUP_PC.md`
 - Docs: `docs/ELEVA_CAM.md`
 
 ## Tecnologias
