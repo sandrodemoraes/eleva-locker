@@ -13,13 +13,22 @@ Câmeras ao vivo em pontos turísticos. Marca separada do Eleva Locker.
 | `/cameras/ao-vivo` | Alias da home pública |
 | `/cameras` | Painel admin (login) |
 
+## Setup no PC do site
+
+Guia passo a passo (clone, Flask, OBS/MediaMTX, YouTube):
+
+→ **`docs/ELEVA_CAM_SETUP_PC.md`**
+
+Scripts: `tools/eleva-cam/` (`INICIAR_SITE.bat`, `INICIAR_STREAM.bat`).
+
 ## Como ligar o stream
 
-1. Entre no painel → **Câmeras**
-2. Edite **Serra do Rio do Rastro**
-3. Preencha `youtube_video_id` com o ID da live do YouTube
-4. Defina `stream_status` = `online`
-5. Abra `/eleva-cam`
+1. Suba o site: `tools\eleva-cam\INICIAR_SITE.bat`
+2. Transmita com OBS ou `INICIAR_STREAM.bat` (MediaMTX + ffmpeg)
+3. Painel → **Câmeras** → edite Serra
+4. Preencha `youtube_video_id` com o ID da live
+5. Defina `stream_status` = `online`
+6. Abra `/eleva-cam`
 
 Enquanto o ID estiver vazio, o site mostra placeholder “Em breve ao vivo”.
 
