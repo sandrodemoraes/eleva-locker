@@ -1,0 +1,88 @@
+{% extends "eleva_cam/base.html" %}
+
+{% block title %}{{ camera.nome }} Ao Vivo | Eleva Cam{% endblock %}
+{% block meta_description %}{{ camera.descricao or (camera.nome ~ ' ao vivo — Eleva Cam') }}{% endblock %}
+
+{% block body %}
+<header class="cam-top" style="position:relative; background:var(--cam-ink);">
+    <a class="cam-brand" href="{{ url_for('cameras.eleva_cam_home') }}">
+        Eleva <span>Cam</span>
+    </a>
+    <nav class="cam-nav">
+        <a href="{{ url_for('cameras.eleva_cam_home') }}#pontos">Pontos</a>
+        {% if camera.youtube_channel_url %}
+        <a href="{{ camera.youtube_channel_url }}" target="_blank" rel="noopener">YouTube</a>
+        {% endif %}
+    </nav>
+</header>
+
+<section class="cam-section cam-watch">
+    <div class="cam-player">
+        {% if camera.youtube_video_id %}
+        <iframe
+            src="https://www.youtube.com/embed/{{ camera.youtube_video_id }}?autoplay=1&mute=0&rel=0&modestbranding=1&playsinline=1"
+            title="{{ camera.nome }} ao vivo"
+            allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
+            allowfullscreen></iframe>
+        {% else %}
+        <div class="cam-placeholder">
+            <div>
+                <strong>{{ camera.nome }}</strong>
+                <p>
+                    {% if camera.stream_status == 'manutencao' %}
+                    Câmera em manutenção. O stream volta em breve.
+                    {% else %}
+                    Stream ainda não configurado. Informe o ID do YouTube Live no painel.
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="cam-watch-copy">
+        {% if camera.stream_status == 'online' %}
+        <div class="cam-live" style="color:var(--cam-live);"><i></i> Ao vivo</div>
+        {% elif camera.stream_status == 'manutencao' %}
+        <span class="cam-badge cam-badge-manutencao">Manutenção</span>
+        {% else %}
+        <span class="cam-badge cam-badge-offline">Offline</span>
+        {% endif %}
+
+        <h1>{{ camera.nome }}</h1>
+        <p>{{ camera.descricao or 'Transmissão Eleva Cam.' }}</p>
+
+        <div class="cam-meta-row">
+            {% if camera.local %}
+            <span><i class="fa-solid fa-location-dot"></i> {{ camera.local }}</span>
+            {% endif %}
+            {% if camera.cidade %}
+            <span>{{ camera.cidade }}{% if camera.estado %}/{{ camera.estado }}{% endif %}</span>
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+{% if outras %}
+<section class="cam-section" id="pontos">
+    <h2>Outros pontos</h2>
+    <p>Mais câmeras da rede Eleva Cam.</p>
+    <div class="cam-grid">
+        {% for item in outras %}
+        <a class="cam-point" href="{{ url_for('cameras.eleva_cam_camera', slug=item.slug) }}">
+            <div class="cam-point-meta">
+                <span>{{ item.cidade }}{% if item.estado %}/{{ item.estado }}{% endif %}</span>
+                {% if item.stream_status == 'online' %}
+                <span class="cam-badge cam-badge-online">Ao vivo</span>
+                {% else %}
+                <span class="cam-badge cam-badge-offline">{{ item.stream_status }}</span>
+                {% endif %}
+            </div>
+            <h3>{{ item.nome }}</h3>
+            <p>{{ item.descricao or item.local }}</p>
+        </a>
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
+{% endblock %}
