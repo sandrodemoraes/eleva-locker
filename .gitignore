@@ -36,3 +36,7 @@ tools/eleva-cam/mediamtx.yml
 tools/eleva-cam/mediamtx.runtime.yml
 tools/eleva-cam/mediamtx/
 tools/eleva-cam/*.log
+
+# Eleva Cam — deploy local
+deploy/eleva-cam/.env
+deploy/eleva-cam/Caddyfile.local

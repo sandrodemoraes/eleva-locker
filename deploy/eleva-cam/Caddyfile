@@ -1,0 +1,22 @@
+# Eleva Cam — subdomínio em elevalocker.com.br
+# Domínio: elevacam.elevalocker.com.br → app Flask (porta 15000)
+#
+# Local (PC do site):
+#   reverse_proxy 127.0.0.1:15000
+# Docker (compose do portal):
+#   reverse_proxy web:15000
+#
+# Variáveis: ELEVA_CAM_DOMAIN, TLS_EMAIL (Caddy)
+
+{
+	email {$TLS_EMAIL}
+}
+
+{$ELEVA_CAM_DOMAIN} {
+	encode gzip
+
+	# Home do subdomínio = Eleva Cam (não mistura com login do Locker)
+	redir / /eleva-cam 302
+
+	reverse_proxy 127.0.0.1:15000
+}

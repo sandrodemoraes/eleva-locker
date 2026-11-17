@@ -129,9 +129,11 @@ Isso sobe o MediaMTX e, com a chave YouTube, o `ffmpeg` empurra RTMP para a live
 
 ## 6. Próximo depois do teste local
 
-1. Registrar `elevacam.com.br`
-2. Publicar em VPS (pacote `deploy/` do portal) **ou** Cloudflare Tunnel neste PC
+1. DNS: subdomínio `elevacam.elevalocker.com.br` → IP deste PC/VPS  
+   → guia **`docs/ELEVA_CAM_DNS.md`**
+2. Caddy em `deploy/eleva-cam/` (HTTPS + redirect `/` → `/eleva-cam`)
 3. Overlay (hora, temperatura, logo) no encoder
+4. (Opcional depois) registrar `elevacam.com.br` e apontar para o mesmo app
 
 Detalhes de marca e obra: `docs/CHECKLIST-MARCA-SITE-CAMERAS.md`  
 Visão do produto: `docs/ELEVA_CAM.md`
