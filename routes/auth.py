@@ -8,6 +8,11 @@ auth_bp = Blueprint("auth", __name__)
 
 @auth_bp.route("/")
 def home():
+    # Subdomínio Eleva Cam: não misturar com o login do Locker
+    host = (request.host or "").split(":")[0].lower()
+    if host.startswith("elevacam."):
+        return redirect("/eleva-cam")
+
     return render_template("login.html")
 
 

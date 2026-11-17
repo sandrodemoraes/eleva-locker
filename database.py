@@ -389,6 +389,85 @@ def criar_banco():
         ])
 
     # ============================
+    # TABELA CÂMERAS (Eleva Cam)
+    # ============================
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS cameras(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+        nome TEXT NOT NULL,
+
+        slug TEXT NOT NULL UNIQUE,
+
+        local TEXT,
+
+        cidade TEXT,
+
+        estado TEXT,
+
+        descricao TEXT,
+
+        youtube_video_id TEXT,
+
+        youtube_channel_url TEXT,
+
+        stream_status TEXT NOT NULL DEFAULT 'offline',
+
+        latitude REAL,
+
+        longitude REAL,
+
+        ordem INTEGER NOT NULL DEFAULT 0,
+
+        status INTEGER NOT NULL DEFAULT 1,
+
+        criado_em DATETIME DEFAULT CURRENT_TIMESTAMP,
+
+        atualizado_em DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+    """)
+
+    # Ponto piloto Eleva Cam — Serra do Rio do Rastro
+    cursor.execute("""
+    SELECT id FROM cameras WHERE slug = ?
+    """, ("serra-do-rio-do-rastro",))
+
+    if not cursor.fetchone():
+        cursor.execute("""
+        INSERT INTO cameras (
+            nome,
+            slug,
+            local,
+            cidade,
+            estado,
+            descricao,
+            youtube_video_id,
+            youtube_channel_url,
+            stream_status,
+            latitude,
+            longitude,
+            ordem,
+            status
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, (
+            "Serra do Rio do Rastro",
+            "serra-do-rio-do-rastro",
+            "Fachada frente — hub Eleva (Lauro Müller)",
+            "Lauro Müller",
+            "SC",
+            "Câmera ao vivo da Serra do Rio do Rastro vista da base, em Lauro Müller/SC. "
+            "Primeiro ponto da rede Eleva Cam.",
+            "",
+            "",
+            "offline",
+            -28.3925,
+            -49.3967,
+            1,
+            1
+        ))
+
+    # ============================
     # USUÁRIO ADMINISTRADOR PADRÃO
     # ============================
     cursor.execute("""

@@ -1,0 +1,19 @@
+# Eleva Cam — versão Docker (proxy para o serviço web do compose)
+# Use com o stack deploy/docker-compose.prod.yml (quando mergeado)
+# ou um compose mínimo só com caddy + web.
+
+{
+	email {$TLS_EMAIL}
+}
+
+{$ELEVA_CAM_DOMAIN} {
+	encode gzip
+	redir / /eleva-cam 302
+	reverse_proxy web:15000
+}
+
+# Opcional: domínio principal do Locker no mesmo Caddy
+# {$SITE_DOMAIN} {
+# 	encode gzip
+# 	reverse_proxy web:15000
+# }
