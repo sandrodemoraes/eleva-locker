@@ -36,19 +36,23 @@ Deve mostrar o IP do seu servidor.
 
 ---
 
-## 2. Firewall no servidor
+## 2. Se o provedor NÃO libera 80/443
 
-Liberar **80** e **443** (HTTPS do Caddy) e, se acessar direto, **15000**:
+Unifique (e similares) às vezes só liberam portas **> 10024**.  
+Nesse caso **não use Caddy com Let's Encrypt na 80** — use **Cloudflare Tunnel**:
+
+→ **`docs/ELEVA_CAM_CLOUDFLARE_TUNNEL.md`**
+
+Não precisa port forward. O DNS do `elevacam` passa a ser gerenciado pela Cloudflare.
+
+## 2b. Firewall (só se for Caddy + portas 80/443 liberadas)
 
 ```powershell
 New-NetFirewallRule -DisplayName "HTTP" -Direction Inbound -Protocol TCP -LocalPort 80 -Action Allow
 New-NetFirewallRule -DisplayName "HTTPS" -Direction Inbound -Protocol TCP -LocalPort 443 -Action Allow
-New-NetFirewallRule -DisplayName "Eleva Cam 15000" -Direction Inbound -Protocol TCP -LocalPort 15000 -Action Allow
 ```
 
-Se o PC estiver atrás de roteador: **port forward** 80/443 → IP local do PC (`192.168.16.145`).
-
-Se não tiver IP público fixo / CGNAT: use **Cloudflare Tunnel** (sem abrir porta no modem).
+Se o PC estiver atrás de roteador: **port forward** 80/443 → IP local do PC.
 
 ---
 

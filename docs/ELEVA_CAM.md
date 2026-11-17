@@ -27,7 +27,8 @@ Usamos o domínio já registrado **`elevalocker.com.br`** com subdomínio:
 
 **`elevacam.elevalocker.com.br`** → `/eleva-cam`
 
-→ DNS + Caddy: **`docs/ELEVA_CAM_DNS.md`**  
+→ DNS: **`docs/ELEVA_CAM_DNS.md`**  
+→ Sem porta 80/443 (Unifique): **`docs/ELEVA_CAM_CLOUDFLARE_TUNNEL.md`**  
 → Config: `deploy/eleva-cam/`
 
 ## Como ligar o stream
