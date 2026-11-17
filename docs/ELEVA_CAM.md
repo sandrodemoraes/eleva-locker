@@ -21,6 +21,15 @@ Guia passo a passo (clone, Flask, OBS/MediaMTX, YouTube):
 
 Scripts: `tools/eleva-cam/` (`INICIAR_SITE.bat`, `INICIAR_STREAM.bat`).
 
+## Domínio (sem misturar marca)
+
+Usamos o domínio já registrado **`elevalocker.com.br`** com subdomínio:
+
+**`elevacam.elevalocker.com.br`** → `/eleva-cam`
+
+→ DNS + Caddy: **`docs/ELEVA_CAM_DNS.md`**  
+→ Config: `deploy/eleva-cam/`
+
 ## Como ligar o stream
 
 1. Suba o site: `tools\eleva-cam\INICIAR_SITE.bat`
