@@ -1,11 +1,13 @@
-"""Clima local para Eleva Cam — Open-Meteo (sem chave de API)."""
+"""Clima local para Eleva Cam — Open-Meteo (stdlib, sem chave)."""
 
 from __future__ import annotations
 
+import json
 import time
+import urllib.error
+import urllib.parse
+import urllib.request
 from typing import Any, Optional
-
-import requests
 
 # Cache simples em memória: (lat, lon) -> (expires_at, payload)
 _CACHE: dict[tuple[float, float], tuple[float, dict[str, Any]]] = {}
@@ -50,18 +52,20 @@ def buscar_clima(latitude, longitude) -> Optional[dict[str, Any]]:
         return cached[1]
 
     try:
-        resp = requests.get(
-            "https://api.open-meteo.com/v1/forecast",
-            params={
+        qs = urllib.parse.urlencode(
+            {
                 "latitude": lat,
                 "longitude": lon,
                 "current": "temperature_2m,weather_code,relative_humidity_2m,wind_speed_10m",
                 "timezone": "America/Sao_Paulo",
-            },
-            timeout=_TIMEOUT,
+            }
         )
-        resp.raise_for_status()
-        atual = (resp.json() or {}).get("current") or {}
+        url = f"https://api.open-meteo.com/v1/forecast?{qs}"
+        req = urllib.request.Request(url, headers={"User-Agent": "elevacam/1.0"})
+        with urllib.request.urlopen(req, timeout=_TIMEOUT) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+
+        atual = (data or {}).get("current") or {}
         temp = atual.get("temperature_2m")
         if temp is None:
             return None
@@ -78,5 +82,7 @@ def buscar_clima(latitude, longitude) -> Optional[dict[str, Any]]:
         }
         _CACHE[chave] = (agora + _CACHE_TTL_SEG, payload)
         return payload
+    except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError, ValueError, OSError, KeyError):
+        return None
     except Exception:
         return None

@@ -70,15 +70,40 @@ def _dados_formulario():
 @cameras_bp.route("/eleva-cam", strict_slashes=False)
 @cameras_bp.route("/cameras/ao-vivo")
 def eleva_cam_home():
-    cameras = CameraService.listar(apenas_ativas=True)
-    destaque = cameras[0] if cameras else None
+    try:
+        cameras = CameraService.listar(apenas_ativas=True)
+    except Exception as erro:
+        print(f"[eleva-cam] erro ao listar cameras: {erro}")
+        cameras = []
 
-    return render_template(
-        "eleva_cam/home.html",
-        cameras=cameras,
-        destaque=destaque,
-        clima=_clima_da_camera(destaque),
-    )
+    destaque = cameras[0] if cameras else None
+    clima = None
+    if request.args.get("sem_clima") != "1":
+        clima = _clima_da_camera(destaque)
+
+    try:
+        return render_template(
+            "eleva_cam/home.html",
+            cameras=cameras,
+            destaque=destaque,
+            clima=clima,
+        )
+    except Exception as erro:
+        import traceback
+        traceback.print_exc()
+        try:
+            return render_template(
+                "eleva_cam/home.html",
+                cameras=cameras,
+                destaque=destaque,
+                clima=None,
+            )
+        except Exception as erro2:
+            traceback.print_exc()
+            return (
+                "<h1>Erro eleva-cam</h1>"
+                f"<pre>{erro}</pre><pre>{erro2}</pre>"
+            ), 500
 
 
 @cameras_bp.route("/eleva-cam/<slug>")
@@ -90,6 +115,7 @@ def eleva_cam_camera(slug):
             "eleva_cam/home.html",
             cameras=CameraService.listar(apenas_ativas=True),
             destaque=None,
+            clima=None,
             erro="Câmera não encontrada ou indisponível.",
         ), 404
 
@@ -98,12 +124,25 @@ def eleva_cam_camera(slug):
         if item["id"] != camera["id"]
     ]
 
-    return render_template(
-        "eleva_cam/camera.html",
-        camera=camera,
-        outras=outras,
-        clima=_clima_da_camera(camera),
-    )
+    clima = None
+    if request.args.get("sem_clima") != "1":
+        clima = _clima_da_camera(camera)
+
+    try:
+        return render_template(
+            "eleva_cam/camera.html",
+            camera=camera,
+            outras=outras,
+            clima=clima,
+        )
+    except Exception as erro:
+        print(f"[eleva-cam] erro no template camera: {erro}")
+        return render_template(
+            "eleva_cam/camera.html",
+            camera=camera,
+            outras=outras,
+            clima=None,
+        )
 
 
 # ==========================
