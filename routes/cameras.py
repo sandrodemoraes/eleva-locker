@@ -15,6 +15,21 @@ from services.clima_service import buscar_clima
 cameras_bp = Blueprint("cameras", __name__)
 
 
+def _clima_da_camera(camera):
+    """sqlite3.Row não tem .get(); clima nunca derruba a página."""
+    if not camera:
+        return None
+    try:
+        lat = camera["latitude"]
+        lon = camera["longitude"]
+    except (KeyError, IndexError, TypeError):
+        return None
+    try:
+        return buscar_clima(lat, lon)
+    except Exception:
+        return None
+
+
 def _exige_login_html():
     if "usuario" not in session:
         return redirect("/")
@@ -57,15 +72,12 @@ def _dados_formulario():
 def eleva_cam_home():
     cameras = CameraService.listar(apenas_ativas=True)
     destaque = cameras[0] if cameras else None
-    clima = None
-    if destaque:
-        clima = buscar_clima(destaque.get("latitude"), destaque.get("longitude"))
 
     return render_template(
         "eleva_cam/home.html",
         cameras=cameras,
         destaque=destaque,
-        clima=clima,
+        clima=_clima_da_camera(destaque),
     )
 
 
@@ -86,13 +98,11 @@ def eleva_cam_camera(slug):
         if item["id"] != camera["id"]
     ]
 
-    clima = buscar_clima(camera.get("latitude"), camera.get("longitude"))
-
     return render_template(
         "eleva_cam/camera.html",
         camera=camera,
         outras=outras,
-        clima=clima,
+        clima=_clima_da_camera(camera),
     )
 
 
