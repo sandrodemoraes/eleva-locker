@@ -4,13 +4,16 @@ cd /d "%~dp0"
 
 echo.
 echo  ========================================
-echo   ELEVA CAM — Cloudflare Tunnel
+echo   elevacam — Cloudflare Tunnel
 echo  ========================================
 echo.
-echo  URL: https://elevacam.elevalocker.com.br
+echo  URLs:
+echo    https://elevacam.elevalocker.com.br
+echo    https://elevalocker.com.br
 echo  Origem: http://127.0.0.1:15000
 echo.
 echo  Deixe o Flask (INICIAR_SITE.bat) rodando.
+echo  Ou use tools\eleva-cam\INICIAR_TUDO.bat
 echo.
 
 if not exist "cloudflared.exe" (
