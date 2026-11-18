@@ -59,6 +59,13 @@
             {% if camera.cidade %}
             <span>{{ camera.cidade }}{% if camera.estado %}/{{ camera.estado }}{% endif %}</span>
             {% endif %}
+            {% if clima %}
+            <span class="cam-temp" title="{{ clima.resumo or 'Temperatura no local' }}">
+                <i class="fa-solid fa-temperature-half"></i>
+                {{ clima.temperatura_c }}°C
+                {% if clima.resumo %}<small>{{ clima.resumo }}</small>{% endif %}
+            </span>
+            {% endif %}
         </div>
     </div>
 </section>

@@ -90,6 +90,15 @@ Ou:
 
 Teste: **https://elevacam.elevalocker.com.br**
 
+### Atalho de um clique (site + túnel)
+
+Na pasta do projeto:
+
+- `INICIAR_ELEVA_CAM.bat` (raiz)  
+- ou `tools\eleva-cam\INICIAR_TUDO.bat`
+
+Abre o Flask, o `cloudflared` e o navegador. Pode criar um atalho na área de trabalho apontando para esse `.bat`.
+
 ---
 
 ## 6. Checklist

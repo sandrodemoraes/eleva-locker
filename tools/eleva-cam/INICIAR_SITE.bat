@@ -4,11 +4,14 @@ cd /d "%~dp0..\.."
 
 echo.
 echo  ========================================
-echo   ELEVA CAM — site local
+echo   elevacam — site local
 echo  ========================================
 echo.
-echo  Site:   http://127.0.0.1:15000/eleva-cam
+echo  Local:  http://127.0.0.1:15000/eleva-cam
+echo  Publico: https://elevacam.elevalocker.com.br
 echo  Painel: http://127.0.0.1:15000/cameras
+echo.
+echo  Dica: use INICIAR_TUDO.bat para subir site + tunel juntos.
 echo.
 
 where py >nul 2>&1
