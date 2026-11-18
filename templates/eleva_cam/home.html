@@ -43,6 +43,14 @@
             clima, neblina e horizonte em tempo real.
         </p>
 
+        {% if clima %}
+        <div class="cam-temp cam-temp-hero" title="{{ clima.resumo or 'Temperatura no local' }}">
+            <i class="fa-solid fa-temperature-half"></i>
+            <strong>{{ clima.temperatura_c }}°C</strong>
+            {% if clima.resumo %}<span>{{ clima.resumo }}</span>{% endif %}
+        </div>
+        {% endif %}
+
         <div class="cam-actions">
             {% if destaque %}
             <a class="cam-btn cam-btn-primary"

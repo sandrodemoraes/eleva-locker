@@ -10,6 +10,7 @@ from flask import (
 )
 
 from services.camera_service import CameraService, STREAM_STATUS
+from services.clima_service import buscar_clima
 
 cameras_bp = Blueprint("cameras", __name__)
 
@@ -56,11 +57,15 @@ def _dados_formulario():
 def eleva_cam_home():
     cameras = CameraService.listar(apenas_ativas=True)
     destaque = cameras[0] if cameras else None
+    clima = None
+    if destaque:
+        clima = buscar_clima(destaque.get("latitude"), destaque.get("longitude"))
 
     return render_template(
         "eleva_cam/home.html",
         cameras=cameras,
         destaque=destaque,
+        clima=clima,
     )
 
 
@@ -81,10 +86,13 @@ def eleva_cam_camera(slug):
         if item["id"] != camera["id"]
     ]
 
+    clima = buscar_clima(camera.get("latitude"), camera.get("longitude"))
+
     return render_template(
         "eleva_cam/camera.html",
         camera=camera,
         outras=outras,
+        clima=clima,
     )
 
 
