@@ -66,11 +66,40 @@ Apague o atalho:
 
 ---
 
-## 4. Checklist pós-blecaute
+## 4. OBS — transmitir sozinho após o login
+
+O `INSTALAR_AUTOINICIO.bat` sobe **só o site + túnel**. A live do YouTube depende do OBS.
+
+1. Abra o OBS → **Arquivo** → **Configurações** → **Geral**  
+2. Em **Inicialização do sistema**, marque:
+   - **Abrir automaticamente ao iniciar o sistema** (ou coloque o atalho do OBS em `shell:startup`)
+   - **Iniciar transmissão automaticamente quando a transmissão estiver ativa** / **Start streaming when OBS starts** (se disponível na sua versão)
+3. Em **Transmissão**, deixe **YouTube - RTMPS** + conta/chave já salvos  
+4. Confirme que a cena com a câmera Intelbras está ativa
+
+Sem o OBS autoiniciar + stream, o Eleva Cam sobe mas o embed fica “indisponível” até alguém clicar **Iniciar transmissão**.
+
+---
+
+## 5. YouTube — ID estável no `/cameras`
+
+Cada live **nova** no YouTube gera um Video ID diferente. Depois do reboot:
+
+1. Se a live continuar a **mesma** (mesmo Video ID), nada a fazer no painel  
+2. Se criar live nova, atualize em `/cameras` → Serra → `youtube_video_id`  
+3. Evite trocar `0` (zero) por `o` (letra) — copie da URL `watch?v=` ou do Studio
+
+Dica: reutilize a mesma transmissão agendada/recorrente no Studio quando possível, para o ID não mudar.
+
+---
+
+## 6. Checklist pós-blecaute
 
 - [ ] BIOS = Power On após energia  
 - [ ] Windows com login automático (ou alguém loga)  
 - [ ] `INSTALAR_AUTOINICIO.bat` já rodado  
+- [ ] OBS abre e inicia a transmissão sozinho  
+- [ ] `youtube_video_id` no `/cameras` ainda é o da live atual  
 - [ ] `cloudflared.exe` em `deploy\eleva-cam\`  
 - [ ] `config.tunnel.yml` configurado  
 
