@@ -94,6 +94,15 @@ def _dados_formulario():
 # SITE PÚBLICO — ELEVA CAM
 # ==========================
 
+@cameras_bp.route("/google6eb1b4545f974171.html")
+def google_site_verification():
+    """Arquivo HTML exigido pelo Google Search Console."""
+    return Response(
+        "google-site-verification: google6eb1b4545f974171.html\n",
+        mimetype="text/html; charset=utf-8",
+    )
+
+
 @cameras_bp.route("/robots.txt")
 def robots_txt():
     corpo = "\n".join(
@@ -102,6 +111,7 @@ def robots_txt():
             "Allow: /eleva-cam",
             "Allow: /eleva-cam/",
             "Allow: /static/",
+            "Allow: /google6eb1b4545f974171.html",
             "Disallow: /cameras",
             "Disallow: /login",
             "Disallow: /dashboard",
