@@ -12,6 +12,7 @@ type Props = {
 
 const empty: ChamadoInput = {
   cliente: "",
+  quem_chamou: "",
   telefone: "",
   endereco: "",
   servico: "Outro",
@@ -28,6 +29,7 @@ function mergeParsed(prev: ChamadoInput, transcript: string): ChamadoInput {
     transcricao: transcript,
     descricao: transcript,
     cliente: parsed.cliente || prev.cliente,
+    quem_chamou: parsed.quem_chamou || prev.quem_chamou,
     telefone: parsed.telefone || prev.telefone,
     endereco: parsed.endereco || prev.endereco,
     servico:
@@ -41,6 +43,7 @@ export function ChamadoComposer({ onCreated }: Props) {
   const [form, setForm] = useState<ChamadoInput>(empty);
   const [interim, setInterim] = useState("");
   const [message, setMessage] = useState("");
+  const [transcribing, setTranscribing] = useState(false);
   const [pending, startTransition] = useTransition();
 
   function onTranscript(text: string, isFinal: boolean) {
@@ -52,6 +55,42 @@ export function ChamadoComposer({ onCreated }: Props) {
       });
     } else {
       setInterim(text);
+    }
+  }
+
+  async function onAudio(dataUrl: string) {
+    setForm((prev) => ({ ...prev, audio_base64: dataUrl }));
+    setTranscribing(true);
+    setMessage("Passando o áudio para texto…");
+    try {
+      const res = await fetch("/api/transcribe", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ audio_base64: dataUrl }),
+      });
+      const data = (await res.json().catch(() => ({}))) as {
+        text?: string;
+        source?: string;
+        hint?: string;
+        error?: string;
+      };
+      if (data.text?.trim()) {
+        setForm((prev) => {
+          const merged = mergeParsed(prev, data.text!.trim());
+          return { ...merged, audio_base64: dataUrl };
+        });
+        setMessage("Áudio convertido em texto. Revise e envie.");
+      } else if (data.source === "none") {
+        setMessage(
+          "Revise o texto abaixo (ditado do Chrome) ou digite o que foi falado.",
+        );
+      } else if (data.error) {
+        setMessage(data.error);
+      }
+    } catch {
+      setMessage("Não deu para transcrever agora. Digite o texto do áudio.");
+    } finally {
+      setTranscribing(false);
     }
   }
 
@@ -91,8 +130,8 @@ export function ChamadoComposer({ onCreated }: Props) {
     <section className="composer">
       <VoiceCapture
         onTranscript={onTranscript}
-        onAudio={(dataUrl) => update("audio_base64", dataUrl)}
-        disabled={pending}
+        onAudio={(dataUrl) => void onAudio(dataUrl)}
+        disabled={pending || transcribing}
       />
 
       {form.audio_base64 && (
@@ -100,12 +139,12 @@ export function ChamadoComposer({ onCreated }: Props) {
       )}
 
       <label className="field">
-        <span>Transcrição</span>
+        <span>Texto do áudio</span>
         <textarea
           rows={4}
           value={`${form.transcricao}${interim ? ` ${interim}` : ""}`.trim()}
           onChange={(e) => onTranscricaoEdit(e.target.value)}
-          placeholder="Ex.: Cliente Maria, telefone 11 98888-0000, rua das Acácias 45, instalação de câmeras, urgência alta"
+          placeholder="O que foi falado aparece aqui. Ex.: Quem chamou João, cliente Maria, telefone 11 98888-0000…"
         />
       </label>
 
@@ -115,9 +154,20 @@ export function ChamadoComposer({ onCreated }: Props) {
           <input
             value={form.cliente}
             onChange={(e) => update("cliente", e.target.value)}
-            placeholder="Nome"
+            placeholder="Empresa ou nome"
           />
         </label>
+        <label className="field">
+          <span>Quem chamou</span>
+          <input
+            value={form.quem_chamou}
+            onChange={(e) => update("quem_chamou", e.target.value)}
+            placeholder="Pessoa que ligou"
+          />
+        </label>
+      </div>
+
+      <div className="grid-2">
         <label className="field">
           <span>Telefone</span>
           <input
@@ -127,18 +177,6 @@ export function ChamadoComposer({ onCreated }: Props) {
             inputMode="tel"
           />
         </label>
-      </div>
-
-      <label className="field">
-        <span>Endereço</span>
-        <input
-          value={form.endereco}
-          onChange={(e) => update("endereco", e.target.value)}
-          placeholder="Rua, número, bairro"
-        />
-      </label>
-
-      <div className="grid-2">
         <label className="field">
           <span>Serviço</span>
           <select
@@ -152,26 +190,40 @@ export function ChamadoComposer({ onCreated }: Props) {
             ))}
           </select>
         </label>
-        <label className="field">
-          <span>Urgência</span>
-          <select
-            value={form.urgencia}
-            onChange={(e) => update("urgencia", e.target.value as Urgencia)}
-          >
-            <option value="baixa">Baixa</option>
-            <option value="normal">Normal</option>
-            <option value="alta">Alta</option>
-          </select>
-        </label>
       </div>
+
+      <label className="field">
+        <span>Endereço</span>
+        <input
+          value={form.endereco}
+          onChange={(e) => update("endereco", e.target.value)}
+          placeholder="Rua, número, bairro"
+        />
+      </label>
+
+      <label className="field">
+        <span>Urgência</span>
+        <select
+          value={form.urgencia}
+          onChange={(e) => update("urgencia", e.target.value as Urgencia)}
+        >
+          <option value="baixa">Baixa</option>
+          <option value="normal">Normal</option>
+          <option value="alta">Alta</option>
+        </select>
+      </label>
 
       <button
         type="button"
         className="primary"
-        disabled={pending || !canSend}
+        disabled={pending || transcribing || !canSend}
         onClick={salvar}
       >
-        {pending ? "Salvando…" : "Enviar para o escritório"}
+        {pending
+          ? "Salvando…"
+          : transcribing
+            ? "Transcrevendo…"
+            : "Enviar para o escritório"}
       </button>
       {message && <p className="toast">{message}</p>}
     </section>

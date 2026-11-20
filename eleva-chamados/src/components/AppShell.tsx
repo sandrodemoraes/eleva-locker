@@ -41,8 +41,8 @@ export function AppShell() {
         <main className="main main--campo">
           <h1 className="headline">Anote o chamado falando</h1>
           <p className="lede">
-            Câmeras, alarme, elétrica ou solar: grave no celular e o
-            escritório recebe o texto pronto para a nota do cliente.
+            Grave o áudio: o sistema escreve o texto. Informe cliente, quem
+            chamou e o serviço para o escritório emitir a nota.
           </p>
           <ChamadoComposer onCreated={onCreated} />
         </main>

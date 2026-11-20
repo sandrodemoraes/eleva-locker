@@ -8,6 +8,7 @@ export type ChamadoStatus =
 export type Chamado = {
   id: string;
   cliente: string;
+  quem_chamou: string;
   telefone: string;
   endereco: string;
   servico: string;
@@ -24,6 +25,7 @@ export type Chamado = {
 
 export type ChamadoInput = {
   cliente: string;
+  quem_chamou: string;
   telefone: string;
   endereco: string;
   servico: string;

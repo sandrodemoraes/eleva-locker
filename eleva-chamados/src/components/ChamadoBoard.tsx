@@ -100,6 +100,9 @@ export function ChamadoBoard({ refreshToken }: Props) {
               <div>
                 <h3>{c.cliente || "Cliente sem nome"}</h3>
                 <p className="meta">
+                  {c.quem_chamou
+                    ? `Quem chamou: ${c.quem_chamou} · `
+                    : ""}
                   {c.servico} · {formatWhen(c.criado_em)} · {c.criado_por_nome}
                 </p>
               </div>

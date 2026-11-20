@@ -22,7 +22,14 @@ const SERVICO_ALIASES: { label: (typeof SERVICOS)[number]; terms: string[] }[] =
     { label: "Projeto", terms: ["projeto", "laudo", "planta"] },
     {
       label: "Manutenção",
-      terms: ["manutencao", "manutenção", "reparo", "conserto", "visita tecnica", "visita técnica"],
+      terms: [
+        "manutencao",
+        "manutenção",
+        "reparo",
+        "conserto",
+        "visita tecnica",
+        "visita técnica",
+      ],
     },
   ];
 
@@ -74,6 +81,8 @@ export function parseChamadoFromSpeech(transcricao: string): ChamadoInput {
   const text = transcricao.trim().replace(/\s+/g, " ");
   const stop = [
     "cliente",
+    "quem chamou",
+    "ligou",
     "telefone",
     "fone",
     "whatsapp",
@@ -105,6 +114,20 @@ export function parseChamadoFromSpeech(transcricao: string): ChamadoInput {
       stop.filter((s) => !s.startsWith("cliente")),
     ) || "";
 
+  const quem_chamou =
+    captureAfter(
+      text,
+      [
+        "quem chamou ",
+        "quem chamou:",
+        "chamou ",
+        "ligou ",
+        "falou com ",
+        "atendeu ",
+      ],
+      stop.filter((s) => s !== "quem chamou" && s !== "ligou"),
+    ) || "";
+
   const telefone =
     captureAfter(
       text,
@@ -118,7 +141,14 @@ export function parseChamadoFromSpeech(transcricao: string): ChamadoInput {
   const endereco =
     captureAfter(
       text,
-      ["endereço ", "endereco ", "endereço:", "endereco:", "na rua ", "no bairro ", "em "],
+      [
+        "endereço ",
+        "endereco ",
+        "endereço:",
+        "endereco:",
+        "na rua ",
+        "no bairro ",
+      ],
       stop.filter((s) => !s.includes("endere")),
     ) || "";
 
@@ -128,6 +158,7 @@ export function parseChamadoFromSpeech(transcricao: string): ChamadoInput {
 
   return {
     cliente: cliente.slice(0, 120),
+    quem_chamou: quem_chamou.slice(0, 120),
     telefone: telefone.slice(0, 40),
     endereco: endereco.slice(0, 200),
     servico,
@@ -140,6 +171,7 @@ export function parseChamadoFromSpeech(transcricao: string): ChamadoInput {
 
 export function textoParaNota(c: {
   cliente: string;
+  quem_chamou?: string;
   telefone: string;
   endereco: string;
   servico: string;
@@ -148,6 +180,7 @@ export function textoParaNota(c: {
 }): string {
   return [
     `Cliente: ${c.cliente || "—"}`,
+    `Quem chamou: ${c.quem_chamou || "—"}`,
     `Telefone: ${c.telefone || "—"}`,
     `Endereço: ${c.endereco || "—"}`,
     `Serviço: ${c.servico || "—"}`,

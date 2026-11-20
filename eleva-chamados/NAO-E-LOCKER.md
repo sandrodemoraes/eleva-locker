@@ -1,7 +1,5 @@
 # Fonte oficial
 
-Este diretório existe só para o Cursor publicar o app.
+https://github.com/sandrodemoraes/eleva-chamados
 
-**Repositório oficial:** https://github.com/sandrodemoraes/eleva-chamados
-
-Não mesclar no produto Eleva Locker.
+Não mesclar no Eleva Locker.

@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { requireIdentity } from "../../../../cursor/identity";
 import { sql } from "../../../lib/db";
+import { transcribeAudioDataUrl } from "../../../lib/transcribe";
 import type { Chamado, ChamadoInput, Urgencia } from "../../../lib/types";
 
 export const dynamic = "force-dynamic";
@@ -52,18 +53,23 @@ export async function POST(request: Request) {
   }
 
   const cliente = asString(body.cliente, 120);
+  const quem_chamou = asString(body.quem_chamou, 120);
   const telefone = asString(body.telefone, 40);
   const endereco = asString(body.endereco, 200);
   const servico = asString(body.servico, 80);
   const urgencia = asUrgencia(body.urgencia);
-  const descricao = asString(body.descricao, 4000);
-  const transcricao = asString(body.transcricao, 4000);
-  const audioRaw = asString(
-    (body as { audio_base64?: string }).audio_base64,
-    900_000,
-  );
-  const audio_base64 =
-    audioRaw.startsWith("data:audio/") ? audioRaw : "";
+  let descricao = asString(body.descricao, 4000);
+  let transcricao = asString(body.transcricao, 4000);
+  const audioRaw = asString(body.audio_base64, 900_000);
+  const audio_base64 = audioRaw.startsWith("data:audio/") ? audioRaw : "";
+
+  if (audio_base64 && !transcricao.trim()) {
+    const whispered = await transcribeAudioDataUrl(audio_base64);
+    if (whispered.text) {
+      transcricao = whispered.text.slice(0, 4000);
+      if (!descricao) descricao = transcricao;
+    }
+  }
 
   if (!descricao && !transcricao && !cliente && !audio_base64) {
     return Response.json(
@@ -80,12 +86,13 @@ export async function POST(request: Request) {
 
   await sql(
     `insert into chamados (
-      id, cliente, telefone, endereco, servico, urgencia, descricao, transcricao,
+      id, cliente, quem_chamou, telefone, endereco, servico, urgencia, descricao, transcricao,
       audio_base64, status, criado_por, criado_por_nome
-    ) values ($1,$2,$3,$4,$5,$6,$7,$8,$9,'aguardando_nota',$10,$11)`,
+    ) values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,'aguardando_nota',$11,$12)`,
     [
       id,
       cliente,
+      quem_chamou,
       telefone,
       endereco,
       servico || "Outro",
