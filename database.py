@@ -467,6 +467,23 @@ def criar_banco():
             1
         ))
 
+    # Live YouTube atual da Serra (ID muda a cada transmissão nova)
+    cursor.execute(
+        """
+        UPDATE cameras
+        SET youtube_video_id = ?,
+            stream_status = 'online',
+            atualizado_em = CURRENT_TIMESTAMP
+        WHERE slug = ?
+          AND (
+            youtube_video_id IS NULL
+            OR youtube_video_id = ''
+            OR youtube_video_id = ?
+          )
+        """,
+        ("KKQYRg0RgOo", "serra-do-rio-do-rastro", "3zujQ8SFe4g"),
+    )
+
     # ============================
     # USUÁRIO ADMINISTRADOR PADRÃO
     # ============================
