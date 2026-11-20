@@ -481,7 +481,20 @@ def criar_banco():
             OR youtube_video_id = ?
           )
         """,
-        ("KKQYRg0RgOo", "serra-do-rio-do-rastro", "3zujQ8SFe4g"),
+        ("KKQYRgoRgOo", "serra-do-rio-do-rastro", "3zujQ8SFe4g"),
+    )
+
+    # Corrige typo 0 vs o no ID anterior
+    cursor.execute(
+        """
+        UPDATE cameras
+        SET youtube_video_id = ?,
+            stream_status = 'online',
+            atualizado_em = CURRENT_TIMESTAMP
+        WHERE slug = ?
+          AND youtube_video_id = ?
+        """,
+        ("KKQYRgoRgOo", "serra-do-rio-do-rastro", "KKQYRg0RgOo"),
     )
 
     # ============================
