@@ -1,5 +1,8 @@
 """Eleva Cam — site público de câmeras ao vivo + gestão no painel."""
 
+import os
+from datetime import datetime, timezone
+
 from flask import (
     Blueprint,
     render_template,
@@ -7,12 +10,20 @@ from flask import (
     redirect,
     session,
     jsonify,
+    Response,
+    url_for,
 )
 
 from services.camera_service import CameraService, STREAM_STATUS
 from services.clima_service import buscar_clima
 
 cameras_bp = Blueprint("cameras", __name__)
+
+# Base canônica pública do Eleva Cam (SEO / sitemap)
+ELEVA_CAM_PUBLIC_BASE = os.getenv(
+    "ELEVA_CAM_PUBLIC_BASE",
+    "https://elevacam.elevalocker.com.br",
+).rstrip("/")
 
 
 def _clima_da_camera(camera):
@@ -28,6 +39,22 @@ def _clima_da_camera(camera):
         return buscar_clima(lat, lon)
     except Exception:
         return None
+
+
+def _eleva_cam_url(path="/eleva-cam"):
+    if not path.startswith("/"):
+        path = "/" + path
+    return f"{ELEVA_CAM_PUBLIC_BASE}{path}"
+
+
+def _eleva_cam_seo(path="/eleva-cam", title=None, description=None):
+    return {
+        "canonical_url": _eleva_cam_url(path),
+        "og_title": title or "Eleva Cam — câmeras ao vivo",
+        "og_description": description
+        or "Câmeras ao vivo em pontos turísticos. Serra do Rio do Rastro — Lauro Müller/SC.",
+        "og_url": _eleva_cam_url(path),
+    }
 
 
 def _exige_login_html():
@@ -67,6 +94,73 @@ def _dados_formulario():
 # SITE PÚBLICO — ELEVA CAM
 # ==========================
 
+@cameras_bp.route("/robots.txt")
+def robots_txt():
+    corpo = "\n".join(
+        [
+            "User-agent: *",
+            "Allow: /eleva-cam",
+            "Allow: /eleva-cam/",
+            "Allow: /static/",
+            "Disallow: /cameras",
+            "Disallow: /login",
+            "Disallow: /dashboard",
+            "Disallow: /usuarios",
+            "Disallow: /empresas",
+            "Disallow: /armarios",
+            "Disallow: /compartimentos",
+            "Disallow: /encomendas",
+            "Disallow: /esp32",
+            "Disallow: /totem",
+            "Disallow: /financeiro",
+            "Disallow: /planos",
+            "Disallow: /contratos",
+            "Disallow: /faturas",
+            "Disallow: /api/",
+            f"Sitemap: {_eleva_cam_url('/sitemap.xml')}",
+            "",
+        ]
+    )
+    return Response(corpo, mimetype="text/plain; charset=utf-8")
+
+
+@cameras_bp.route("/sitemap.xml")
+def sitemap_xml():
+    agora = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    urls = [
+        (_eleva_cam_url("/eleva-cam"), "daily", "1.0"),
+    ]
+    try:
+        for cam in CameraService.listar(apenas_ativas=True):
+            urls.append(
+                (
+                    _eleva_cam_url(f"/eleva-cam/{cam['slug']}"),
+                    "hourly" if cam["stream_status"] == "online" else "daily",
+                    "0.9",
+                )
+            )
+    except Exception as erro:
+        print(f"[eleva-cam] sitemap: {erro}")
+
+    linhas = [
+        '<?xml version="1.0" encoding="UTF-8"?>',
+        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
+    ]
+    for loc, freq, prioridade in urls:
+        linhas.extend(
+            [
+                "  <url>",
+                f"    <loc>{loc}</loc>",
+                f"    <lastmod>{agora}</lastmod>",
+                f"    <changefreq>{freq}</changefreq>",
+                f"    <priority>{prioridade}</priority>",
+                "  </url>",
+            ]
+        )
+    linhas.append("</urlset>")
+    return Response("\n".join(linhas) + "\n", mimetype="application/xml; charset=utf-8")
+
+
 @cameras_bp.route("/eleva-cam", strict_slashes=False)
 @cameras_bp.route("/cameras/ao-vivo")
 def eleva_cam_home():
@@ -81,12 +175,22 @@ def eleva_cam_home():
     if request.args.get("sem_clima") != "1":
         clima = _clima_da_camera(destaque)
 
+    seo = _eleva_cam_seo(
+        "/eleva-cam",
+        title="Eleva Cam — Serra do Rio do Rastro Ao Vivo",
+        description=(
+            "Câmeras ao vivo em pontos turísticos. "
+            "Serra do Rio do Rastro — Lauro Müller/SC."
+        ),
+    )
+
     try:
         return render_template(
             "eleva_cam/home.html",
             cameras=cameras,
             destaque=destaque,
             clima=clima,
+            **seo,
         )
     except Exception as erro:
         import traceback
@@ -97,6 +201,7 @@ def eleva_cam_home():
                 cameras=cameras,
                 destaque=destaque,
                 clima=None,
+                **seo,
             )
         except Exception as erro2:
             traceback.print_exc()
@@ -117,6 +222,7 @@ def eleva_cam_camera(slug):
             destaque=None,
             clima=None,
             erro="Câmera não encontrada ou indisponível.",
+            **_eleva_cam_seo("/eleva-cam"),
         ), 404
 
     outras = [
@@ -128,12 +234,20 @@ def eleva_cam_camera(slug):
     if request.args.get("sem_clima") != "1":
         clima = _clima_da_camera(camera)
 
+    descricao = camera["descricao"] or f"{camera['nome']} ao vivo — Eleva Cam"
+    seo = _eleva_cam_seo(
+        f"/eleva-cam/{camera['slug']}",
+        title=f"{camera['nome']} Ao Vivo | Eleva Cam",
+        description=descricao,
+    )
+
     try:
         return render_template(
             "eleva_cam/camera.html",
             camera=camera,
             outras=outras,
             clima=clima,
+            **seo,
         )
     except Exception as erro:
         print(f"[eleva-cam] erro no template camera: {erro}")
@@ -142,6 +256,7 @@ def eleva_cam_camera(slug):
             camera=camera,
             outras=outras,
             clima=None,
+            **seo,
         )
 
 

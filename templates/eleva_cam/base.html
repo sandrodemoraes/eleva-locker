@@ -5,6 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Eleva Cam{% endblock %}</title>
     <meta name="description" content="{% block meta_description %}Câmeras ao vivo em pontos turísticos. Serra do Rio do Rastro — Lauro Müller/SC.{% endblock %}">
+    <meta name="robots" content="index,follow,max-image-preview:large">
+    {% if canonical_url %}
+    <link rel="canonical" href="{{ canonical_url }}">
+    {% endif %}
+    <meta property="og:site_name" content="Eleva Cam">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="pt_BR">
+    <meta property="og:title" content="{{ og_title|default('Eleva Cam — câmeras ao vivo') }}">
+    <meta property="og:description" content="{{ og_description|default('Câmeras ao vivo em pontos turísticos. Serra do Rio do Rastro — Lauro Müller/SC.') }}">
+    {% if og_url or canonical_url %}
+    <meta property="og:url" content="{{ og_url or canonical_url }}">
+    {% endif %}
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{{ og_title|default('Eleva Cam — câmeras ao vivo') }}">
+    <meta name="twitter:description" content="{{ og_description|default('Câmeras ao vivo em pontos turísticos. Serra do Rio do Rastro — Lauro Müller/SC.') }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
