@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { VoiceCapture } from "./VoiceCapture";
+import { EquipePicker } from "./EquipePicker";
 import { parseChamadoFromSpeech } from "../lib/parse-chamado";
 import type { Chamado, ChamadoInput, Urgencia } from "../lib/types";
 import { SERVICOS } from "../lib/types";
@@ -20,6 +21,9 @@ const empty: ChamadoInput = {
   descricao: "",
   transcricao: "",
   audio_base64: "",
+  funcionarios: "",
+  horario: "",
+  marcado: false,
 };
 
 function mergeParsed(prev: ChamadoInput, transcript: string): ChamadoInput {
@@ -36,6 +40,8 @@ function mergeParsed(prev: ChamadoInput, transcript: string): ChamadoInput {
       parsed.servico !== "Outro" ? parsed.servico : prev.servico || "Outro",
     urgencia:
       parsed.urgencia !== "normal" ? parsed.urgencia : prev.urgencia,
+    funcionarios: parsed.funcionarios || prev.funcionarios,
+    horario: parsed.horario || prev.horario,
   };
 }
 
@@ -73,6 +79,7 @@ export function ChamadoComposer({ onCreated }: Props) {
         source?: string;
         hint?: string;
         error?: string;
+        needs_key?: boolean;
       };
       if (data.text?.trim()) {
         setForm((prev) => {
@@ -80,9 +87,10 @@ export function ChamadoComposer({ onCreated }: Props) {
           return { ...merged, audio_base64: dataUrl };
         });
         setMessage("Áudio convertido em texto. Revise e envie.");
-      } else if (data.source === "none") {
+      } else if (data.needs_key || data.source === "none") {
         setMessage(
-          "Revise o texto abaixo (ditado do Chrome) ou digite o que foi falado.",
+          data.hint ||
+            "Digite o texto do áudio abaixo. A transcrição automática precisa da chave OpenAI nas Secrets.",
         );
       } else if (data.error) {
         setMessage(data.error);
@@ -144,7 +152,7 @@ export function ChamadoComposer({ onCreated }: Props) {
           rows={4}
           value={`${form.transcricao}${interim ? ` ${interim}` : ""}`.trim()}
           onChange={(e) => onTranscricaoEdit(e.target.value)}
-          placeholder="O que foi falado aparece aqui. Ex.: Quem chamou João, cliente Maria, telefone 11 98888-0000…"
+          placeholder="O que foi falado aparece aqui…"
         />
       </label>
 
@@ -178,17 +186,12 @@ export function ChamadoComposer({ onCreated }: Props) {
           />
         </label>
         <label className="field">
-          <span>Serviço</span>
-          <select
-            value={form.servico}
-            onChange={(e) => update("servico", e.target.value)}
-          >
-            {SERVICOS.map((s) => (
-              <option key={s} value={s}>
-                {s}
-              </option>
-            ))}
-          </select>
+          <span>Horário</span>
+          <input
+            type="datetime-local"
+            value={form.horario}
+            onChange={(e) => update("horario", e.target.value)}
+          />
         </label>
       </div>
 
@@ -201,17 +204,49 @@ export function ChamadoComposer({ onCreated }: Props) {
         />
       </label>
 
-      <label className="field">
-        <span>Urgência</span>
-        <select
-          value={form.urgencia}
-          onChange={(e) => update("urgencia", e.target.value as Urgencia)}
-        >
-          <option value="baixa">Baixa</option>
-          <option value="normal">Normal</option>
-          <option value="alta">Alta</option>
-        </select>
+      <EquipePicker
+        value={form.funcionarios}
+        onChange={(v) => update("funcionarios", v)}
+        disabled={pending || transcribing}
+      />
+
+      <label className="check-row check-row--solo" htmlFor="marcado-novo">
+        <input
+          id="marcado-novo"
+          type="checkbox"
+          checked={form.marcado}
+          disabled={pending || transcribing}
+          onChange={(e) => update("marcado", e.target.checked)}
+        />
+        <span>Marcado / confirmado</span>
       </label>
+
+      <div className="grid-2">
+        <label className="field">
+          <span>Serviço</span>
+          <select
+            value={form.servico}
+            onChange={(e) => update("servico", e.target.value)}
+          >
+            {SERVICOS.map((s) => (
+              <option key={s} value={s}>
+                {s}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="field">
+          <span>Urgência</span>
+          <select
+            value={form.urgencia}
+            onChange={(e) => update("urgencia", e.target.value as Urgencia)}
+          >
+            <option value="baixa">Baixa</option>
+            <option value="normal">Normal</option>
+            <option value="alta">Alta</option>
+          </select>
+        </label>
+      </div>
 
       <button
         type="button"

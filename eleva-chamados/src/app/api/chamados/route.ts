@@ -58,6 +58,9 @@ export async function POST(request: Request) {
   const endereco = asString(body.endereco, 200);
   const servico = asString(body.servico, 80);
   const urgencia = asUrgencia(body.urgencia);
+  const funcionarios = asString(body.funcionarios, 300);
+  const horario = asString(body.horario, 80);
+  const marcado = body.marcado === true;
   let descricao = asString(body.descricao, 4000);
   let transcricao = asString(body.transcricao, 4000);
   const audioRaw = asString(body.audio_base64, 900_000);
@@ -87,8 +90,8 @@ export async function POST(request: Request) {
   await sql(
     `insert into chamados (
       id, cliente, quem_chamou, telefone, endereco, servico, urgencia, descricao, transcricao,
-      audio_base64, status, criado_por, criado_por_nome
-    ) values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,'aguardando_nota',$11,$12)`,
+      audio_base64, funcionarios, horario, marcado, status, criado_por, criado_por_nome
+    ) values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,'aguardando_nota',$14,$15)`,
     [
       id,
       cliente,
@@ -100,6 +103,9 @@ export async function POST(request: Request) {
       descricao || transcricao,
       transcricao,
       audio_base64,
+      funcionarios,
+      horario,
+      marcado,
       identity.sub,
       nome,
     ],

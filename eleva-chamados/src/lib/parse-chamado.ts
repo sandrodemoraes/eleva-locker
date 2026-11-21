@@ -1,5 +1,6 @@
 import type { ChamadoInput, Urgencia } from "./types";
 import { SERVICOS } from "./types";
+import { EQUIPE, joinFuncionarios } from "./equipe";
 
 const SERVICO_ALIASES: { label: (typeof SERVICOS)[number]; terms: string[] }[] =
   [
@@ -54,6 +55,15 @@ function pickUrgencia(text: string): Urgencia {
   return "normal";
 }
 
+function pickFuncionarios(text: string): string {
+  const lower = text.toLowerCase();
+  const found = EQUIPE.filter((n) => {
+    const parts = n.toLowerCase().split(/\s+/);
+    return parts.some((p) => p.length > 2 && lower.includes(p));
+  });
+  return joinFuncionarios(found);
+}
+
 function captureAfter(
   text: string,
   labels: string[],
@@ -90,6 +100,12 @@ export function parseChamadoFromSpeech(transcricao: string): ChamadoInput {
     "endereco",
     "serviço",
     "servico",
+    "funcionário",
+    "funcionario",
+    "técnico",
+    "tecnico",
+    "horário",
+    "horario",
     "instalação",
     "instalacao",
     "manutenção",
@@ -152,20 +168,26 @@ export function parseChamadoFromSpeech(transcricao: string): ChamadoInput {
       stop.filter((s) => !s.includes("endere")),
     ) || "";
 
-  const descricao = text;
-  const servico = pickServico(text);
-  const urgencia = pickUrgencia(text);
+  const horario =
+    captureAfter(
+      text,
+      ["horário ", "horario ", "às ", "as ", "para as ", "marcar para "],
+      stop.filter((s) => !s.includes("hor")),
+    ) || "";
 
   return {
     cliente: cliente.slice(0, 120),
     quem_chamou: quem_chamou.slice(0, 120),
     telefone: telefone.slice(0, 40),
     endereco: endereco.slice(0, 200),
-    servico,
-    urgencia,
-    descricao,
+    servico: pickServico(text),
+    urgencia: pickUrgencia(text),
+    descricao: text,
     transcricao: text,
     audio_base64: "",
+    funcionarios: pickFuncionarios(text),
+    horario: horario.slice(0, 80),
+    marcado: false,
   };
 }
 
@@ -177,6 +199,9 @@ export function textoParaNota(c: {
   servico: string;
   urgencia: string;
   descricao: string;
+  funcionarios?: string;
+  horario?: string;
+  marcado?: boolean;
 }): string {
   return [
     `Cliente: ${c.cliente || "—"}`,
@@ -184,7 +209,22 @@ export function textoParaNota(c: {
     `Telefone: ${c.telefone || "—"}`,
     `Endereço: ${c.endereco || "—"}`,
     `Serviço: ${c.servico || "—"}`,
+    `Funcionários: ${c.funcionarios || "—"}`,
+    `Horário: ${c.horario || "—"}`,
+    `Marcado: ${c.marcado ? "Sim" : "Não"}`,
     `Urgência: ${c.urgencia || "—"}`,
     `Detalhes: ${c.descricao || "—"}`,
   ].join("\n");
+}
+
+export function formatHorarioLabel(value: string): string {
+  if (!value) return "—";
+  // datetime-local: 2026-11-21T14:30
+  const m = value.match(
+    /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/,
+  );
+  if (m) {
+    return `${m[3]}/${m[2]}/${m[1]} ${m[4]}:${m[5]}`;
+  }
+  return value;
 }

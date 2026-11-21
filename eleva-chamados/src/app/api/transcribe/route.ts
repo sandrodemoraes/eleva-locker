@@ -1,11 +1,29 @@
 import { requireIdentity } from "../../../../cursor/identity";
+import { rateLimit } from "../../../lib/rate-limit";
 import { transcribeAudioDataUrl } from "../../../lib/transcribe";
 
 export const dynamic = "force-dynamic";
 
+const MAX_BODY = 1_200_000; // ~900KB data-url + margem
+
 export async function POST(request: Request) {
   const identity = await requireIdentity(request);
   if (identity instanceof Response) return identity;
+
+  if (!rateLimit(`transcribe:${identity.sub}`, 20, 60_000)) {
+    return Response.json(
+      { error: "Muitas transcrições. Aguarde um minuto." },
+      { status: 429 },
+    );
+  }
+
+  const lengthHeader = request.headers.get("content-length");
+  if (lengthHeader) {
+    const n = Number(lengthHeader);
+    if (Number.isFinite(n) && n > MAX_BODY) {
+      return Response.json({ error: "Áudio grande demais" }, { status: 413 });
+    }
+  }
 
   let body: { audio_base64?: string };
   try {
@@ -18,6 +36,9 @@ export async function POST(request: Request) {
   if (!audio.startsWith("data:audio/")) {
     return Response.json({ error: "Envie o áudio gravado" }, { status: 400 });
   }
+  if (audio.length > 900_000) {
+    return Response.json({ error: "Áudio grande demais" }, { status: 413 });
+  }
 
   const result = await transcribeAudioDataUrl(audio);
   if (!result.text && result.source === "none") {
@@ -25,7 +46,8 @@ export async function POST(request: Request) {
       {
         text: "",
         source: "none",
-        hint: "Ditado do Chrome ou digite o texto. Com OPENAI_API_KEY o áudio vira texto automático.",
+        needs_key: true,
+        hint: "Para o áudio virar texto sozinho, adicione a chave OpenAI nas Secrets do app. Enquanto isso, digite o que foi falado.",
       },
       { headers: { "cache-control": "private, no-store" } },
     );

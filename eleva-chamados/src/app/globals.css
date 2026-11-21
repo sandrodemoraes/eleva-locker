@@ -144,6 +144,67 @@ body::before {
   height: 2.5rem;
 }
 
+.equipe {
+  display: grid;
+  gap: 0.45rem;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-inline-size: 0;
+}
+
+.equipe-label {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-soft);
+  padding: 0;
+}
+
+.equipe-list {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.check-row {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-size: 0.95rem;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.check-row input {
+  width: 1.1rem;
+  height: 1.1rem;
+  accent-color: var(--accent);
+}
+
+.check-row--solo {
+  padding: 0.35rem 0;
+}
+
+.badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  justify-content: flex-end;
+}
+
+.badge--ok {
+  border-color: var(--live);
+  color: var(--live);
+}
+
+.edit-panel {
+  display: grid;
+  gap: 0.85rem;
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px dashed var(--line);
+}
+
 .mic-btn {
   position: relative;
   width: min(220px, 70vw);
