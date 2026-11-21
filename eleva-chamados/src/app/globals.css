@@ -514,3 +514,90 @@ body::before {
     transition: none !important;
   }
 }
+
+.badge--status-aberto {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.badge--status-em_andamento {
+  border-color: var(--live);
+  color: var(--live);
+}
+
+.eu-sou {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin: 0.75rem 0 0;
+  font-size: 0.9rem;
+  color: var(--ink-soft);
+}
+
+.eu-sou select {
+  font: inherit;
+  padding: 0.35rem 0.5rem;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.6);
+  color: var(--ink);
+}
+
+.alerta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  margin: 0.75rem 0 0;
+  padding: 0.6rem 0.8rem;
+  border: 1px solid var(--line);
+  font-size: 0.9rem;
+  color: var(--ink-soft);
+}
+
+.alerta--on {
+  border-color: var(--accent);
+  background: rgba(196, 92, 22, 0.1);
+  color: var(--accent-deep);
+  font-weight: 600;
+}
+
+.alerta-texto {
+  margin: 0;
+}
+
+.alerta-acoes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.alerta-nota {
+  font-size: 0.8rem;
+  font-weight: 400;
+}
+
+.abrir-btn {
+  margin: 0 0 1.25rem;
+}
+
+.abrir-box {
+  margin: 0 0 1.5rem;
+  padding: 1rem;
+  border: 1px solid var(--accent);
+}
+
+.abrir-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
+.abrir-head h2 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+}

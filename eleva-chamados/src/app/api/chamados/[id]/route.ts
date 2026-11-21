@@ -10,6 +10,8 @@ import type {
 export const dynamic = "force-dynamic";
 
 const STATUSES: ChamadoStatus[] = [
+  "aberto",
+  "em_andamento",
   "aguardando_nota",
   "nota_feita",
   "concluido",

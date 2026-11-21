@@ -1,9 +1,20 @@
 export type Urgencia = "baixa" | "normal" | "alta";
 export type ChamadoStatus =
+  | "aberto"
+  | "em_andamento"
   | "aguardando_nota"
   | "nota_feita"
   | "concluido"
   | "cancelado";
+
+export const STATUS_LABEL: Record<ChamadoStatus, string> = {
+  aberto: "Em aberto",
+  em_andamento: "Em andamento",
+  aguardando_nota: "Aguardando nota",
+  nota_feita: "Nota feita",
+  concluido: "Concluído",
+  cancelado: "Cancelado",
+};
 
 export type Chamado = {
   id: string;
@@ -20,6 +31,8 @@ export type Chamado = {
   horario: string;
   marcado: boolean;
   status: ChamadoStatus;
+  assumido_por?: string;
+  assumido_em?: string | null;
   criado_por: string;
   criado_por_nome: string;
   criado_em: string;
@@ -39,6 +52,7 @@ export type ChamadoInput = {
   funcionarios: string;
   horario: string;
   marcado: boolean;
+  aberto?: boolean;
 };
 
 export type ChamadoEdit = {

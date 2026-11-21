@@ -9,6 +9,7 @@ import { SERVICOS } from "../lib/types";
 
 type Props = {
   onCreated: (chamado: Chamado) => void;
+  modo?: "campo" | "escritorio";
 };
 
 const empty: ChamadoInput = {
@@ -45,8 +46,9 @@ function mergeParsed(prev: ChamadoInput, transcript: string): ChamadoInput {
   };
 }
 
-export function ChamadoComposer({ onCreated }: Props) {
+export function ChamadoComposer({ onCreated, modo = "campo" }: Props) {
   const [form, setForm] = useState<ChamadoInput>(empty);
+  const [aberto, setAberto] = useState(modo === "escritorio");
   const [interim, setInterim] = useState("");
   const [message, setMessage] = useState("");
   const [transcribing, setTranscribing] = useState(false);
@@ -116,7 +118,7 @@ export function ChamadoComposer({ onCreated }: Props) {
       const res = await fetch("/api/chamados", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify({ ...form, aberto }),
       });
       if (!res.ok) {
         const data = (await res.json().catch(() => ({}))) as { error?: string };
@@ -127,7 +129,11 @@ export function ChamadoComposer({ onCreated }: Props) {
       onCreated(data.chamado);
       setForm(empty);
       setInterim("");
-      setMessage("Chamado anotado. O escritório já pode fazer a nota.");
+      setMessage(
+        aberto
+          ? "Chamado aberto. Os técnicos recebem o aviso para pegar."
+          : "Chamado anotado. O escritório já pode fazer a nota.",
+      );
     });
   }
 
@@ -204,11 +210,24 @@ export function ChamadoComposer({ onCreated }: Props) {
         />
       </label>
 
-      <EquipePicker
-        value={form.funcionarios}
-        onChange={(v) => update("funcionarios", v)}
-        disabled={pending || transcribing}
-      />
+      <label className="check-row check-row--solo" htmlFor="aberto-novo">
+        <input
+          id="aberto-novo"
+          type="checkbox"
+          checked={aberto}
+          disabled={pending || transcribing}
+          onChange={(e) => setAberto(e.target.checked)}
+        />
+        <span>Deixar em aberto para o técnico disponível</span>
+      </label>
+
+      {!aberto && (
+        <EquipePicker
+          value={form.funcionarios}
+          onChange={(v) => update("funcionarios", v)}
+          disabled={pending || transcribing}
+        />
+      )}
 
       <label className="check-row check-row--solo" htmlFor="marcado-novo">
         <input
@@ -258,7 +277,9 @@ export function ChamadoComposer({ onCreated }: Props) {
           ? "Salvando…"
           : transcribing
             ? "Transcrevendo…"
-            : "Enviar para o escritório"}
+            : aberto
+              ? "Abrir chamado para os técnicos"
+              : "Enviar para o escritório"}
       </button>
       {message && <p className="toast">{message}</p>}
     </section>

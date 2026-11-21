@@ -2,12 +2,14 @@
 
 import { useCallback, useEffect, useState, useTransition } from "react";
 import type { Chamado, ChamadoStatus, Urgencia } from "../lib/types";
-import { SERVICOS } from "../lib/types";
+import { SERVICOS, STATUS_LABEL } from "../lib/types";
 import { formatHorarioLabel, textoParaNota } from "../lib/parse-chamado";
 import { EquipePicker } from "./EquipePicker";
 
 const FILTERS: { id: string; label: string; status?: ChamadoStatus }[] = [
   { id: "todos", label: "Todos" },
+  { id: "aberto", label: "Em aberto", status: "aberto" },
+  { id: "em_andamento", label: "Em andamento", status: "em_andamento" },
   { id: "aguardando_nota", label: "Aguardando nota", status: "aguardando_nota" },
   { id: "nota_feita", label: "Nota feita", status: "nota_feita" },
   { id: "concluido", label: "Concluídos", status: "concluido" },
@@ -55,10 +57,16 @@ function toEdit(c: Chamado): EditState {
 
 type Props = {
   refreshToken: number;
+  tecnico: string;
+  initialFilter?: string;
 };
 
-export function ChamadoBoard({ refreshToken }: Props) {
-  const [filter, setFilter] = useState("aguardando_nota");
+export function ChamadoBoard({
+  refreshToken,
+  tecnico,
+  initialFilter = "aberto",
+}: Props) {
+  const [filter, setFilter] = useState(initialFilter);
   const [items, setItems] = useState<Chamado[]>([]);
   const [error, setError] = useState("");
   const [pending, startTransition] = useTransition();
@@ -103,6 +111,29 @@ export function ChamadoBoard({ refreshToken }: Props) {
       setTimeout(() => setCopied(null), 2000);
     } catch {
       setError("Não foi possível copiar. Selecione o texto manualmente.");
+    }
+  }
+
+  async function assumir(id: string) {
+    if (!tecnico) {
+      setError("Escolha seu nome em “Eu sou” no topo para pegar o chamado.");
+      return;
+    }
+    setBusyId(id);
+    setError("");
+    try {
+      const res = await fetch(`/api/chamados/${id}/assumir`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ tecnico }),
+      });
+      if (!res.ok) {
+        const data = (await res.json().catch(() => ({}))) as { error?: string };
+        setError(data.error || "Não foi possível pegar o chamado.");
+      }
+      load();
+    } finally {
+      setBusyId(null);
     }
   }
 
@@ -202,6 +233,9 @@ export function ChamadoBoard({ refreshToken }: Props) {
                   </p>
                 </div>
                 <div className="badges">
+                  <span className={`badge badge--status-${c.status}`}>
+                    {STATUS_LABEL[c.status] ?? c.status}
+                  </span>
                   {c.marcado && <span className="badge badge--ok">Marcado</span>}
                   <span className={`badge badge--${c.urgencia}`}>{c.urgencia}</span>
                 </div>
@@ -354,6 +388,30 @@ export function ChamadoBoard({ refreshToken }: Props) {
                   )}
                   <pre className="nota-preview">{textoParaNota(c)}</pre>
                   <div className="actions">
+                    {c.status === "aberto" && (
+                      <button
+                        type="button"
+                        className="primary"
+                        disabled={busyId === c.id}
+                        onClick={() => void assumir(c.id)}
+                      >
+                        {busyId === c.id
+                          ? "Pegando…"
+                          : tecnico
+                            ? `Pegar chamado (${tecnico})`
+                            : "Pegar chamado"}
+                      </button>
+                    )}
+                    {c.status === "em_andamento" && (
+                      <button
+                        type="button"
+                        className="primary"
+                        disabled={busyId === c.id}
+                        onClick={() => setStatus(c.id, "aguardando_nota")}
+                      >
+                        Serviço feito
+                      </button>
+                    )}
                     <button
                       type="button"
                       className="ghost"
